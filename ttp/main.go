@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"net/http"
 
 	"github.com/akakou/ra_webs/core"
@@ -10,11 +11,19 @@ import (
 const PORT = ":1323"
 
 func main() {
-	e := NewRouter()
+	dbType := flag.String("db_type", "sqlite3", "database type")
+	dbConfig := flag.String("db_config", "file:ent?mode=memory&cache=shared&_fk=1", "database config")
+
+	db, err := newtTAInfoDB(*dbType, *dbConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	e := NewRouter(db)
 	e.Logger.Fatal(e.Start(PORT))
 }
 
-func NewRouter() *echo.Echo {
+func NewRouter(db *taInfoDB) *echo.Echo {
 	e := echo.New()
 
 	e.GET("/", func(c echo.Context) error {
@@ -32,7 +41,7 @@ func NewRouter() *echo.Echo {
 			return c.String(http.StatusBadRequest, "bad attestation")
 		}
 
-		if storeTAInfo(provReq) != nil {
+		if db.store(provReq) != nil {
 			return c.String(http.StatusInternalServerError, "internal error")
 		}
 
@@ -43,9 +52,5 @@ func NewRouter() *echo.Echo {
 }
 
 func verifyAttestation(attestation string) error {
-	return nil
-}
-
-func storeTAInfo(req *core.ProvisioningRequest) error {
 	return nil
 }

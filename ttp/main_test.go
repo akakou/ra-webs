@@ -12,7 +12,10 @@ import (
 )
 
 func TestRegister(t *testing.T) {
-	router := NewRouter()
+	db, err := newtTAInfoDB("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	assert.Equal(t, nil, err)
+
+	router := NewRouter(db)
 
 	postBody := core.ProvisioningRequest{
 		Attestation: "attestation",
