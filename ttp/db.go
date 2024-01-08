@@ -1,4 +1,4 @@
-package main
+package ttp
 
 import (
 	"context"
@@ -9,13 +9,18 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type DBConfig struct {
+	Type   string
+	Config string
+}
+
 type taInfoDB struct {
 	client *ent.Client
 	ctx    *context.Context
 }
 
-func newtTAInfoDB(dbType, dbConfig string) (*taInfoDB, error) {
-	client, err := ent.Open(dbType, dbConfig)
+func newtTAInfoDB(dbConfig *DBConfig) (*taInfoDB, error) {
+	client, err := ent.Open(dbConfig.Type, dbConfig.Config)
 	if err != nil {
 		return nil, fmt.Errorf("failed opening connection to sqlite: %w", err)
 	}

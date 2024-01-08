@@ -1,4 +1,4 @@
-package main
+package ttp
 
 import (
 	"bytes"
@@ -12,10 +12,12 @@ import (
 )
 
 func TestRegister(t *testing.T) {
-	db, err := newtTAInfoDB("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
-	assert.Equal(t, nil, err)
+	dbConfig := DBConfig{
+		Type:   "sqlite3",
+		Config: "file:ent?mode=memory&cache=shared&_fk=1",
+	}
 
-	router := NewRouter(db)
+	router := NewTTPServer(&dbConfig)
 
 	postBody := core.ProvisioningRequest{
 		Attestation: "attestation",

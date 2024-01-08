@@ -1,30 +1,20 @@
-package main
+package ttp
 
 import (
-	"flag"
 	"net/http"
 
 	"github.com/akakou/ra_webs/core"
 	"github.com/labstack/echo/v4"
 )
 
-const PORT = ":1323"
 
-func main() {
-	dbType := flag.String("db_type", "sqlite3", "database type")
-	dbConfig := flag.String("db_config", "file:ent?mode=memory&cache=shared&_fk=1", "database config")
+func NewTTPServer(dbConfig *DBConfig) *echo.Echo {
+	e := echo.New()
 
-	db, err := newtTAInfoDB(*dbType, *dbConfig)
+	db, err := newtTAInfoDB(dbConfig)
 	if err != nil {
 		panic(err)
 	}
-
-	e := NewRouter(db)
-	e.Logger.Fatal(e.Start(PORT))
-}
-
-func NewRouter(db *taInfoDB) *echo.Echo {
-	e := echo.New()
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
