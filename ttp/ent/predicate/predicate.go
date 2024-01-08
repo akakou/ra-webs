@@ -6,5 +6,5 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// TA is the predicate function for ta builders.
-type TA func(*sql.Selector)
+// TAInfo is the predicate function for tainfo builders.
+type TAInfo func(*sql.Selector)

@@ -8,11 +8,11 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra_webs/ttp/ent/ta"
+	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
 
-// TA is the model entity for the TA schema.
-type TA struct {
+// TAInfo is the model entity for the TAInfo schema.
+type TAInfo struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -26,13 +26,13 @@ type TA struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*TA) scanValues(columns []string) ([]any, error) {
+func (*TAInfo) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case ta.FieldID:
+		case tainfo.FieldID:
 			values[i] = new(sql.NullInt64)
-		case ta.FieldDomain, ta.FieldPublicKey, ta.FieldAttestation:
+		case tainfo.FieldDomain, tainfo.FieldPublicKey, tainfo.FieldAttestation:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -42,84 +42,84 @@ func (*TA) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the TA fields.
-func (t *TA) assignValues(columns []string, values []any) error {
+// to the TAInfo fields.
+func (ti *TAInfo) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case ta.FieldID:
+		case tainfo.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			t.ID = int(value.Int64)
-		case ta.FieldDomain:
+			ti.ID = int(value.Int64)
+		case tainfo.FieldDomain:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field domain", values[i])
 			} else if value.Valid {
-				t.Domain = value.String
+				ti.Domain = value.String
 			}
-		case ta.FieldPublicKey:
+		case tainfo.FieldPublicKey:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field public_key", values[i])
 			} else if value.Valid {
-				t.PublicKey = value.String
+				ti.PublicKey = value.String
 			}
-		case ta.FieldAttestation:
+		case tainfo.FieldAttestation:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field attestation", values[i])
 			} else if value.Valid {
-				t.Attestation = value.String
+				ti.Attestation = value.String
 			}
 		default:
-			t.selectValues.Set(columns[i], values[i])
+			ti.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the TA.
+// Value returns the ent.Value that was dynamically selected and assigned to the TAInfo.
 // This includes values selected through modifiers, order, etc.
-func (t *TA) Value(name string) (ent.Value, error) {
-	return t.selectValues.Get(name)
+func (ti *TAInfo) Value(name string) (ent.Value, error) {
+	return ti.selectValues.Get(name)
 }
 
-// Update returns a builder for updating this TA.
-// Note that you need to call TA.Unwrap() before calling this method if this TA
+// Update returns a builder for updating this TAInfo.
+// Note that you need to call TAInfo.Unwrap() before calling this method if this TAInfo
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (t *TA) Update() *TAUpdateOne {
-	return NewTAClient(t.config).UpdateOne(t)
+func (ti *TAInfo) Update() *TAInfoUpdateOne {
+	return NewTAInfoClient(ti.config).UpdateOne(ti)
 }
 
-// Unwrap unwraps the TA entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the TAInfo entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (t *TA) Unwrap() *TA {
-	_tx, ok := t.config.driver.(*txDriver)
+func (ti *TAInfo) Unwrap() *TAInfo {
+	_tx, ok := ti.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: TA is not a transactional entity")
+		panic("ent: TAInfo is not a transactional entity")
 	}
-	t.config.driver = _tx.drv
-	return t
+	ti.config.driver = _tx.drv
+	return ti
 }
 
 // String implements the fmt.Stringer.
-func (t *TA) String() string {
+func (ti *TAInfo) String() string {
 	var builder strings.Builder
-	builder.WriteString("TA(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString("TAInfo(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", ti.ID))
 	builder.WriteString("domain=")
-	builder.WriteString(t.Domain)
+	builder.WriteString(ti.Domain)
 	builder.WriteString(", ")
 	builder.WriteString("public_key=")
-	builder.WriteString(t.PublicKey)
+	builder.WriteString(ti.PublicKey)
 	builder.WriteString(", ")
 	builder.WriteString("attestation=")
-	builder.WriteString(t.Attestation)
+	builder.WriteString(ti.Attestation)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// TAs is a parsable slice of TA.
-type TAs []*TA
+// TAInfos is a parsable slice of TAInfo.
+type TAInfos []*TAInfo

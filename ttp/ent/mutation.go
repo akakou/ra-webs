@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
-	"github.com/akakou/ra_webs/ttp/ent/ta"
+	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
 
 const (
@@ -23,11 +23,11 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeTA = "TA"
+	TypeTAInfo = "TAInfo"
 )
 
-// TAMutation represents an operation that mutates the TA nodes in the graph.
-type TAMutation struct {
+// TAInfoMutation represents an operation that mutates the TAInfo nodes in the graph.
+type TAInfoMutation struct {
 	config
 	op            Op
 	typ           string
@@ -37,21 +37,21 @@ type TAMutation struct {
 	attestation   *string
 	clearedFields map[string]struct{}
 	done          bool
-	oldValue      func(context.Context) (*TA, error)
-	predicates    []predicate.TA
+	oldValue      func(context.Context) (*TAInfo, error)
+	predicates    []predicate.TAInfo
 }
 
-var _ ent.Mutation = (*TAMutation)(nil)
+var _ ent.Mutation = (*TAInfoMutation)(nil)
 
-// taOption allows management of the mutation configuration using functional options.
-type taOption func(*TAMutation)
+// tainfoOption allows management of the mutation configuration using functional options.
+type tainfoOption func(*TAInfoMutation)
 
-// newTAMutation creates new mutation for the TA entity.
-func newTAMutation(c config, op Op, opts ...taOption) *TAMutation {
-	m := &TAMutation{
+// newTAInfoMutation creates new mutation for the TAInfo entity.
+func newTAInfoMutation(c config, op Op, opts ...tainfoOption) *TAInfoMutation {
+	m := &TAInfoMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeTA,
+		typ:           TypeTAInfo,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -60,20 +60,20 @@ func newTAMutation(c config, op Op, opts ...taOption) *TAMutation {
 	return m
 }
 
-// withTAID sets the ID field of the mutation.
-func withTAID(id int) taOption {
-	return func(m *TAMutation) {
+// withTAInfoID sets the ID field of the mutation.
+func withTAInfoID(id int) tainfoOption {
+	return func(m *TAInfoMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *TA
+			value *TAInfo
 		)
-		m.oldValue = func(ctx context.Context) (*TA, error) {
+		m.oldValue = func(ctx context.Context) (*TAInfo, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().TA.Get(ctx, id)
+					value, err = m.Client().TAInfo.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -82,10 +82,10 @@ func withTAID(id int) taOption {
 	}
 }
 
-// withTA sets the old TA of the mutation.
-func withTA(node *TA) taOption {
-	return func(m *TAMutation) {
-		m.oldValue = func(context.Context) (*TA, error) {
+// withTAInfo sets the old TAInfo of the mutation.
+func withTAInfo(node *TAInfo) tainfoOption {
+	return func(m *TAInfoMutation) {
+		m.oldValue = func(context.Context) (*TAInfo, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -94,7 +94,7 @@ func withTA(node *TA) taOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m TAMutation) Client() *Client {
+func (m TAInfoMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -102,7 +102,7 @@ func (m TAMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m TAMutation) Tx() (*Tx, error) {
+func (m TAInfoMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -113,7 +113,7 @@ func (m TAMutation) Tx() (*Tx, error) {
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *TAMutation) ID() (id int, exists bool) {
+func (m *TAInfoMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -124,7 +124,7 @@ func (m *TAMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *TAMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *TAInfoMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -133,19 +133,19 @@ func (m *TAMutation) IDs(ctx context.Context) ([]int, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().TA.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().TAInfo.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetDomain sets the "domain" field.
-func (m *TAMutation) SetDomain(s string) {
+func (m *TAInfoMutation) SetDomain(s string) {
 	m.domain = &s
 }
 
 // Domain returns the value of the "domain" field in the mutation.
-func (m *TAMutation) Domain() (r string, exists bool) {
+func (m *TAInfoMutation) Domain() (r string, exists bool) {
 	v := m.domain
 	if v == nil {
 		return
@@ -153,10 +153,10 @@ func (m *TAMutation) Domain() (r string, exists bool) {
 	return *v, true
 }
 
-// OldDomain returns the old "domain" field's value of the TA entity.
-// If the TA object wasn't provided to the builder, the object is fetched from the database.
+// OldDomain returns the old "domain" field's value of the TAInfo entity.
+// If the TAInfo object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAMutation) OldDomain(ctx context.Context) (v string, err error) {
+func (m *TAInfoMutation) OldDomain(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDomain is only allowed on UpdateOne operations")
 	}
@@ -171,17 +171,17 @@ func (m *TAMutation) OldDomain(ctx context.Context) (v string, err error) {
 }
 
 // ResetDomain resets all changes to the "domain" field.
-func (m *TAMutation) ResetDomain() {
+func (m *TAInfoMutation) ResetDomain() {
 	m.domain = nil
 }
 
 // SetPublicKey sets the "public_key" field.
-func (m *TAMutation) SetPublicKey(s string) {
+func (m *TAInfoMutation) SetPublicKey(s string) {
 	m.public_key = &s
 }
 
 // PublicKey returns the value of the "public_key" field in the mutation.
-func (m *TAMutation) PublicKey() (r string, exists bool) {
+func (m *TAInfoMutation) PublicKey() (r string, exists bool) {
 	v := m.public_key
 	if v == nil {
 		return
@@ -189,10 +189,10 @@ func (m *TAMutation) PublicKey() (r string, exists bool) {
 	return *v, true
 }
 
-// OldPublicKey returns the old "public_key" field's value of the TA entity.
-// If the TA object wasn't provided to the builder, the object is fetched from the database.
+// OldPublicKey returns the old "public_key" field's value of the TAInfo entity.
+// If the TAInfo object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAMutation) OldPublicKey(ctx context.Context) (v string, err error) {
+func (m *TAInfoMutation) OldPublicKey(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPublicKey is only allowed on UpdateOne operations")
 	}
@@ -207,17 +207,17 @@ func (m *TAMutation) OldPublicKey(ctx context.Context) (v string, err error) {
 }
 
 // ResetPublicKey resets all changes to the "public_key" field.
-func (m *TAMutation) ResetPublicKey() {
+func (m *TAInfoMutation) ResetPublicKey() {
 	m.public_key = nil
 }
 
 // SetAttestation sets the "attestation" field.
-func (m *TAMutation) SetAttestation(s string) {
+func (m *TAInfoMutation) SetAttestation(s string) {
 	m.attestation = &s
 }
 
 // Attestation returns the value of the "attestation" field in the mutation.
-func (m *TAMutation) Attestation() (r string, exists bool) {
+func (m *TAInfoMutation) Attestation() (r string, exists bool) {
 	v := m.attestation
 	if v == nil {
 		return
@@ -225,10 +225,10 @@ func (m *TAMutation) Attestation() (r string, exists bool) {
 	return *v, true
 }
 
-// OldAttestation returns the old "attestation" field's value of the TA entity.
-// If the TA object wasn't provided to the builder, the object is fetched from the database.
+// OldAttestation returns the old "attestation" field's value of the TAInfo entity.
+// If the TAInfo object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAMutation) OldAttestation(ctx context.Context) (v string, err error) {
+func (m *TAInfoMutation) OldAttestation(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldAttestation is only allowed on UpdateOne operations")
 	}
@@ -243,19 +243,19 @@ func (m *TAMutation) OldAttestation(ctx context.Context) (v string, err error) {
 }
 
 // ResetAttestation resets all changes to the "attestation" field.
-func (m *TAMutation) ResetAttestation() {
+func (m *TAInfoMutation) ResetAttestation() {
 	m.attestation = nil
 }
 
-// Where appends a list predicates to the TAMutation builder.
-func (m *TAMutation) Where(ps ...predicate.TA) {
+// Where appends a list predicates to the TAInfoMutation builder.
+func (m *TAInfoMutation) Where(ps ...predicate.TAInfo) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the TAMutation builder. Using this method,
+// WhereP appends storage-level predicates to the TAInfoMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *TAMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.TA, len(ps))
+func (m *TAInfoMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TAInfo, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -263,33 +263,33 @@ func (m *TAMutation) WhereP(ps ...func(*sql.Selector)) {
 }
 
 // Op returns the operation name.
-func (m *TAMutation) Op() Op {
+func (m *TAInfoMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *TAMutation) SetOp(op Op) {
+func (m *TAInfoMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (TA).
-func (m *TAMutation) Type() string {
+// Type returns the node type of this mutation (TAInfo).
+func (m *TAInfoMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *TAMutation) Fields() []string {
+func (m *TAInfoMutation) Fields() []string {
 	fields := make([]string, 0, 3)
 	if m.domain != nil {
-		fields = append(fields, ta.FieldDomain)
+		fields = append(fields, tainfo.FieldDomain)
 	}
 	if m.public_key != nil {
-		fields = append(fields, ta.FieldPublicKey)
+		fields = append(fields, tainfo.FieldPublicKey)
 	}
 	if m.attestation != nil {
-		fields = append(fields, ta.FieldAttestation)
+		fields = append(fields, tainfo.FieldAttestation)
 	}
 	return fields
 }
@@ -297,13 +297,13 @@ func (m *TAMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *TAMutation) Field(name string) (ent.Value, bool) {
+func (m *TAInfoMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case ta.FieldDomain:
+	case tainfo.FieldDomain:
 		return m.Domain()
-	case ta.FieldPublicKey:
+	case tainfo.FieldPublicKey:
 		return m.PublicKey()
-	case ta.FieldAttestation:
+	case tainfo.FieldAttestation:
 		return m.Attestation()
 	}
 	return nil, false
@@ -312,38 +312,38 @@ func (m *TAMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *TAMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *TAInfoMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case ta.FieldDomain:
+	case tainfo.FieldDomain:
 		return m.OldDomain(ctx)
-	case ta.FieldPublicKey:
+	case tainfo.FieldPublicKey:
 		return m.OldPublicKey(ctx)
-	case ta.FieldAttestation:
+	case tainfo.FieldAttestation:
 		return m.OldAttestation(ctx)
 	}
-	return nil, fmt.Errorf("unknown TA field %s", name)
+	return nil, fmt.Errorf("unknown TAInfo field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *TAMutation) SetField(name string, value ent.Value) error {
+func (m *TAInfoMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case ta.FieldDomain:
+	case tainfo.FieldDomain:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDomain(v)
 		return nil
-	case ta.FieldPublicKey:
+	case tainfo.FieldPublicKey:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPublicKey(v)
 		return nil
-	case ta.FieldAttestation:
+	case tainfo.FieldAttestation:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -351,111 +351,111 @@ func (m *TAMutation) SetField(name string, value ent.Value) error {
 		m.SetAttestation(v)
 		return nil
 	}
-	return fmt.Errorf("unknown TA field %s", name)
+	return fmt.Errorf("unknown TAInfo field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *TAMutation) AddedFields() []string {
+func (m *TAInfoMutation) AddedFields() []string {
 	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *TAMutation) AddedField(name string) (ent.Value, bool) {
+func (m *TAInfoMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *TAMutation) AddField(name string, value ent.Value) error {
+func (m *TAInfoMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown TA numeric field %s", name)
+	return fmt.Errorf("unknown TAInfo numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *TAMutation) ClearedFields() []string {
+func (m *TAInfoMutation) ClearedFields() []string {
 	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *TAMutation) FieldCleared(name string) bool {
+func (m *TAInfoMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *TAMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown TA nullable field %s", name)
+func (m *TAInfoMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown TAInfo nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *TAMutation) ResetField(name string) error {
+func (m *TAInfoMutation) ResetField(name string) error {
 	switch name {
-	case ta.FieldDomain:
+	case tainfo.FieldDomain:
 		m.ResetDomain()
 		return nil
-	case ta.FieldPublicKey:
+	case tainfo.FieldPublicKey:
 		m.ResetPublicKey()
 		return nil
-	case ta.FieldAttestation:
+	case tainfo.FieldAttestation:
 		m.ResetAttestation()
 		return nil
 	}
-	return fmt.Errorf("unknown TA field %s", name)
+	return fmt.Errorf("unknown TAInfo field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *TAMutation) AddedEdges() []string {
+func (m *TAInfoMutation) AddedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *TAMutation) AddedIDs(name string) []ent.Value {
+func (m *TAInfoMutation) AddedIDs(name string) []ent.Value {
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *TAMutation) RemovedEdges() []string {
+func (m *TAInfoMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *TAMutation) RemovedIDs(name string) []ent.Value {
+func (m *TAInfoMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *TAMutation) ClearedEdges() []string {
+func (m *TAInfoMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *TAMutation) EdgeCleared(name string) bool {
+func (m *TAInfoMutation) EdgeCleared(name string) bool {
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *TAMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown TA unique edge %s", name)
+func (m *TAInfoMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown TAInfo unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *TAMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown TA edge %s", name)
+func (m *TAInfoMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown TAInfo edge %s", name)
 }

@@ -8,22 +8,22 @@ import (
 )
 
 var (
-	// TasColumns holds the columns for the "tas" table.
-	TasColumns = []*schema.Column{
+	// TaInfosColumns holds the columns for the "ta_infos" table.
+	TaInfosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "domain", Type: field.TypeString},
 		{Name: "public_key", Type: field.TypeString},
 		{Name: "attestation", Type: field.TypeString},
 	}
-	// TasTable holds the schema information for the "tas" table.
-	TasTable = &schema.Table{
-		Name:       "tas",
-		Columns:    TasColumns,
-		PrimaryKey: []*schema.Column{TasColumns[0]},
+	// TaInfosTable holds the schema information for the "ta_infos" table.
+	TaInfosTable = &schema.Table{
+		Name:       "ta_infos",
+		Columns:    TaInfosColumns,
+		PrimaryKey: []*schema.Column{TaInfosColumns[0]},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		TasTable,
+		TaInfosTable,
 	}
 )
 

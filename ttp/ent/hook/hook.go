@@ -9,16 +9,16 @@ import (
 	"github.com/akakou/ra_webs/ttp/ent"
 )
 
-// The TAFunc type is an adapter to allow the use of ordinary
-// function as TA mutator.
-type TAFunc func(context.Context, *ent.TAMutation) (ent.Value, error)
+// The TAInfoFunc type is an adapter to allow the use of ordinary
+// function as TAInfo mutator.
+type TAInfoFunc func(context.Context, *ent.TAInfoMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f TAFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.TAMutation); ok {
+func (f TAInfoFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TAInfoMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TAMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TAInfoMutation", m)
 }
 
 // Condition is a hook condition function.

@@ -6,12 +6,12 @@ import (
 )
 
 // TA holds the schema definition for the TA entity.
-type TA struct {
+type TAInfo struct {
 	ent.Schema
 }
 
 // Fields of the TA.
-func (TA) Fields() []ent.Field {
+func (TAInfo) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("domain"),
 		field.String("public_key"),
@@ -20,6 +20,6 @@ func (TA) Fields() []ent.Field {
 }
 
 // Edges of the TA.
-func (TA) Edges() []ent.Edge {
+func (TAInfo) Edges() []ent.Edge {
 	return nil
 }
