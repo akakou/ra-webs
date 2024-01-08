@@ -3,6 +3,7 @@ module github.com/akakou/ra_webs/ttp
 go 1.21.4
 
 require (
+	entgo.io/ent v0.12.5 // indirect
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000 // indirect
 	github.com/go-playground/assert/v2 v2.2.0 // indirect
 	github.com/labstack/echo/v4 v4.11.4 // indirect
