@@ -21,7 +21,7 @@ func TestRegister(t *testing.T) {
 
 	postBody := core.ProvisioningRequest{
 		Attestation: "attestation",
-		PublicKey:   "public_key",
+		PublicKey:   []byte("public_key"),
 		Domain:      "domain",
 	}
 

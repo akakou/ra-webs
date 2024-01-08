@@ -1,12 +1,13 @@
 package ttp
 
 import (
+	"flag"
+	"fmt"
 	"net/http"
 
 	"github.com/akakou/ra_webs/core"
 	"github.com/labstack/echo/v4"
 )
-
 
 func NewTTPServer(dbConfig *DBConfig) *echo.Echo {
 	e := echo.New()
@@ -20,7 +21,7 @@ func NewTTPServer(dbConfig *DBConfig) *echo.Echo {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
-	e.POST("/register", func(c echo.Context) error {
+	e.POST("/provision", func(c echo.Context) error {
 		provReq := new(core.ProvisioningRequest)
 
 		if err := c.Bind(provReq); err != nil {
@@ -39,6 +40,18 @@ func NewTTPServer(dbConfig *DBConfig) *echo.Echo {
 	})
 
 	return e
+}
+
+func DefaultTTPServer() *echo.Echo {
+	dbType := flag.String("db_type", "sqlite3", "database type")
+	dbConfig := flag.String("db_config", "file:ent?mode=memory&cache=shared&_fk=1", "database config")
+
+	fmt.Printf("We use %s as database type and %s as database config\n", *dbType, *dbConfig)
+
+	return NewTTPServer(&DBConfig{
+		Type:   *dbType,
+		Config: *dbConfig,
+	})
 }
 
 func verifyAttestation(attestation string) error {

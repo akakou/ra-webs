@@ -10,7 +10,7 @@ func TestRAConfiggenerateKeyPair(t *testing.T) {
 		Domain:    "ta.example.com",
 	}
 
-	got, err := raConfig.generateKeyPair()
+	got, _, err := raConfig.generateKeyPair()
 	if err != nil {
 		t.Errorf("RAConfig.generateKeyPair() got an unexpected error: %s", err)
 	}

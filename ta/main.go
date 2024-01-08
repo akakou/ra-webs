@@ -7,6 +7,13 @@ type RAConfig struct {
 	Domain    string
 }
 
+
 func TLSConfig(config RAConfig) (*tls.Config, error) {
-	return config.generateKeyPair()
+	tlsConfig, _, err := config.generateKeyPair()
+	if err != nil {
+		return nil, err
+	}
+
+	return tlsConfig, nil
+
 }
