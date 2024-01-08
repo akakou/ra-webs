@@ -17,6 +17,7 @@ func TestRegister(t *testing.T) {
 	postBody := core.ProvisioningRequest{
 		Attestation: "attestation",
 		PublicKey:   "public_key",
+		Domain:      "domain",
 	}
 
 	body, _ := json.Marshal(postBody)
