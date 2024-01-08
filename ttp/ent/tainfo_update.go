@@ -42,16 +42,8 @@ func (tiu *TAInfoUpdate) SetNillableDomain(s *string) *TAInfoUpdate {
 }
 
 // SetPublicKey sets the "public_key" field.
-func (tiu *TAInfoUpdate) SetPublicKey(s string) *TAInfoUpdate {
-	tiu.mutation.SetPublicKey(s)
-	return tiu
-}
-
-// SetNillablePublicKey sets the "public_key" field if the given value is not nil.
-func (tiu *TAInfoUpdate) SetNillablePublicKey(s *string) *TAInfoUpdate {
-	if s != nil {
-		tiu.SetPublicKey(*s)
-	}
+func (tiu *TAInfoUpdate) SetPublicKey(b []byte) *TAInfoUpdate {
+	tiu.mutation.SetPublicKey(b)
 	return tiu
 }
 
@@ -114,7 +106,7 @@ func (tiu *TAInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(tainfo.FieldDomain, field.TypeString, value)
 	}
 	if value, ok := tiu.mutation.PublicKey(); ok {
-		_spec.SetField(tainfo.FieldPublicKey, field.TypeString, value)
+		_spec.SetField(tainfo.FieldPublicKey, field.TypeBytes, value)
 	}
 	if value, ok := tiu.mutation.Attestation(); ok {
 		_spec.SetField(tainfo.FieldAttestation, field.TypeString, value)
@@ -154,16 +146,8 @@ func (tiuo *TAInfoUpdateOne) SetNillableDomain(s *string) *TAInfoUpdateOne {
 }
 
 // SetPublicKey sets the "public_key" field.
-func (tiuo *TAInfoUpdateOne) SetPublicKey(s string) *TAInfoUpdateOne {
-	tiuo.mutation.SetPublicKey(s)
-	return tiuo
-}
-
-// SetNillablePublicKey sets the "public_key" field if the given value is not nil.
-func (tiuo *TAInfoUpdateOne) SetNillablePublicKey(s *string) *TAInfoUpdateOne {
-	if s != nil {
-		tiuo.SetPublicKey(*s)
-	}
+func (tiuo *TAInfoUpdateOne) SetPublicKey(b []byte) *TAInfoUpdateOne {
+	tiuo.mutation.SetPublicKey(b)
 	return tiuo
 }
 
@@ -256,7 +240,7 @@ func (tiuo *TAInfoUpdateOne) sqlSave(ctx context.Context) (_node *TAInfo, err er
 		_spec.SetField(tainfo.FieldDomain, field.TypeString, value)
 	}
 	if value, ok := tiuo.mutation.PublicKey(); ok {
-		_spec.SetField(tainfo.FieldPublicKey, field.TypeString, value)
+		_spec.SetField(tainfo.FieldPublicKey, field.TypeBytes, value)
 	}
 	if value, ok := tiuo.mutation.Attestation(); ok {
 		_spec.SetField(tainfo.FieldAttestation, field.TypeString, value)

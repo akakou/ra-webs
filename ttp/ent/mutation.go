@@ -33,7 +33,7 @@ type TAInfoMutation struct {
 	typ           string
 	id            *int
 	domain        *string
-	public_key    *string
+	public_key    *[]byte
 	attestation   *string
 	clearedFields map[string]struct{}
 	done          bool
@@ -176,12 +176,12 @@ func (m *TAInfoMutation) ResetDomain() {
 }
 
 // SetPublicKey sets the "public_key" field.
-func (m *TAInfoMutation) SetPublicKey(s string) {
-	m.public_key = &s
+func (m *TAInfoMutation) SetPublicKey(b []byte) {
+	m.public_key = &b
 }
 
 // PublicKey returns the value of the "public_key" field in the mutation.
-func (m *TAInfoMutation) PublicKey() (r string, exists bool) {
+func (m *TAInfoMutation) PublicKey() (r []byte, exists bool) {
 	v := m.public_key
 	if v == nil {
 		return
@@ -192,7 +192,7 @@ func (m *TAInfoMutation) PublicKey() (r string, exists bool) {
 // OldPublicKey returns the old "public_key" field's value of the TAInfo entity.
 // If the TAInfo object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAInfoMutation) OldPublicKey(ctx context.Context) (v string, err error) {
+func (m *TAInfoMutation) OldPublicKey(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPublicKey is only allowed on UpdateOne operations")
 	}
@@ -337,7 +337,7 @@ func (m *TAInfoMutation) SetField(name string, value ent.Value) error {
 		m.SetDomain(v)
 		return nil
 	case tainfo.FieldPublicKey:
-		v, ok := value.(string)
+		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

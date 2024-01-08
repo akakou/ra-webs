@@ -12,7 +12,7 @@ var (
 	TaInfosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "domain", Type: field.TypeString},
-		{Name: "public_key", Type: field.TypeString},
+		{Name: "public_key", Type: field.TypeBytes},
 		{Name: "attestation", Type: field.TypeString},
 	}
 	// TaInfosTable holds the schema information for the "ta_infos" table.

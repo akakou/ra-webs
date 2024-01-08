@@ -26,8 +26,8 @@ func (tic *TAInfoCreate) SetDomain(s string) *TAInfoCreate {
 }
 
 // SetPublicKey sets the "public_key" field.
-func (tic *TAInfoCreate) SetPublicKey(s string) *TAInfoCreate {
-	tic.mutation.SetPublicKey(s)
+func (tic *TAInfoCreate) SetPublicKey(b []byte) *TAInfoCreate {
+	tic.mutation.SetPublicKey(b)
 	return tic
 }
 
@@ -111,7 +111,7 @@ func (tic *TAInfoCreate) createSpec() (*TAInfo, *sqlgraph.CreateSpec) {
 		_node.Domain = value
 	}
 	if value, ok := tic.mutation.PublicKey(); ok {
-		_spec.SetField(tainfo.FieldPublicKey, field.TypeString, value)
+		_spec.SetField(tainfo.FieldPublicKey, field.TypeBytes, value)
 		_node.PublicKey = value
 	}
 	if value, ok := tic.mutation.Attestation(); ok {

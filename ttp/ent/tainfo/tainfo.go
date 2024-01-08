@@ -52,11 +52,6 @@ func ByDomain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDomain, opts...).ToFunc()
 }
 
-// ByPublicKey orders the results by the public_key field.
-func ByPublicKey(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPublicKey, opts...).ToFunc()
-}
-
 // ByAttestation orders the results by the attestation field.
 func ByAttestation(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAttestation, opts...).ToFunc()

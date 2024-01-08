@@ -58,7 +58,7 @@ func Domain(v string) predicate.TAInfo {
 }
 
 // PublicKey applies equality check predicate on the "public_key" field. It's identical to PublicKeyEQ.
-func PublicKey(v string) predicate.TAInfo {
+func PublicKey(v []byte) predicate.TAInfo {
 	return predicate.TAInfo(sql.FieldEQ(FieldPublicKey, v))
 }
 
@@ -133,68 +133,43 @@ func DomainContainsFold(v string) predicate.TAInfo {
 }
 
 // PublicKeyEQ applies the EQ predicate on the "public_key" field.
-func PublicKeyEQ(v string) predicate.TAInfo {
+func PublicKeyEQ(v []byte) predicate.TAInfo {
 	return predicate.TAInfo(sql.FieldEQ(FieldPublicKey, v))
 }
 
 // PublicKeyNEQ applies the NEQ predicate on the "public_key" field.
-func PublicKeyNEQ(v string) predicate.TAInfo {
+func PublicKeyNEQ(v []byte) predicate.TAInfo {
 	return predicate.TAInfo(sql.FieldNEQ(FieldPublicKey, v))
 }
 
 // PublicKeyIn applies the In predicate on the "public_key" field.
-func PublicKeyIn(vs ...string) predicate.TAInfo {
+func PublicKeyIn(vs ...[]byte) predicate.TAInfo {
 	return predicate.TAInfo(sql.FieldIn(FieldPublicKey, vs...))
 }
 
 // PublicKeyNotIn applies the NotIn predicate on the "public_key" field.
-func PublicKeyNotIn(vs ...string) predicate.TAInfo {
+func PublicKeyNotIn(vs ...[]byte) predicate.TAInfo {
 	return predicate.TAInfo(sql.FieldNotIn(FieldPublicKey, vs...))
 }
 
 // PublicKeyGT applies the GT predicate on the "public_key" field.
-func PublicKeyGT(v string) predicate.TAInfo {
+func PublicKeyGT(v []byte) predicate.TAInfo {
 	return predicate.TAInfo(sql.FieldGT(FieldPublicKey, v))
 }
 
 // PublicKeyGTE applies the GTE predicate on the "public_key" field.
-func PublicKeyGTE(v string) predicate.TAInfo {
+func PublicKeyGTE(v []byte) predicate.TAInfo {
 	return predicate.TAInfo(sql.FieldGTE(FieldPublicKey, v))
 }
 
 // PublicKeyLT applies the LT predicate on the "public_key" field.
-func PublicKeyLT(v string) predicate.TAInfo {
+func PublicKeyLT(v []byte) predicate.TAInfo {
 	return predicate.TAInfo(sql.FieldLT(FieldPublicKey, v))
 }
 
 // PublicKeyLTE applies the LTE predicate on the "public_key" field.
-func PublicKeyLTE(v string) predicate.TAInfo {
+func PublicKeyLTE(v []byte) predicate.TAInfo {
 	return predicate.TAInfo(sql.FieldLTE(FieldPublicKey, v))
-}
-
-// PublicKeyContains applies the Contains predicate on the "public_key" field.
-func PublicKeyContains(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldContains(FieldPublicKey, v))
-}
-
-// PublicKeyHasPrefix applies the HasPrefix predicate on the "public_key" field.
-func PublicKeyHasPrefix(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldHasPrefix(FieldPublicKey, v))
-}
-
-// PublicKeyHasSuffix applies the HasSuffix predicate on the "public_key" field.
-func PublicKeyHasSuffix(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldHasSuffix(FieldPublicKey, v))
-}
-
-// PublicKeyEqualFold applies the EqualFold predicate on the "public_key" field.
-func PublicKeyEqualFold(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldEqualFold(FieldPublicKey, v))
-}
-
-// PublicKeyContainsFold applies the ContainsFold predicate on the "public_key" field.
-func PublicKeyContainsFold(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldContainsFold(FieldPublicKey, v))
 }
 
 // AttestationEQ applies the EQ predicate on the "attestation" field.

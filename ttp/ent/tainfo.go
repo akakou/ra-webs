@@ -19,7 +19,7 @@ type TAInfo struct {
 	// Domain holds the value of the "domain" field.
 	Domain string `json:"domain,omitempty"`
 	// PublicKey holds the value of the "public_key" field.
-	PublicKey string `json:"public_key,omitempty"`
+	PublicKey []byte `json:"public_key,omitempty"`
 	// Attestation holds the value of the "attestation" field.
 	Attestation  string `json:"attestation,omitempty"`
 	selectValues sql.SelectValues
@@ -30,9 +30,11 @@ func (*TAInfo) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case tainfo.FieldPublicKey:
+			values[i] = new([]byte)
 		case tainfo.FieldID:
 			values[i] = new(sql.NullInt64)
-		case tainfo.FieldDomain, tainfo.FieldPublicKey, tainfo.FieldAttestation:
+		case tainfo.FieldDomain, tainfo.FieldAttestation:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -62,10 +64,10 @@ func (ti *TAInfo) assignValues(columns []string, values []any) error {
 				ti.Domain = value.String
 			}
 		case tainfo.FieldPublicKey:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field public_key", values[i])
-			} else if value.Valid {
-				ti.PublicKey = value.String
+			} else if value != nil {
+				ti.PublicKey = *value
 			}
 		case tainfo.FieldAttestation:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -113,7 +115,7 @@ func (ti *TAInfo) String() string {
 	builder.WriteString(ti.Domain)
 	builder.WriteString(", ")
 	builder.WriteString("public_key=")
-	builder.WriteString(ti.PublicKey)
+	builder.WriteString(fmt.Sprintf("%v", ti.PublicKey))
 	builder.WriteString(", ")
 	builder.WriteString("attestation=")
 	builder.WriteString(ti.Attestation)
