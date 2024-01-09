@@ -17,7 +17,7 @@ func TestRegister(t *testing.T) {
 		Config: "file:ent?mode=memory&cache=shared&_fk=1",
 	}
 
-	router := NewTTPServer(&dbConfig)
+	router := NewTTPServer(&dbConfig, "views/*.html")
 
 	postBody := core.ProvisioningRequest{
 		Attestation: "attestation",

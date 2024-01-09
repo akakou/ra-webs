@@ -3,46 +3,38 @@ package ttp
 import (
 	"flag"
 	"fmt"
-	"net/http"
+	"html/template"
+	"io"
 
-	"github.com/akakou/ra_webs/core"
 	"github.com/labstack/echo/v4"
 )
 
-func NewTTPServer(dbConfig *DBConfig) *echo.Echo {
+type Template struct {
+	templates *template.Template
+}
+
+func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
+}
+
+func NewTTPServer(dbConfig *DBConfig, templatePath string) *echo.Echo {
 	e := echo.New()
+
+	e.Renderer = &Template{
+		templates: template.Must(template.ParseGlob(templatePath)),
+	}
 
 	db, err := newtTAInfoDB(dbConfig)
 	if err != nil {
 		panic(err)
 	}
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
-
-	e.POST("/provision", func(c echo.Context) error {
-		provReq := new(core.ProvisioningRequest)
-
-		if err := c.Bind(provReq); err != nil {
-			return err
-		}
-
-		if verifyAttestation(provReq.Attestation) != nil {
-			return c.String(http.StatusBadRequest, "bad attestation")
-		}
-
-		if db.store(provReq) != nil {
-			return c.String(http.StatusInternalServerError, "internal error")
-		}
-
-		return c.String(http.StatusOK, "ok")
-	})
+	Route(e, db)
 
 	return e
 }
 
-func DefaultTTPServer() *echo.Echo {
+func DefaultTTPServer(templatePath string) *echo.Echo {
 	dbType := flag.String("db_type", "sqlite3", "database type")
 	dbConfig := flag.String("db_config", "file:ent?mode=memory&cache=shared&_fk=1", "database config")
 
@@ -51,7 +43,7 @@ func DefaultTTPServer() *echo.Echo {
 	return NewTTPServer(&DBConfig{
 		Type:   *dbType,
 		Config: *dbConfig,
-	})
+	}, templatePath)
 }
 
 func verifyAttestation(attestation string) error {
