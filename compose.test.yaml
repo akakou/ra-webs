@@ -1,0 +1,21 @@
+version: '3'
+services:
+  ta:
+    image: golang:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./ta:/ta
+      - ./core:/core
+    working_dir: /ta/example
+    command: go run main.go
+
+  ttp:
+    image: golang:latest
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./ttp:/ttp
+      - ./core:/core
+    working_dir: /ttp/serv
+    command: go run main.go
