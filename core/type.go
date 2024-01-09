@@ -1,6 +1,6 @@
 package core
 
-type ProvisioningRequest struct {
+type TAInfo struct {
 	Attestation string `json:"attestation"`
 	PublicKey   []byte `json:"public_key"`
 	Domain      string `json:"domain"`

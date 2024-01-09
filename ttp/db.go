@@ -6,6 +6,7 @@ import (
 
 	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp/ent"
+	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -37,12 +38,31 @@ func newtTAInfoDB(dbConfig *DBConfig) (*taInfoDB, error) {
 	}, nil
 }
 
-func (db *taInfoDB) store(req *core.ProvisioningRequest) error {
+func (db *taInfoDB) findByDomain(domain string) (*core.TAInfo, error) {
+	taInfoColumn, err := db.client.TAInfo.
+		Query().
+		Where(tainfo.DomainEQ(domain)).
+		Only(*db.ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed querying ta info: %w", err)
+	}
+
+	taInfo := &core.TAInfo{
+		Domain:      taInfoColumn.Domain,
+		PublicKey:   taInfoColumn.PublicKey,
+		Attestation: taInfoColumn.Attestation,
+	}
+
+	return taInfo, nil
+}
+
+func (db *taInfoDB) store(taInfo *core.TAInfo) error {
 	_, err := db.client.TAInfo.
 		Create().
-		SetDomain(req.Domain).
-		SetPublicKey(req.PublicKey).
-		SetAttestation(req.Attestation).
+		SetDomain(taInfo.Domain).
+		SetPublicKey(taInfo.PublicKey).
+		SetAttestation(taInfo.Attestation).
 		Save(*db.ctx)
 
 	if err != nil {

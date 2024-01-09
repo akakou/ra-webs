@@ -13,7 +13,7 @@ func Route(e *echo.Echo, db *taInfoDB) {
 	})
 
 	e.POST("/provision", func(c echo.Context) error {
-		provReq := new(core.ProvisioningRequest)
+		provReq := new(core.TAInfo)
 
 		if err := c.Bind(provReq); err != nil {
 			return err

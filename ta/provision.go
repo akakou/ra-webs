@@ -76,7 +76,7 @@ func (raConfig *RAConfig) generateKeyPair() (*tls.Config, *rsa.PublicKey, error)
 }
 
 func (raConfig *RAConfig) registerToTTP(publicKey []byte, attestation string) error {
-	provReq := core.ProvisioningRequest{
+	provReq := core.TAInfo{
 		Attestation: attestation,
 		PublicKey:   publicKey,
 		Domain:      raConfig.Domain,
