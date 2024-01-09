@@ -19,7 +19,7 @@ func TestRegister(t *testing.T) {
 
 	router := NewTTPServer(&dbConfig, "views/*.html")
 
-	postBody := core.ProvisioningRequest{
+	postBody := core.TAInfo{
 		Attestation: "attestation",
 		PublicKey:   []byte("public_key"),
 		Domain:      "domain",
