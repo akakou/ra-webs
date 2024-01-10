@@ -54,12 +54,20 @@ func fetchCTLogs(domain string) ([]CTLog, error) {
 
 	url := fmt.Sprintf(SSLMATE_API_URL, domain)
 
-	resp, _ := http.Get(url)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, errors.New("failed to get ct logs")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("failed to get ct logs")
+	}
+
 	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(resp.Body)
 
-	err := json.Unmarshal(body, &ctLog)
+	err = json.Unmarshal(body, &ctLog)
 	if err != nil {
 		return nil, errors.New("failed to unmarshal json")
 	}
