@@ -65,10 +65,10 @@ func TestCTLogAuditDB(t *testing.T) {
 
 	db := makeTestDB()
 
-	entTaInfo := db.toEntTaInfo(&taInfo)
-	entTaInfo.SaveX(*db.ctx)
+	entTaInfoCreate := db.toEntTaInfo(&taInfo)
+	entTaInfo := entTaInfoCreate.SaveX(*db.ctx)
 
-	entCTLogAuditCreate, err := db.toEntCTLogAuditWithRelation(&expected)
+	entCTLogAuditCreate, err := db.toEntCTLogAudit(&expected, entTaInfo)
 	if err != nil {
 		panic(err)
 	}

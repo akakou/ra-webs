@@ -57,19 +57,11 @@ func (db *ttpDB) toCoreTaInfo(taInfo *ent.TAInfo) *core.TAInfo {
 }
 
 func (db *ttpDB) selectTaInfoByDomain(domain string) (*ent.TAInfo, error) {
-	return db._selectTaInfoByDomain(domain, false)
-}
-
-func (db *ttpDB) _selectTaInfoByDomain(domain string, withCTLogs bool) (*ent.TAInfo, error) {
-	query := db.client.TAInfo.
+	taInfo, err := db.client.TAInfo.
 		Query().
-		Where(tainfo.DomainEQ(domain))
-
-	if withCTLogs {
-		query = query.WithCtLog()
-	}
-
-	taInfo, err := query.Only(*db.ctx)
+		Where(tainfo.DomainEQ(domain)).
+		WithCtLog().
+		Only(*db.ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed querying ta info: %w", err)
@@ -78,12 +70,7 @@ func (db *ttpDB) _selectTaInfoByDomain(domain string, withCTLogs bool) (*ent.TAI
 	return taInfo, nil
 }
 
-func (db *ttpDB) toEntCTLogAuditWithRelation(ctLog *CTLogAudit) (*ent.CTLogAuditCreate, error) {
-	taInfo, err := db.selectTaInfoByDomain(ctLog.TADomain)
-	if err != nil {
-		return nil, err
-	}
-
+func (db *ttpDB) toEntCTLogAudit(ctLog *CTLogAudit, taInfo *ent.TAInfo) (*ent.CTLogAuditCreate, error) {
 	entCTLog := db.client.CTLogAudit.
 		Create().
 		SetLatestCtID(ctLog.LatestCTId).
@@ -102,7 +89,7 @@ func (db *ttpDB) toCoreCTLogAudit(ctLogAudit *ent.CTLogAudit) *CTLogAudit {
 }
 
 func (db *ttpDB) selectCTLogByDomain(domain string) (*ent.CTLogAudit, error) {
-	taInfo, err := db._selectTaInfoByDomain(domain, true)
+	taInfo, err := db.selectTaInfoByDomain(domain)
 	if err != nil {
 		return nil, err
 	}
