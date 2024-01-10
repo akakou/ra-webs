@@ -91,11 +91,15 @@ func (db *ttpDB) toCoreCTLogAudit(ctLogAudit *ent.CTLogAudit) *CTLogAudit {
 func (db *ttpDB) selectCTLogByDomain(domain string) (*ent.CTLogAudit, error) {
 	taInfo, err := db.selectTaInfoByDomain(domain)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to select ta info by domain: %w", err)
 	}
 
 	ctLog := taInfo.Edges.CtLog
 	ctLog.Edges.TaInfo = taInfo
 
 	return ctLog, err
+}
+
+func (db *ttpDB) close() {
+	db.client.Close()
 }

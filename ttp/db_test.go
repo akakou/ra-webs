@@ -33,6 +33,7 @@ func TestTAInfoDB(t *testing.T) {
 	}
 
 	db := makeTestDB()
+	defer db.close()
 
 	e := db.toEntTaInfo(&expected)
 	e.SaveX(*db.ctx)
@@ -64,6 +65,7 @@ func TestCTLogAuditDB(t *testing.T) {
 	}
 
 	db := makeTestDB()
+	defer db.close()
 
 	entTaInfoCreate := db.toEntTaInfo(&taInfo)
 	entTaInfo := entTaInfoCreate.SaveX(*db.ctx)
