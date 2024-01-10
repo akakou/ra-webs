@@ -12,7 +12,7 @@ func TestRAConfiggenerateKeyPair(t *testing.T) {
 
 	ra := NewRA(&raConfig)
 
-	got, _, err := ra.generateKeyPair()
+	got, _, _, err := ra.generateKeyPair()
 	if err != nil {
 		t.Errorf("RAConfig.generateKeyPair() got an unexpected error: %s", err)
 	}

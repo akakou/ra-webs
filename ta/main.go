@@ -1,6 +1,9 @@
 package ta
 
-import "crypto/tls"
+import (
+	"crypto/rsa"
+	"crypto/tls"
+)
 
 type RAConfig struct {
 	TTPDomain string
@@ -8,21 +11,46 @@ type RAConfig struct {
 }
 
 type RA struct {
-	config *RAConfig
+	config       *RAConfig
+	privKeyStore *privKeyStore
+	certStore    *certStore
 }
 
 func NewRA(config *RAConfig) *RA {
 	return &RA{
-		config: config,
+		config:       config,
+		privKeyStore: &privKeyStore{},
+		certStore:    &certStore{},
 	}
 }
 
-func TLSConfig(config *RA) (*tls.Config, error) {
-	tlsConfig, _, err := config.generateKeyPair()
+func TLSConfig(ra *RA) (*tls.Config, error) {
+	privKeyStore := privKeyStore{}
+	certStore := certStore{}
+
+	var privKey *rsa.PrivateKey
+	var cert *tls.Certificate
+
+	var err error
+
+	if hasFileExists() {
+		privKey, cert, err = ra.Load()
+	} else {
+		privKey, cert, err = ra.Provisioning(&privKeyStore, &certStore)
+	}
+
 	if err != nil {
 		return nil, err
 	}
 
-	return tlsConfig, nil
+	cert.PrivateKey = privKey
+
+	tlsConfig := tls.Config{
+		Certificates: []tls.Certificate{
+			*cert,
+		},
+	}
+
+	return &tlsConfig, nil
 
 }

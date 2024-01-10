@@ -20,10 +20,10 @@ import (
 
 var SCHEME = "https://"
 
-func (ra *RA) Provisioning() (*tls.Config, error) {
-	tlsConfig, publicKey, err := ra.generateKeyPair()
+func (ra *RA) Provisioning(pks *privKeyStore, cs *certStore) (*rsa.PrivateKey, *tls.Certificate, error) {
+	privKey, pubKey, cert, err := ra.generateKeyPair()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// attestation, err := raConfig.attest(tlsConfig)
@@ -32,24 +32,32 @@ func (ra *RA) Provisioning() (*tls.Config, error) {
 	// }
 	attestation := "attestation"
 
-	publicKeyBytes, err := x509.MarshalPKIXPublicKey(publicKey)
-	if err != nil {
-		return nil, err
-	}
-
-	err = ra.registerToTTP(publicKeyBytes, attestation)
-	if err != nil {
-		return nil, err
-	}
-
-	return tlsConfig, nil
-}
-
-func (ra *RA) generateKeyPair() (*tls.Config, *rsa.PublicKey, error) {
-	priv, err := rsa.GenerateKey(rand.Reader, 2048)
-
+	pubKeyBytes, err := x509.MarshalPKIXPublicKey(pubKey)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	err = ra.registerToTTP(pubKeyBytes, attestation)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	pks.Set(privKey)
+	pks.Store()
+
+	cs.Set(cert)
+	cs.Store()
+
+	return privKey, cert, nil
+}
+
+func (ra *RA) generateKeyPair() (*rsa.PrivateKey, *rsa.PublicKey, *tls.Certificate, error) {
+	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
+
+	pubKey := &privKey.PublicKey
+
+	if err != nil {
+		return nil, nil, nil, err
 	}
 
 	template := &x509.Certificate{
@@ -59,22 +67,18 @@ func (ra *RA) generateKeyPair() (*tls.Config, *rsa.PublicKey, error) {
 		DNSNames:     []string{ra.config.Domain},
 	}
 
-	cert, err := x509.CreateCertificate(rand.Reader, template, template, &priv.PublicKey, priv)
+	rawCert, err := x509.CreateCertificate(rand.Reader, template, template, pubKey, privKey)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	tlsCfg := tls.Config{
-		Certificates: []tls.Certificate{
-			{
-				Certificate: [][]byte{cert},
-				PrivateKey:  priv,
-			},
-		},
+	cert := tls.Certificate{
+		Certificate: [][]byte{rawCert},
+		PrivateKey:  privKey,
 	}
 
-	return &tlsCfg, &priv.PublicKey, nil
+	return privKey, pubKey, &cert, nil
 }
 
 func (ra *RA) registerToTTP(publicKey []byte, attestation string) error {
