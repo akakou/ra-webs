@@ -8,6 +8,7 @@ import (
 type RAConfig struct {
 	TTPDomain string
 	Domain    string
+	Email     string
 }
 
 type RA struct {
@@ -25,9 +26,6 @@ func NewRA(config *RAConfig) *RA {
 }
 
 func TLSConfig(ra *RA) (*tls.Config, error) {
-	privKeyStore := privKeyStore{}
-	certStore := certStore{}
-
 	var privKey *rsa.PrivateKey
 	var cert *tls.Certificate
 
@@ -36,7 +34,7 @@ func TLSConfig(ra *RA) (*tls.Config, error) {
 	if hasFileExists() {
 		privKey, cert, err = ra.Load()
 	} else {
-		privKey, cert, err = ra.Provisioning(&privKeyStore, &certStore)
+		privKey, cert, err = ra.Provisioning()
 	}
 
 	if err != nil {

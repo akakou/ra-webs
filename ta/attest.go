@@ -11,7 +11,7 @@ import (
 	"github.com/edgelesssys/ego/enclave"
 )
 
-func AttestateByAzure(publicKey *rsa.PublicKey) (string, error) {
+func attestateByAzure(publicKey *rsa.PublicKey) (string, error) {
 	rawPubKey := x509.MarshalPKCS1PublicKey(publicKey)
 
 	publicKeyHashBytes := sha256.Sum256(rawPubKey)
