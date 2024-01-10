@@ -27,7 +27,7 @@ func TestRegister(t *testing.T) {
 
 	body, _ := json.Marshal(postBody)
 
-	req := httptest.NewRequest("POST", "/register", bytes.NewReader(body))
+	req := httptest.NewRequest("POST", "/provision", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
 	rec := httptest.NewRecorder()
