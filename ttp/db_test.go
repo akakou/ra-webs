@@ -3,7 +3,6 @@ package ttp
 import (
 	"testing"
 
-	"github.com/akakou/ra_webs/core"
 	"github.com/go-playground/assert/v2"
 )
 
@@ -26,7 +25,7 @@ func makeTestDB() *ttpDB {
 func TestTAInfoDB(t *testing.T) {
 	TADomain := "ta.example.com"
 
-	expected := core.TAInfo{
+	expected := TAInfo{
 		Domain:        "ta.example.com",
 		PublicKeyHash: "public key hash",
 		Attestation:   "attestation",
@@ -58,7 +57,7 @@ func TestCTLogAuditDB(t *testing.T) {
 		TADomain:   TADomain,
 	}
 
-	taInfo := core.TAInfo{
+	taInfo := TAInfo{
 		Attestation:   "",
 		PublicKeyHash: "hash",
 		Domain:        TADomain,

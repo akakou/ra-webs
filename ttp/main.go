@@ -45,8 +45,3 @@ func DefaultTTPServer(templatePath string) *echo.Echo {
 		Config: *dbConfig,
 	}, templatePath)
 }
-
-func verifyAttestation(attestation string) error {
-
-	return nil
-}

@@ -4,11 +4,9 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math/big"
@@ -82,13 +80,9 @@ func (ra *RA) generateKeyPair() (*rsa.PrivateKey, *rsa.PublicKey, *tls.Certifica
 }
 
 func (ra *RA) registerToTTP(publicKey []byte, attestation string) error {
-	publicKeyHashBytes := sha256.Sum256(publicKey)
-	publicKeyHash := hex.EncodeToString(publicKeyHashBytes[:])
-
-	provReq := core.TAInfo{
-		Attestation:   attestation,
-		PublicKeyHash: publicKeyHash,
-		Domain:        ra.config.Domain,
+	provReq := core.ProvisionRequest{
+		Attestation: attestation,
+		Domain:      ra.config.Domain,
 	}
 
 	body, _ := json.Marshal(provReq)

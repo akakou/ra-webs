@@ -1,21 +1,26 @@
 package ta
 
 import (
-	"crypto/tls"
-	"log"
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/hex"
+	"fmt"
 
+	"github.com/akakou/ra_webs/core"
 	"github.com/edgelesssys/ego/enclave"
 )
 
-const ATTEST_PROVIDER_URL = "https://shareduks.uks.attest.azure.net"
+func AttestateByAzure(publicKey *rsa.PublicKey) (string, error) {
+	rawPubKey := x509.MarshalPKCS1PublicKey(publicKey)
 
-func AttestateByAzure(tlsConfig *tls.Config) string {
-	token, err := enclave.CreateAzureAttestationToken(tlsConfig.Certificates[0].Certificate[0], ATTEST_PROVIDER_URL)
+	publicKeyHashBytes := sha256.Sum256(rawPubKey)
+	publicKeyHash := hex.EncodeToString(publicKeyHashBytes[:])
+
+	token, err := enclave.CreateAzureAttestationToken([]byte(publicKeyHash), core.ATTEST_PROVIDER_URL)
 	if err != nil {
-		log.Print("Run without attestation!!!!!\n")
-	} else {
-		log.Print("Created an Microsoft Azure Attestation Token.")
+		return "", fmt.Errorf("failed to create attestation token: %w", err)
 	}
 
-	return token
+	return token, nil
 }

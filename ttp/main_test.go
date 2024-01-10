@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/akakou/ra_webs/core"
 	"github.com/go-playground/assert/v2"
 )
 
@@ -19,7 +18,7 @@ func TestRegister(t *testing.T) {
 
 	router := NewTTPServer(&dbConfig, "views/*.html")
 
-	postBody := core.TAInfo{
+	postBody := TAInfo{
 		Attestation:   "attestation",
 		PublicKeyHash: "public_key_hash",
 		Domain:        "domain",

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp/ent"
 	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 	_ "github.com/mattn/go-sqlite3"
@@ -38,7 +37,7 @@ func newTtpDB(dbConfig *DBConfig) (*ttpDB, error) {
 	}, nil
 }
 
-func (db *ttpDB) toEntTaInfo(taInfo *core.TAInfo) *ent.TAInfoCreate {
+func (db *ttpDB) toEntTaInfo(taInfo *TAInfo) *ent.TAInfoCreate {
 	entTaInfo := db.client.TAInfo.
 		Create().
 		SetDomain(taInfo.Domain).
@@ -48,8 +47,8 @@ func (db *ttpDB) toEntTaInfo(taInfo *core.TAInfo) *ent.TAInfoCreate {
 	return entTaInfo
 }
 
-func (db *ttpDB) toCoreTaInfo(taInfo *ent.TAInfo) *core.TAInfo {
-	return &core.TAInfo{
+func (db *ttpDB) toCoreTaInfo(taInfo *ent.TAInfo) *TAInfo {
+	return &TAInfo{
 		Domain:        taInfo.Domain,
 		PublicKeyHash: taInfo.PublicKeyHash,
 		Attestation:   taInfo.Attestation,

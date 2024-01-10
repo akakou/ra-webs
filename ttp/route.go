@@ -3,7 +3,6 @@ package ttp
 import (
 	"net/http"
 
-	"github.com/akakou/ra_webs/core"
 	"github.com/labstack/echo/v4"
 )
 
@@ -13,19 +12,22 @@ func Route(e *echo.Echo, db *ttpDB) {
 	})
 
 	e.POST("/provision", func(c echo.Context) error {
-		provReq := new(core.TAInfo)
+		provReq := new(TAInfo)
 
 		if c.Bind(provReq) != nil {
 			return c.String(http.StatusBadRequest, "bad attestation")
 		}
 
-		if verifyAttestation(provReq.Attestation) != nil {
+		pubKeyHash, err := verifyAttestation(provReq.Attestation)
+		if err != nil {
 			return c.String(http.StatusBadRequest, "bad attestation")
 		}
 
+		provReq.PublicKeyHash = pubKeyHash
+
 		taInfo := db.toEntTaInfo(provReq)
 
-		_, err := taInfo.Save(*db.ctx)
+		_, err = taInfo.Save(*db.ctx)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, "internal error")
 		}
