@@ -15,15 +15,21 @@ import (
 
 var SCHEME = "https://"
 var KEY_SIZE = 2048
-var USE_ACME = true
+var DEBUG = true
 
 func (ra *RA) Provisioning() (*rsa.PrivateKey, *tls.Certificate, error) {
+	var cert *tls.Certificate
+
 	privKey, pubKey, err := ra.generateKeyPair()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var cert *tls.Certificate
+	if DEBUG {
+		fmt.Printf("WARNING: This is debug mode. Self-signed certificate will be issued.\n")
+		cert, _ = ra.issueSelfSignedCert(privKey, pubKey)
+		return privKey, cert, nil
+	}
 
 	acmeConfig := ACMEConfig{
 		Email:      ra.config.Email,

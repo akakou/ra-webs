@@ -10,13 +10,7 @@ import (
 	"time"
 )
 
-func (ra *RA) issueSelfSignedCert() (*rsa.PrivateKey, *rsa.PublicKey, *tls.Certificate, error) {
-	privKey, pubKey, err := ra.generateKeyPair()
-
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
+func (ra *RA) issueSelfSignedCert(privKey *rsa.PrivateKey, pubKey *rsa.PublicKey) (*tls.Certificate, error) {
 	template := &x509.Certificate{
 		SerialNumber: &big.Int{},
 		Subject:      pkix.Name{CommonName: ra.config.Domain},
@@ -27,7 +21,7 @@ func (ra *RA) issueSelfSignedCert() (*rsa.PrivateKey, *rsa.PublicKey, *tls.Certi
 	rawCert, err := x509.CreateCertificate(rand.Reader, template, template, pubKey, privKey)
 
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	cert := tls.Certificate{
@@ -35,5 +29,5 @@ func (ra *RA) issueSelfSignedCert() (*rsa.PrivateKey, *rsa.PublicKey, *tls.Certi
 		PrivateKey:  privKey,
 	}
 
-	return privKey, pubKey, &cert, nil
+	return &cert, nil
 }
