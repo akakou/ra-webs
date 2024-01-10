@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 )
 
 type CTLogAudit struct {
@@ -20,36 +19,39 @@ type CTLog struct {
 	PubKeySha256 string `json:"pubkey_sha256"`
 }
 
-const SSLMATE_API_URL = "https://api.certspotter.com/v1/issuances?domain=%v&include_subdomains=true&expand=dns_names&expand=cert_der"
+const SSLMATE_API_URL = "https://api.certspotter.com/v1/issuances?domain=%v&match_wildcards=true&expand=dns_names&expand=cert_der"
 
 func AuditCTLog(domain string, db *ttpDB) error {
-	l := 1
-
 	taInfo, err := db.selectTaInfoByDomain(domain)
-
 	if err != nil {
-		return fmt.Errorf("failed to select ta info by domain: %w", err)
+		return fmt.Errorf("failed to get ta info: %w", err)
 	}
 
-	for l != 0 {
-		subdomain, _l := subDomain(domain)
-		l = _l
-
-		ctLogs, err := fetchCTLogs(subdomain)
-		if err != nil {
-			return fmt.Errorf("failed to fetch ct logs: %w", err)
-		}
-
-		if checkCTLogs(ctLogs, taInfo.PublicKeyHash) != nil {
-			return fmt.Errorf("failed to check ct logs: %w", err)
-		}
-
+	ctLog := taInfo.Edges.CtLog
+	if !ctLog.IsValid {
+		return errors.New("ct log is not valid")
 	}
+
+	ctLogs, err := fetchCTLogs(domain, ctLog.LatestCtID)
+	if err != nil {
+		return fmt.Errorf("failed to fetch ct logs: %w", err)
+	}
+
+	logLen := len(ctLogs)
+	ctLog.LatestCtID = ctLogs[logLen-1].Id
+
+	if checkCTLogs(ctLogs, taInfo.PublicKeyHash) != nil {
+		ctLog.IsValid = false
+		ctLog.Update().Save(*db.ctx)
+		return fmt.Errorf("failed to check ct logs: %w", err)
+	}
+
+	ctLog.Update().Save(*db.ctx)
 
 	return nil
 }
 
-func fetchCTLogs(domain string) ([]CTLog, error) {
+func fetchCTLogs(domain string, after string) ([]CTLog, error) {
 	ctLog := []CTLog{}
 
 	url := fmt.Sprintf(SSLMATE_API_URL, domain)
@@ -83,13 +85,4 @@ func checkCTLogs(ctLogs []CTLog, hashedPublicKey string) error {
 	}
 
 	return nil
-}
-
-func subDomain(domain string) (string, int) {
-	splited := strings.Split(domain, ".")
-	l := len(splited) - 1
-
-	splited = splited[:l]
-
-	return strings.Join(splited, "."), l
 }

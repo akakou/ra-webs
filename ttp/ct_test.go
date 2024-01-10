@@ -15,7 +15,7 @@ func TestFetchCTLogs(t *testing.T) {
 		t.Skip("RAWEBS_TEST_CT is not set")
 	}
 
-	result, err := fetchCTLogs(TEST_SITE)
+	result, err := fetchCTLogs(TEST_SITE, "")
 	if err != nil {
 		t.Fatalf("fetchCTLogs() got an unexpected error: %s", err)
 	}
