@@ -14,8 +14,8 @@ const (
 	FieldID = "id"
 	// FieldDomain holds the string denoting the domain field in the database.
 	FieldDomain = "domain"
-	// FieldPublicKey holds the string denoting the public_key field in the database.
-	FieldPublicKey = "public_key"
+	// FieldPublicKeyHash holds the string denoting the public_key_hash field in the database.
+	FieldPublicKeyHash = "public_key_hash"
 	// FieldAttestation holds the string denoting the attestation field in the database.
 	FieldAttestation = "attestation"
 	// EdgeCtLog holds the string denoting the ct_log edge name in mutations.
@@ -35,7 +35,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldDomain,
-	FieldPublicKey,
+	FieldPublicKeyHash,
 	FieldAttestation,
 }
 
@@ -71,6 +71,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByDomain orders the results by the domain field.
 func ByDomain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDomain, opts...).ToFunc()
+}
+
+// ByPublicKeyHash orders the results by the public_key_hash field.
+func ByPublicKeyHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPublicKeyHash, opts...).ToFunc()
 }
 
 // ByAttestation orders the results by the attestation field.

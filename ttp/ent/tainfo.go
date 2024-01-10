@@ -19,8 +19,8 @@ type TAInfo struct {
 	ID int `json:"id,omitempty"`
 	// Domain holds the value of the "domain" field.
 	Domain string `json:"domain,omitempty"`
-	// PublicKey holds the value of the "public_key" field.
-	PublicKey []byte `json:"public_key,omitempty"`
+	// PublicKeyHash holds the value of the "public_key_hash" field.
+	PublicKeyHash string `json:"public_key_hash,omitempty"`
 	// Attestation holds the value of the "attestation" field.
 	Attestation string `json:"attestation,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -57,11 +57,9 @@ func (*TAInfo) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case tainfo.FieldPublicKey:
-			values[i] = new([]byte)
 		case tainfo.FieldID:
 			values[i] = new(sql.NullInt64)
-		case tainfo.FieldDomain, tainfo.FieldAttestation:
+		case tainfo.FieldDomain, tainfo.FieldPublicKeyHash, tainfo.FieldAttestation:
 			values[i] = new(sql.NullString)
 		case tainfo.ForeignKeys[0]: // ct_log_audit_ta_info
 			values[i] = new(sql.NullInt64)
@@ -92,11 +90,11 @@ func (ti *TAInfo) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ti.Domain = value.String
 			}
-		case tainfo.FieldPublicKey:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field public_key", values[i])
-			} else if value != nil {
-				ti.PublicKey = *value
+		case tainfo.FieldPublicKeyHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field public_key_hash", values[i])
+			} else if value.Valid {
+				ti.PublicKeyHash = value.String
 			}
 		case tainfo.FieldAttestation:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -155,8 +153,8 @@ func (ti *TAInfo) String() string {
 	builder.WriteString("domain=")
 	builder.WriteString(ti.Domain)
 	builder.WriteString(", ")
-	builder.WriteString("public_key=")
-	builder.WriteString(fmt.Sprintf("%v", ti.PublicKey))
+	builder.WriteString("public_key_hash=")
+	builder.WriteString(ti.PublicKeyHash)
 	builder.WriteString(", ")
 	builder.WriteString("attestation=")
 	builder.WriteString(ti.Attestation)

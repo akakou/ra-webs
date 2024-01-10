@@ -42,7 +42,7 @@ func (db *ttpDB) toEntTaInfo(taInfo *core.TAInfo) *ent.TAInfoCreate {
 	entTaInfo := db.client.TAInfo.
 		Create().
 		SetDomain(taInfo.Domain).
-		SetPublicKey(taInfo.PublicKey).
+		SetPublicKeyHash(taInfo.PublicKeyHash).
 		SetAttestation(taInfo.Attestation)
 
 	return entTaInfo
@@ -50,9 +50,9 @@ func (db *ttpDB) toEntTaInfo(taInfo *core.TAInfo) *ent.TAInfoCreate {
 
 func (db *ttpDB) toCoreTaInfo(taInfo *ent.TAInfo) *core.TAInfo {
 	return &core.TAInfo{
-		Domain:      taInfo.Domain,
-		PublicKey:   taInfo.PublicKey,
-		Attestation: taInfo.Attestation,
+		Domain:        taInfo.Domain,
+		PublicKeyHash: taInfo.PublicKeyHash,
+		Attestation:   taInfo.Attestation,
 	}
 }
 

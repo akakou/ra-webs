@@ -20,9 +20,9 @@ func TestRegister(t *testing.T) {
 	router := NewTTPServer(&dbConfig, "views/*.html")
 
 	postBody := core.TAInfo{
-		Attestation: "attestation",
-		PublicKey:   []byte("public_key"),
-		Domain:      "domain",
+		Attestation:   "attestation",
+		PublicKeyHash: "public_key_hash",
+		Domain:        "domain",
 	}
 
 	body, _ := json.Marshal(postBody)

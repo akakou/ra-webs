@@ -27,9 +27,9 @@ func TestTAInfoDB(t *testing.T) {
 	TADomain := "ta.example.com"
 
 	expected := core.TAInfo{
-		Domain:      "ta.example.com",
-		PublicKey:   []byte("public key"),
-		Attestation: "attestation",
+		Domain:        "ta.example.com",
+		PublicKeyHash: "public key hash",
+		Attestation:   "attestation",
 	}
 
 	db := makeTestDB()
@@ -58,9 +58,9 @@ func TestCTLogAuditDB(t *testing.T) {
 	}
 
 	taInfo := core.TAInfo{
-		Attestation: "",
-		PublicKey:   []byte{},
-		Domain:      TADomain,
+		Attestation:   "",
+		PublicKeyHash: "hash",
+		Domain:        TADomain,
 	}
 
 	db := makeTestDB()

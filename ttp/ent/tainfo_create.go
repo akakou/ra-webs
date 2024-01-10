@@ -26,9 +26,9 @@ func (tic *TAInfoCreate) SetDomain(s string) *TAInfoCreate {
 	return tic
 }
 
-// SetPublicKey sets the "public_key" field.
-func (tic *TAInfoCreate) SetPublicKey(b []byte) *TAInfoCreate {
-	tic.mutation.SetPublicKey(b)
+// SetPublicKeyHash sets the "public_key_hash" field.
+func (tic *TAInfoCreate) SetPublicKeyHash(s string) *TAInfoCreate {
+	tic.mutation.SetPublicKeyHash(s)
 	return tic
 }
 
@@ -94,8 +94,8 @@ func (tic *TAInfoCreate) check() error {
 	if _, ok := tic.mutation.Domain(); !ok {
 		return &ValidationError{Name: "domain", err: errors.New(`ent: missing required field "TAInfo.domain"`)}
 	}
-	if _, ok := tic.mutation.PublicKey(); !ok {
-		return &ValidationError{Name: "public_key", err: errors.New(`ent: missing required field "TAInfo.public_key"`)}
+	if _, ok := tic.mutation.PublicKeyHash(); !ok {
+		return &ValidationError{Name: "public_key_hash", err: errors.New(`ent: missing required field "TAInfo.public_key_hash"`)}
 	}
 	if _, ok := tic.mutation.Attestation(); !ok {
 		return &ValidationError{Name: "attestation", err: errors.New(`ent: missing required field "TAInfo.attestation"`)}
@@ -130,9 +130,9 @@ func (tic *TAInfoCreate) createSpec() (*TAInfo, *sqlgraph.CreateSpec) {
 		_spec.SetField(tainfo.FieldDomain, field.TypeString, value)
 		_node.Domain = value
 	}
-	if value, ok := tic.mutation.PublicKey(); ok {
-		_spec.SetField(tainfo.FieldPublicKey, field.TypeBytes, value)
-		_node.PublicKey = value
+	if value, ok := tic.mutation.PublicKeyHash(); ok {
+		_spec.SetField(tainfo.FieldPublicKeyHash, field.TypeString, value)
+		_node.PublicKeyHash = value
 	}
 	if value, ok := tic.mutation.Attestation(); ok {
 		_spec.SetField(tainfo.FieldAttestation, field.TypeString, value)

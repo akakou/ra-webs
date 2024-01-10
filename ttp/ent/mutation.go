@@ -478,18 +478,18 @@ func (m *CTLogAuditMutation) ResetEdge(name string) error {
 // TAInfoMutation represents an operation that mutates the TAInfo nodes in the graph.
 type TAInfoMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	domain        *string
-	public_key    *[]byte
-	attestation   *string
-	clearedFields map[string]struct{}
-	ct_log        *int
-	clearedct_log bool
-	done          bool
-	oldValue      func(context.Context) (*TAInfo, error)
-	predicates    []predicate.TAInfo
+	op              Op
+	typ             string
+	id              *int
+	domain          *string
+	public_key_hash *string
+	attestation     *string
+	clearedFields   map[string]struct{}
+	ct_log          *int
+	clearedct_log   bool
+	done            bool
+	oldValue        func(context.Context) (*TAInfo, error)
+	predicates      []predicate.TAInfo
 }
 
 var _ ent.Mutation = (*TAInfoMutation)(nil)
@@ -626,40 +626,40 @@ func (m *TAInfoMutation) ResetDomain() {
 	m.domain = nil
 }
 
-// SetPublicKey sets the "public_key" field.
-func (m *TAInfoMutation) SetPublicKey(b []byte) {
-	m.public_key = &b
+// SetPublicKeyHash sets the "public_key_hash" field.
+func (m *TAInfoMutation) SetPublicKeyHash(s string) {
+	m.public_key_hash = &s
 }
 
-// PublicKey returns the value of the "public_key" field in the mutation.
-func (m *TAInfoMutation) PublicKey() (r []byte, exists bool) {
-	v := m.public_key
+// PublicKeyHash returns the value of the "public_key_hash" field in the mutation.
+func (m *TAInfoMutation) PublicKeyHash() (r string, exists bool) {
+	v := m.public_key_hash
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldPublicKey returns the old "public_key" field's value of the TAInfo entity.
+// OldPublicKeyHash returns the old "public_key_hash" field's value of the TAInfo entity.
 // If the TAInfo object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAInfoMutation) OldPublicKey(ctx context.Context) (v []byte, err error) {
+func (m *TAInfoMutation) OldPublicKeyHash(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPublicKey is only allowed on UpdateOne operations")
+		return v, errors.New("OldPublicKeyHash is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPublicKey requires an ID field in the mutation")
+		return v, errors.New("OldPublicKeyHash requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPublicKey: %w", err)
+		return v, fmt.Errorf("querying old value for OldPublicKeyHash: %w", err)
 	}
-	return oldValue.PublicKey, nil
+	return oldValue.PublicKeyHash, nil
 }
 
-// ResetPublicKey resets all changes to the "public_key" field.
-func (m *TAInfoMutation) ResetPublicKey() {
-	m.public_key = nil
+// ResetPublicKeyHash resets all changes to the "public_key_hash" field.
+func (m *TAInfoMutation) ResetPublicKeyHash() {
+	m.public_key_hash = nil
 }
 
 // SetAttestation sets the "attestation" field.
@@ -775,8 +775,8 @@ func (m *TAInfoMutation) Fields() []string {
 	if m.domain != nil {
 		fields = append(fields, tainfo.FieldDomain)
 	}
-	if m.public_key != nil {
-		fields = append(fields, tainfo.FieldPublicKey)
+	if m.public_key_hash != nil {
+		fields = append(fields, tainfo.FieldPublicKeyHash)
 	}
 	if m.attestation != nil {
 		fields = append(fields, tainfo.FieldAttestation)
@@ -791,8 +791,8 @@ func (m *TAInfoMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case tainfo.FieldDomain:
 		return m.Domain()
-	case tainfo.FieldPublicKey:
-		return m.PublicKey()
+	case tainfo.FieldPublicKeyHash:
+		return m.PublicKeyHash()
 	case tainfo.FieldAttestation:
 		return m.Attestation()
 	}
@@ -806,8 +806,8 @@ func (m *TAInfoMutation) OldField(ctx context.Context, name string) (ent.Value, 
 	switch name {
 	case tainfo.FieldDomain:
 		return m.OldDomain(ctx)
-	case tainfo.FieldPublicKey:
-		return m.OldPublicKey(ctx)
+	case tainfo.FieldPublicKeyHash:
+		return m.OldPublicKeyHash(ctx)
 	case tainfo.FieldAttestation:
 		return m.OldAttestation(ctx)
 	}
@@ -826,12 +826,12 @@ func (m *TAInfoMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDomain(v)
 		return nil
-	case tainfo.FieldPublicKey:
-		v, ok := value.([]byte)
+	case tainfo.FieldPublicKeyHash:
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetPublicKey(v)
+		m.SetPublicKeyHash(v)
 		return nil
 	case tainfo.FieldAttestation:
 		v, ok := value.(string)
@@ -892,8 +892,8 @@ func (m *TAInfoMutation) ResetField(name string) error {
 	case tainfo.FieldDomain:
 		m.ResetDomain()
 		return nil
-	case tainfo.FieldPublicKey:
-		m.ResetPublicKey()
+	case tainfo.FieldPublicKeyHash:
+		m.ResetPublicKeyHash()
 		return nil
 	case tainfo.FieldAttestation:
 		m.ResetAttestation()

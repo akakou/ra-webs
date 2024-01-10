@@ -42,9 +42,17 @@ func (tiu *TAInfoUpdate) SetNillableDomain(s *string) *TAInfoUpdate {
 	return tiu
 }
 
-// SetPublicKey sets the "public_key" field.
-func (tiu *TAInfoUpdate) SetPublicKey(b []byte) *TAInfoUpdate {
-	tiu.mutation.SetPublicKey(b)
+// SetPublicKeyHash sets the "public_key_hash" field.
+func (tiu *TAInfoUpdate) SetPublicKeyHash(s string) *TAInfoUpdate {
+	tiu.mutation.SetPublicKeyHash(s)
+	return tiu
+}
+
+// SetNillablePublicKeyHash sets the "public_key_hash" field if the given value is not nil.
+func (tiu *TAInfoUpdate) SetNillablePublicKeyHash(s *string) *TAInfoUpdate {
+	if s != nil {
+		tiu.SetPublicKeyHash(*s)
+	}
 	return tiu
 }
 
@@ -131,8 +139,8 @@ func (tiu *TAInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tiu.mutation.Domain(); ok {
 		_spec.SetField(tainfo.FieldDomain, field.TypeString, value)
 	}
-	if value, ok := tiu.mutation.PublicKey(); ok {
-		_spec.SetField(tainfo.FieldPublicKey, field.TypeBytes, value)
+	if value, ok := tiu.mutation.PublicKeyHash(); ok {
+		_spec.SetField(tainfo.FieldPublicKeyHash, field.TypeString, value)
 	}
 	if value, ok := tiu.mutation.Attestation(); ok {
 		_spec.SetField(tainfo.FieldAttestation, field.TypeString, value)
@@ -200,9 +208,17 @@ func (tiuo *TAInfoUpdateOne) SetNillableDomain(s *string) *TAInfoUpdateOne {
 	return tiuo
 }
 
-// SetPublicKey sets the "public_key" field.
-func (tiuo *TAInfoUpdateOne) SetPublicKey(b []byte) *TAInfoUpdateOne {
-	tiuo.mutation.SetPublicKey(b)
+// SetPublicKeyHash sets the "public_key_hash" field.
+func (tiuo *TAInfoUpdateOne) SetPublicKeyHash(s string) *TAInfoUpdateOne {
+	tiuo.mutation.SetPublicKeyHash(s)
+	return tiuo
+}
+
+// SetNillablePublicKeyHash sets the "public_key_hash" field if the given value is not nil.
+func (tiuo *TAInfoUpdateOne) SetNillablePublicKeyHash(s *string) *TAInfoUpdateOne {
+	if s != nil {
+		tiuo.SetPublicKeyHash(*s)
+	}
 	return tiuo
 }
 
@@ -319,8 +335,8 @@ func (tiuo *TAInfoUpdateOne) sqlSave(ctx context.Context) (_node *TAInfo, err er
 	if value, ok := tiuo.mutation.Domain(); ok {
 		_spec.SetField(tainfo.FieldDomain, field.TypeString, value)
 	}
-	if value, ok := tiuo.mutation.PublicKey(); ok {
-		_spec.SetField(tainfo.FieldPublicKey, field.TypeBytes, value)
+	if value, ok := tiuo.mutation.PublicKeyHash(); ok {
+		_spec.SetField(tainfo.FieldPublicKeyHash, field.TypeString, value)
 	}
 	if value, ok := tiuo.mutation.Attestation(); ok {
 		_spec.SetField(tainfo.FieldAttestation, field.TypeString, value)

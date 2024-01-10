@@ -40,8 +40,7 @@ func AuditCTLog(domain string, db *ttpDB) error {
 			return fmt.Errorf("failed to fetch ct logs: %w", err)
 		}
 
-		// todo:
-		if checkCTLogs(ctLogs, "taInfo.PublicKey") != nil {
+		if checkCTLogs(ctLogs, taInfo.PublicKeyHash) != nil {
 			return fmt.Errorf("failed to check ct logs: %w", err)
 		}
 

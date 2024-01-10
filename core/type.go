@@ -1,7 +1,7 @@
 package core
 
 type TAInfo struct {
-	Attestation string `json:"attestation"`
-	PublicKey   []byte `json:"public_key"`
-	Domain      string `json:"domain"`
+	Attestation   string `json:"attestation"`
+	PublicKeyHash string `json:"public_key_hash"`
+	Domain        string `json:"domain"`
 }

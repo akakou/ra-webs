@@ -15,7 +15,7 @@ type TAInfo struct {
 func (TAInfo) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("domain"),
-		field.Bytes("public_key"),
+		field.String("public_key_hash"),
 		field.String("attestation"),
 	}
 }
