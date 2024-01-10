@@ -7,20 +7,20 @@ import (
 )
 
 // CTLog holds the schema definition for the CTLog entity.
-type CTLog struct {
+type CTLogAudit struct {
 	ent.Schema
 }
 
 // Fields of the CTLog.
-func (CTLog) Fields() []ent.Field {
+func (CTLogAudit) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("domain"),
-		field.Bytes("public_key"),
+		field.Bool("is_valid"),
+		field.String("latest_ct_id"),
 	}
 }
 
 // Edges of the CTLog.
-func (CTLog) Edges() []ent.Edge {
+func (CTLogAudit) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("ta_info", TAInfo.Type).Unique(),
 	}

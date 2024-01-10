@@ -243,14 +243,14 @@ func HasCtLog() predicate.TAInfo {
 	return predicate.TAInfo(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, CtLogTable, CtLogColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, CtLogTable, CtLogColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
 // HasCtLogWith applies the HasEdge predicate on the "ct_log" edge with a given conditions (other predicates).
-func HasCtLogWith(preds ...predicate.CTLog) predicate.TAInfo {
+func HasCtLogWith(preds ...predicate.CTLogAudit) predicate.TAInfo {
 	return predicate.TAInfo(func(s *sql.Selector) {
 		step := newCtLogStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

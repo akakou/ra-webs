@@ -8,26 +8,17 @@ import (
 )
 
 var (
-	// CtLogsColumns holds the columns for the "ct_logs" table.
-	CtLogsColumns = []*schema.Column{
+	// CtLogAuditsColumns holds the columns for the "ct_log_audits" table.
+	CtLogAuditsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "domain", Type: field.TypeString},
-		{Name: "public_key", Type: field.TypeBytes},
-		{Name: "ct_log_ta_info", Type: field.TypeInt, Nullable: true},
+		{Name: "is_valid", Type: field.TypeBool},
+		{Name: "latest_ct_id", Type: field.TypeString},
 	}
-	// CtLogsTable holds the schema information for the "ct_logs" table.
-	CtLogsTable = &schema.Table{
-		Name:       "ct_logs",
-		Columns:    CtLogsColumns,
-		PrimaryKey: []*schema.Column{CtLogsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "ct_logs_ta_infos_ta_info",
-				Columns:    []*schema.Column{CtLogsColumns[3]},
-				RefColumns: []*schema.Column{TaInfosColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
+	// CtLogAuditsTable holds the schema information for the "ct_log_audits" table.
+	CtLogAuditsTable = &schema.Table{
+		Name:       "ct_log_audits",
+		Columns:    CtLogAuditsColumns,
+		PrimaryKey: []*schema.Column{CtLogAuditsColumns[0]},
 	}
 	// TaInfosColumns holds the columns for the "ta_infos" table.
 	TaInfosColumns = []*schema.Column{
@@ -35,20 +26,29 @@ var (
 		{Name: "domain", Type: field.TypeString},
 		{Name: "public_key", Type: field.TypeBytes},
 		{Name: "attestation", Type: field.TypeString},
+		{Name: "ct_log_audit_ta_info", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// TaInfosTable holds the schema information for the "ta_infos" table.
 	TaInfosTable = &schema.Table{
 		Name:       "ta_infos",
 		Columns:    TaInfosColumns,
 		PrimaryKey: []*schema.Column{TaInfosColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ta_infos_ct_log_audits_ta_info",
+				Columns:    []*schema.Column{TaInfosColumns[4]},
+				RefColumns: []*schema.Column{CtLogAuditsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		CtLogsTable,
+		CtLogAuditsTable,
 		TaInfosTable,
 	}
 )
 
 func init() {
-	CtLogsTable.ForeignKeys[0].RefTable = TaInfosTable
+	TaInfosTable.ForeignKeys[0].RefTable = CtLogAuditsTable
 }

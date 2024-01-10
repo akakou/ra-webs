@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra_webs/ttp/ent/ctlog"
+	"github.com/akakou/ra_webs/ttp/ent/ctlogaudit"
 	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
 
@@ -38,19 +38,23 @@ func (tic *TAInfoCreate) SetAttestation(s string) *TAInfoCreate {
 	return tic
 }
 
-// AddCtLogIDs adds the "ct_log" edge to the CTLog entity by IDs.
-func (tic *TAInfoCreate) AddCtLogIDs(ids ...int) *TAInfoCreate {
-	tic.mutation.AddCtLogIDs(ids...)
+// SetCtLogID sets the "ct_log" edge to the CTLogAudit entity by ID.
+func (tic *TAInfoCreate) SetCtLogID(id int) *TAInfoCreate {
+	tic.mutation.SetCtLogID(id)
 	return tic
 }
 
-// AddCtLog adds the "ct_log" edges to the CTLog entity.
-func (tic *TAInfoCreate) AddCtLog(c ...*CTLog) *TAInfoCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// SetNillableCtLogID sets the "ct_log" edge to the CTLogAudit entity by ID if the given value is not nil.
+func (tic *TAInfoCreate) SetNillableCtLogID(id *int) *TAInfoCreate {
+	if id != nil {
+		tic = tic.SetCtLogID(*id)
 	}
-	return tic.AddCtLogIDs(ids...)
+	return tic
+}
+
+// SetCtLog sets the "ct_log" edge to the CTLogAudit entity.
+func (tic *TAInfoCreate) SetCtLog(c *CTLogAudit) *TAInfoCreate {
+	return tic.SetCtLogID(c.ID)
 }
 
 // Mutation returns the TAInfoMutation object of the builder.
@@ -136,18 +140,19 @@ func (tic *TAInfoCreate) createSpec() (*TAInfo, *sqlgraph.CreateSpec) {
 	}
 	if nodes := tic.mutation.CtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   tainfo.CtLogTable,
 			Columns: []string{tainfo.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ctlogaudit.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.ct_log_audit_ta_info = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

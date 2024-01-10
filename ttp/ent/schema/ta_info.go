@@ -23,6 +23,6 @@ func (TAInfo) Fields() []ent.Field {
 // Edges of the TA.
 func (TAInfo) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("ct_log", CTLog.Type).Ref("ta_info"),
+		edge.From("ct_log", CTLogAudit.Type).Ref("ta_info").Unique(),
 	}
 }

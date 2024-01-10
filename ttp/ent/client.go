@@ -15,7 +15,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/akakou/ra_webs/ttp/ent/ctlog"
+	"github.com/akakou/ra_webs/ttp/ent/ctlogaudit"
 	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
 
@@ -24,8 +24,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// CTLog is the client for interacting with the CTLog builders.
-	CTLog *CTLogClient
+	// CTLogAudit is the client for interacting with the CTLogAudit builders.
+	CTLogAudit *CTLogAuditClient
 	// TAInfo is the client for interacting with the TAInfo builders.
 	TAInfo *TAInfoClient
 }
@@ -39,7 +39,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.CTLog = NewCTLogClient(c.config)
+	c.CTLogAudit = NewCTLogAuditClient(c.config)
 	c.TAInfo = NewTAInfoClient(c.config)
 }
 
@@ -131,10 +131,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		CTLog:  NewCTLogClient(cfg),
-		TAInfo: NewTAInfoClient(cfg),
+		ctx:        ctx,
+		config:     cfg,
+		CTLogAudit: NewCTLogAuditClient(cfg),
+		TAInfo:     NewTAInfoClient(cfg),
 	}, nil
 }
 
@@ -152,17 +152,17 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		CTLog:  NewCTLogClient(cfg),
-		TAInfo: NewTAInfoClient(cfg),
+		ctx:        ctx,
+		config:     cfg,
+		CTLogAudit: NewCTLogAuditClient(cfg),
+		TAInfo:     NewTAInfoClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		CTLog.
+//		CTLogAudit.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -184,22 +184,22 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.CTLog.Use(hooks...)
+	c.CTLogAudit.Use(hooks...)
 	c.TAInfo.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.CTLog.Intercept(interceptors...)
+	c.CTLogAudit.Intercept(interceptors...)
 	c.TAInfo.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
-	case *CTLogMutation:
-		return c.CTLog.mutate(ctx, m)
+	case *CTLogAuditMutation:
+		return c.CTLogAudit.mutate(ctx, m)
 	case *TAInfoMutation:
 		return c.TAInfo.mutate(ctx, m)
 	default:
@@ -207,107 +207,107 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	}
 }
 
-// CTLogClient is a client for the CTLog schema.
-type CTLogClient struct {
+// CTLogAuditClient is a client for the CTLogAudit schema.
+type CTLogAuditClient struct {
 	config
 }
 
-// NewCTLogClient returns a client for the CTLog from the given config.
-func NewCTLogClient(c config) *CTLogClient {
-	return &CTLogClient{config: c}
+// NewCTLogAuditClient returns a client for the CTLogAudit from the given config.
+func NewCTLogAuditClient(c config) *CTLogAuditClient {
+	return &CTLogAuditClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `ctlog.Hooks(f(g(h())))`.
-func (c *CTLogClient) Use(hooks ...Hook) {
-	c.hooks.CTLog = append(c.hooks.CTLog, hooks...)
+// A call to `Use(f, g, h)` equals to `ctlogaudit.Hooks(f(g(h())))`.
+func (c *CTLogAuditClient) Use(hooks ...Hook) {
+	c.hooks.CTLogAudit = append(c.hooks.CTLogAudit, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `ctlog.Intercept(f(g(h())))`.
-func (c *CTLogClient) Intercept(interceptors ...Interceptor) {
-	c.inters.CTLog = append(c.inters.CTLog, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `ctlogaudit.Intercept(f(g(h())))`.
+func (c *CTLogAuditClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CTLogAudit = append(c.inters.CTLogAudit, interceptors...)
 }
 
-// Create returns a builder for creating a CTLog entity.
-func (c *CTLogClient) Create() *CTLogCreate {
-	mutation := newCTLogMutation(c.config, OpCreate)
-	return &CTLogCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a CTLogAudit entity.
+func (c *CTLogAuditClient) Create() *CTLogAuditCreate {
+	mutation := newCTLogAuditMutation(c.config, OpCreate)
+	return &CTLogAuditCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of CTLog entities.
-func (c *CTLogClient) CreateBulk(builders ...*CTLogCreate) *CTLogCreateBulk {
-	return &CTLogCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of CTLogAudit entities.
+func (c *CTLogAuditClient) CreateBulk(builders ...*CTLogAuditCreate) *CTLogAuditCreateBulk {
+	return &CTLogAuditCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *CTLogClient) MapCreateBulk(slice any, setFunc func(*CTLogCreate, int)) *CTLogCreateBulk {
+func (c *CTLogAuditClient) MapCreateBulk(slice any, setFunc func(*CTLogAuditCreate, int)) *CTLogAuditCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &CTLogCreateBulk{err: fmt.Errorf("calling to CTLogClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &CTLogAuditCreateBulk{err: fmt.Errorf("calling to CTLogAuditClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*CTLogCreate, rv.Len())
+	builders := make([]*CTLogAuditCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &CTLogCreateBulk{config: c.config, builders: builders}
+	return &CTLogAuditCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for CTLog.
-func (c *CTLogClient) Update() *CTLogUpdate {
-	mutation := newCTLogMutation(c.config, OpUpdate)
-	return &CTLogUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for CTLogAudit.
+func (c *CTLogAuditClient) Update() *CTLogAuditUpdate {
+	mutation := newCTLogAuditMutation(c.config, OpUpdate)
+	return &CTLogAuditUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *CTLogClient) UpdateOne(cl *CTLog) *CTLogUpdateOne {
-	mutation := newCTLogMutation(c.config, OpUpdateOne, withCTLog(cl))
-	return &CTLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *CTLogAuditClient) UpdateOne(cla *CTLogAudit) *CTLogAuditUpdateOne {
+	mutation := newCTLogAuditMutation(c.config, OpUpdateOne, withCTLogAudit(cla))
+	return &CTLogAuditUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CTLogClient) UpdateOneID(id int) *CTLogUpdateOne {
-	mutation := newCTLogMutation(c.config, OpUpdateOne, withCTLogID(id))
-	return &CTLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *CTLogAuditClient) UpdateOneID(id int) *CTLogAuditUpdateOne {
+	mutation := newCTLogAuditMutation(c.config, OpUpdateOne, withCTLogAuditID(id))
+	return &CTLogAuditUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for CTLog.
-func (c *CTLogClient) Delete() *CTLogDelete {
-	mutation := newCTLogMutation(c.config, OpDelete)
-	return &CTLogDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for CTLogAudit.
+func (c *CTLogAuditClient) Delete() *CTLogAuditDelete {
+	mutation := newCTLogAuditMutation(c.config, OpDelete)
+	return &CTLogAuditDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *CTLogClient) DeleteOne(cl *CTLog) *CTLogDeleteOne {
-	return c.DeleteOneID(cl.ID)
+func (c *CTLogAuditClient) DeleteOne(cla *CTLogAudit) *CTLogAuditDeleteOne {
+	return c.DeleteOneID(cla.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *CTLogClient) DeleteOneID(id int) *CTLogDeleteOne {
-	builder := c.Delete().Where(ctlog.ID(id))
+func (c *CTLogAuditClient) DeleteOneID(id int) *CTLogAuditDeleteOne {
+	builder := c.Delete().Where(ctlogaudit.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &CTLogDeleteOne{builder}
+	return &CTLogAuditDeleteOne{builder}
 }
 
-// Query returns a query builder for CTLog.
-func (c *CTLogClient) Query() *CTLogQuery {
-	return &CTLogQuery{
+// Query returns a query builder for CTLogAudit.
+func (c *CTLogAuditClient) Query() *CTLogAuditQuery {
+	return &CTLogAuditQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeCTLog},
+		ctx:    &QueryContext{Type: TypeCTLogAudit},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a CTLog entity by its id.
-func (c *CTLogClient) Get(ctx context.Context, id int) (*CTLog, error) {
-	return c.Query().Where(ctlog.ID(id)).Only(ctx)
+// Get returns a CTLogAudit entity by its id.
+func (c *CTLogAuditClient) Get(ctx context.Context, id int) (*CTLogAudit, error) {
+	return c.Query().Where(ctlogaudit.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CTLogClient) GetX(ctx context.Context, id int) *CTLog {
+func (c *CTLogAuditClient) GetX(ctx context.Context, id int) *CTLogAudit {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -315,44 +315,44 @@ func (c *CTLogClient) GetX(ctx context.Context, id int) *CTLog {
 	return obj
 }
 
-// QueryTaInfo queries the ta_info edge of a CTLog.
-func (c *CTLogClient) QueryTaInfo(cl *CTLog) *TAInfoQuery {
+// QueryTaInfo queries the ta_info edge of a CTLogAudit.
+func (c *CTLogAuditClient) QueryTaInfo(cla *CTLogAudit) *TAInfoQuery {
 	query := (&TAInfoClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cl.ID
+		id := cla.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(ctlog.Table, ctlog.FieldID, id),
+			sqlgraph.From(ctlogaudit.Table, ctlogaudit.FieldID, id),
 			sqlgraph.To(tainfo.Table, tainfo.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, ctlog.TaInfoTable, ctlog.TaInfoColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, ctlogaudit.TaInfoTable, ctlogaudit.TaInfoColumn),
 		)
-		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(cla.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *CTLogClient) Hooks() []Hook {
-	return c.hooks.CTLog
+func (c *CTLogAuditClient) Hooks() []Hook {
+	return c.hooks.CTLogAudit
 }
 
 // Interceptors returns the client interceptors.
-func (c *CTLogClient) Interceptors() []Interceptor {
-	return c.inters.CTLog
+func (c *CTLogAuditClient) Interceptors() []Interceptor {
+	return c.inters.CTLogAudit
 }
 
-func (c *CTLogClient) mutate(ctx context.Context, m *CTLogMutation) (Value, error) {
+func (c *CTLogAuditClient) mutate(ctx context.Context, m *CTLogAuditMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&CTLogCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&CTLogAuditCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&CTLogUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&CTLogAuditUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&CTLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&CTLogAuditUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&CTLogDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&CTLogAuditDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown CTLog mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown CTLogAudit mutation op: %q", m.Op())
 	}
 }
 
@@ -465,14 +465,14 @@ func (c *TAInfoClient) GetX(ctx context.Context, id int) *TAInfo {
 }
 
 // QueryCtLog queries the ct_log edge of a TAInfo.
-func (c *TAInfoClient) QueryCtLog(ti *TAInfo) *CTLogQuery {
-	query := (&CTLogClient{config: c.config}).Query()
+func (c *TAInfoClient) QueryCtLog(ti *TAInfo) *CTLogAuditQuery {
+	query := (&CTLogAuditClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ti.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tainfo.Table, tainfo.FieldID, id),
-			sqlgraph.To(ctlog.Table, ctlog.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, tainfo.CtLogTable, tainfo.CtLogColumn),
+			sqlgraph.To(ctlogaudit.Table, ctlogaudit.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, tainfo.CtLogTable, tainfo.CtLogColumn),
 		)
 		fromV = sqlgraph.Neighbors(ti.driver.Dialect(), step)
 		return fromV, nil
@@ -508,9 +508,9 @@ func (c *TAInfoClient) mutate(ctx context.Context, m *TAInfoMutation) (Value, er
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		CTLog, TAInfo []ent.Hook
+		CTLogAudit, TAInfo []ent.Hook
 	}
 	inters struct {
-		CTLog, TAInfo []ent.Interceptor
+		CTLogAudit, TAInfo []ent.Interceptor
 	}
 )

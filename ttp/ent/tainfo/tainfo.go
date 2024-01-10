@@ -23,12 +23,12 @@ const (
 	// Table holds the table name of the tainfo in the database.
 	Table = "ta_infos"
 	// CtLogTable is the table that holds the ct_log relation/edge.
-	CtLogTable = "ct_logs"
-	// CtLogInverseTable is the table name for the CTLog entity.
-	// It exists in this package in order to avoid circular dependency with the "ctlog" package.
-	CtLogInverseTable = "ct_logs"
+	CtLogTable = "ta_infos"
+	// CtLogInverseTable is the table name for the CTLogAudit entity.
+	// It exists in this package in order to avoid circular dependency with the "ctlogaudit" package.
+	CtLogInverseTable = "ct_log_audits"
 	// CtLogColumn is the table column denoting the ct_log relation/edge.
-	CtLogColumn = "ct_log_ta_info"
+	CtLogColumn = "ct_log_audit_ta_info"
 )
 
 // Columns holds all SQL columns for tainfo fields.
@@ -39,10 +39,21 @@ var Columns = []string{
 	FieldAttestation,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "ta_infos"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"ct_log_audit_ta_info",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -67,23 +78,16 @@ func ByAttestation(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAttestation, opts...).ToFunc()
 }
 
-// ByCtLogCount orders the results by ct_log count.
-func ByCtLogCount(opts ...sql.OrderTermOption) OrderOption {
+// ByCtLogField orders the results by ct_log field.
+func ByCtLogField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newCtLogStep(), opts...)
-	}
-}
-
-// ByCtLog orders the results by ct_log terms.
-func ByCtLog(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newCtLogStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newCtLogStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newCtLogStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CtLogInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, CtLogTable, CtLogColumn),
+		sqlgraph.Edge(sqlgraph.O2O, true, CtLogTable, CtLogColumn),
 	)
 }

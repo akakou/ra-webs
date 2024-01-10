@@ -10,7 +10,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra_webs/ttp/ent/ctlog"
+	"github.com/akakou/ra_webs/ttp/ent/ctlogaudit"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
 	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
@@ -24,37 +24,37 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeCTLog  = "CTLog"
-	TypeTAInfo = "TAInfo"
+	TypeCTLogAudit = "CTLogAudit"
+	TypeTAInfo     = "TAInfo"
 )
 
-// CTLogMutation represents an operation that mutates the CTLog nodes in the graph.
-type CTLogMutation struct {
+// CTLogAuditMutation represents an operation that mutates the CTLogAudit nodes in the graph.
+type CTLogAuditMutation struct {
 	config
 	op             Op
 	typ            string
 	id             *int
-	domain         *string
-	public_key     *[]byte
+	is_valid       *bool
+	latest_ct_id   *string
 	clearedFields  map[string]struct{}
 	ta_info        *int
 	clearedta_info bool
 	done           bool
-	oldValue       func(context.Context) (*CTLog, error)
-	predicates     []predicate.CTLog
+	oldValue       func(context.Context) (*CTLogAudit, error)
+	predicates     []predicate.CTLogAudit
 }
 
-var _ ent.Mutation = (*CTLogMutation)(nil)
+var _ ent.Mutation = (*CTLogAuditMutation)(nil)
 
-// ctlogOption allows management of the mutation configuration using functional options.
-type ctlogOption func(*CTLogMutation)
+// ctlogauditOption allows management of the mutation configuration using functional options.
+type ctlogauditOption func(*CTLogAuditMutation)
 
-// newCTLogMutation creates new mutation for the CTLog entity.
-func newCTLogMutation(c config, op Op, opts ...ctlogOption) *CTLogMutation {
-	m := &CTLogMutation{
+// newCTLogAuditMutation creates new mutation for the CTLogAudit entity.
+func newCTLogAuditMutation(c config, op Op, opts ...ctlogauditOption) *CTLogAuditMutation {
+	m := &CTLogAuditMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeCTLog,
+		typ:           TypeCTLogAudit,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -63,20 +63,20 @@ func newCTLogMutation(c config, op Op, opts ...ctlogOption) *CTLogMutation {
 	return m
 }
 
-// withCTLogID sets the ID field of the mutation.
-func withCTLogID(id int) ctlogOption {
-	return func(m *CTLogMutation) {
+// withCTLogAuditID sets the ID field of the mutation.
+func withCTLogAuditID(id int) ctlogauditOption {
+	return func(m *CTLogAuditMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *CTLog
+			value *CTLogAudit
 		)
-		m.oldValue = func(ctx context.Context) (*CTLog, error) {
+		m.oldValue = func(ctx context.Context) (*CTLogAudit, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().CTLog.Get(ctx, id)
+					value, err = m.Client().CTLogAudit.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -85,10 +85,10 @@ func withCTLogID(id int) ctlogOption {
 	}
 }
 
-// withCTLog sets the old CTLog of the mutation.
-func withCTLog(node *CTLog) ctlogOption {
-	return func(m *CTLogMutation) {
-		m.oldValue = func(context.Context) (*CTLog, error) {
+// withCTLogAudit sets the old CTLogAudit of the mutation.
+func withCTLogAudit(node *CTLogAudit) ctlogauditOption {
+	return func(m *CTLogAuditMutation) {
+		m.oldValue = func(context.Context) (*CTLogAudit, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -97,7 +97,7 @@ func withCTLog(node *CTLog) ctlogOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m CTLogMutation) Client() *Client {
+func (m CTLogAuditMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -105,7 +105,7 @@ func (m CTLogMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m CTLogMutation) Tx() (*Tx, error) {
+func (m CTLogAuditMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -116,7 +116,7 @@ func (m CTLogMutation) Tx() (*Tx, error) {
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *CTLogMutation) ID() (id int, exists bool) {
+func (m *CTLogAuditMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -127,7 +127,7 @@ func (m *CTLogMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *CTLogMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *CTLogAuditMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -136,101 +136,101 @@ func (m *CTLogMutation) IDs(ctx context.Context) ([]int, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().CTLog.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().CTLogAudit.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
-// SetDomain sets the "domain" field.
-func (m *CTLogMutation) SetDomain(s string) {
-	m.domain = &s
+// SetIsValid sets the "is_valid" field.
+func (m *CTLogAuditMutation) SetIsValid(b bool) {
+	m.is_valid = &b
 }
 
-// Domain returns the value of the "domain" field in the mutation.
-func (m *CTLogMutation) Domain() (r string, exists bool) {
-	v := m.domain
+// IsValid returns the value of the "is_valid" field in the mutation.
+func (m *CTLogAuditMutation) IsValid() (r bool, exists bool) {
+	v := m.is_valid
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldDomain returns the old "domain" field's value of the CTLog entity.
-// If the CTLog object wasn't provided to the builder, the object is fetched from the database.
+// OldIsValid returns the old "is_valid" field's value of the CTLogAudit entity.
+// If the CTLogAudit object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CTLogMutation) OldDomain(ctx context.Context) (v string, err error) {
+func (m *CTLogAuditMutation) OldIsValid(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDomain is only allowed on UpdateOne operations")
+		return v, errors.New("OldIsValid is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDomain requires an ID field in the mutation")
+		return v, errors.New("OldIsValid requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDomain: %w", err)
+		return v, fmt.Errorf("querying old value for OldIsValid: %w", err)
 	}
-	return oldValue.Domain, nil
+	return oldValue.IsValid, nil
 }
 
-// ResetDomain resets all changes to the "domain" field.
-func (m *CTLogMutation) ResetDomain() {
-	m.domain = nil
+// ResetIsValid resets all changes to the "is_valid" field.
+func (m *CTLogAuditMutation) ResetIsValid() {
+	m.is_valid = nil
 }
 
-// SetPublicKey sets the "public_key" field.
-func (m *CTLogMutation) SetPublicKey(b []byte) {
-	m.public_key = &b
+// SetLatestCtID sets the "latest_ct_id" field.
+func (m *CTLogAuditMutation) SetLatestCtID(s string) {
+	m.latest_ct_id = &s
 }
 
-// PublicKey returns the value of the "public_key" field in the mutation.
-func (m *CTLogMutation) PublicKey() (r []byte, exists bool) {
-	v := m.public_key
+// LatestCtID returns the value of the "latest_ct_id" field in the mutation.
+func (m *CTLogAuditMutation) LatestCtID() (r string, exists bool) {
+	v := m.latest_ct_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldPublicKey returns the old "public_key" field's value of the CTLog entity.
-// If the CTLog object wasn't provided to the builder, the object is fetched from the database.
+// OldLatestCtID returns the old "latest_ct_id" field's value of the CTLogAudit entity.
+// If the CTLogAudit object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CTLogMutation) OldPublicKey(ctx context.Context) (v []byte, err error) {
+func (m *CTLogAuditMutation) OldLatestCtID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPublicKey is only allowed on UpdateOne operations")
+		return v, errors.New("OldLatestCtID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPublicKey requires an ID field in the mutation")
+		return v, errors.New("OldLatestCtID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPublicKey: %w", err)
+		return v, fmt.Errorf("querying old value for OldLatestCtID: %w", err)
 	}
-	return oldValue.PublicKey, nil
+	return oldValue.LatestCtID, nil
 }
 
-// ResetPublicKey resets all changes to the "public_key" field.
-func (m *CTLogMutation) ResetPublicKey() {
-	m.public_key = nil
+// ResetLatestCtID resets all changes to the "latest_ct_id" field.
+func (m *CTLogAuditMutation) ResetLatestCtID() {
+	m.latest_ct_id = nil
 }
 
 // SetTaInfoID sets the "ta_info" edge to the TAInfo entity by id.
-func (m *CTLogMutation) SetTaInfoID(id int) {
+func (m *CTLogAuditMutation) SetTaInfoID(id int) {
 	m.ta_info = &id
 }
 
 // ClearTaInfo clears the "ta_info" edge to the TAInfo entity.
-func (m *CTLogMutation) ClearTaInfo() {
+func (m *CTLogAuditMutation) ClearTaInfo() {
 	m.clearedta_info = true
 }
 
 // TaInfoCleared reports if the "ta_info" edge to the TAInfo entity was cleared.
-func (m *CTLogMutation) TaInfoCleared() bool {
+func (m *CTLogAuditMutation) TaInfoCleared() bool {
 	return m.clearedta_info
 }
 
 // TaInfoID returns the "ta_info" edge ID in the mutation.
-func (m *CTLogMutation) TaInfoID() (id int, exists bool) {
+func (m *CTLogAuditMutation) TaInfoID() (id int, exists bool) {
 	if m.ta_info != nil {
 		return *m.ta_info, true
 	}
@@ -240,7 +240,7 @@ func (m *CTLogMutation) TaInfoID() (id int, exists bool) {
 // TaInfoIDs returns the "ta_info" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // TaInfoID instead. It exists only for internal usage by the builders.
-func (m *CTLogMutation) TaInfoIDs() (ids []int) {
+func (m *CTLogAuditMutation) TaInfoIDs() (ids []int) {
 	if id := m.ta_info; id != nil {
 		ids = append(ids, *id)
 	}
@@ -248,20 +248,20 @@ func (m *CTLogMutation) TaInfoIDs() (ids []int) {
 }
 
 // ResetTaInfo resets all changes to the "ta_info" edge.
-func (m *CTLogMutation) ResetTaInfo() {
+func (m *CTLogAuditMutation) ResetTaInfo() {
 	m.ta_info = nil
 	m.clearedta_info = false
 }
 
-// Where appends a list predicates to the CTLogMutation builder.
-func (m *CTLogMutation) Where(ps ...predicate.CTLog) {
+// Where appends a list predicates to the CTLogAuditMutation builder.
+func (m *CTLogAuditMutation) Where(ps ...predicate.CTLogAudit) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the CTLogMutation builder. Using this method,
+// WhereP appends storage-level predicates to the CTLogAuditMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *CTLogMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.CTLog, len(ps))
+func (m *CTLogAuditMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CTLogAudit, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -269,30 +269,30 @@ func (m *CTLogMutation) WhereP(ps ...func(*sql.Selector)) {
 }
 
 // Op returns the operation name.
-func (m *CTLogMutation) Op() Op {
+func (m *CTLogAuditMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *CTLogMutation) SetOp(op Op) {
+func (m *CTLogAuditMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (CTLog).
-func (m *CTLogMutation) Type() string {
+// Type returns the node type of this mutation (CTLogAudit).
+func (m *CTLogAuditMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *CTLogMutation) Fields() []string {
+func (m *CTLogAuditMutation) Fields() []string {
 	fields := make([]string, 0, 2)
-	if m.domain != nil {
-		fields = append(fields, ctlog.FieldDomain)
+	if m.is_valid != nil {
+		fields = append(fields, ctlogaudit.FieldIsValid)
 	}
-	if m.public_key != nil {
-		fields = append(fields, ctlog.FieldPublicKey)
+	if m.latest_ct_id != nil {
+		fields = append(fields, ctlogaudit.FieldLatestCtID)
 	}
 	return fields
 }
@@ -300,12 +300,12 @@ func (m *CTLogMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *CTLogMutation) Field(name string) (ent.Value, bool) {
+func (m *CTLogAuditMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case ctlog.FieldDomain:
-		return m.Domain()
-	case ctlog.FieldPublicKey:
-		return m.PublicKey()
+	case ctlogaudit.FieldIsValid:
+		return m.IsValid()
+	case ctlogaudit.FieldLatestCtID:
+		return m.LatestCtID()
 	}
 	return nil, false
 }
@@ -313,108 +313,108 @@ func (m *CTLogMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *CTLogMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *CTLogAuditMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case ctlog.FieldDomain:
-		return m.OldDomain(ctx)
-	case ctlog.FieldPublicKey:
-		return m.OldPublicKey(ctx)
+	case ctlogaudit.FieldIsValid:
+		return m.OldIsValid(ctx)
+	case ctlogaudit.FieldLatestCtID:
+		return m.OldLatestCtID(ctx)
 	}
-	return nil, fmt.Errorf("unknown CTLog field %s", name)
+	return nil, fmt.Errorf("unknown CTLogAudit field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *CTLogMutation) SetField(name string, value ent.Value) error {
+func (m *CTLogAuditMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case ctlog.FieldDomain:
+	case ctlogaudit.FieldIsValid:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsValid(v)
+		return nil
+	case ctlogaudit.FieldLatestCtID:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetDomain(v)
-		return nil
-	case ctlog.FieldPublicKey:
-		v, ok := value.([]byte)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPublicKey(v)
+		m.SetLatestCtID(v)
 		return nil
 	}
-	return fmt.Errorf("unknown CTLog field %s", name)
+	return fmt.Errorf("unknown CTLogAudit field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *CTLogMutation) AddedFields() []string {
+func (m *CTLogAuditMutation) AddedFields() []string {
 	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *CTLogMutation) AddedField(name string) (ent.Value, bool) {
+func (m *CTLogAuditMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *CTLogMutation) AddField(name string, value ent.Value) error {
+func (m *CTLogAuditMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown CTLog numeric field %s", name)
+	return fmt.Errorf("unknown CTLogAudit numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *CTLogMutation) ClearedFields() []string {
+func (m *CTLogAuditMutation) ClearedFields() []string {
 	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *CTLogMutation) FieldCleared(name string) bool {
+func (m *CTLogAuditMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *CTLogMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown CTLog nullable field %s", name)
+func (m *CTLogAuditMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown CTLogAudit nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *CTLogMutation) ResetField(name string) error {
+func (m *CTLogAuditMutation) ResetField(name string) error {
 	switch name {
-	case ctlog.FieldDomain:
-		m.ResetDomain()
+	case ctlogaudit.FieldIsValid:
+		m.ResetIsValid()
 		return nil
-	case ctlog.FieldPublicKey:
-		m.ResetPublicKey()
+	case ctlogaudit.FieldLatestCtID:
+		m.ResetLatestCtID()
 		return nil
 	}
-	return fmt.Errorf("unknown CTLog field %s", name)
+	return fmt.Errorf("unknown CTLogAudit field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *CTLogMutation) AddedEdges() []string {
+func (m *CTLogAuditMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
 	if m.ta_info != nil {
-		edges = append(edges, ctlog.EdgeTaInfo)
+		edges = append(edges, ctlogaudit.EdgeTaInfo)
 	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *CTLogMutation) AddedIDs(name string) []ent.Value {
+func (m *CTLogAuditMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case ctlog.EdgeTaInfo:
+	case ctlogaudit.EdgeTaInfo:
 		if id := m.ta_info; id != nil {
 			return []ent.Value{*id}
 		}
@@ -423,31 +423,31 @@ func (m *CTLogMutation) AddedIDs(name string) []ent.Value {
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *CTLogMutation) RemovedEdges() []string {
+func (m *CTLogAuditMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *CTLogMutation) RemovedIDs(name string) []ent.Value {
+func (m *CTLogAuditMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *CTLogMutation) ClearedEdges() []string {
+func (m *CTLogAuditMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
 	if m.clearedta_info {
-		edges = append(edges, ctlog.EdgeTaInfo)
+		edges = append(edges, ctlogaudit.EdgeTaInfo)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *CTLogMutation) EdgeCleared(name string) bool {
+func (m *CTLogAuditMutation) EdgeCleared(name string) bool {
 	switch name {
-	case ctlog.EdgeTaInfo:
+	case ctlogaudit.EdgeTaInfo:
 		return m.clearedta_info
 	}
 	return false
@@ -455,24 +455,24 @@ func (m *CTLogMutation) EdgeCleared(name string) bool {
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *CTLogMutation) ClearEdge(name string) error {
+func (m *CTLogAuditMutation) ClearEdge(name string) error {
 	switch name {
-	case ctlog.EdgeTaInfo:
+	case ctlogaudit.EdgeTaInfo:
 		m.ClearTaInfo()
 		return nil
 	}
-	return fmt.Errorf("unknown CTLog unique edge %s", name)
+	return fmt.Errorf("unknown CTLogAudit unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *CTLogMutation) ResetEdge(name string) error {
+func (m *CTLogAuditMutation) ResetEdge(name string) error {
 	switch name {
-	case ctlog.EdgeTaInfo:
+	case ctlogaudit.EdgeTaInfo:
 		m.ResetTaInfo()
 		return nil
 	}
-	return fmt.Errorf("unknown CTLog edge %s", name)
+	return fmt.Errorf("unknown CTLogAudit edge %s", name)
 }
 
 // TAInfoMutation represents an operation that mutates the TAInfo nodes in the graph.
@@ -485,8 +485,7 @@ type TAInfoMutation struct {
 	public_key    *[]byte
 	attestation   *string
 	clearedFields map[string]struct{}
-	ct_log        map[int]struct{}
-	removedct_log map[int]struct{}
+	ct_log        *int
 	clearedct_log bool
 	done          bool
 	oldValue      func(context.Context) (*TAInfo, error)
@@ -699,49 +698,35 @@ func (m *TAInfoMutation) ResetAttestation() {
 	m.attestation = nil
 }
 
-// AddCtLogIDs adds the "ct_log" edge to the CTLog entity by ids.
-func (m *TAInfoMutation) AddCtLogIDs(ids ...int) {
-	if m.ct_log == nil {
-		m.ct_log = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.ct_log[ids[i]] = struct{}{}
-	}
+// SetCtLogID sets the "ct_log" edge to the CTLogAudit entity by id.
+func (m *TAInfoMutation) SetCtLogID(id int) {
+	m.ct_log = &id
 }
 
-// ClearCtLog clears the "ct_log" edge to the CTLog entity.
+// ClearCtLog clears the "ct_log" edge to the CTLogAudit entity.
 func (m *TAInfoMutation) ClearCtLog() {
 	m.clearedct_log = true
 }
 
-// CtLogCleared reports if the "ct_log" edge to the CTLog entity was cleared.
+// CtLogCleared reports if the "ct_log" edge to the CTLogAudit entity was cleared.
 func (m *TAInfoMutation) CtLogCleared() bool {
 	return m.clearedct_log
 }
 
-// RemoveCtLogIDs removes the "ct_log" edge to the CTLog entity by IDs.
-func (m *TAInfoMutation) RemoveCtLogIDs(ids ...int) {
-	if m.removedct_log == nil {
-		m.removedct_log = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.ct_log, ids[i])
-		m.removedct_log[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedCtLog returns the removed IDs of the "ct_log" edge to the CTLog entity.
-func (m *TAInfoMutation) RemovedCtLogIDs() (ids []int) {
-	for id := range m.removedct_log {
-		ids = append(ids, id)
+// CtLogID returns the "ct_log" edge ID in the mutation.
+func (m *TAInfoMutation) CtLogID() (id int, exists bool) {
+	if m.ct_log != nil {
+		return *m.ct_log, true
 	}
 	return
 }
 
 // CtLogIDs returns the "ct_log" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CtLogID instead. It exists only for internal usage by the builders.
 func (m *TAInfoMutation) CtLogIDs() (ids []int) {
-	for id := range m.ct_log {
-		ids = append(ids, id)
+	if id := m.ct_log; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -750,7 +735,6 @@ func (m *TAInfoMutation) CtLogIDs() (ids []int) {
 func (m *TAInfoMutation) ResetCtLog() {
 	m.ct_log = nil
 	m.clearedct_log = false
-	m.removedct_log = nil
 }
 
 // Where appends a list predicates to the TAInfoMutation builder.
@@ -932,11 +916,9 @@ func (m *TAInfoMutation) AddedEdges() []string {
 func (m *TAInfoMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case tainfo.EdgeCtLog:
-		ids := make([]ent.Value, 0, len(m.ct_log))
-		for id := range m.ct_log {
-			ids = append(ids, id)
+		if id := m.ct_log; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -944,23 +926,12 @@ func (m *TAInfoMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TAInfoMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedct_log != nil {
-		edges = append(edges, tainfo.EdgeCtLog)
-	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *TAInfoMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case tainfo.EdgeCtLog:
-		ids := make([]ent.Value, 0, len(m.removedct_log))
-		for id := range m.removedct_log {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
@@ -987,6 +958,9 @@ func (m *TAInfoMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *TAInfoMutation) ClearEdge(name string) error {
 	switch name {
+	case tainfo.EdgeCtLog:
+		m.ClearCtLog()
+		return nil
 	}
 	return fmt.Errorf("unknown TAInfo unique edge %s", name)
 }

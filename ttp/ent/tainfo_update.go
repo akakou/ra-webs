@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra_webs/ttp/ent/ctlog"
+	"github.com/akakou/ra_webs/ttp/ent/ctlogaudit"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
 	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
@@ -62,19 +62,23 @@ func (tiu *TAInfoUpdate) SetNillableAttestation(s *string) *TAInfoUpdate {
 	return tiu
 }
 
-// AddCtLogIDs adds the "ct_log" edge to the CTLog entity by IDs.
-func (tiu *TAInfoUpdate) AddCtLogIDs(ids ...int) *TAInfoUpdate {
-	tiu.mutation.AddCtLogIDs(ids...)
+// SetCtLogID sets the "ct_log" edge to the CTLogAudit entity by ID.
+func (tiu *TAInfoUpdate) SetCtLogID(id int) *TAInfoUpdate {
+	tiu.mutation.SetCtLogID(id)
 	return tiu
 }
 
-// AddCtLog adds the "ct_log" edges to the CTLog entity.
-func (tiu *TAInfoUpdate) AddCtLog(c ...*CTLog) *TAInfoUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// SetNillableCtLogID sets the "ct_log" edge to the CTLogAudit entity by ID if the given value is not nil.
+func (tiu *TAInfoUpdate) SetNillableCtLogID(id *int) *TAInfoUpdate {
+	if id != nil {
+		tiu = tiu.SetCtLogID(*id)
 	}
-	return tiu.AddCtLogIDs(ids...)
+	return tiu
+}
+
+// SetCtLog sets the "ct_log" edge to the CTLogAudit entity.
+func (tiu *TAInfoUpdate) SetCtLog(c *CTLogAudit) *TAInfoUpdate {
+	return tiu.SetCtLogID(c.ID)
 }
 
 // Mutation returns the TAInfoMutation object of the builder.
@@ -82,25 +86,10 @@ func (tiu *TAInfoUpdate) Mutation() *TAInfoMutation {
 	return tiu.mutation
 }
 
-// ClearCtLog clears all "ct_log" edges to the CTLog entity.
+// ClearCtLog clears the "ct_log" edge to the CTLogAudit entity.
 func (tiu *TAInfoUpdate) ClearCtLog() *TAInfoUpdate {
 	tiu.mutation.ClearCtLog()
 	return tiu
-}
-
-// RemoveCtLogIDs removes the "ct_log" edge to CTLog entities by IDs.
-func (tiu *TAInfoUpdate) RemoveCtLogIDs(ids ...int) *TAInfoUpdate {
-	tiu.mutation.RemoveCtLogIDs(ids...)
-	return tiu
-}
-
-// RemoveCtLog removes "ct_log" edges to CTLog entities.
-func (tiu *TAInfoUpdate) RemoveCtLog(c ...*CTLog) *TAInfoUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return tiu.RemoveCtLogIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -150,42 +139,26 @@ func (tiu *TAInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tiu.mutation.CtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   tainfo.CtLogTable,
 			Columns: []string{tainfo.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ctlogaudit.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tiu.mutation.RemovedCtLogIDs(); len(nodes) > 0 && !tiu.mutation.CtLogCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   tainfo.CtLogTable,
-			Columns: []string{tainfo.CtLogColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := tiu.mutation.CtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   tainfo.CtLogTable,
 			Columns: []string{tainfo.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ctlogaudit.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -247,19 +220,23 @@ func (tiuo *TAInfoUpdateOne) SetNillableAttestation(s *string) *TAInfoUpdateOne 
 	return tiuo
 }
 
-// AddCtLogIDs adds the "ct_log" edge to the CTLog entity by IDs.
-func (tiuo *TAInfoUpdateOne) AddCtLogIDs(ids ...int) *TAInfoUpdateOne {
-	tiuo.mutation.AddCtLogIDs(ids...)
+// SetCtLogID sets the "ct_log" edge to the CTLogAudit entity by ID.
+func (tiuo *TAInfoUpdateOne) SetCtLogID(id int) *TAInfoUpdateOne {
+	tiuo.mutation.SetCtLogID(id)
 	return tiuo
 }
 
-// AddCtLog adds the "ct_log" edges to the CTLog entity.
-func (tiuo *TAInfoUpdateOne) AddCtLog(c ...*CTLog) *TAInfoUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// SetNillableCtLogID sets the "ct_log" edge to the CTLogAudit entity by ID if the given value is not nil.
+func (tiuo *TAInfoUpdateOne) SetNillableCtLogID(id *int) *TAInfoUpdateOne {
+	if id != nil {
+		tiuo = tiuo.SetCtLogID(*id)
 	}
-	return tiuo.AddCtLogIDs(ids...)
+	return tiuo
+}
+
+// SetCtLog sets the "ct_log" edge to the CTLogAudit entity.
+func (tiuo *TAInfoUpdateOne) SetCtLog(c *CTLogAudit) *TAInfoUpdateOne {
+	return tiuo.SetCtLogID(c.ID)
 }
 
 // Mutation returns the TAInfoMutation object of the builder.
@@ -267,25 +244,10 @@ func (tiuo *TAInfoUpdateOne) Mutation() *TAInfoMutation {
 	return tiuo.mutation
 }
 
-// ClearCtLog clears all "ct_log" edges to the CTLog entity.
+// ClearCtLog clears the "ct_log" edge to the CTLogAudit entity.
 func (tiuo *TAInfoUpdateOne) ClearCtLog() *TAInfoUpdateOne {
 	tiuo.mutation.ClearCtLog()
 	return tiuo
-}
-
-// RemoveCtLogIDs removes the "ct_log" edge to CTLog entities by IDs.
-func (tiuo *TAInfoUpdateOne) RemoveCtLogIDs(ids ...int) *TAInfoUpdateOne {
-	tiuo.mutation.RemoveCtLogIDs(ids...)
-	return tiuo
-}
-
-// RemoveCtLog removes "ct_log" edges to CTLog entities.
-func (tiuo *TAInfoUpdateOne) RemoveCtLog(c ...*CTLog) *TAInfoUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return tiuo.RemoveCtLogIDs(ids...)
 }
 
 // Where appends a list predicates to the TAInfoUpdate builder.
@@ -365,42 +327,26 @@ func (tiuo *TAInfoUpdateOne) sqlSave(ctx context.Context) (_node *TAInfo, err er
 	}
 	if tiuo.mutation.CtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   tainfo.CtLogTable,
 			Columns: []string{tainfo.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ctlogaudit.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tiuo.mutation.RemovedCtLogIDs(); len(nodes) > 0 && !tiuo.mutation.CtLogCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   tainfo.CtLogTable,
-			Columns: []string{tainfo.CtLogColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := tiuo.mutation.CtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   tainfo.CtLogTable,
 			Columns: []string{tainfo.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ctlogaudit.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

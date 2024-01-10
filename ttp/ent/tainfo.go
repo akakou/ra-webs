@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/akakou/ra_webs/ttp/ent/ctlogaudit"
 	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
 
@@ -24,23 +25,28 @@ type TAInfo struct {
 	Attestation string `json:"attestation,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TAInfoQuery when eager-loading is set.
-	Edges        TAInfoEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges                TAInfoEdges `json:"edges"`
+	ct_log_audit_ta_info *int
+	selectValues         sql.SelectValues
 }
 
 // TAInfoEdges holds the relations/edges for other nodes in the graph.
 type TAInfoEdges struct {
 	// CtLog holds the value of the ct_log edge.
-	CtLog []*CTLog `json:"ct_log,omitempty"`
+	CtLog *CTLogAudit `json:"ct_log,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
 // CtLogOrErr returns the CtLog value or an error if the edge
-// was not loaded in eager-loading.
-func (e TAInfoEdges) CtLogOrErr() ([]*CTLog, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TAInfoEdges) CtLogOrErr() (*CTLogAudit, error) {
 	if e.loadedTypes[0] {
+		if e.CtLog == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: ctlogaudit.Label}
+		}
 		return e.CtLog, nil
 	}
 	return nil, &NotLoadedError{edge: "ct_log"}
@@ -57,6 +63,8 @@ func (*TAInfo) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case tainfo.FieldDomain, tainfo.FieldAttestation:
 			values[i] = new(sql.NullString)
+		case tainfo.ForeignKeys[0]: // ct_log_audit_ta_info
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -96,6 +104,13 @@ func (ti *TAInfo) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ti.Attestation = value.String
 			}
+		case tainfo.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field ct_log_audit_ta_info", value)
+			} else if value.Valid {
+				ti.ct_log_audit_ta_info = new(int)
+				*ti.ct_log_audit_ta_info = int(value.Int64)
+			}
 		default:
 			ti.selectValues.Set(columns[i], values[i])
 		}
@@ -110,7 +125,7 @@ func (ti *TAInfo) Value(name string) (ent.Value, error) {
 }
 
 // QueryCtLog queries the "ct_log" edge of the TAInfo entity.
-func (ti *TAInfo) QueryCtLog() *CTLogQuery {
+func (ti *TAInfo) QueryCtLog() *CTLogAuditQuery {
 	return NewTAInfoClient(ti.config).QueryCtLog(ti)
 }
 
