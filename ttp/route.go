@@ -15,15 +15,18 @@ func Route(e *echo.Echo, db *ttpDB) {
 	e.POST("/provision", func(c echo.Context) error {
 		provReq := new(core.TAInfo)
 
-		if err := c.Bind(provReq); err != nil {
-			return err
+		if c.Bind(provReq) != nil {
+			return c.String(http.StatusBadRequest, "bad attestation")
 		}
 
 		if verifyAttestation(provReq.Attestation) != nil {
 			return c.String(http.StatusBadRequest, "bad attestation")
 		}
 
-		if db.store(provReq) != nil {
+		taInfo := db.toEntTaInfo(provReq)
+
+		_, err := taInfo.Save(*db.ctx)
+		if err != nil {
 			return c.String(http.StatusInternalServerError, "internal error")
 		}
 
