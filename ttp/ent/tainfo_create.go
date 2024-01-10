@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/akakou/ra_webs/ttp/ent/ctlog"
 	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
 
@@ -35,6 +36,21 @@ func (tic *TAInfoCreate) SetPublicKey(b []byte) *TAInfoCreate {
 func (tic *TAInfoCreate) SetAttestation(s string) *TAInfoCreate {
 	tic.mutation.SetAttestation(s)
 	return tic
+}
+
+// AddCtLogIDs adds the "ct_log" edge to the CTLog entity by IDs.
+func (tic *TAInfoCreate) AddCtLogIDs(ids ...int) *TAInfoCreate {
+	tic.mutation.AddCtLogIDs(ids...)
+	return tic
+}
+
+// AddCtLog adds the "ct_log" edges to the CTLog entity.
+func (tic *TAInfoCreate) AddCtLog(c ...*CTLog) *TAInfoCreate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return tic.AddCtLogIDs(ids...)
 }
 
 // Mutation returns the TAInfoMutation object of the builder.
@@ -117,6 +133,22 @@ func (tic *TAInfoCreate) createSpec() (*TAInfo, *sqlgraph.CreateSpec) {
 	if value, ok := tic.mutation.Attestation(); ok {
 		_spec.SetField(tainfo.FieldAttestation, field.TypeString, value)
 		_node.Attestation = value
+	}
+	if nodes := tic.mutation.CtLogIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tainfo.CtLogTable,
+			Columns: []string{tainfo.CtLogColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

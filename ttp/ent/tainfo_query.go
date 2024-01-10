@@ -4,12 +4,14 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/akakou/ra_webs/ttp/ent/ctlog"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
 	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
@@ -21,6 +23,7 @@ type TAInfoQuery struct {
 	order      []tainfo.OrderOption
 	inters     []Interceptor
 	predicates []predicate.TAInfo
+	withCtLog  *CTLogQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -55,6 +58,28 @@ func (tiq *TAInfoQuery) Unique(unique bool) *TAInfoQuery {
 func (tiq *TAInfoQuery) Order(o ...tainfo.OrderOption) *TAInfoQuery {
 	tiq.order = append(tiq.order, o...)
 	return tiq
+}
+
+// QueryCtLog chains the current query on the "ct_log" edge.
+func (tiq *TAInfoQuery) QueryCtLog() *CTLogQuery {
+	query := (&CTLogClient{config: tiq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tiq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tiq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tainfo.Table, tainfo.FieldID, selector),
+			sqlgraph.To(ctlog.Table, ctlog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, tainfo.CtLogTable, tainfo.CtLogColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tiq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first TAInfo entity from the query.
@@ -249,10 +274,22 @@ func (tiq *TAInfoQuery) Clone() *TAInfoQuery {
 		order:      append([]tainfo.OrderOption{}, tiq.order...),
 		inters:     append([]Interceptor{}, tiq.inters...),
 		predicates: append([]predicate.TAInfo{}, tiq.predicates...),
+		withCtLog:  tiq.withCtLog.Clone(),
 		// clone intermediate query.
 		sql:  tiq.sql.Clone(),
 		path: tiq.path,
 	}
+}
+
+// WithCtLog tells the query-builder to eager-load the nodes that are connected to
+// the "ct_log" edge. The optional arguments are used to configure the query builder of the edge.
+func (tiq *TAInfoQuery) WithCtLog(opts ...func(*CTLogQuery)) *TAInfoQuery {
+	query := (&CTLogClient{config: tiq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tiq.withCtLog = query
+	return tiq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -331,8 +368,11 @@ func (tiq *TAInfoQuery) prepareQuery(ctx context.Context) error {
 
 func (tiq *TAInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TAInfo, error) {
 	var (
-		nodes = []*TAInfo{}
-		_spec = tiq.querySpec()
+		nodes       = []*TAInfo{}
+		_spec       = tiq.querySpec()
+		loadedTypes = [1]bool{
+			tiq.withCtLog != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*TAInfo).scanValues(nil, columns)
@@ -340,6 +380,7 @@ func (tiq *TAInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TAIn
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &TAInfo{config: tiq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -351,7 +392,46 @@ func (tiq *TAInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TAIn
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := tiq.withCtLog; query != nil {
+		if err := tiq.loadCtLog(ctx, query, nodes,
+			func(n *TAInfo) { n.Edges.CtLog = []*CTLog{} },
+			func(n *TAInfo, e *CTLog) { n.Edges.CtLog = append(n.Edges.CtLog, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (tiq *TAInfoQuery) loadCtLog(ctx context.Context, query *CTLogQuery, nodes []*TAInfo, init func(*TAInfo), assign func(*TAInfo, *CTLog)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*TAInfo)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.CTLog(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tainfo.CtLogColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ct_log_ta_info
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "ct_log_ta_info" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "ct_log_ta_info" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (tiq *TAInfoQuery) sqlCount(ctx context.Context) (int, error) {

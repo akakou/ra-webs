@@ -8,6 +8,27 @@ import (
 )
 
 var (
+	// CtLogsColumns holds the columns for the "ct_logs" table.
+	CtLogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "domain", Type: field.TypeString},
+		{Name: "public_key", Type: field.TypeBytes},
+		{Name: "ct_log_ta_info", Type: field.TypeInt, Nullable: true},
+	}
+	// CtLogsTable holds the schema information for the "ct_logs" table.
+	CtLogsTable = &schema.Table{
+		Name:       "ct_logs",
+		Columns:    CtLogsColumns,
+		PrimaryKey: []*schema.Column{CtLogsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ct_logs_ta_infos_ta_info",
+				Columns:    []*schema.Column{CtLogsColumns[3]},
+				RefColumns: []*schema.Column{TaInfosColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// TaInfosColumns holds the columns for the "ta_infos" table.
 	TaInfosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -23,9 +44,11 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CtLogsTable,
 		TaInfosTable,
 	}
 )
 
 func init() {
+	CtLogsTable.ForeignKeys[0].RefTable = TaInfosTable
 }

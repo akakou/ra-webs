@@ -6,5 +6,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// CTLog is the predicate function for ctlog builders.
+type CTLog func(*sql.Selector)
+
 // TAInfo is the predicate function for tainfo builders.
 type TAInfo func(*sql.Selector)

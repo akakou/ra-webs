@@ -21,8 +21,29 @@ type TAInfo struct {
 	// PublicKey holds the value of the "public_key" field.
 	PublicKey []byte `json:"public_key,omitempty"`
 	// Attestation holds the value of the "attestation" field.
-	Attestation  string `json:"attestation,omitempty"`
+	Attestation string `json:"attestation,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the TAInfoQuery when eager-loading is set.
+	Edges        TAInfoEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// TAInfoEdges holds the relations/edges for other nodes in the graph.
+type TAInfoEdges struct {
+	// CtLog holds the value of the ct_log edge.
+	CtLog []*CTLog `json:"ct_log,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// CtLogOrErr returns the CtLog value or an error if the edge
+// was not loaded in eager-loading.
+func (e TAInfoEdges) CtLogOrErr() ([]*CTLog, error) {
+	if e.loadedTypes[0] {
+		return e.CtLog, nil
+	}
+	return nil, &NotLoadedError{edge: "ct_log"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -86,6 +107,11 @@ func (ti *TAInfo) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (ti *TAInfo) Value(name string) (ent.Value, error) {
 	return ti.selectValues.Get(name)
+}
+
+// QueryCtLog queries the "ct_log" edge of the TAInfo entity.
+func (ti *TAInfo) QueryCtLog() *CTLogQuery {
+	return NewTAInfoClient(ti.config).QueryCtLog(ti)
 }
 
 // Update returns a builder for updating this TAInfo.

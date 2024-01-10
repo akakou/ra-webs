@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -21,5 +22,7 @@ func (TAInfo) Fields() []ent.Field {
 
 // Edges of the TA.
 func (TAInfo) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.From("ct_log", CTLog.Type).Ref("ta_info"),
+	}
 }

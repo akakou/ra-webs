@@ -4,6 +4,7 @@ package tainfo
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -17,8 +18,17 @@ const (
 	FieldPublicKey = "public_key"
 	// FieldAttestation holds the string denoting the attestation field in the database.
 	FieldAttestation = "attestation"
+	// EdgeCtLog holds the string denoting the ct_log edge name in mutations.
+	EdgeCtLog = "ct_log"
 	// Table holds the table name of the tainfo in the database.
 	Table = "ta_infos"
+	// CtLogTable is the table that holds the ct_log relation/edge.
+	CtLogTable = "ct_logs"
+	// CtLogInverseTable is the table name for the CTLog entity.
+	// It exists in this package in order to avoid circular dependency with the "ctlog" package.
+	CtLogInverseTable = "ct_logs"
+	// CtLogColumn is the table column denoting the ct_log relation/edge.
+	CtLogColumn = "ct_log_ta_info"
 )
 
 // Columns holds all SQL columns for tainfo fields.
@@ -55,4 +65,25 @@ func ByDomain(opts ...sql.OrderTermOption) OrderOption {
 // ByAttestation orders the results by the attestation field.
 func ByAttestation(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAttestation, opts...).ToFunc()
+}
+
+// ByCtLogCount orders the results by ct_log count.
+func ByCtLogCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCtLogStep(), opts...)
+	}
+}
+
+// ByCtLog orders the results by ct_log terms.
+func ByCtLog(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCtLogStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newCtLogStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CtLogInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, CtLogTable, CtLogColumn),
+	)
 }

@@ -9,6 +9,18 @@ import (
 	"github.com/akakou/ra_webs/ttp/ent"
 )
 
+// The CTLogFunc type is an adapter to allow the use of ordinary
+// function as CTLog mutator.
+type CTLogFunc func(context.Context, *ent.CTLogMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CTLogFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CTLogMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CTLogMutation", m)
+}
+
 // The TAInfoFunc type is an adapter to allow the use of ordinary
 // function as TAInfo mutator.
 type TAInfoFunc func(context.Context, *ent.TAInfoMutation) (ent.Value, error)
