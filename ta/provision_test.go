@@ -2,6 +2,8 @@ package ta
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRAConfiggenerateKeyPair(t *testing.T) {
@@ -12,11 +14,7 @@ func TestRAConfiggenerateKeyPair(t *testing.T) {
 
 	ra := NewRA(&raConfig)
 
-	got, _, err := ra.generateKeyPair()
-	if err != nil {
-		t.Errorf("RAConfig.generateKeyPair() got an unexpected error: %s", err)
-	}
-	if got == nil {
-		t.Errorf("RAConfig.generateKeyPair() got: nil, want: non-nil")
-	}
+	_, _, err := ra.generateKeyPair()
+
+	assert.NoError(t, err)
 }

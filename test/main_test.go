@@ -5,6 +5,7 @@ import (
 
 	"github.com/akakou/ra_webs/ta"
 	"github.com/akakou/ra_webs/ttp"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestProvisioning(t *testing.T) {
@@ -20,9 +21,7 @@ func TestProvisioning(t *testing.T) {
 	}
 
 	_, err := config.Provisioning()
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err)
 
 	e.Server.Close()
 }

@@ -5,7 +5,7 @@ import (
 	"crypto/rsa"
 	"testing"
 
-	"github.com/go-playground/assert/v2"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPrivKeyStore(t *testing.T) {
@@ -13,15 +13,15 @@ func TestPrivKeyStore(t *testing.T) {
 	privKeyStoreR := privKeyStore{}
 
 	expected, err := rsa.GenerateKey(rand.Reader, 2048)
-	assert.Equal(t, nil, err)
+	assert.NoError(t, err)
 
 	privKeyStoreW.privKey = expected
 
 	err = privKeyStoreW.Store()
-	assert.Equal(t, nil, err)
+	assert.NoError(t, err)
 
 	err = privKeyStoreR.Load()
-	assert.Equal(t, nil, err)
+	assert.NoError(t, err)
 	assert.Equal(t, expected, privKeyStoreR.privKey)
 }
 

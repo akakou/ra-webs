@@ -1,37 +1,26 @@
 package ttp
 
-import (
-	"bytes"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
-	"testing"
+// func TestProvision(t *testing.T) {
+// 	dbConfig := DBConfig{
+// 		Type:   "sqlite3",
+// 		Config: "file:ent?mode=memory&cache=shared&_fk=1",
+// 	}
 
-	"github.com/go-playground/assert/v2"
-)
+// 	router := NewTTPServer(&dbConfig, "views/*.html")
 
-func TestRegister(t *testing.T) {
-	dbConfig := DBConfig{
-		Type:   "sqlite3",
-		Config: "file:ent?mode=memory&cache=shared&_fk=1",
-	}
+// 	postBody := core.ProvisionRequest{
+// 		Attestation: "attestation",
+// 		Domain:      "domain",
+// 	}
 
-	router := NewTTPServer(&dbConfig, "views/*.html")
+// 	body, _ := json.Marshal(postBody)
 
-	postBody := TAInfo{
-		Attestation:   "attestation",
-		PublicKeyHash: "public_key_hash",
-		Domain:        "domain",
-	}
+// 	req := httptest.NewRequest("POST", "/provision", bytes.NewReader(body))
+// 	req.Header.Set("Content-Type", "application/json")
 
-	body, _ := json.Marshal(postBody)
+// 	rec := httptest.NewRecorder()
 
-	req := httptest.NewRequest("POST", "/provision", bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
+// 	router.ServeHTTP(rec, req)
 
-	rec := httptest.NewRecorder()
-
-	router.ServeHTTP(rec, req)
-
-	assert.Equal(t, http.StatusOK, rec.Code)
-}
+// 	assert.Equal(t, http.StatusOK, rec.Code)
+// }

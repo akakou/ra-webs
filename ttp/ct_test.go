@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFetchCTLogs(t *testing.T) {
@@ -16,13 +18,8 @@ func TestFetchCTLogs(t *testing.T) {
 	}
 
 	result, err := fetchCTLogs(TEST_SITE, "")
-	if err != nil {
-		t.Fatalf("fetchCTLogs() got an unexpected error: %s", err)
-	}
-
-	if len(result) == 0 {
-		t.Fatal("fetchCTLogs() got: empty slice, want: non-empty slice")
-	}
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
 
 	for _, ct := range result {
 		fmt.Printf("fetchCTLogs() \ngot: %s\nwant: %s\n\n", ct.PubKeySha256, TEST_PUBLIC_KEY_HASH)
