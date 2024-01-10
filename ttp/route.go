@@ -35,6 +35,7 @@ func Route(e *echo.Echo, db *ttpDB) {
 
 	e.GET("/redirect", func(c echo.Context) error {
 		back := c.Request().Header.Get("Referer")
+
 		// back = "aaa"
 		return c.Render(http.StatusOK, "redirect", back)
 	})

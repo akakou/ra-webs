@@ -20,8 +20,8 @@ import (
 
 var SCHEME = "https://"
 
-func (raConfig *RAConfig) Provisioning() (*tls.Config, error) {
-	tlsConfig, publicKey, err := raConfig.generateKeyPair()
+func (ra *RA) Provisioning() (*tls.Config, error) {
+	tlsConfig, publicKey, err := ra.generateKeyPair()
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (raConfig *RAConfig) Provisioning() (*tls.Config, error) {
 		return nil, err
 	}
 
-	err = raConfig.registerToTTP(publicKeyBytes, attestation)
+	err = ra.registerToTTP(publicKeyBytes, attestation)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (raConfig *RAConfig) Provisioning() (*tls.Config, error) {
 	return tlsConfig, nil
 }
 
-func (raConfig *RAConfig) generateKeyPair() (*tls.Config, *rsa.PublicKey, error) {
+func (ra *RA) generateKeyPair() (*tls.Config, *rsa.PublicKey, error) {
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 
 	if err != nil {
@@ -54,9 +54,9 @@ func (raConfig *RAConfig) generateKeyPair() (*tls.Config, *rsa.PublicKey, error)
 
 	template := &x509.Certificate{
 		SerialNumber: &big.Int{},
-		Subject:      pkix.Name{CommonName: raConfig.Domain},
+		Subject:      pkix.Name{CommonName: ra.config.Domain},
 		NotAfter:     time.Now().Add(time.Hour),
-		DNSNames:     []string{raConfig.Domain},
+		DNSNames:     []string{ra.config.Domain},
 	}
 
 	cert, err := x509.CreateCertificate(rand.Reader, template, template, &priv.PublicKey, priv)
@@ -77,20 +77,20 @@ func (raConfig *RAConfig) generateKeyPair() (*tls.Config, *rsa.PublicKey, error)
 	return &tlsCfg, &priv.PublicKey, nil
 }
 
-func (raConfig *RAConfig) registerToTTP(publicKey []byte, attestation string) error {
+func (ra *RA) registerToTTP(publicKey []byte, attestation string) error {
 	publicKeyHashBytes := sha256.Sum256(publicKey)
 	publicKeyHash := hex.EncodeToString(publicKeyHashBytes[:])
 
 	provReq := core.TAInfo{
 		Attestation:   attestation,
 		PublicKeyHash: publicKeyHash,
-		Domain:        raConfig.Domain,
+		Domain:        ra.config.Domain,
 	}
 
 	body, _ := json.Marshal(provReq)
 	buf := bytes.NewBuffer(body)
 
-	req, err := http.NewRequest("POST", SCHEME+raConfig.TTPDomain+"/provision", buf)
+	req, err := http.NewRequest("POST", SCHEME+ra.config.TTPDomain+"/provision", buf)
 	if err != nil {
 		return err
 	}

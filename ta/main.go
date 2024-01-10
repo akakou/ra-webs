@@ -7,8 +7,17 @@ type RAConfig struct {
 	Domain    string
 }
 
+type RA struct {
+	config *RAConfig
+}
 
-func TLSConfig(config RAConfig) (*tls.Config, error) {
+func NewRA(config *RAConfig) *RA {
+	return &RA{
+		config: config,
+	}
+}
+
+func TLSConfig(config *RA) (*tls.Config, error) {
 	tlsConfig, _, err := config.generateKeyPair()
 	if err != nil {
 		return nil, err
