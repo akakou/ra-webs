@@ -47,5 +47,6 @@ func DefaultTTPServer(templatePath string) *echo.Echo {
 }
 
 func verifyAttestation(attestation string) error {
+	
 	return nil
 }
