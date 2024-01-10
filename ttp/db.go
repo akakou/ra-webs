@@ -20,7 +20,7 @@ type ttpDB struct {
 	ctx    *context.Context
 }
 
-func newttpDB(dbConfig *DBConfig) (*ttpDB, error) {
+func newTtpDB(dbConfig *DBConfig) (*ttpDB, error) {
 	client, err := ent.Open(dbConfig.Type, dbConfig.Config)
 	if err != nil {
 		return nil, fmt.Errorf("failed opening connection to sqlite: %w", err)

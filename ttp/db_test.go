@@ -13,7 +13,7 @@ func makeTestDB() *ttpDB {
 		Config: "file:ent?mode=memory&cache=shared&_fk=1",
 	}
 
-	db, err := newttpDB(&dbConfig)
+	db, err := newTtpDB(&dbConfig)
 
 	if err != nil {
 		panic(err)
