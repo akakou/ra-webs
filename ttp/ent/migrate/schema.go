@@ -23,7 +23,7 @@ var (
 	// TaInfosColumns holds the columns for the "ta_infos" table.
 	TaInfosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "domain", Type: field.TypeString},
+		{Name: "domain", Type: field.TypeString, Unique: true},
 		{Name: "public_key_hash", Type: field.TypeString},
 		{Name: "attestation", Type: field.TypeString},
 		{Name: "ct_log_audit_ta_info", Type: field.TypeInt, Unique: true, Nullable: true},
