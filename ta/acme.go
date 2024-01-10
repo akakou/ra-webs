@@ -2,56 +2,112 @@ package ta
 
 import (
 	"crypto"
-	"crypto/rand"
 	"crypto/rsa"
+	"crypto/tls"
 	"fmt"
 	"log"
 
+	"github.com/go-acme/lego/challenge/tlsalpn01"
 	"github.com/go-acme/lego/v4/certificate"
-	"github.com/go-acme/lego/v4/challenge/tlsalpn01"
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/registration"
 )
 
-func IssueCertiifcate(user *acmeUser, privateKey *rsa.PrivateKey, domains []string, isProduction bool) (*certificate.Resource, error) {
-	var acmeClient *lego.Client
-	var err error
+type ACMEConfig struct {
+	Email      string
+	Domain     string
+	PrivateKey *rsa.PrivateKey
+}
 
-	if isProduction {
-		acmeClient, err = NewAcmeClient(user)
-	} else {
-		acmeClient, err = NewStagingAcmeClient(user)
+type acmeContext struct {
+	user   *acmeUser
+	client *lego.Client
+	config *ACMEConfig
+}
+
+func initACMEContext(config *ACMEConfig) (*acmeContext, error) {
+	acmeUser := &acmeUser{
+		Email: config.Email,
 	}
+
+	legoConfig := lego.NewConfig(acmeUser)
+	legoClient, err := lego.NewClient(legoConfig)
 
 	if err != nil {
-		return nil, fmt.Errorf("IssueCertificate: creating ACME Client: %v", err)
+		return nil, fmt.Errorf("InitACMEContext: creating ACME Client: %v", err)
 	}
 
-	err = SetupProvider(acmeClient)
+	return &acmeContext{
+		config: config,
+		user:   acmeUser,
+		client: legoClient,
+	}, nil
+}
+
+func (ctx *acmeContext) issueCert() (*tls.Certificate, error) {
+	err := ctx.setupCRProvider()
 	if err != nil {
-		return nil, fmt.Errorf("IssueCertificate: setting up provider: %v", err)
+		return nil, fmt.Errorf("issueCert: setting up provider: %v", err)
 	}
 
-	err = user.Register(acmeClient)
+	err = ctx.register(ctx.client)
 	if err != nil {
-		return nil, fmt.Errorf("IssueCertificate: registering acme user: %v", err)
+		return nil, fmt.Errorf("issueCert: registering acme user: %v", err)
 	}
 
-	cert, err := user.ObtainCertificate(acmeClient, privateKey, domains)
+	resource, err := ctx.obtainCertificate()
 	if err != nil {
-		return nil, fmt.Errorf("IssueCertificate: obtaining certificate: %v", err)
+		return nil, fmt.Errorf("issueCert: obtaining certificate: %v", err)
 	}
 
-	log.Printf("IssueCertificate: obtained certificate for domain: %v\n", cert.Domain)
+	log.Printf("issueCert: obtained certificate for domain: %v\n", resource.Domain)
+
+	cert := tls.Certificate{
+		Certificate: [][]byte{resource.Certificate},
+	}
+
+	return &cert, nil
+}
+
+func (ctx *acmeContext) setupCRProvider() error {
+	server := tlsalpn01.NewProviderServer("", "443")
+	provider := ctx.client.Challenge.SetTLSALPN01Provider(server)
+	return provider
+}
+
+func (ctx *acmeContext) register(client *lego.Client) error {
+	options := registration.RegisterOptions{
+		TermsOfServiceAgreed: true,
+	}
+
+	reg, err := client.Registration.Register(options)
+	if err != nil {
+		return err
+	}
+
+	ctx.user.Registration = reg
+	return nil
+}
+
+func (ctx *acmeContext) obtainCertificate() (*certificate.Resource, error) {
+	request := certificate.ObtainRequest{
+		Domains:    []string{ctx.config.Domain},
+		PrivateKey: ctx.config.PrivateKey,
+		Bundle:     true, // Returned byte[] will contain both issuer's and issued certificate
+	}
+
+	cert, err := ctx.client.Certificate.Obtain(request)
+	if err != nil {
+		return nil, err
+	}
 
 	return cert, nil
 }
 
-// Implhent acme.User interface
 type acmeUser struct {
 	Email        string
-	Registration *registration.Resource
 	key          crypto.PrivateKey
+	Registration *registration.Resource
 }
 
 func (u *acmeUser) GetEmail() string {
@@ -64,64 +120,4 @@ func (u acmeUser) GetRegistration() *registration.Resource {
 
 func (u *acmeUser) GetPrivateKey() crypto.PrivateKey {
 	return u.key
-}
-
-func NewUser(email string, key crypto.PrivateKey) *acmeUser {
-	return &acmeUser{
-		Email: email,
-		key:   key,
-	}
-}
-
-func CreateUser(email string) (*acmeUser, error) {
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		return nil, err
-	}
-
-	return NewUser(email, privateKey), nil
-}
-
-func NewStagingAcmeClient(user *acmeUser) (*lego.Client, error) {
-	config := lego.NewConfig(user)
-	config.CADirURL = lego.LEDirectoryStaging
-
-	return lego.NewClient(config)
-}
-
-func NewAcmeClient(user *acmeUser) (*lego.Client, error) {
-	config := lego.NewConfig(user)
-	return lego.NewClient(config)
-}
-
-func SetupProvider(client *lego.Client) error {
-	return client.Challenge.SetTLSALPN01Provider(tlsalpn01.NewProviderServer("", "443"))
-}
-
-func (user *acmeUser) Register(client *lego.Client) error {
-	options := registration.RegisterOptions{
-		TermsOfServiceAgreed: true,
-	}
-	reg, err := client.Registration.Register(options)
-	if err != nil {
-		return err
-	}
-
-	user.Registration = reg
-	return nil
-}
-
-func (user *acmeUser) ObtainCertificate(client *lego.Client, privateKey *rsa.PrivateKey, domains []string) (*certificate.Resource, error) {
-	request := certificate.ObtainRequest{
-		Domains:    domains,
-		PrivateKey: privateKey,
-		Bundle:     true, // Returned byte[] will contain both issuer's and issued certificate
-	}
-
-	cert, err := client.Certificate.Obtain(request)
-	if err != nil {
-		return nil, err
-	}
-
-	return cert, nil
 }
