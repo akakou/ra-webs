@@ -15,12 +15,12 @@ type DBConfig struct {
 	Config string
 }
 
-type taInfoDB struct {
+type ttpDB struct {
 	client *ent.Client
 	ctx    *context.Context
 }
 
-func newtTAInfoDB(dbConfig *DBConfig) (*taInfoDB, error) {
+func newttpDB(dbConfig *DBConfig) (*ttpDB, error) {
 	client, err := ent.Open(dbConfig.Type, dbConfig.Config)
 	if err != nil {
 		return nil, fmt.Errorf("failed opening connection to sqlite: %w", err)
@@ -32,13 +32,13 @@ func newtTAInfoDB(dbConfig *DBConfig) (*taInfoDB, error) {
 		return nil, fmt.Errorf("failed creating schema resources: %w", err)
 	}
 
-	return &taInfoDB{
+	return &ttpDB{
 		client: client,
 		ctx:    &ctx,
 	}, nil
 }
 
-func (db *taInfoDB) findByDomain(domain string) (*core.TAInfo, error) {
+func (db *ttpDB) findByDomain(domain string) (*core.TAInfo, error) {
 	taInfoColumn, err := db.client.TAInfo.
 		Query().
 		Where(tainfo.DomainEQ(domain)).
@@ -57,7 +57,7 @@ func (db *taInfoDB) findByDomain(domain string) (*core.TAInfo, error) {
 	return taInfo, nil
 }
 
-func (db *taInfoDB) store(taInfo *core.TAInfo) error {
+func (db *ttpDB) store(taInfo *core.TAInfo) error {
 	_, err := db.client.TAInfo.
 		Create().
 		SetDomain(taInfo.Domain).

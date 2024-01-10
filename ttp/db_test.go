@@ -19,7 +19,7 @@ func TestDB(t *testing.T) {
 		Config: "file:ent?mode=memory&cache=shared&_fk=1",
 	}
 
-	db, err := newtTAInfoDB(&dbConfig)
+	db, err := newttpDB(&dbConfig)
 
 	if err != nil {
 		panic(err)
