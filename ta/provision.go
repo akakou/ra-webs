@@ -42,10 +42,10 @@ func (ra *RA) Provisioning(pks *privKeyStore, cs *certStore) (*rsa.PrivateKey, *
 		return nil, nil, err
 	}
 
-	pks.Set(privKey)
+	pks.privKey = privKey
 	pks.Store()
 
-	cs.Set(cert)
+	cs.cert = cert
 	cs.Store()
 
 	return privKey, cert, nil

@@ -47,13 +47,9 @@ func (store *privKeyStore) Load() error {
 		return fmt.Errorf("failed to parse private key: %w", err)
 	}
 
-	store.Set(privKey)
+	store.privKey = privKey
 
 	return nil
-}
-
-func (store *privKeyStore) Set(privKey *rsa.PrivateKey) {
-	store.privKey = privKey
 }
 
 func (store *privKeyStore) Store() error {
@@ -81,13 +77,9 @@ func (store *certStore) Load() error {
 		Certificate: [][]byte{raw},
 	}
 
-	store.Set(&cert)
+	store.cert = &cert
 
 	return nil
-}
-
-func (store *certStore) Set(cert *tls.Certificate) {
-	store.cert = cert
 }
 
 func (store *certStore) Store() error {
