@@ -25,7 +25,7 @@ func NewRA(config *RAConfig) *RA {
 	}
 }
 
-func TLSConfig(ra *RA) (*tls.Config, error) {
+func (ra *RA) TLSConfig()(*tls.Config, error) {
 	var privKey *rsa.PrivateKey
 	var cert *tls.Certificate
 
