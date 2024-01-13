@@ -19,29 +19,23 @@ type secureChannel struct {
 	gcm cipher.AEAD
 }
 
-type secureChannelLoader struct {
+type secureKeyReceiver struct {
 	privateKey *rsa.PrivateKey
 }
 
-func NewSecureChannelLoaeder(privKey *rsa.PrivateKey) *secureChannelLoader {
-	return &secureChannelLoader{
+func newSecureKeyReceiver(privKey *rsa.PrivateKey) *secureKeyReceiver {
+	return &secureKeyReceiver{
 		privateKey: privKey,
 	}
 }
 
-func (loader *secureChannelLoader) load(pubkeyCipher []byte) (*secureChannel, error) {
-	comKey, err := rsa.DecryptOAEP(sha256.New(), nil, loader.privateKey, pubkeyCipher, []byte{})
+func (receiver *secureKeyReceiver) run(pubkeyCipher []byte) ([]byte, error) {
+	comKey, err := rsa.DecryptOAEP(sha256.New(), nil, receiver.privateKey, pubkeyCipher, []byte{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt com key: %w", err)
 	}
 
-	sc, err := newSecureChannel(comKey)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to create secure channel: %w", err)
-	}
-
-	return sc, nil
+	return comKey, nil
 }
 
 func newSecureChannel(key []byte) (*secureChannel, error) {
