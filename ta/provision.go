@@ -28,6 +28,8 @@ func (ra *RA) Provisioning() (*rsa.PrivateKey, *tls.Certificate, error) {
 	if DEBUG {
 		fmt.Printf("WARNING: This is debug mode. Self-signed certificate will be issued.\n")
 		cert, _ = ra.issueSelfSignedCert(privKey, pubKey)
+		ra.storeKeyAndCert(privKey, cert)
+
 		return privKey, cert, nil
 	}
 
@@ -62,11 +64,10 @@ func (ra *RA) Provisioning() (*rsa.PrivateKey, *tls.Certificate, error) {
 		return nil, nil, err
 	}
 
-	ra.privKeyStore.privKey = privKey
-	ra.privKeyStore.Store()
-
-	ra.certStore.cert = cert
-	ra.certStore.Store()
+	err = ra.storeKeyAndCert(privKey, cert)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	return privKey, cert, nil
 }
@@ -110,4 +111,21 @@ func (ra *RA) registerToTTP(publicKey []byte, attestation string) error {
 	} else {
 		return fmt.Errorf("TTP returned %s", resp.Status)
 	}
+}
+
+func (ra *RA) storeKeyAndCert(key *rsa.PrivateKey, cert *tls.Certificate) error {
+	ra.privKeyStore.privKey = key
+	ra.certStore.cert = cert
+
+	err := ra.privKeyStore.Store()
+	if err != nil {
+		return err
+	}
+
+	err = ra.certStore.Store()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -10,8 +10,8 @@ import (
 	"github.com/edgelesssys/ego/ecrypto"
 )
 
-const PRIVATE_PATH = "private.key"
-const CERTIFICATE_PATH = "certificate.pem"
+var PRIVATE_PATH = "private.key"
+var CERTIFICATE_PATH = "certificate.pem"
 
 func (ra *RA) Load() (*rsa.PrivateKey, *tls.Certificate, error) {
 	err := ra.privKeyStore.Load()
