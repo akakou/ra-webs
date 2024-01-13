@@ -3,6 +3,9 @@ package ta
 import (
 	"crypto/rsa"
 	"crypto/tls"
+	"log"
+
+	"github.com/labstack/echo/v4"
 )
 
 type RAConfig struct {
@@ -25,7 +28,7 @@ func NewRA(config *RAConfig) *RA {
 	}
 }
 
-func (ra *RA) TLSConfig()(*tls.Config, error) {
+func (ra *RA) TLSConfig() (*tls.Config, error) {
 	var privKey *rsa.PrivateKey
 	var cert *tls.Certificate
 
@@ -51,4 +54,21 @@ func (ra *RA) TLSConfig()(*tls.Config, error) {
 
 	return &tlsConfig, nil
 
+}
+
+func (ra *RA) Middleware() func(echo.HandlerFunc) echo.HandlerFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			// c.Set("Cookies", "")
+
+			log.Println("before action")
+			if err := next(c); err != nil {
+				c.Error(err)
+			}
+
+			// c.Set("Set-Cookies", "")
+			log.Println("after action")
+			return nil
+		}
+	}
 }
