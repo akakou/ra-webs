@@ -21,5 +21,6 @@
 go.work
 /ttp/ttp
 /ttp/serv/serv
-ta/certificate.pem
-ta/private.key
+*.pem
+*.key
+test/sw/test
