@@ -15,9 +15,11 @@ func main() {
 	config := ta.RAConfig{
 		TTPDomain: "",
 		Domain:    "",
+		Email:     "",
 	}
 
-	_, err := ta.TLSConfig(config)
+	ra := ta.NewRA(&config)
+	_, err := ra.TLSConfig()
 	if err != nil {
 		panic(err)
 	}
