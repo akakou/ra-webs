@@ -9,7 +9,7 @@ import (
 	"fmt"
 )
 
-type secureChannelCipher struct {
+type scCipher struct {
 	iv         []byte
 	cipherText []byte
 }
@@ -19,17 +19,17 @@ type secureChannel struct {
 	gcm cipher.AEAD
 }
 
-type secureKeyReceiver struct {
+type scKeyDecryptor struct {
 	privateKey *rsa.PrivateKey
 }
 
-func newSecureKeyReceiver(privKey *rsa.PrivateKey) *secureKeyReceiver {
-	return &secureKeyReceiver{
+func newscKeyDecryptor(privKey *rsa.PrivateKey) *scKeyDecryptor {
+	return &scKeyDecryptor{
 		privateKey: privKey,
 	}
 }
 
-func (receiver *secureKeyReceiver) run(pubkeyCipher []byte) ([]byte, error) {
+func (receiver *scKeyDecryptor) decrypt(pubkeyCipher []byte) ([]byte, error) {
 	comKey, err := rsa.DecryptOAEP(sha256.New(), nil, receiver.privateKey, pubkeyCipher, []byte{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt com key: %w", err)
@@ -57,7 +57,7 @@ func newSecureChannel(key []byte) (*secureChannel, error) {
 	return &sc, nil
 }
 
-func (sc *secureChannel) decrypt(scCipher *secureChannelCipher) ([]byte, error) {
+func (sc *secureChannel) decrypt(scCipher *scCipher) ([]byte, error) {
 	plaintext, err := sc.gcm.Open(nil, scCipher.iv, scCipher.cipherText, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open gcm: %w", err)
@@ -65,21 +65,21 @@ func (sc *secureChannel) decrypt(scCipher *secureChannelCipher) ([]byte, error) 
 	return plaintext, nil
 }
 
-func (sc *secureChannel) encrypt(plainText []byte) (*secureChannelCipher, error) {
+func (sc *secureChannel) encrypt(plainText []byte) (*scCipher, error) {
 	iv := make([]byte, sc.gcm.NonceSize())
 	_, err := rand.Read(iv)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read random: %w", err)
 	}
 
-	cipherText := sc.gcm.Seal(nil, iv, plainText, nil)
+	cipher := sc.gcm.Seal(nil, iv, plainText, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open gcm: %w", err)
 	}
 
-	scCipher := secureChannelCipher{
+	scCipher := scCipher{
 		iv:         iv,
-		cipherText: cipherText,
+		cipherText: cipher,
 	}
 
 	return &scCipher, nil

@@ -34,8 +34,8 @@ func TestSecureLoader(t *testing.T) {
 	cipher, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, pubKey, expected, []byte{})
 	assert.NoError(t, err)
 
-	receiver := newSecureKeyReceiver(privKey)
-	actual, err := receiver.run(cipher)
+	receiver := newscKeyDecryptor(privKey)
+	actual, err := receiver.decrypt(cipher)
 	assert.NoError(t, err)
 
 	assert.Equal(t, expected, actual)
