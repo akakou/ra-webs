@@ -93,9 +93,9 @@ const encodeCipher = (cipher, iv, pubKeyCipher) => {
     const base64PubKeyCipher = btoa(String.fromCharCode(...new Uint8Array(pubKeyCipher)))
 
     return JSON.stringify({
-        cipher: base64Cipher,
         iv: base64IV,
-        cipherPubKey: base64PubKeyCipher
+        text: base64Cipher,
+        key: base64PubKeyCipher
     })
 }
 
@@ -105,7 +105,7 @@ const decodeCipher = (allCipher) => {
     const decodedIV = str2ab(atob(iv))
 
     return {
-        cipher: decodedCipher,
+        text: decodedCipher,
         iv: decodedIV
     }
 }
