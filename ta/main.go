@@ -3,7 +3,6 @@ package ta
 import (
 	"crypto/rsa"
 	"crypto/tls"
-	"fmt"
 	"log"
 
 	"github.com/labstack/echo/v4"
@@ -64,35 +63,20 @@ func (ra *RA) Middleware() func(echo.HandlerFunc) echo.HandlerFunc {
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			r := c.Request()
-
-			cipher, err := extractCipher(r)
+			sc, err := decryptMiddleware(c, provisioner)
 			if err != nil {
-				return fmt.Errorf("aa ")
+				return err
 			}
 
-			sc, err := provisioner.provision(cipher.Key)
-			if err != nil {
-				return fmt.Errorf("aa ")
-			}
-
-			plain, err := sc.decrypt(cipher)
-			if err != nil {
-				return fmt.Errorf("aa ")
-			}
-
-			req, err := reqFromJson(plain, r)
-			if err != nil {
-				return fmt.Errorf("aa ")
-			}
-
-			c.SetRequest(req)
+			c.Response().Before(func() {
+				encryptMiddlware(c, sc)
+			})
 
 			log.Println("before action")
+
 			if err := next(c); err != nil {
 				c.Error(err)
 			}
-			log.Println("after action")
 
 			return nil
 		}
