@@ -3,6 +3,7 @@ package ta
 import (
 	"crypto/rsa"
 	"crypto/tls"
+	"fmt"
 	"log"
 
 	"github.com/labstack/echo/v4"
@@ -57,17 +58,42 @@ func (ra *RA) TLSConfig() (*tls.Config, error) {
 }
 
 func (ra *RA) Middleware() func(echo.HandlerFunc) echo.HandlerFunc {
+	provisioner := scProvisioner{
+		privateKey: ra.privKeyStore.privKey,
+	}
+
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// c.Set("Cookies", "")
+			r := c.Request()
+
+			cipher, err := extractCipher(r)
+			if err != nil {
+				return fmt.Errorf("aa ")
+			}
+
+			sc, err := provisioner.provision(cipher.Key)
+			if err != nil {
+				return fmt.Errorf("aa ")
+			}
+
+			plain, err := sc.decrypt(cipher)
+			if err != nil {
+				return fmt.Errorf("aa ")
+			}
+
+			req, err := reqFromJson(plain, r)
+			if err != nil {
+				return fmt.Errorf("aa ")
+			}
+
+			c.SetRequest(req)
 
 			log.Println("before action")
 			if err := next(c); err != nil {
 				c.Error(err)
 			}
-
-			// c.Set("Set-Cookies", "")
 			log.Println("after action")
+
 			return nil
 		}
 	}

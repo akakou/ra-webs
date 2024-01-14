@@ -10,8 +10,9 @@ import (
 )
 
 type scCipher struct {
-	iv         []byte
-	cipherText []byte
+	IV   []byte `json: "iv"`
+	Text []byte `json: "text"`
+	Key  []byte `json: "key"`
 }
 
 type secureChannel struct {
@@ -72,7 +73,7 @@ func newSecureChannel(key []byte) (*secureChannel, error) {
 }
 
 func (sc *secureChannel) decrypt(scCipher *scCipher) ([]byte, error) {
-	plaintext, err := sc.gcm.Open(nil, scCipher.iv, scCipher.cipherText, nil)
+	plaintext, err := sc.gcm.Open(nil, scCipher.IV, scCipher.Text, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open gcm: %w", err)
 	}
@@ -92,8 +93,8 @@ func (sc *secureChannel) encrypt(plainText []byte) (*scCipher, error) {
 	}
 
 	scCipher := scCipher{
-		iv:         iv,
-		cipherText: cipher,
+		IV:   iv,
+		Text: cipher,
 	}
 
 	return &scCipher, nil
