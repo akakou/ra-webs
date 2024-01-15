@@ -1,7 +1,6 @@
 package ta
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 
@@ -10,15 +9,11 @@ import (
 
 func decryptMiddleware(c echo.Context, provisioner scProvisioner) (*secureChannel, error) {
 	r := c.Request()
-
-	if r.URL.Path == "/" {
-		return nil, nil
-	}
+	fmt.Printf("before method: %v", c.Request().Method)
 
 	cipher, err := extractCipher(r)
 	if err != nil {
 		return nil, fmt.Errorf("extractCipher: %w", err)
-
 	}
 
 	sc, err := provisioner.provision(cipher.Key)
@@ -31,46 +26,54 @@ func decryptMiddleware(c echo.Context, provisioner scProvisioner) (*secureChanne
 		return nil, fmt.Errorf("decrypt: %w", err)
 	}
 
+	fmt.Printf("\nplain: %v\n", string(plain))
+
 	req, err := reqFromJson(plain, r)
 	if err != nil {
 		return nil, fmt.Errorf("reqFromJson: %w", err)
 	}
 
 	c.SetRequest(req)
+	fmt.Printf("after method: %v", c.Request().Method)
 
 	return sc, nil
 }
 
-func encryptMiddlware(c echo.Context, sc *secureChannel) {
+func encryptMiddlware(c echo.Context, sc *secureChannel) error {
 	log.Println("after action")
 
 	resp := c.Response()
 
 	conn, rw, err := resp.Hijack()
 	if err != nil {
-		rw.Discard(int(resp.Size))
-		return
+		return fmt.Errorf("resp.Hijack: %w", err)
 	}
+	fmt.Printf("1 ")
+
 	defer conn.Close()
+
+	fmt.Printf("2 ")
 
 	jsonResp, err := respToJson(resp, rw)
 	if err != nil {
 		rw.Discard(int(resp.Size))
-		return
+		return fmt.Errorf("respToJson: %w", err)
 	}
+	fmt.Printf("3 ")
 
 	cipher, err := sc.encrypt(jsonResp)
 	if err != nil {
 		rw.Discard(int(resp.Size))
-		return
+		return fmt.Errorf("encrypt: %w", err)
 	}
+	fmt.Printf("4 ")
 
-	cipherText, err := json.Marshal(cipher)
-	if err != nil {
-		rw.Discard(int(resp.Size))
-		return
-	}
+	// rw.Discard(int(resp.Size))
 
-	rw.Discard(int(resp.Size))
-	rw.Write(cipherText)
+	cipherToResp(cipher, rw, resp)
+	fmt.Printf("5 ")
+	rw.Flush()
+
+	fmt.Printf("after action end")
+	return nil
 }

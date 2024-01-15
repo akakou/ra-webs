@@ -1,36 +1,11 @@
 package main
 
 import (
-	"io"
 	"net/http"
-	"os"
 
 	"github.com/akakou/ra_webs/ta"
 	"github.com/labstack/echo/v4"
 )
-
-func readFile(name string) string {
-	file, err := os.Open(name)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	bytes, _ := io.ReadAll(file)
-	html := string(bytes)
-
-	return html
-}
-
-func jsEndpoint(name string, e *echo.Echo) {
-	e.GET("/ra-webs/static/"+name, func(c echo.Context) error {
-		js := readFile(ta.STATIC_FOLDER + "/" + name)
-		c.Response().Header().Set("Content-Type", "application/javascript")
-		c.Response().Header().Set("Service-Worker-Allowed", "/")
-
-		return c.String(http.StatusOK, js)
-	})
-}
 
 func main() {
 	e := echo.New()
@@ -49,7 +24,6 @@ func main() {
 
 	e.GET("/", func(c echo.Context) error {
 		html := readFile("index.html")
-		c.Response().Header().Set("Service-Worker-Allowed", "/aaa")
 
 		return c.HTML(http.StatusOK, html)
 	})

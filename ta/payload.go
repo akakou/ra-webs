@@ -29,12 +29,12 @@ func reqFromJson(source []byte, req *http.Request) (*http.Request, error) {
 	rj := reqJson{}
 	err := json.Unmarshal(source, &rj)
 	if err != nil {
-		return nil, fmt.Errorf("aa ")
+		return nil, fmt.Errorf("json.Unmarshal: %w", err)
 	}
 
 	u, err := url.Parse(rj.URL)
 	if err != nil {
-		return nil, fmt.Errorf("aa ")
+		return nil, fmt.Errorf("url.Parse: %w", err)
 	}
 
 	req.Method = rj.Method
@@ -46,52 +46,60 @@ func reqFromJson(source []byte, req *http.Request) (*http.Request, error) {
 }
 
 func respToJson(resp *echo.Response, reader *bufio.ReadWriter) ([]byte, error) {
-	body, err := io.ReadAll(reader.Reader)
+	fmt.Printf("2-1 ")
+
+	size := reader.Reader.Buffered()
+
+	body := make([]byte, size)
+	_, err := io.ReadAtLeast(reader, body, size)
+
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("io.ReadAll: %w", err)
 	}
+	fmt.Printf("2-2 ")
 
 	rj := respJson{
 		Body:   body,
 		Header: resp.Header(),
 		Status: resp.Status,
 	}
+	fmt.Printf("2-3 ")
 
 	j, err := json.Marshal(rj)
 	if err != nil {
-		return nil, fmt.Errorf("aa")
+		return nil, fmt.Errorf("json.Marshal: %w", err)
 	}
 
 	return j, nil
 }
 
-func cipherToResp(cipher *scCipher, resp *echo.Response) (*echo.Response, error) {
+func cipherToResp(cipher *scCipher, rw *bufio.ReadWriter, resp *echo.Response) error {
 	cj, err := json.Marshal(cipher)
 	if err != nil {
-		return nil, fmt.Errorf("aa")
+		return fmt.Errorf("json.Marshal: %w", err)
 	}
 
-	rj := echo.Response{
-		Status: 200,
+	// rw.Discard(int(resp.Size))
+	_, err = rw.Write(cj)
+	if err != nil {
+		return fmt.Errorf("rw.Write: %w", err)
 	}
 
-	rj.Write(cj)
-
-	return &rj, nil
+	return nil
 }
 
 func extractCipher(r *http.Request) (*scCipher, error) {
-	var cipher *scCipher
+	var cipher scCipher
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("io.ReadAll: %w", err)
 	}
 
-	err = json.Unmarshal(body, cipher)
+	err = json.Unmarshal(body, &cipher)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("json.Unmarshal: %w", err)
 	}
 
-	return cipher, nil
+	return &cipher, nil
 }

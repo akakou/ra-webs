@@ -32,7 +32,6 @@ const customFetch = async (input, init = {}) => {
     if (input.method === 'POST') {
         const arrayBody = await cloned.arrayBuffer()
         plainReq.body = btoa(String.fromCharCode(...new Uint8Array(arrayBody)))
-
     }
 
     const jsonPlainReq = JSON.stringify(plainReq)
@@ -47,7 +46,8 @@ const customFetch = async (input, init = {}) => {
         body: encodedReqCipher,
         credentials: 'omit',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-TEE': '1'
         },
         url: TEE_URL
     });
@@ -55,7 +55,7 @@ const customFetch = async (input, init = {}) => {
     let originalFetching = originalFetch(req, init)
     const originalResp = await originalFetching
 
-    const body = await originalResp.body.text()
+    const body = await originalResp.json()
     const { cipher, iv } = decodeCipher(body)
     const rawResp = await decrypt(cipher, iv, comkey)
 

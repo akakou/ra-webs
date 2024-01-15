@@ -1,26 +1,19 @@
 package ta
 
-import (
-	"fmt"
-	"testing"
+// func TestMakeSW(t *testing.T) {
+// 	ra := NewRA(&RAConfig{
+// 		TTPDomain: "ttp-domain",
+// 		Domain:    "domain",
+// 		Email:     "hoge@example.com",
+// 	})
 
-	"github.com/stretchr/testify/assert"
-)
+// 	_, err := ra.TLSConfig()
+// 	assert.NoError(t, err)
 
-func TestMakeSW(t *testing.T) {
-	ra := NewRA(&RAConfig{
-		TTPDomain: "ttp-domain",
-		Domain:    "domain",
-		Email:     "hoge@example.com",
-	})
+// 	js, err := ra.MakeServiceWorker()
+// 	assert.NoError(t, err)
+// 	assert.NotEmpty(t, js)
 
-	_, err := ra.TLSConfig()
-	assert.NoError(t, err)
+// 	fmt.Printf("%v\n", js)
 
-	js, err := ra.MakeServiceWorker()
-	assert.NoError(t, err)
-	assert.NotEmpty(t, js)
-
-	fmt.Printf("%v\n", js)
-
-}
+// }

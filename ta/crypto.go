@@ -10,9 +10,9 @@ import (
 )
 
 type scCipher struct {
-	IV   []byte `json: "iv"`
-	Text []byte `json: "text"`
-	Key  []byte `json: "key"`
+	IV   []byte `json:"iv"`
+	Text []byte `json:"text"`
+	Key  []byte `json:"key"`
 }
 
 type secureChannel struct {

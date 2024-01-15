@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/akakou/ra_webs/ta"
+	"github.com/labstack/echo/v4"
 )
 
 func RedirectHandler(w http.ResponseWriter, r *http.Request) {
@@ -16,6 +17,7 @@ func main() {
 		TTPDomain: "",
 		Domain:    "",
 		Email:     "",
+		JSFolder:  "../static",
 	}
 
 	ra := ta.NewRA(&config)
@@ -24,8 +26,24 @@ func main() {
 		panic(err)
 	}
 
-	http.HandleFunc("/", RedirectHandler)
-	http.ListenAndServe(":8080", nil)
+	ta.DEBUG = true
+
+	e := echo.New()
+	e.Use(ra.Middleware())
+
+	ra.EndPoints(e)
+
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
+
+	e.GET("/aa", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, aa!")
+	})
+
+	e.Debug = true
+
+	err = e.Start(":8081")
 
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)

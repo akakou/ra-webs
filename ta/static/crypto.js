@@ -7,6 +7,7 @@ const str2ab = (str) => {
     return buf;
 }
 
+const IV_SIZE = 96 / 8
 
 const initKey = async () => {
     const comkey = await crypto.subtle.generateKey(
@@ -35,14 +36,12 @@ const initKey = async () => {
         ["encrypt"],
     );
 
-    const plain = new TextEncoder().encode(rawComkey)
-
     const pubKeyCipher = await crypto.subtle.encrypt(
         {
             name: "RSA-OAEP",
         },
         pubKey,
-        plain,
+        rawComkey,
     );
 
     return {
@@ -53,7 +52,7 @@ const initKey = async () => {
 
 
 const encrypt = async (plain, comkey) => {
-    const iv = crypto.getRandomValues(new Uint8Array(96));
+    const iv = crypto.getRandomValues(new Uint8Array(IV_SIZE));
 
     const cipher = await crypto.subtle.encrypt(
         {
@@ -72,7 +71,7 @@ const encrypt = async (plain, comkey) => {
 
 
 const decrypt = async (cipher, comkey) => {
-    const iv = crypto.getRandomValues(new Uint8Array(96));
+    const iv = crypto.getRandomValues(new Uint8Array(IV_SIZE));
 
     const plain = await crypto.subtle.decrypt(
         {
@@ -89,7 +88,7 @@ const decrypt = async (cipher, comkey) => {
 
 const encodeCipher = (cipher, iv, pubKeyCipher) => {
     const base64Cipher = btoa(String.fromCharCode(...new Uint8Array(cipher)))
-    const base64IV = btoa(iv.buffer)
+    const base64IV = btoa(String.fromCharCode(...new Uint8Array(iv.buffer)))
     const base64PubKeyCipher = btoa(String.fromCharCode(...new Uint8Array(pubKeyCipher)))
 
     return JSON.stringify({
@@ -99,8 +98,8 @@ const encodeCipher = (cipher, iv, pubKeyCipher) => {
     })
 }
 
-const decodeCipher = (allCipher) => {
-    const { cipher, iv } = JSON.parse(allCipher)
+const decodeCipher = ({ iv, cipher }) => {
+    // const { cipher, iv } = JSON.parse(allCipher)
     const decodedCipher = str2ab(atob(cipher))
     const decodedIV = str2ab(atob(iv))
 
