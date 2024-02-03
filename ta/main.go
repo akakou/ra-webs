@@ -2,53 +2,29 @@ package ta
 
 import (
 	"crypto/rsa"
-	"crypto/tls"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/acme/autocert"
 )
 
-type RAConfig struct {
-	TTPDomain string
-	Domain    string
-	Email     string
-}
+const CERT_DIER_CACHE = "/var/www/.cache"
+const ATTEST_ENDPOINT = "/rawebs/attest"
 
-type RA struct {
-	config       *RAConfig
-	privKeyStore *privKeyStore
-	certStore    *certStore
-}
+func SetRaWebs(e *echo.Echo) error {
+	e.AutoTLSManager.Cache = autocert.DirCache(CERT_DIER_CACHE)
 
-func NewRA(config *RAConfig) *RA {
-	return &RA{
-		config:       config,
-		privKeyStore: &privKeyStore{},
-		certStore:    &certStore{},
-	}
-}
+	e.GET(ATTEST_ENDPOINT, func(c echo.Context) error {
+		publicKey := e.AutoTLSManager.Client.Key.Public()
+		rsaPublicKey := publicKey.(*rsa.PublicKey)
 
-func TLSConfig(ra *RA) (*tls.Config, error) {
-	var privKey *rsa.PrivateKey
-	var cert *tls.Certificate
+		quote, err := attestateByAzure(rsaPublicKey)
+		if err != nil {
+			c.Error(err)
+		}
 
-	var err error
+		return c.String(http.StatusOK, quote)
+	})
 
-	if hasFileExists() {
-		privKey, cert, err = ra.Load()
-	} else {
-		privKey, cert, err = ra.Provisioning()
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	cert.PrivateKey = privKey
-
-	tlsConfig := tls.Config{
-		Certificates: []tls.Certificate{
-			*cert,
-		},
-	}
-
-	return &tlsConfig, nil
-
+	return nil
 }
