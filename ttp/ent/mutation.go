@@ -483,7 +483,8 @@ type TACodeMutation struct {
 	op             Op
 	typ            string
 	id             *int
-	unique_id      *string
+	product_id     *uint16
+	addproduct_id  *int16
 	commit_id      *string
 	clearedFields  map[string]struct{}
 	ta_info        map[int]struct{}
@@ -592,40 +593,60 @@ func (m *TACodeMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetUniqueID sets the "unique_id" field.
-func (m *TACodeMutation) SetUniqueID(s string) {
-	m.unique_id = &s
+// SetProductID sets the "product_id" field.
+func (m *TACodeMutation) SetProductID(u uint16) {
+	m.product_id = &u
+	m.addproduct_id = nil
 }
 
-// UniqueID returns the value of the "unique_id" field in the mutation.
-func (m *TACodeMutation) UniqueID() (r string, exists bool) {
-	v := m.unique_id
+// ProductID returns the value of the "product_id" field in the mutation.
+func (m *TACodeMutation) ProductID() (r uint16, exists bool) {
+	v := m.product_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldUniqueID returns the old "unique_id" field's value of the TACode entity.
+// OldProductID returns the old "product_id" field's value of the TACode entity.
 // If the TACode object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TACodeMutation) OldUniqueID(ctx context.Context) (v string, err error) {
+func (m *TACodeMutation) OldProductID(ctx context.Context) (v uint16, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUniqueID is only allowed on UpdateOne operations")
+		return v, errors.New("OldProductID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUniqueID requires an ID field in the mutation")
+		return v, errors.New("OldProductID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUniqueID: %w", err)
+		return v, fmt.Errorf("querying old value for OldProductID: %w", err)
 	}
-	return oldValue.UniqueID, nil
+	return oldValue.ProductID, nil
 }
 
-// ResetUniqueID resets all changes to the "unique_id" field.
-func (m *TACodeMutation) ResetUniqueID() {
-	m.unique_id = nil
+// AddProductID adds u to the "product_id" field.
+func (m *TACodeMutation) AddProductID(u int16) {
+	if m.addproduct_id != nil {
+		*m.addproduct_id += u
+	} else {
+		m.addproduct_id = &u
+	}
+}
+
+// AddedProductID returns the value that was added to the "product_id" field in this mutation.
+func (m *TACodeMutation) AddedProductID() (r int16, exists bool) {
+	v := m.addproduct_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetProductID resets all changes to the "product_id" field.
+func (m *TACodeMutation) ResetProductID() {
+	m.product_id = nil
+	m.addproduct_id = nil
 }
 
 // SetCommitID sets the "commit_id" field.
@@ -753,8 +774,8 @@ func (m *TACodeMutation) Type() string {
 // AddedFields().
 func (m *TACodeMutation) Fields() []string {
 	fields := make([]string, 0, 2)
-	if m.unique_id != nil {
-		fields = append(fields, tacode.FieldUniqueID)
+	if m.product_id != nil {
+		fields = append(fields, tacode.FieldProductID)
 	}
 	if m.commit_id != nil {
 		fields = append(fields, tacode.FieldCommitID)
@@ -767,8 +788,8 @@ func (m *TACodeMutation) Fields() []string {
 // schema.
 func (m *TACodeMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case tacode.FieldUniqueID:
-		return m.UniqueID()
+	case tacode.FieldProductID:
+		return m.ProductID()
 	case tacode.FieldCommitID:
 		return m.CommitID()
 	}
@@ -780,8 +801,8 @@ func (m *TACodeMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *TACodeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case tacode.FieldUniqueID:
-		return m.OldUniqueID(ctx)
+	case tacode.FieldProductID:
+		return m.OldProductID(ctx)
 	case tacode.FieldCommitID:
 		return m.OldCommitID(ctx)
 	}
@@ -793,12 +814,12 @@ func (m *TACodeMutation) OldField(ctx context.Context, name string) (ent.Value, 
 // type.
 func (m *TACodeMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case tacode.FieldUniqueID:
-		v, ok := value.(string)
+	case tacode.FieldProductID:
+		v, ok := value.(uint16)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetUniqueID(v)
+		m.SetProductID(v)
 		return nil
 	case tacode.FieldCommitID:
 		v, ok := value.(string)
@@ -814,13 +835,21 @@ func (m *TACodeMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *TACodeMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addproduct_id != nil {
+		fields = append(fields, tacode.FieldProductID)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *TACodeMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case tacode.FieldProductID:
+		return m.AddedProductID()
+	}
 	return nil, false
 }
 
@@ -829,6 +858,13 @@ func (m *TACodeMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *TACodeMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case tacode.FieldProductID:
+		v, ok := value.(int16)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddProductID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown TACode numeric field %s", name)
 }
@@ -856,8 +892,8 @@ func (m *TACodeMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *TACodeMutation) ResetField(name string) error {
 	switch name {
-	case tacode.FieldUniqueID:
-		m.ResetUniqueID()
+	case tacode.FieldProductID:
+		m.ResetProductID()
 		return nil
 	case tacode.FieldCommitID:
 		m.ResetCommitID()

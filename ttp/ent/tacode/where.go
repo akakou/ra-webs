@@ -53,9 +53,9 @@ func IDLTE(id int) predicate.TACode {
 	return predicate.TACode(sql.FieldLTE(FieldID, id))
 }
 
-// UniqueID applies equality check predicate on the "unique_id" field. It's identical to UniqueIDEQ.
-func UniqueID(v string) predicate.TACode {
-	return predicate.TACode(sql.FieldEQ(FieldUniqueID, v))
+// ProductID applies equality check predicate on the "product_id" field. It's identical to ProductIDEQ.
+func ProductID(v uint16) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldProductID, v))
 }
 
 // CommitID applies equality check predicate on the "commit_id" field. It's identical to CommitIDEQ.
@@ -63,69 +63,44 @@ func CommitID(v string) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldCommitID, v))
 }
 
-// UniqueIDEQ applies the EQ predicate on the "unique_id" field.
-func UniqueIDEQ(v string) predicate.TACode {
-	return predicate.TACode(sql.FieldEQ(FieldUniqueID, v))
+// ProductIDEQ applies the EQ predicate on the "product_id" field.
+func ProductIDEQ(v uint16) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldProductID, v))
 }
 
-// UniqueIDNEQ applies the NEQ predicate on the "unique_id" field.
-func UniqueIDNEQ(v string) predicate.TACode {
-	return predicate.TACode(sql.FieldNEQ(FieldUniqueID, v))
+// ProductIDNEQ applies the NEQ predicate on the "product_id" field.
+func ProductIDNEQ(v uint16) predicate.TACode {
+	return predicate.TACode(sql.FieldNEQ(FieldProductID, v))
 }
 
-// UniqueIDIn applies the In predicate on the "unique_id" field.
-func UniqueIDIn(vs ...string) predicate.TACode {
-	return predicate.TACode(sql.FieldIn(FieldUniqueID, vs...))
+// ProductIDIn applies the In predicate on the "product_id" field.
+func ProductIDIn(vs ...uint16) predicate.TACode {
+	return predicate.TACode(sql.FieldIn(FieldProductID, vs...))
 }
 
-// UniqueIDNotIn applies the NotIn predicate on the "unique_id" field.
-func UniqueIDNotIn(vs ...string) predicate.TACode {
-	return predicate.TACode(sql.FieldNotIn(FieldUniqueID, vs...))
+// ProductIDNotIn applies the NotIn predicate on the "product_id" field.
+func ProductIDNotIn(vs ...uint16) predicate.TACode {
+	return predicate.TACode(sql.FieldNotIn(FieldProductID, vs...))
 }
 
-// UniqueIDGT applies the GT predicate on the "unique_id" field.
-func UniqueIDGT(v string) predicate.TACode {
-	return predicate.TACode(sql.FieldGT(FieldUniqueID, v))
+// ProductIDGT applies the GT predicate on the "product_id" field.
+func ProductIDGT(v uint16) predicate.TACode {
+	return predicate.TACode(sql.FieldGT(FieldProductID, v))
 }
 
-// UniqueIDGTE applies the GTE predicate on the "unique_id" field.
-func UniqueIDGTE(v string) predicate.TACode {
-	return predicate.TACode(sql.FieldGTE(FieldUniqueID, v))
+// ProductIDGTE applies the GTE predicate on the "product_id" field.
+func ProductIDGTE(v uint16) predicate.TACode {
+	return predicate.TACode(sql.FieldGTE(FieldProductID, v))
 }
 
-// UniqueIDLT applies the LT predicate on the "unique_id" field.
-func UniqueIDLT(v string) predicate.TACode {
-	return predicate.TACode(sql.FieldLT(FieldUniqueID, v))
+// ProductIDLT applies the LT predicate on the "product_id" field.
+func ProductIDLT(v uint16) predicate.TACode {
+	return predicate.TACode(sql.FieldLT(FieldProductID, v))
 }
 
-// UniqueIDLTE applies the LTE predicate on the "unique_id" field.
-func UniqueIDLTE(v string) predicate.TACode {
-	return predicate.TACode(sql.FieldLTE(FieldUniqueID, v))
-}
-
-// UniqueIDContains applies the Contains predicate on the "unique_id" field.
-func UniqueIDContains(v string) predicate.TACode {
-	return predicate.TACode(sql.FieldContains(FieldUniqueID, v))
-}
-
-// UniqueIDHasPrefix applies the HasPrefix predicate on the "unique_id" field.
-func UniqueIDHasPrefix(v string) predicate.TACode {
-	return predicate.TACode(sql.FieldHasPrefix(FieldUniqueID, v))
-}
-
-// UniqueIDHasSuffix applies the HasSuffix predicate on the "unique_id" field.
-func UniqueIDHasSuffix(v string) predicate.TACode {
-	return predicate.TACode(sql.FieldHasSuffix(FieldUniqueID, v))
-}
-
-// UniqueIDEqualFold applies the EqualFold predicate on the "unique_id" field.
-func UniqueIDEqualFold(v string) predicate.TACode {
-	return predicate.TACode(sql.FieldEqualFold(FieldUniqueID, v))
-}
-
-// UniqueIDContainsFold applies the ContainsFold predicate on the "unique_id" field.
-func UniqueIDContainsFold(v string) predicate.TACode {
-	return predicate.TACode(sql.FieldContainsFold(FieldUniqueID, v))
+// ProductIDLTE applies the LTE predicate on the "product_id" field.
+func ProductIDLTE(v uint16) predicate.TACode {
+	return predicate.TACode(sql.FieldLTE(FieldProductID, v))
 }
 
 // CommitIDEQ applies the EQ predicate on the "commit_id" field.

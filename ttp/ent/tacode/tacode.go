@@ -12,8 +12,8 @@ const (
 	Label = "ta_code"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldUniqueID holds the string denoting the unique_id field in the database.
-	FieldUniqueID = "unique_id"
+	// FieldProductID holds the string denoting the product_id field in the database.
+	FieldProductID = "product_id"
 	// FieldCommitID holds the string denoting the commit_id field in the database.
 	FieldCommitID = "commit_id"
 	// EdgeTaInfo holds the string denoting the ta_info edge name in mutations.
@@ -30,7 +30,7 @@ const (
 // Columns holds all SQL columns for tacode fields.
 var Columns = []string{
 	FieldID,
-	FieldUniqueID,
+	FieldProductID,
 	FieldCommitID,
 }
 
@@ -58,9 +58,9 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByUniqueID orders the results by the unique_id field.
-func ByUniqueID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUniqueID, opts...).ToFunc()
+// ByProductID orders the results by the product_id field.
+func ByProductID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProductID, opts...).ToFunc()
 }
 
 // ByCommitID orders the results by the commit_id field.

@@ -16,8 +16,8 @@ type TACode struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// UniqueID holds the value of the "unique_id" field.
-	UniqueID string `json:"unique_id,omitempty"`
+	// ProductID holds the value of the "product_id" field.
+	ProductID uint16 `json:"product_id,omitempty"`
 	// CommitID holds the value of the "commit_id" field.
 	CommitID string `json:"commit_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -49,9 +49,9 @@ func (*TACode) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case tacode.FieldID:
+		case tacode.FieldID, tacode.FieldProductID:
 			values[i] = new(sql.NullInt64)
-		case tacode.FieldUniqueID, tacode.FieldCommitID:
+		case tacode.FieldCommitID:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -74,11 +74,11 @@ func (tc *TACode) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			tc.ID = int(value.Int64)
-		case tacode.FieldUniqueID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field unique_id", values[i])
+		case tacode.FieldProductID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field product_id", values[i])
 			} else if value.Valid {
-				tc.UniqueID = value.String
+				tc.ProductID = uint16(value.Int64)
 			}
 		case tacode.FieldCommitID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -127,8 +127,8 @@ func (tc *TACode) String() string {
 	var builder strings.Builder
 	builder.WriteString("TACode(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", tc.ID))
-	builder.WriteString("unique_id=")
-	builder.WriteString(tc.UniqueID)
+	builder.WriteString("product_id=")
+	builder.WriteString(fmt.Sprintf("%v", tc.ProductID))
 	builder.WriteString(", ")
 	builder.WriteString("commit_id=")
 	builder.WriteString(tc.CommitID)

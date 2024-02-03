@@ -14,7 +14,7 @@ type TACode struct {
 // Fields of the TA.
 func (TACode) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("unique_id"),
+		field.Uint16("product_id"),
 		field.String("commit_id"),
 	}
 }

@@ -28,17 +28,24 @@ func (tcu *TACodeUpdate) Where(ps ...predicate.TACode) *TACodeUpdate {
 	return tcu
 }
 
-// SetUniqueID sets the "unique_id" field.
-func (tcu *TACodeUpdate) SetUniqueID(s string) *TACodeUpdate {
-	tcu.mutation.SetUniqueID(s)
+// SetProductID sets the "product_id" field.
+func (tcu *TACodeUpdate) SetProductID(u uint16) *TACodeUpdate {
+	tcu.mutation.ResetProductID()
+	tcu.mutation.SetProductID(u)
 	return tcu
 }
 
-// SetNillableUniqueID sets the "unique_id" field if the given value is not nil.
-func (tcu *TACodeUpdate) SetNillableUniqueID(s *string) *TACodeUpdate {
-	if s != nil {
-		tcu.SetUniqueID(*s)
+// SetNillableProductID sets the "product_id" field if the given value is not nil.
+func (tcu *TACodeUpdate) SetNillableProductID(u *uint16) *TACodeUpdate {
+	if u != nil {
+		tcu.SetProductID(*u)
 	}
+	return tcu
+}
+
+// AddProductID adds u to the "product_id" field.
+func (tcu *TACodeUpdate) AddProductID(u int16) *TACodeUpdate {
+	tcu.mutation.AddProductID(u)
 	return tcu
 }
 
@@ -133,8 +140,11 @@ func (tcu *TACodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := tcu.mutation.UniqueID(); ok {
-		_spec.SetField(tacode.FieldUniqueID, field.TypeString, value)
+	if value, ok := tcu.mutation.ProductID(); ok {
+		_spec.SetField(tacode.FieldProductID, field.TypeUint16, value)
+	}
+	if value, ok := tcu.mutation.AddedProductID(); ok {
+		_spec.AddField(tacode.FieldProductID, field.TypeUint16, value)
 	}
 	if value, ok := tcu.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)
@@ -204,17 +214,24 @@ type TACodeUpdateOne struct {
 	mutation *TACodeMutation
 }
 
-// SetUniqueID sets the "unique_id" field.
-func (tcuo *TACodeUpdateOne) SetUniqueID(s string) *TACodeUpdateOne {
-	tcuo.mutation.SetUniqueID(s)
+// SetProductID sets the "product_id" field.
+func (tcuo *TACodeUpdateOne) SetProductID(u uint16) *TACodeUpdateOne {
+	tcuo.mutation.ResetProductID()
+	tcuo.mutation.SetProductID(u)
 	return tcuo
 }
 
-// SetNillableUniqueID sets the "unique_id" field if the given value is not nil.
-func (tcuo *TACodeUpdateOne) SetNillableUniqueID(s *string) *TACodeUpdateOne {
-	if s != nil {
-		tcuo.SetUniqueID(*s)
+// SetNillableProductID sets the "product_id" field if the given value is not nil.
+func (tcuo *TACodeUpdateOne) SetNillableProductID(u *uint16) *TACodeUpdateOne {
+	if u != nil {
+		tcuo.SetProductID(*u)
 	}
+	return tcuo
+}
+
+// AddProductID adds u to the "product_id" field.
+func (tcuo *TACodeUpdateOne) AddProductID(u int16) *TACodeUpdateOne {
+	tcuo.mutation.AddProductID(u)
 	return tcuo
 }
 
@@ -339,8 +356,11 @@ func (tcuo *TACodeUpdateOne) sqlSave(ctx context.Context) (_node *TACode, err er
 			}
 		}
 	}
-	if value, ok := tcuo.mutation.UniqueID(); ok {
-		_spec.SetField(tacode.FieldUniqueID, field.TypeString, value)
+	if value, ok := tcuo.mutation.ProductID(); ok {
+		_spec.SetField(tacode.FieldProductID, field.TypeUint16, value)
+	}
+	if value, ok := tcuo.mutation.AddedProductID(); ok {
+		_spec.AddField(tacode.FieldProductID, field.TypeUint16, value)
 	}
 	if value, ok := tcuo.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)

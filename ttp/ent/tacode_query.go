@@ -298,12 +298,12 @@ func (tcq *TACodeQuery) WithTaInfo(opts ...func(*TAInfoQuery)) *TACodeQuery {
 // Example:
 //
 //	var v []struct {
-//		UniqueID string `json:"unique_id,omitempty"`
+//		ProductID uint16 `json:"product_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.TACode.Query().
-//		GroupBy(tacode.FieldUniqueID).
+//		GroupBy(tacode.FieldProductID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (tcq *TACodeQuery) GroupBy(field string, fields ...string) *TACodeGroupBy {
@@ -321,11 +321,11 @@ func (tcq *TACodeQuery) GroupBy(field string, fields ...string) *TACodeGroupBy {
 // Example:
 //
 //	var v []struct {
-//		UniqueID string `json:"unique_id,omitempty"`
+//		ProductID uint16 `json:"product_id,omitempty"`
 //	}
 //
 //	client.TACode.Query().
-//		Select(tacode.FieldUniqueID).
+//		Select(tacode.FieldProductID).
 //		Scan(ctx, &v)
 func (tcq *TACodeQuery) Select(fields ...string) *TACodeSelect {
 	tcq.ctx.Fields = append(tcq.ctx.Fields, fields...)
