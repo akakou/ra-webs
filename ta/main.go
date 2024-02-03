@@ -1,54 +1,54 @@
 package ta
 
 import (
+	"crypto/rand"
 	"crypto/rsa"
-	"crypto/tls"
+	"crypto/x509/pkix"
+	"fmt"
+
+	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/acme"
+	"golang.org/x/crypto/acme/autocert"
 )
 
-type RAConfig struct {
-	TTPDomain string
-	Domain    string
-	Email     string
-}
+const CERT_DIER_CACHE = "/var/www/.cache"
+const ATTEST_ENDPOINT = "/rawebs/attest"
 
-type RA struct {
-	config       *RAConfig
-	privKeyStore *privKeyStore
-	certStore    *certStore
-}
+var QUOTE_OBJECT_ID = []int{1, 3, 6, 1, 4, 1, 48181, 1, 1}
+var REPORT_OBJECT_ID = []int{1, 3, 6, 1, 4, 1, 48181, 1, 2}
 
-func NewRA(config *RAConfig) *RA {
-	return &RA{
-		config:       config,
-		privKeyStore: &privKeyStore{},
-		certStore:    &certStore{},
-	}
-}
-
-func TLSConfig(ra *RA) (*tls.Config, error) {
-	var privKey *rsa.PrivateKey
-	var cert *tls.Certificate
-
-	var err error
-
-	if hasFileExists() {
-		privKey, cert, err = ra.Load()
-	} else {
-		privKey, cert, err = ra.Provisioning()
-	}
+func SetRaWebs(e *echo.Echo) error {
+	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
 
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("failed to generate rsa key: %w", err)
 	}
 
-	cert.PrivateKey = privKey
+	pubKey := privKey.Public()
+	quote, report, err := attestateByAzure(pubKey.(*rsa.PublicKey))
+	if err != nil {
+		return fmt.Errorf("failed to attestate by azure: %w", err)
+	}
 
-	tlsConfig := tls.Config{
-		Certificates: []tls.Certificate{
-			*cert,
+	acmeClient := acme.Client{DirectoryURL: autocert.DefaultACMEDirectory}
+	acmeClient.Key = privKey
+
+	e.AutoTLSManager = autocert.Manager{
+		Client: &acmeClient,
+		Cache:  autocert.DirCache(CERT_DIER_CACHE),
+		ExtraExtensions: []pkix.Extension{
+			{
+				Id:       QUOTE_OBJECT_ID,
+				Critical: false,
+				Value:    []byte(quote),
+			},
+			{
+				Id:       REPORT_OBJECT_ID,
+				Critical: false,
+				Value:    []byte(report),
+			},
 		},
 	}
 
-	return &tlsConfig, nil
-
+	return nil
 }

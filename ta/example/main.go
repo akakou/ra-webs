@@ -1,10 +1,10 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/akakou/ra_webs/ta"
+	"github.com/labstack/echo/v4"
 )
 
 func RedirectHandler(w http.ResponseWriter, r *http.Request) {
@@ -12,20 +12,14 @@ func RedirectHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	config := ta.RAConfig{
-		TTPDomain: "",
-		Domain:    "",
-	}
+	e := echo.New()
 
-	_, err := ta.TLSConfig(config)
-	if err != nil {
-		panic(err)
-	}
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello")
+	})
 
-	http.HandleFunc("/", RedirectHandler)
-	http.ListenAndServe(":8080", nil)
+	ta.SetRaWebs(e)
+	e.StartAutoTLS(":443")
 
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
-	}
+	e.Logger.Fatal(e.StartAutoTLS(":443"))
 }
