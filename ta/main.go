@@ -1,29 +1,54 @@
 package ta
 
 import (
+	"crypto/rand"
 	"crypto/rsa"
-	"net/http"
+	"crypto/x509/pkix"
+	"fmt"
 
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
 )
 
 const CERT_DIER_CACHE = "/var/www/.cache"
 const ATTEST_ENDPOINT = "/rawebs/attest"
 
-func SetRaWebs(e *echo.Echo) {
-	e.AutoTLSManager.Cache = autocert.DirCache(CERT_DIER_CACHE)
+var QUOTE_OBJECT_ID = []int{1, 3, 6, 1, 4, 1, 48181, 1, 1}
+var REPORT_OBJECT_ID = []int{1, 3, 6, 1, 4, 1, 48181, 1, 2}
 
-	e.GET(ATTEST_ENDPOINT, func(c echo.Context) error {
-		publicKey := e.AutoTLSManager.Client.Key.Public()
-		rsaPublicKey := publicKey.(*rsa.PublicKey)
+func SetRaWebs(e *echo.Echo) error {
+	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
 
-		quote, err := attestateByAzure(rsaPublicKey)
-		if err != nil {
-			c.Error(err)
-		}
+	if err != nil {
+		return fmt.Errorf("failed to generate rsa key: %w", err)
+	}
 
-		return c.String(http.StatusOK, quote)
-	})
+	pubKey := privKey.Public()
+	quote, report, err := attestateByAzure(pubKey.(*rsa.PublicKey))
+	if err != nil {
+		return fmt.Errorf("failed to attestate by azure: %w", err)
+	}
 
+	acmeClient := acme.Client{DirectoryURL: autocert.DefaultACMEDirectory}
+	acmeClient.Key = privKey
+
+	e.AutoTLSManager = autocert.Manager{
+		Client: &acmeClient,
+		Cache:  autocert.DirCache(CERT_DIER_CACHE),
+		ExtraExtensions: []pkix.Extension{
+			{
+				Id:       QUOTE_OBJECT_ID,
+				Critical: false,
+				Value:    []byte(quote),
+			},
+			{
+				Id:       REPORT_OBJECT_ID,
+				Critical: false,
+				Value:    []byte(report),
+			},
+		},
+	}
+
+	return nil
 }
