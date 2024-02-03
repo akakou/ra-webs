@@ -12,15 +12,6 @@ import (
 	"github.com/edgelesssys/ego/enclave"
 )
 
-type privateClaims struct {
-	Data            string `json:"x-ms-sgx-ehd"`
-	SecurityVersion uint   `json:"x-ms-sgx-svn"`
-	Debug           bool   `json:"x-ms-sgx-is-debuggable"`
-	UniqueID        string `json:"x-ms-sgx-mrenclave"`
-	SignerID        string `json:"x-ms-sgx-mrsigner"`
-	ProductID       uint   `json:"x-ms-sgx-product-id"`
-}
-
 func attestateByAzure(publicKey *rsa.PublicKey) (string, string, error) {
 	rawPubKey := x509.MarshalPKCS1PublicKey(publicKey)
 
