@@ -9,5 +9,8 @@ import (
 // CTLogAudit is the predicate function for ctlogaudit builders.
 type CTLogAudit func(*sql.Selector)
 
+// TACode is the predicate function for tacode builders.
+type TACode func(*sql.Selector)
+
 // TAInfo is the predicate function for tainfo builders.
 type TAInfo func(*sql.Selector)

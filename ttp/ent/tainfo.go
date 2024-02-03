@@ -19,10 +19,8 @@ type TAInfo struct {
 	ID int `json:"id,omitempty"`
 	// Domain holds the value of the "domain" field.
 	Domain string `json:"domain,omitempty"`
-	// PublicKeyHash holds the value of the "public_key_hash" field.
-	PublicKeyHash string `json:"public_key_hash,omitempty"`
-	// Attestation holds the value of the "attestation" field.
-	Attestation string `json:"attestation,omitempty"`
+	// GitRepository holds the value of the "git_repository" field.
+	GitRepository string `json:"git_repository,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TAInfoQuery when eager-loading is set.
 	Edges                TAInfoEdges `json:"edges"`
@@ -34,9 +32,11 @@ type TAInfo struct {
 type TAInfoEdges struct {
 	// CtLog holds the value of the ct_log edge.
 	CtLog *CTLogAudit `json:"ct_log,omitempty"`
+	// TaCode holds the value of the ta_code edge.
+	TaCode []*TACode `json:"ta_code,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // CtLogOrErr returns the CtLog value or an error if the edge
@@ -52,6 +52,15 @@ func (e TAInfoEdges) CtLogOrErr() (*CTLogAudit, error) {
 	return nil, &NotLoadedError{edge: "ct_log"}
 }
 
+// TaCodeOrErr returns the TaCode value or an error if the edge
+// was not loaded in eager-loading.
+func (e TAInfoEdges) TaCodeOrErr() ([]*TACode, error) {
+	if e.loadedTypes[1] {
+		return e.TaCode, nil
+	}
+	return nil, &NotLoadedError{edge: "ta_code"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*TAInfo) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -59,7 +68,7 @@ func (*TAInfo) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case tainfo.FieldID:
 			values[i] = new(sql.NullInt64)
-		case tainfo.FieldDomain, tainfo.FieldPublicKeyHash, tainfo.FieldAttestation:
+		case tainfo.FieldDomain, tainfo.FieldGitRepository:
 			values[i] = new(sql.NullString)
 		case tainfo.ForeignKeys[0]: // ct_log_audit_ta_info
 			values[i] = new(sql.NullInt64)
@@ -90,17 +99,11 @@ func (ti *TAInfo) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ti.Domain = value.String
 			}
-		case tainfo.FieldPublicKeyHash:
+		case tainfo.FieldGitRepository:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field public_key_hash", values[i])
+				return fmt.Errorf("unexpected type %T for field git_repository", values[i])
 			} else if value.Valid {
-				ti.PublicKeyHash = value.String
-			}
-		case tainfo.FieldAttestation:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field attestation", values[i])
-			} else if value.Valid {
-				ti.Attestation = value.String
+				ti.GitRepository = value.String
 			}
 		case tainfo.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -125,6 +128,11 @@ func (ti *TAInfo) Value(name string) (ent.Value, error) {
 // QueryCtLog queries the "ct_log" edge of the TAInfo entity.
 func (ti *TAInfo) QueryCtLog() *CTLogAuditQuery {
 	return NewTAInfoClient(ti.config).QueryCtLog(ti)
+}
+
+// QueryTaCode queries the "ta_code" edge of the TAInfo entity.
+func (ti *TAInfo) QueryTaCode() *TACodeQuery {
+	return NewTAInfoClient(ti.config).QueryTaCode(ti)
 }
 
 // Update returns a builder for updating this TAInfo.
@@ -153,11 +161,8 @@ func (ti *TAInfo) String() string {
 	builder.WriteString("domain=")
 	builder.WriteString(ti.Domain)
 	builder.WriteString(", ")
-	builder.WriteString("public_key_hash=")
-	builder.WriteString(ti.PublicKeyHash)
-	builder.WriteString(", ")
-	builder.WriteString("attestation=")
-	builder.WriteString(ti.Attestation)
+	builder.WriteString("git_repository=")
+	builder.WriteString(ti.GitRepository)
 	builder.WriteByte(')')
 	return builder.String()
 }

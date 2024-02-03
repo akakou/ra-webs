@@ -58,14 +58,9 @@ func Domain(v string) predicate.TAInfo {
 	return predicate.TAInfo(sql.FieldEQ(FieldDomain, v))
 }
 
-// PublicKeyHash applies equality check predicate on the "public_key_hash" field. It's identical to PublicKeyHashEQ.
-func PublicKeyHash(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldEQ(FieldPublicKeyHash, v))
-}
-
-// Attestation applies equality check predicate on the "attestation" field. It's identical to AttestationEQ.
-func Attestation(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldEQ(FieldAttestation, v))
+// GitRepository applies equality check predicate on the "git_repository" field. It's identical to GitRepositoryEQ.
+func GitRepository(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldEQ(FieldGitRepository, v))
 }
 
 // DomainEQ applies the EQ predicate on the "domain" field.
@@ -133,134 +128,69 @@ func DomainContainsFold(v string) predicate.TAInfo {
 	return predicate.TAInfo(sql.FieldContainsFold(FieldDomain, v))
 }
 
-// PublicKeyHashEQ applies the EQ predicate on the "public_key_hash" field.
-func PublicKeyHashEQ(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldEQ(FieldPublicKeyHash, v))
+// GitRepositoryEQ applies the EQ predicate on the "git_repository" field.
+func GitRepositoryEQ(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldEQ(FieldGitRepository, v))
 }
 
-// PublicKeyHashNEQ applies the NEQ predicate on the "public_key_hash" field.
-func PublicKeyHashNEQ(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldNEQ(FieldPublicKeyHash, v))
+// GitRepositoryNEQ applies the NEQ predicate on the "git_repository" field.
+func GitRepositoryNEQ(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldNEQ(FieldGitRepository, v))
 }
 
-// PublicKeyHashIn applies the In predicate on the "public_key_hash" field.
-func PublicKeyHashIn(vs ...string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldIn(FieldPublicKeyHash, vs...))
+// GitRepositoryIn applies the In predicate on the "git_repository" field.
+func GitRepositoryIn(vs ...string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldIn(FieldGitRepository, vs...))
 }
 
-// PublicKeyHashNotIn applies the NotIn predicate on the "public_key_hash" field.
-func PublicKeyHashNotIn(vs ...string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldNotIn(FieldPublicKeyHash, vs...))
+// GitRepositoryNotIn applies the NotIn predicate on the "git_repository" field.
+func GitRepositoryNotIn(vs ...string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldNotIn(FieldGitRepository, vs...))
 }
 
-// PublicKeyHashGT applies the GT predicate on the "public_key_hash" field.
-func PublicKeyHashGT(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldGT(FieldPublicKeyHash, v))
+// GitRepositoryGT applies the GT predicate on the "git_repository" field.
+func GitRepositoryGT(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldGT(FieldGitRepository, v))
 }
 
-// PublicKeyHashGTE applies the GTE predicate on the "public_key_hash" field.
-func PublicKeyHashGTE(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldGTE(FieldPublicKeyHash, v))
+// GitRepositoryGTE applies the GTE predicate on the "git_repository" field.
+func GitRepositoryGTE(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldGTE(FieldGitRepository, v))
 }
 
-// PublicKeyHashLT applies the LT predicate on the "public_key_hash" field.
-func PublicKeyHashLT(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldLT(FieldPublicKeyHash, v))
+// GitRepositoryLT applies the LT predicate on the "git_repository" field.
+func GitRepositoryLT(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldLT(FieldGitRepository, v))
 }
 
-// PublicKeyHashLTE applies the LTE predicate on the "public_key_hash" field.
-func PublicKeyHashLTE(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldLTE(FieldPublicKeyHash, v))
+// GitRepositoryLTE applies the LTE predicate on the "git_repository" field.
+func GitRepositoryLTE(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldLTE(FieldGitRepository, v))
 }
 
-// PublicKeyHashContains applies the Contains predicate on the "public_key_hash" field.
-func PublicKeyHashContains(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldContains(FieldPublicKeyHash, v))
+// GitRepositoryContains applies the Contains predicate on the "git_repository" field.
+func GitRepositoryContains(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldContains(FieldGitRepository, v))
 }
 
-// PublicKeyHashHasPrefix applies the HasPrefix predicate on the "public_key_hash" field.
-func PublicKeyHashHasPrefix(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldHasPrefix(FieldPublicKeyHash, v))
+// GitRepositoryHasPrefix applies the HasPrefix predicate on the "git_repository" field.
+func GitRepositoryHasPrefix(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldHasPrefix(FieldGitRepository, v))
 }
 
-// PublicKeyHashHasSuffix applies the HasSuffix predicate on the "public_key_hash" field.
-func PublicKeyHashHasSuffix(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldHasSuffix(FieldPublicKeyHash, v))
+// GitRepositoryHasSuffix applies the HasSuffix predicate on the "git_repository" field.
+func GitRepositoryHasSuffix(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldHasSuffix(FieldGitRepository, v))
 }
 
-// PublicKeyHashEqualFold applies the EqualFold predicate on the "public_key_hash" field.
-func PublicKeyHashEqualFold(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldEqualFold(FieldPublicKeyHash, v))
+// GitRepositoryEqualFold applies the EqualFold predicate on the "git_repository" field.
+func GitRepositoryEqualFold(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldEqualFold(FieldGitRepository, v))
 }
 
-// PublicKeyHashContainsFold applies the ContainsFold predicate on the "public_key_hash" field.
-func PublicKeyHashContainsFold(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldContainsFold(FieldPublicKeyHash, v))
-}
-
-// AttestationEQ applies the EQ predicate on the "attestation" field.
-func AttestationEQ(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldEQ(FieldAttestation, v))
-}
-
-// AttestationNEQ applies the NEQ predicate on the "attestation" field.
-func AttestationNEQ(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldNEQ(FieldAttestation, v))
-}
-
-// AttestationIn applies the In predicate on the "attestation" field.
-func AttestationIn(vs ...string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldIn(FieldAttestation, vs...))
-}
-
-// AttestationNotIn applies the NotIn predicate on the "attestation" field.
-func AttestationNotIn(vs ...string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldNotIn(FieldAttestation, vs...))
-}
-
-// AttestationGT applies the GT predicate on the "attestation" field.
-func AttestationGT(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldGT(FieldAttestation, v))
-}
-
-// AttestationGTE applies the GTE predicate on the "attestation" field.
-func AttestationGTE(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldGTE(FieldAttestation, v))
-}
-
-// AttestationLT applies the LT predicate on the "attestation" field.
-func AttestationLT(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldLT(FieldAttestation, v))
-}
-
-// AttestationLTE applies the LTE predicate on the "attestation" field.
-func AttestationLTE(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldLTE(FieldAttestation, v))
-}
-
-// AttestationContains applies the Contains predicate on the "attestation" field.
-func AttestationContains(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldContains(FieldAttestation, v))
-}
-
-// AttestationHasPrefix applies the HasPrefix predicate on the "attestation" field.
-func AttestationHasPrefix(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldHasPrefix(FieldAttestation, v))
-}
-
-// AttestationHasSuffix applies the HasSuffix predicate on the "attestation" field.
-func AttestationHasSuffix(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldHasSuffix(FieldAttestation, v))
-}
-
-// AttestationEqualFold applies the EqualFold predicate on the "attestation" field.
-func AttestationEqualFold(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldEqualFold(FieldAttestation, v))
-}
-
-// AttestationContainsFold applies the ContainsFold predicate on the "attestation" field.
-func AttestationContainsFold(v string) predicate.TAInfo {
-	return predicate.TAInfo(sql.FieldContainsFold(FieldAttestation, v))
+// GitRepositoryContainsFold applies the ContainsFold predicate on the "git_repository" field.
+func GitRepositoryContainsFold(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldContainsFold(FieldGitRepository, v))
 }
 
 // HasCtLog applies the HasEdge predicate on the "ct_log" edge.
@@ -278,6 +208,29 @@ func HasCtLog() predicate.TAInfo {
 func HasCtLogWith(preds ...predicate.CTLogAudit) predicate.TAInfo {
 	return predicate.TAInfo(func(s *sql.Selector) {
 		step := newCtLogStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasTaCode applies the HasEdge predicate on the "ta_code" edge.
+func HasTaCode() predicate.TAInfo {
+	return predicate.TAInfo(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, TaCodeTable, TaCodePrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTaCodeWith applies the HasEdge predicate on the "ta_code" edge with a given conditions (other predicates).
+func HasTaCodeWith(preds ...predicate.TACode) predicate.TAInfo {
+	return predicate.TAInfo(func(s *sql.Selector) {
+		step := newTaCodeStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

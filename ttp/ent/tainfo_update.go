@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/ctlogaudit"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
+	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
 
@@ -42,30 +43,16 @@ func (tiu *TAInfoUpdate) SetNillableDomain(s *string) *TAInfoUpdate {
 	return tiu
 }
 
-// SetPublicKeyHash sets the "public_key_hash" field.
-func (tiu *TAInfoUpdate) SetPublicKeyHash(s string) *TAInfoUpdate {
-	tiu.mutation.SetPublicKeyHash(s)
+// SetGitRepository sets the "git_repository" field.
+func (tiu *TAInfoUpdate) SetGitRepository(s string) *TAInfoUpdate {
+	tiu.mutation.SetGitRepository(s)
 	return tiu
 }
 
-// SetNillablePublicKeyHash sets the "public_key_hash" field if the given value is not nil.
-func (tiu *TAInfoUpdate) SetNillablePublicKeyHash(s *string) *TAInfoUpdate {
+// SetNillableGitRepository sets the "git_repository" field if the given value is not nil.
+func (tiu *TAInfoUpdate) SetNillableGitRepository(s *string) *TAInfoUpdate {
 	if s != nil {
-		tiu.SetPublicKeyHash(*s)
-	}
-	return tiu
-}
-
-// SetAttestation sets the "attestation" field.
-func (tiu *TAInfoUpdate) SetAttestation(s string) *TAInfoUpdate {
-	tiu.mutation.SetAttestation(s)
-	return tiu
-}
-
-// SetNillableAttestation sets the "attestation" field if the given value is not nil.
-func (tiu *TAInfoUpdate) SetNillableAttestation(s *string) *TAInfoUpdate {
-	if s != nil {
-		tiu.SetAttestation(*s)
+		tiu.SetGitRepository(*s)
 	}
 	return tiu
 }
@@ -89,6 +76,21 @@ func (tiu *TAInfoUpdate) SetCtLog(c *CTLogAudit) *TAInfoUpdate {
 	return tiu.SetCtLogID(c.ID)
 }
 
+// AddTaCodeIDs adds the "ta_code" edge to the TACode entity by IDs.
+func (tiu *TAInfoUpdate) AddTaCodeIDs(ids ...int) *TAInfoUpdate {
+	tiu.mutation.AddTaCodeIDs(ids...)
+	return tiu
+}
+
+// AddTaCode adds the "ta_code" edges to the TACode entity.
+func (tiu *TAInfoUpdate) AddTaCode(t ...*TACode) *TAInfoUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return tiu.AddTaCodeIDs(ids...)
+}
+
 // Mutation returns the TAInfoMutation object of the builder.
 func (tiu *TAInfoUpdate) Mutation() *TAInfoMutation {
 	return tiu.mutation
@@ -98,6 +100,27 @@ func (tiu *TAInfoUpdate) Mutation() *TAInfoMutation {
 func (tiu *TAInfoUpdate) ClearCtLog() *TAInfoUpdate {
 	tiu.mutation.ClearCtLog()
 	return tiu
+}
+
+// ClearTaCode clears all "ta_code" edges to the TACode entity.
+func (tiu *TAInfoUpdate) ClearTaCode() *TAInfoUpdate {
+	tiu.mutation.ClearTaCode()
+	return tiu
+}
+
+// RemoveTaCodeIDs removes the "ta_code" edge to TACode entities by IDs.
+func (tiu *TAInfoUpdate) RemoveTaCodeIDs(ids ...int) *TAInfoUpdate {
+	tiu.mutation.RemoveTaCodeIDs(ids...)
+	return tiu
+}
+
+// RemoveTaCode removes "ta_code" edges to TACode entities.
+func (tiu *TAInfoUpdate) RemoveTaCode(t ...*TACode) *TAInfoUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return tiu.RemoveTaCodeIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -139,11 +162,8 @@ func (tiu *TAInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tiu.mutation.Domain(); ok {
 		_spec.SetField(tainfo.FieldDomain, field.TypeString, value)
 	}
-	if value, ok := tiu.mutation.PublicKeyHash(); ok {
-		_spec.SetField(tainfo.FieldPublicKeyHash, field.TypeString, value)
-	}
-	if value, ok := tiu.mutation.Attestation(); ok {
-		_spec.SetField(tainfo.FieldAttestation, field.TypeString, value)
+	if value, ok := tiu.mutation.GitRepository(); ok {
+		_spec.SetField(tainfo.FieldGitRepository, field.TypeString, value)
 	}
 	if tiu.mutation.CtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -167,6 +187,51 @@ func (tiu *TAInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ctlogaudit.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tiu.mutation.TaCodeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   tainfo.TaCodeTable,
+			Columns: tainfo.TaCodePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tiu.mutation.RemovedTaCodeIDs(); len(nodes) > 0 && !tiu.mutation.TaCodeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   tainfo.TaCodeTable,
+			Columns: tainfo.TaCodePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tiu.mutation.TaCodeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   tainfo.TaCodeTable,
+			Columns: tainfo.TaCodePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -208,30 +273,16 @@ func (tiuo *TAInfoUpdateOne) SetNillableDomain(s *string) *TAInfoUpdateOne {
 	return tiuo
 }
 
-// SetPublicKeyHash sets the "public_key_hash" field.
-func (tiuo *TAInfoUpdateOne) SetPublicKeyHash(s string) *TAInfoUpdateOne {
-	tiuo.mutation.SetPublicKeyHash(s)
+// SetGitRepository sets the "git_repository" field.
+func (tiuo *TAInfoUpdateOne) SetGitRepository(s string) *TAInfoUpdateOne {
+	tiuo.mutation.SetGitRepository(s)
 	return tiuo
 }
 
-// SetNillablePublicKeyHash sets the "public_key_hash" field if the given value is not nil.
-func (tiuo *TAInfoUpdateOne) SetNillablePublicKeyHash(s *string) *TAInfoUpdateOne {
+// SetNillableGitRepository sets the "git_repository" field if the given value is not nil.
+func (tiuo *TAInfoUpdateOne) SetNillableGitRepository(s *string) *TAInfoUpdateOne {
 	if s != nil {
-		tiuo.SetPublicKeyHash(*s)
-	}
-	return tiuo
-}
-
-// SetAttestation sets the "attestation" field.
-func (tiuo *TAInfoUpdateOne) SetAttestation(s string) *TAInfoUpdateOne {
-	tiuo.mutation.SetAttestation(s)
-	return tiuo
-}
-
-// SetNillableAttestation sets the "attestation" field if the given value is not nil.
-func (tiuo *TAInfoUpdateOne) SetNillableAttestation(s *string) *TAInfoUpdateOne {
-	if s != nil {
-		tiuo.SetAttestation(*s)
+		tiuo.SetGitRepository(*s)
 	}
 	return tiuo
 }
@@ -255,6 +306,21 @@ func (tiuo *TAInfoUpdateOne) SetCtLog(c *CTLogAudit) *TAInfoUpdateOne {
 	return tiuo.SetCtLogID(c.ID)
 }
 
+// AddTaCodeIDs adds the "ta_code" edge to the TACode entity by IDs.
+func (tiuo *TAInfoUpdateOne) AddTaCodeIDs(ids ...int) *TAInfoUpdateOne {
+	tiuo.mutation.AddTaCodeIDs(ids...)
+	return tiuo
+}
+
+// AddTaCode adds the "ta_code" edges to the TACode entity.
+func (tiuo *TAInfoUpdateOne) AddTaCode(t ...*TACode) *TAInfoUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return tiuo.AddTaCodeIDs(ids...)
+}
+
 // Mutation returns the TAInfoMutation object of the builder.
 func (tiuo *TAInfoUpdateOne) Mutation() *TAInfoMutation {
 	return tiuo.mutation
@@ -264,6 +330,27 @@ func (tiuo *TAInfoUpdateOne) Mutation() *TAInfoMutation {
 func (tiuo *TAInfoUpdateOne) ClearCtLog() *TAInfoUpdateOne {
 	tiuo.mutation.ClearCtLog()
 	return tiuo
+}
+
+// ClearTaCode clears all "ta_code" edges to the TACode entity.
+func (tiuo *TAInfoUpdateOne) ClearTaCode() *TAInfoUpdateOne {
+	tiuo.mutation.ClearTaCode()
+	return tiuo
+}
+
+// RemoveTaCodeIDs removes the "ta_code" edge to TACode entities by IDs.
+func (tiuo *TAInfoUpdateOne) RemoveTaCodeIDs(ids ...int) *TAInfoUpdateOne {
+	tiuo.mutation.RemoveTaCodeIDs(ids...)
+	return tiuo
+}
+
+// RemoveTaCode removes "ta_code" edges to TACode entities.
+func (tiuo *TAInfoUpdateOne) RemoveTaCode(t ...*TACode) *TAInfoUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return tiuo.RemoveTaCodeIDs(ids...)
 }
 
 // Where appends a list predicates to the TAInfoUpdate builder.
@@ -335,11 +422,8 @@ func (tiuo *TAInfoUpdateOne) sqlSave(ctx context.Context) (_node *TAInfo, err er
 	if value, ok := tiuo.mutation.Domain(); ok {
 		_spec.SetField(tainfo.FieldDomain, field.TypeString, value)
 	}
-	if value, ok := tiuo.mutation.PublicKeyHash(); ok {
-		_spec.SetField(tainfo.FieldPublicKeyHash, field.TypeString, value)
-	}
-	if value, ok := tiuo.mutation.Attestation(); ok {
-		_spec.SetField(tainfo.FieldAttestation, field.TypeString, value)
+	if value, ok := tiuo.mutation.GitRepository(); ok {
+		_spec.SetField(tainfo.FieldGitRepository, field.TypeString, value)
 	}
 	if tiuo.mutation.CtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -363,6 +447,51 @@ func (tiuo *TAInfoUpdateOne) sqlSave(ctx context.Context) (_node *TAInfo, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ctlogaudit.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tiuo.mutation.TaCodeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   tainfo.TaCodeTable,
+			Columns: tainfo.TaCodePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tiuo.mutation.RemovedTaCodeIDs(); len(nodes) > 0 && !tiuo.mutation.TaCodeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   tainfo.TaCodeTable,
+			Columns: tainfo.TaCodePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tiuo.mutation.TaCodeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   tainfo.TaCodeTable,
+			Columns: tainfo.TaCodePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

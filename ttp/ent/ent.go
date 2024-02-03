@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/akakou/ra_webs/ttp/ent/ctlogaudit"
+	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
 
@@ -75,6 +76,7 @@ func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			ctlogaudit.Table: ctlogaudit.ValidColumn,
+			tacode.Table:     tacode.ValidColumn,
 			tainfo.Table:     tainfo.ValidColumn,
 		})
 	})
