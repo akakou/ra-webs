@@ -11,7 +11,7 @@ import (
 const CERT_DIER_CACHE = "/var/www/.cache"
 const ATTEST_ENDPOINT = "/rawebs/attest"
 
-func SetRaWebs(e *echo.Echo) error {
+func SetRaWebs(e *echo.Echo) {
 	e.AutoTLSManager.Cache = autocert.DirCache(CERT_DIER_CACHE)
 
 	e.GET(ATTEST_ENDPOINT, func(c echo.Context) error {
@@ -26,5 +26,4 @@ func SetRaWebs(e *echo.Echo) error {
 		return c.String(http.StatusOK, quote)
 	})
 
-	return nil
 }
