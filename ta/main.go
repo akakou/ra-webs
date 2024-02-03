@@ -12,12 +12,11 @@ import (
 )
 
 const CERT_DIER_CACHE = "/var/www/.cache"
-const ATTEST_ENDPOINT = "/rawebs/attest"
 
 var QUOTE_OBJECT_ID = []int{1, 3, 6, 1, 4, 1, 48181, 1, 1}
 var REPORT_OBJECT_ID = []int{1, 3, 6, 1, 4, 1, 48181, 1, 2}
 
-func SetRaWebs(e *echo.Echo) error {
+func SetRaWebs(e *echo.Echo, ttpUrl string) error {
 	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
 
 	if err != nil {
@@ -49,6 +48,8 @@ func SetRaWebs(e *echo.Echo) error {
 			},
 		},
 	}
+
+	e.Use(MakeMiddleware(ttpUrl))
 
 	return nil
 }

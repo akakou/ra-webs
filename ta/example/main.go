@@ -7,9 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func RedirectHandler(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "http://localhost:8081/redirect", http.StatusTemporaryRedirect)
-}
+const ttpUrl = "https://ttp.example.com"
 
 func main() {
 	e := echo.New()
@@ -18,7 +16,7 @@ func main() {
 		return c.String(http.StatusOK, "Hello")
 	})
 
-	ta.SetRaWebs(e)
+	ta.SetRaWebs(e, ttpUrl)
 	e.StartAutoTLS(":443")
 
 	e.Logger.Fatal(e.StartAutoTLS(":443"))
