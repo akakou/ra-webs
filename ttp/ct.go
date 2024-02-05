@@ -24,8 +24,6 @@ type CTLog struct {
 	Certificate string `json:"certificate_pem"`
 }
 
-const SSLMATE_API_URL = "https://api.certspotter.com/v1/issuances?domain=%v&match_wildcards=true&expand=dns_names&expand=cert_der"
-
 func AuditCTLog(domain string, db *ttpDB) error {
 	taInfo, err := db.client.TAInfo.
 		Query().
@@ -92,6 +90,7 @@ func fetchCTLogs(domain string, after string) ([]CTLog, error) {
 func checkCTLogs(ctLogs []CTLog, productId uint16) error {
 	for _, ctLog := range ctLogs {
 		err := checkCTLog(ctLog, productId)
+
 		if err != nil {
 			return err
 		}
@@ -102,19 +101,19 @@ func checkCTLogs(ctLogs []CTLog, productId uint16) error {
 func checkCTLog(ctLog CTLog, productId uint16) error {
 	cert, err := x509.ParseCertificate([]byte(ctLog.Certificate))
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to parse certificate: %v", err)
 	}
 
 	extension, err := findCertExtensions(cert.Extensions, core.X509_EXTENSION_LABEL)
 	if err != nil {
-		return errors.New("extension not found")
+		return fmt.Errorf("extension not found: %v", err)
 	}
 
 	publicKey := cert.PublicKey.(*rsa.PublicKey)
 
 	_, err = core.VerifyByAzure(string(extension.Value), productId, publicKey)
 	if err != nil {
-		return errors.New("failed to verify attestation")
+		return fmt.Errorf("failed to verify attestation: %v", err)
 	}
 	return nil
 }
