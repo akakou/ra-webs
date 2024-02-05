@@ -8,6 +8,8 @@ import (
 	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
 
+var ISSUER_NAME = "Let's Encrypt"
+
 type Auditor struct {
 	db *auditDB
 	ct *metact.MetaCT
@@ -23,7 +25,7 @@ func NewAuditor(db *auditDB, ct *metact.MetaCT) (*Auditor, error) {
 func (auditor *Auditor) AuditOne(cert *metact.Certificate) error {
 	domain, violatingDomains, err := validateDomains(cert.Domains)
 
-	if err != nil {
+	if err != nil || cert.IssuerName != ISSUER_NAME {
 		revokeAllDomain(auditor.db, violatingDomains)
 		return fmt.Errorf("domain violation: %w", err)
 	}
