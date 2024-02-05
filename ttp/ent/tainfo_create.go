@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/ctlogaudit"
+	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
 
@@ -26,15 +27,9 @@ func (tic *TAInfoCreate) SetDomain(s string) *TAInfoCreate {
 	return tic
 }
 
-// SetPublicKeyHash sets the "public_key_hash" field.
-func (tic *TAInfoCreate) SetPublicKeyHash(s string) *TAInfoCreate {
-	tic.mutation.SetPublicKeyHash(s)
-	return tic
-}
-
-// SetAttestation sets the "attestation" field.
-func (tic *TAInfoCreate) SetAttestation(s string) *TAInfoCreate {
-	tic.mutation.SetAttestation(s)
+// SetGitRepository sets the "git_repository" field.
+func (tic *TAInfoCreate) SetGitRepository(s string) *TAInfoCreate {
+	tic.mutation.SetGitRepository(s)
 	return tic
 }
 
@@ -55,6 +50,21 @@ func (tic *TAInfoCreate) SetNillableCtLogID(id *int) *TAInfoCreate {
 // SetCtLog sets the "ct_log" edge to the CTLogAudit entity.
 func (tic *TAInfoCreate) SetCtLog(c *CTLogAudit) *TAInfoCreate {
 	return tic.SetCtLogID(c.ID)
+}
+
+// AddTaCodeIDs adds the "ta_code" edge to the TACode entity by IDs.
+func (tic *TAInfoCreate) AddTaCodeIDs(ids ...int) *TAInfoCreate {
+	tic.mutation.AddTaCodeIDs(ids...)
+	return tic
+}
+
+// AddTaCode adds the "ta_code" edges to the TACode entity.
+func (tic *TAInfoCreate) AddTaCode(t ...*TACode) *TAInfoCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return tic.AddTaCodeIDs(ids...)
 }
 
 // Mutation returns the TAInfoMutation object of the builder.
@@ -94,11 +104,8 @@ func (tic *TAInfoCreate) check() error {
 	if _, ok := tic.mutation.Domain(); !ok {
 		return &ValidationError{Name: "domain", err: errors.New(`ent: missing required field "TAInfo.domain"`)}
 	}
-	if _, ok := tic.mutation.PublicKeyHash(); !ok {
-		return &ValidationError{Name: "public_key_hash", err: errors.New(`ent: missing required field "TAInfo.public_key_hash"`)}
-	}
-	if _, ok := tic.mutation.Attestation(); !ok {
-		return &ValidationError{Name: "attestation", err: errors.New(`ent: missing required field "TAInfo.attestation"`)}
+	if _, ok := tic.mutation.GitRepository(); !ok {
+		return &ValidationError{Name: "git_repository", err: errors.New(`ent: missing required field "TAInfo.git_repository"`)}
 	}
 	return nil
 }
@@ -130,13 +137,9 @@ func (tic *TAInfoCreate) createSpec() (*TAInfo, *sqlgraph.CreateSpec) {
 		_spec.SetField(tainfo.FieldDomain, field.TypeString, value)
 		_node.Domain = value
 	}
-	if value, ok := tic.mutation.PublicKeyHash(); ok {
-		_spec.SetField(tainfo.FieldPublicKeyHash, field.TypeString, value)
-		_node.PublicKeyHash = value
-	}
-	if value, ok := tic.mutation.Attestation(); ok {
-		_spec.SetField(tainfo.FieldAttestation, field.TypeString, value)
-		_node.Attestation = value
+	if value, ok := tic.mutation.GitRepository(); ok {
+		_spec.SetField(tainfo.FieldGitRepository, field.TypeString, value)
+		_node.GitRepository = value
 	}
 	if nodes := tic.mutation.CtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -153,6 +156,22 @@ func (tic *TAInfoCreate) createSpec() (*TAInfo, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.ct_log_audit_ta_info = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tic.mutation.TaCodeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   tainfo.TaCodeTable,
+			Columns: tainfo.TaCodePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

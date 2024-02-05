@@ -14,9 +14,8 @@ type TAInfo struct {
 // Fields of the TA.
 func (TAInfo) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("domain").Unique(),
-		field.String("public_key_hash"),
-		field.String("attestation"),
+		field.String("domain"),
+		field.String("git_repository"),
 	}
 }
 
@@ -24,5 +23,6 @@ func (TAInfo) Fields() []ent.Field {
 func (TAInfo) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("ct_log", CTLogAudit.Type).Ref("ta_info").Unique(),
+		edge.From("ta_code", TACode.Type).Ref("ta_info"),
 	}
 }

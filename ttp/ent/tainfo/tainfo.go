@@ -14,12 +14,12 @@ const (
 	FieldID = "id"
 	// FieldDomain holds the string denoting the domain field in the database.
 	FieldDomain = "domain"
-	// FieldPublicKeyHash holds the string denoting the public_key_hash field in the database.
-	FieldPublicKeyHash = "public_key_hash"
-	// FieldAttestation holds the string denoting the attestation field in the database.
-	FieldAttestation = "attestation"
+	// FieldGitRepository holds the string denoting the git_repository field in the database.
+	FieldGitRepository = "git_repository"
 	// EdgeCtLog holds the string denoting the ct_log edge name in mutations.
 	EdgeCtLog = "ct_log"
+	// EdgeTaCode holds the string denoting the ta_code edge name in mutations.
+	EdgeTaCode = "ta_code"
 	// Table holds the table name of the tainfo in the database.
 	Table = "ta_infos"
 	// CtLogTable is the table that holds the ct_log relation/edge.
@@ -29,14 +29,18 @@ const (
 	CtLogInverseTable = "ct_log_audits"
 	// CtLogColumn is the table column denoting the ct_log relation/edge.
 	CtLogColumn = "ct_log_audit_ta_info"
+	// TaCodeTable is the table that holds the ta_code relation/edge. The primary key declared below.
+	TaCodeTable = "ta_code_ta_info"
+	// TaCodeInverseTable is the table name for the TACode entity.
+	// It exists in this package in order to avoid circular dependency with the "tacode" package.
+	TaCodeInverseTable = "ta_codes"
 )
 
 // Columns holds all SQL columns for tainfo fields.
 var Columns = []string{
 	FieldID,
 	FieldDomain,
-	FieldPublicKeyHash,
-	FieldAttestation,
+	FieldGitRepository,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "ta_infos"
@@ -44,6 +48,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"ct_log_audit_ta_info",
 }
+
+var (
+	// TaCodePrimaryKey and TaCodeColumn2 are the table columns denoting the
+	// primary key for the ta_code relation (M2M).
+	TaCodePrimaryKey = []string{"ta_code_id", "ta_info_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -73,14 +83,9 @@ func ByDomain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDomain, opts...).ToFunc()
 }
 
-// ByPublicKeyHash orders the results by the public_key_hash field.
-func ByPublicKeyHash(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPublicKeyHash, opts...).ToFunc()
-}
-
-// ByAttestation orders the results by the attestation field.
-func ByAttestation(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAttestation, opts...).ToFunc()
+// ByGitRepository orders the results by the git_repository field.
+func ByGitRepository(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGitRepository, opts...).ToFunc()
 }
 
 // ByCtLogField orders the results by ct_log field.
@@ -89,10 +94,31 @@ func ByCtLogField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newCtLogStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByTaCodeCount orders the results by ta_code count.
+func ByTaCodeCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTaCodeStep(), opts...)
+	}
+}
+
+// ByTaCode orders the results by ta_code terms.
+func ByTaCode(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTaCodeStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newCtLogStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CtLogInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, true, CtLogTable, CtLogColumn),
+	)
+}
+func newTaCodeStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TaCodeInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, TaCodeTable, TaCodePrimaryKey...),
 	)
 }

@@ -14,12 +14,12 @@ type DBConfig struct {
 	Config string
 }
 
-type ttpDB struct {
+type auditDB struct {
 	client *ent.Client
 	ctx    *context.Context
 }
 
-func newTtpDB(dbConfig *DBConfig) (*ttpDB, error) {
+func newAuditDB(dbConfig *DBConfig) (*auditDB, error) {
 	client, err := ent.Open(dbConfig.Type, dbConfig.Config)
 	if err != nil {
 		return nil, fmt.Errorf("failed opening connection to sqlite: %w", err)
@@ -31,74 +31,30 @@ func newTtpDB(dbConfig *DBConfig) (*ttpDB, error) {
 		return nil, fmt.Errorf("failed creating schema resources: %w", err)
 	}
 
-	return &ttpDB{
+	return &auditDB{
 		client: client,
 		ctx:    &ctx,
 	}, nil
 }
 
-func (db *ttpDB) toEntTaInfo(taInfo *TAInfo) *ent.TAInfoCreate {
-	entTaInfo := db.client.TAInfo.
-		Create().
-		SetDomain(taInfo.Domain).
-		SetPublicKeyHash(taInfo.PublicKeyHash).
-		SetAttestation(taInfo.Attestation)
-
-	return entTaInfo
-}
-
-func (db *ttpDB) toCoreTaInfo(taInfo *ent.TAInfo) *TAInfo {
-	return &TAInfo{
-		Domain:        taInfo.Domain,
-		PublicKeyHash: taInfo.PublicKeyHash,
-		Attestation:   taInfo.Attestation,
-	}
-}
-
-func (db *ttpDB) selectTaInfoByDomain(domain string) (*ent.TAInfo, error) {
-	taInfo, err := db.client.TAInfo.
-		Query().
-		Where(tainfo.DomainEQ(domain)).
-		WithCtLog().
-		Only(*db.ctx)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed querying ta info: %w", err)
-	}
-
-	return taInfo, nil
-}
-
-func (db *ttpDB) toEntCTLogAudit(ctLog *CTLogAudit, taInfo *ent.TAInfo) (*ent.CTLogAuditCreate, error) {
-	entCTLog := db.client.CTLogAudit.
-		Create().
-		SetLatestCtID(ctLog.LatestCTId).
-		SetIsValid(ctLog.IsValid).
-		SetTaInfo(taInfo)
-
-	return entCTLog, nil
-}
-
-func (db *ttpDB) toCoreCTLogAudit(ctLogAudit *ent.CTLogAudit) *CTLogAudit {
-	return &CTLogAudit{
-		TADomain:   ctLogAudit.Edges.TaInfo.Domain,
-		IsValid:    ctLogAudit.IsValid,
-		LatestCTId: ctLogAudit.LatestCtID,
-	}
-}
-
-func (db *ttpDB) selectCTLogByDomain(domain string) (*ent.CTLogAudit, error) {
-	taInfo, err := db.selectTaInfoByDomain(domain)
-	if err != nil {
-		return nil, fmt.Errorf("failed to select ta info by domain: %w", err)
-	}
-
-	ctLog := taInfo.Edges.CtLog
-	ctLog.Edges.TaInfo = taInfo
-
-	return ctLog, err
-}
-
-func (db *ttpDB) close() {
+func (db *auditDB) close() {
 	db.client.Close()
+}
+
+func revokeAllDomain(db *auditDB, domains []string) {
+	for _, violatingDomain := range domains {
+		taInfo, err := db.client.TAInfo.
+			Query().
+			Where(tainfo.DomainEQ(violatingDomain)).
+			WithCtLog().
+			WithTaCode().
+			All(*db.ctx)
+
+		if err != nil {
+			continue
+		}
+
+		taInfo[0].Edges.CtLog.IsValid = false
+		taInfo[0].Edges.CtLog.Update().Save(*db.ctx)
+	}
 }

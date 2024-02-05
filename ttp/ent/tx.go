@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// CTLogAudit is the client for interacting with the CTLogAudit builders.
 	CTLogAudit *CTLogAuditClient
+	// TACode is the client for interacting with the TACode builders.
+	TACode *TACodeClient
 	// TAInfo is the client for interacting with the TAInfo builders.
 	TAInfo *TAInfoClient
 
@@ -148,6 +150,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.CTLogAudit = NewCTLogAuditClient(tx.config)
+	tx.TACode = NewTACodeClient(tx.config)
 	tx.TAInfo = NewTAInfoClient(tx.config)
 }
 
