@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/akakou/ra_webs/ttp/ent"
+	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -38,4 +39,22 @@ func newAuditDB(dbConfig *DBConfig) (*auditDB, error) {
 
 func (db *auditDB) close() {
 	db.client.Close()
+}
+
+func revokeAllDomain(db *auditDB, domains []string) {
+	for _, violatingDomain := range domains {
+		taInfo, err := db.client.TAInfo.
+			Query().
+			Where(tainfo.DomainEQ(violatingDomain)).
+			WithCtLog().
+			WithTaCode().
+			All(*db.ctx)
+
+		if err != nil {
+			continue
+		}
+
+		taInfo[0].Edges.CtLog.IsValid = false
+		taInfo[0].Edges.CtLog.Update().Save(*db.ctx)
+	}
 }

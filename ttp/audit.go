@@ -23,7 +23,12 @@ func NewAuditor(db *auditDB, ct *metact.MetaCT) (*Auditor, error) {
 }
 
 func (auditor *Auditor) AuditOne(cert *metact.Certificate) error {
-	domain := cert.Domains[0]
+	domain, violatingDomains, err := checkDomainValidation(cert.Domains)
+
+	if err != nil {
+		revokeAllDomain(auditor.db, violatingDomains)
+		return fmt.Errorf("domain violation: %w", err)
+	}
 
 	taInfo, err := auditor.db.client.TAInfo.
 		Query().
@@ -51,6 +56,16 @@ func (auditor *Auditor) AuditOne(cert *metact.Certificate) error {
 
 	ctLog.Update().Save(*auditor.db.ctx)
 
+	return nil
+}
+
+func (auditor *Auditor) AuditAll(cert []metact.Certificate) error {
+	for _, c := range cert {
+		err := auditor.AuditOne(&c)
+		if err != nil {
+			return fmt.Errorf("failed to audit: %w", err)
+		}
+	}
 	return nil
 }
 
