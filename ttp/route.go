@@ -37,6 +37,11 @@ func Route(e *echo.Echo, auditor *Auditor) {
 			c.Error(err)
 		}
 
+		err = auditor.ct.Subscribe(reqTAInfo.Domain)
+		if err != nil {
+			c.Error(err)
+		}
+
 		return c.String(http.StatusOK, "ok")
 	})
 
