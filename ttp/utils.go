@@ -1,6 +1,8 @@
 package ttp
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"strings"
 
@@ -32,4 +34,16 @@ func extractDomainLast(domain string) string {
 	lastDomain := strings.Join(last, ".")
 
 	return lastDomain
+}
+
+func randomHexString(size int) string {
+	buf := make([]byte, size)
+	// then we can call rand.Read.
+	_, err := rand.Read(buf)
+	if err != nil {
+		panic(err)
+	}
+	r := hex.EncodeToString(buf)
+
+	return r
 }

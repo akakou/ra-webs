@@ -1,12 +1,18 @@
 package ttp
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-func Route(e *echo.Echo, db *auditDB) {
+var RANDOM_SIZE = 32
+
+func Route(e *echo.Echo, auditor *Auditor) {
+	webhookPath := "/webhook/" + randomHexString(RANDOM_SIZE)
+	fmt.Printf("webhook path: %s\n", webhookPath)
+
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
@@ -21,14 +27,28 @@ func Route(e *echo.Echo, db *auditDB) {
 			return c.String(http.StatusBadRequest, "bad attestation")
 		}
 
-		taInfo := db.client.TAInfo.
+		taInfo := auditor.db.client.TAInfo.
 			Create().
 			SetDomain(reqTAInfo.Domain).
 			SetGitRepository(reqTAInfo.GitRepository)
 
-		_, err := taInfo.Save(*db.ctx)
+		_, err := taInfo.Save(*auditor.db.ctx)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, "internal error")
+			c.Error(err)
+		}
+
+		return c.String(http.StatusOK, "ok")
+	})
+
+	e.GET(webhookPath, func(c echo.Context) error {
+		certs, err := auditor.ct.WebHookCertificates(c)
+		if err != nil {
+			c.Error(err)
+		}
+
+		err = auditor.AuditAll(certs)
+		if err != nil {
+			c.Error(err)
 		}
 
 		return c.String(http.StatusOK, "ok")
