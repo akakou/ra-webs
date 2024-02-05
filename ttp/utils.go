@@ -14,3 +14,8 @@ func findCertExtensions(extensions []pkix.Extension, label []int) (*pkix.Extensi
 
 	return nil, errors.New("extension not found")
 }
+
+type RegisterReqBody struct {
+	Domain        string
+	GitRepository string
+}

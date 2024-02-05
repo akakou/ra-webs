@@ -11,23 +11,19 @@ func Route(e *echo.Echo, db *ttpDB) {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
-	e.POST("/provision", func(c echo.Context) error {
-		provReq := new(TAInfo)
+	e.POST("/register", func(c echo.Context) error {
+		reqTAInfo := new(RegisterReqBody)
 
-		if c.Bind(provReq) != nil {
+		if c.Bind(reqTAInfo) != nil {
 			return c.String(http.StatusBadRequest, "bad attestation")
 		}
 
-		pubKeyHash, err := verifyAttestation(provReq.Attestation)
-		if err != nil {
-			return c.String(http.StatusBadRequest, "bad attestation")
-		}
+		taInfo := db.client.TAInfo.
+			Create().
+			SetDomain(reqTAInfo.Domain).
+			SetGitRepository(reqTAInfo.GitRepository)
 
-		provReq.PublicKeyHash = pubKeyHash
-
-		taInfo := db.toEntTaInfo(provReq)
-
-		_, err = taInfo.Save(*db.ctx)
+		_, err := taInfo.Save(*db.ctx)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, "internal error")
 		}
