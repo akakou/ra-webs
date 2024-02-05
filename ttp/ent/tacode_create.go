@@ -21,9 +21,9 @@ type TACodeCreate struct {
 	hooks    []Hook
 }
 
-// SetProductID sets the "product_id" field.
-func (tcc *TACodeCreate) SetProductID(u uint16) *TACodeCreate {
-	tcc.mutation.SetProductID(u)
+// SetUniqueID sets the "unique_id" field.
+func (tcc *TACodeCreate) SetUniqueID(u uint16) *TACodeCreate {
+	tcc.mutation.SetUniqueID(u)
 	return tcc
 }
 
@@ -96,8 +96,8 @@ func (tcc *TACodeCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (tcc *TACodeCreate) check() error {
-	if _, ok := tcc.mutation.ProductID(); !ok {
-		return &ValidationError{Name: "product_id", err: errors.New(`ent: missing required field "TACode.product_id"`)}
+	if _, ok := tcc.mutation.UniqueID(); !ok {
+		return &ValidationError{Name: "unique_id", err: errors.New(`ent: missing required field "TACode.unique_id"`)}
 	}
 	if _, ok := tcc.mutation.CommitID(); !ok {
 		return &ValidationError{Name: "commit_id", err: errors.New(`ent: missing required field "TACode.commit_id"`)}
@@ -128,9 +128,9 @@ func (tcc *TACodeCreate) createSpec() (*TACode, *sqlgraph.CreateSpec) {
 		_node = &TACode{config: tcc.config}
 		_spec = sqlgraph.NewCreateSpec(tacode.Table, sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt))
 	)
-	if value, ok := tcc.mutation.ProductID(); ok {
-		_spec.SetField(tacode.FieldProductID, field.TypeUint16, value)
-		_node.ProductID = value
+	if value, ok := tcc.mutation.UniqueID(); ok {
+		_spec.SetField(tacode.FieldUniqueID, field.TypeUint16, value)
+		_node.UniqueID = value
 	}
 	if value, ok := tcc.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)

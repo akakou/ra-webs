@@ -65,7 +65,7 @@ func Route(e *echo.Echo, auditor *Auditor) {
 		commitId, uniqueId := compile(taInfo)
 
 		taCode := auditor.db.client.TACode.
-			Create().AddTaInfo(taInfo).SetCommitID(commitId).SetProductID(uniqueId)
+			Create().AddTaInfo(taInfo).SetCommitID(commitId).SetUniqueID(uniqueId)
 
 		_, err = taCode.Save(*auditor.db.ctx)
 		if err != nil {

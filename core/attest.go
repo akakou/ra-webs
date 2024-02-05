@@ -32,13 +32,14 @@ func AttestByAzure(data []byte) (string, error) {
 	return token, nil
 }
 
-func VerifyByAzure(token string, data []byte, productId uint16) (*attestation.Report, error) {
+func VerifyByAzure(token string, data []byte, uniqueId uint16) (*attestation.Report, error) {
 	report, err := attestation.VerifyAzureAttestationToken(token, ATTEST_PROVIDER_URL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify attestation token: %w", err)
 	}
 
-	if binary.LittleEndian.Uint16(report.ProductID) != uint16(productId) {
+	// todo :fix 
+	if binary.LittleEndian.Uint16(report.UniqueID) != uint16(uniqueId) {
 		return nil, errors.New("token contains invalid product id")
 	}
 
