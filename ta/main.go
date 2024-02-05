@@ -15,8 +15,6 @@ import (
 const CERT_DIER_CACHE = "/var/www/.cache"
 const ATTEST_ENDPOINT = "/rawebs/attest"
 
-var QUOTE_OBJECT_ID = []int{1, 3, 6, 1, 4, 1, 48181, 1, 1}
-
 func SetRaWebs(e *echo.Echo) error {
 	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
 
@@ -38,7 +36,7 @@ func SetRaWebs(e *echo.Echo) error {
 		Cache:  autocert.DirCache(CERT_DIER_CACHE),
 		ExtraExtensions: []pkix.Extension{
 			{
-				Id:       QUOTE_OBJECT_ID,
+				Id:       core.X509_EXTENSION_LABEL,
 				Critical: false,
 				Value:    []byte(quote),
 			},
