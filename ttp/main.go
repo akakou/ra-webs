@@ -24,7 +24,7 @@ func NewTTPServer(dbConfig *DBConfig, templatePath string) *echo.Echo {
 		templates: template.Must(template.ParseGlob(templatePath)),
 	}
 
-	db, err := newTTPDB(dbConfig)
+	db, err := newAuditDB(dbConfig)
 	if err != nil {
 		panic(err)
 	}

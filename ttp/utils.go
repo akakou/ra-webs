@@ -1,18 +1,19 @@
 package ttp
 
 import (
-	"crypto/x509/pkix"
 	"errors"
+
+	"github.com/akakou/metact"
 )
 
-func findCertExtensions(extensions []pkix.Extension, label []int) (*pkix.Extension, error) {
+func findCertExtensions(extensions []metact.KeyValue, label string) (string, error) {
 	for _, ext := range extensions {
-		if ext.Id.Equal(label) {
-			return &ext, nil
+		if ext.Key == label {
+			return ext.Value, nil
 		}
 	}
 
-	return nil, errors.New("extension not found")
+	return "", errors.New("extension not found")
 }
 
 type RegisterReqBody struct {

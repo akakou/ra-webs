@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Route(e *echo.Echo, db *ttpDB) {
+func Route(e *echo.Echo, db *auditDB) {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})

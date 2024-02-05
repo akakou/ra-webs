@@ -13,12 +13,12 @@ type DBConfig struct {
 	Config string
 }
 
-type ttpDB struct {
+type auditDB struct {
 	client *ent.Client
 	ctx    *context.Context
 }
 
-func newTTPDB(dbConfig *DBConfig) (*ttpDB, error) {
+func newAuditDB(dbConfig *DBConfig) (*auditDB, error) {
 	client, err := ent.Open(dbConfig.Type, dbConfig.Config)
 	if err != nil {
 		return nil, fmt.Errorf("failed opening connection to sqlite: %w", err)
@@ -30,12 +30,12 @@ func newTTPDB(dbConfig *DBConfig) (*ttpDB, error) {
 		return nil, fmt.Errorf("failed creating schema resources: %w", err)
 	}
 
-	return &ttpDB{
+	return &auditDB{
 		client: client,
 		ctx:    &ctx,
 	}, nil
 }
 
-func (db *ttpDB) close() {
+func (db *auditDB) close() {
 	db.client.Close()
 }
