@@ -1,12 +1,10 @@
 package ttp
 
 import (
-	"encoding/hex"
 	"errors"
 	"fmt"
 
 	"github.com/akakou/metact"
-	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
 
@@ -23,7 +21,7 @@ func NewAuditor(db *auditDB, ct *metact.MetaCT) (*Auditor, error) {
 }
 
 func (auditor *Auditor) AuditOne(cert *metact.Certificate) error {
-	domain, violatingDomains, err := checkDomainValidation(cert.Domains)
+	domain, violatingDomains, err := validateDomains(cert.Domains)
 
 	if err != nil {
 		revokeAllDomain(auditor.db, violatingDomains)
@@ -48,12 +46,13 @@ func (auditor *Auditor) AuditOne(cert *metact.Certificate) error {
 
 	taCode := taInfo.Edges.TaCode[len(taInfo.Edges.TaCode)-1]
 
-	if verifyCTLog(cert, taCode.ProductID) != nil {
+	if validateAttestation(cert, taCode.ProductID) != nil {
 		ctLog.IsValid = false
 		ctLog.Update().Save(*auditor.db.ctx)
 		return fmt.Errorf("failed to check ct logs: %w", err)
 	}
 
+	ctLog.LatestCtID = cert.Id
 	ctLog.Update().Save(*auditor.db.ctx)
 
 	return nil
@@ -65,24 +64,6 @@ func (auditor *Auditor) AuditAll(cert []metact.Certificate) error {
 		if err != nil {
 			return fmt.Errorf("failed to audit: %w", err)
 		}
-	}
-	return nil
-}
-
-func verifyCTLog(cert *metact.Certificate, productId uint16) error {
-	token, err := findCertExtensions(cert.Extensions, "core.X509_EXTENSION_LABEL")
-	if err != nil {
-		return fmt.Errorf("extension not found: %v", err)
-	}
-
-	hashedPublicKey, err := hex.DecodeString(cert.PublicKeyHashSha256)
-	if err != nil {
-		return fmt.Errorf("failed to decode public key hash: %v", err)
-	}
-
-	_, err = core.VerifyByAzure(token, hashedPublicKey, productId)
-	if err != nil {
-		return fmt.Errorf("failed to verify attestation: %v", err)
 	}
 	return nil
 }

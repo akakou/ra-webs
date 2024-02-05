@@ -33,19 +33,3 @@ func splitDomainLast(domain string) string {
 
 	return lastDomain
 }
-
-func checkDomainValidation(domains []string) (string, []string, error) {
-	if len(domains) == 0 {
-		return domains[0], []string{}, nil
-	}
-
-	violatingDomains := []string{}
-
-	for _, domain := range domains {
-		domain := splitDomainLast(domain)
-		violatingDomains = append(violatingDomains, domain)
-	}
-
-	return "", violatingDomains, errors.New("domain violation")
-
-}
