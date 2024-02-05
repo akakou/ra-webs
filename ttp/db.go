@@ -43,7 +43,7 @@ func (db *auditDB) close() {
 
 func revokeAllDomain(db *auditDB, domains []string) {
 	for _, violatingDomain := range domains {
-		taInfo, err := db.client.TAInfo.
+		taInfos, err := db.client.TAInfo.
 			Query().
 			Where(tainfo.DomainEQ(violatingDomain)).
 			WithCtLog().
@@ -54,7 +54,10 @@ func revokeAllDomain(db *auditDB, domains []string) {
 			continue
 		}
 
-		taInfo[0].Edges.CtLog.IsValid = false
-		taInfo[0].Edges.CtLog.Update().Save(*db.ctx)
+		for _, taInfo := range taInfos {
+			taInfo.Edges.CtLog.IsValid = false
+			taInfo.Edges.CtLog.Update().Save(*db.ctx)
+
+		}
 	}
 }
