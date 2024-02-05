@@ -17,7 +17,7 @@ func findCertExtensions(extensions []metact.KeyValue, label string) (string, err
 	return "", errors.New("extension not found")
 }
 
-func splitDomainLast(domain string) string {
+func extractDomainLast(domain string) string {
 	domain = strings.Replace(domain, "*", "", -1)
 	splited := strings.Split(domain, ".")
 

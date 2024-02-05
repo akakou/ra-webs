@@ -17,7 +17,7 @@ func validateDomains(domains []string) (string, []string, error) {
 	violatingDomains := []string{}
 
 	for _, domain := range domains {
-		domain := splitDomainLast(domain)
+		domain := extractDomainLast(domain)
 		violatingDomains = append(violatingDomains, domain)
 	}
 
