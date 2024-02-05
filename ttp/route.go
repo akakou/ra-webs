@@ -12,7 +12,10 @@ func Route(e *echo.Echo, db *auditDB) {
 	})
 
 	e.POST("/register", func(c echo.Context) error {
-		reqTAInfo := new(RegisterReqBody)
+		reqTAInfo := new(struct {
+			Domain        string
+			GitRepository string
+		})
 
 		if c.Bind(reqTAInfo) != nil {
 			return c.String(http.StatusBadRequest, "bad attestation")

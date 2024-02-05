@@ -15,8 +15,3 @@ func findCertExtensions(extensions []metact.KeyValue, label string) (string, err
 
 	return "", errors.New("extension not found")
 }
-
-type RegisterReqBody struct {
-	Domain        string
-	GitRepository string
-}
