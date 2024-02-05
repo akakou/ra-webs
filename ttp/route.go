@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 	"github.com/labstack/echo/v4"
 )
 
@@ -38,6 +39,35 @@ func Route(e *echo.Echo, auditor *Auditor) {
 		}
 
 		err = auditor.ct.Subscribe(reqTAInfo.Domain)
+		if err != nil {
+			c.Error(err)
+		}
+
+		return c.String(http.StatusOK, "ok")
+	})
+
+	e.POST("/compile", func(c echo.Context) error {
+		idReq := new(struct {
+			id int `json:"id"`
+		})
+
+		if c.Bind(idReq) != nil {
+			return c.String(http.StatusBadRequest, "bad attestation")
+		}
+
+		taInfo, err := auditor.db.client.TAInfo.
+			Query().Where(tainfo.IDEQ(idReq.id)).First(*auditor.db.ctx)
+
+		if err != nil {
+			c.Error(err)
+		}
+
+		commitId, uniqueId := compile(taInfo)
+
+		taCode := auditor.db.client.TACode.
+			Create().AddTaInfo(taInfo).SetCommitID(commitId).SetProductID(uniqueId)
+
+		_, err = taCode.Save(*auditor.db.ctx)
 		if err != nil {
 			c.Error(err)
 		}
