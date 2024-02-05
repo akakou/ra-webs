@@ -22,8 +22,8 @@ type TACodeCreate struct {
 }
 
 // SetUniqueID sets the "unique_id" field.
-func (tcc *TACodeCreate) SetUniqueID(u uint16) *TACodeCreate {
-	tcc.mutation.SetUniqueID(u)
+func (tcc *TACodeCreate) SetUniqueID(b []byte) *TACodeCreate {
+	tcc.mutation.SetUniqueID(b)
 	return tcc
 }
 
@@ -129,7 +129,7 @@ func (tcc *TACodeCreate) createSpec() (*TACode, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(tacode.Table, sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt))
 	)
 	if value, ok := tcc.mutation.UniqueID(); ok {
-		_spec.SetField(tacode.FieldUniqueID, field.TypeUint16, value)
+		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
 		_node.UniqueID = value
 	}
 	if value, ok := tcc.mutation.CommitID(); ok {

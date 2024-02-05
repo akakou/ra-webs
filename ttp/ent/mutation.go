@@ -484,8 +484,7 @@ type TACodeMutation struct {
 	op             Op
 	typ            string
 	id             *int
-	unique_id      *uint16
-	addunique_id   *int16
+	unique_id      *[]byte
 	commit_id      *string
 	activated_at   *time.Time
 	clearedFields  map[string]struct{}
@@ -596,13 +595,12 @@ func (m *TACodeMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetUniqueID sets the "unique_id" field.
-func (m *TACodeMutation) SetUniqueID(u uint16) {
-	m.unique_id = &u
-	m.addunique_id = nil
+func (m *TACodeMutation) SetUniqueID(b []byte) {
+	m.unique_id = &b
 }
 
 // UniqueID returns the value of the "unique_id" field in the mutation.
-func (m *TACodeMutation) UniqueID() (r uint16, exists bool) {
+func (m *TACodeMutation) UniqueID() (r []byte, exists bool) {
 	v := m.unique_id
 	if v == nil {
 		return
@@ -613,7 +611,7 @@ func (m *TACodeMutation) UniqueID() (r uint16, exists bool) {
 // OldUniqueID returns the old "unique_id" field's value of the TACode entity.
 // If the TACode object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TACodeMutation) OldUniqueID(ctx context.Context) (v uint16, err error) {
+func (m *TACodeMutation) OldUniqueID(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUniqueID is only allowed on UpdateOne operations")
 	}
@@ -627,28 +625,9 @@ func (m *TACodeMutation) OldUniqueID(ctx context.Context) (v uint16, err error) 
 	return oldValue.UniqueID, nil
 }
 
-// AddUniqueID adds u to the "unique_id" field.
-func (m *TACodeMutation) AddUniqueID(u int16) {
-	if m.addunique_id != nil {
-		*m.addunique_id += u
-	} else {
-		m.addunique_id = &u
-	}
-}
-
-// AddedUniqueID returns the value that was added to the "unique_id" field in this mutation.
-func (m *TACodeMutation) AddedUniqueID() (r int16, exists bool) {
-	v := m.addunique_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetUniqueID resets all changes to the "unique_id" field.
 func (m *TACodeMutation) ResetUniqueID() {
 	m.unique_id = nil
-	m.addunique_id = nil
 }
 
 // SetCommitID sets the "commit_id" field.
@@ -873,7 +852,7 @@ func (m *TACodeMutation) OldField(ctx context.Context, name string) (ent.Value, 
 func (m *TACodeMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case tacode.FieldUniqueID:
-		v, ok := value.(uint16)
+		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -900,21 +879,13 @@ func (m *TACodeMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *TACodeMutation) AddedFields() []string {
-	var fields []string
-	if m.addunique_id != nil {
-		fields = append(fields, tacode.FieldUniqueID)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *TACodeMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case tacode.FieldUniqueID:
-		return m.AddedUniqueID()
-	}
 	return nil, false
 }
 
@@ -923,13 +894,6 @@ func (m *TACodeMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *TACodeMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case tacode.FieldUniqueID:
-		v, ok := value.(int16)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddUniqueID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown TACode numeric field %s", name)
 }

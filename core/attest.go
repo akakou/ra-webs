@@ -1,13 +1,12 @@
 package core
 
 import (
+	"bytes"
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
-	"encoding/binary"
 	"errors"
 	"fmt"
-	"reflect"
 
 	"github.com/edgelesssys/ego/attestation"
 	"github.com/edgelesssys/ego/enclave"
@@ -32,14 +31,13 @@ func AttestByAzure(data []byte) (string, error) {
 	return token, nil
 }
 
-func VerifyByAzure(token string, data []byte, uniqueId uint16) (*attestation.Report, error) {
+func VerifyByAzure(token string, data []byte, uniqueId []byte) (*attestation.Report, error) {
 	report, err := attestation.VerifyAzureAttestationToken(token, ATTEST_PROVIDER_URL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify attestation token: %w", err)
 	}
 
-	// todo :fix 
-	if binary.LittleEndian.Uint16(report.UniqueID) != uint16(uniqueId) {
+	if !bytes.Equal(report.UniqueID, uniqueId) {
 		return nil, errors.New("token contains invalid product id")
 	}
 
@@ -47,7 +45,7 @@ func VerifyByAzure(token string, data []byte, uniqueId uint16) (*attestation.Rep
 		return nil, errors.New("token contains invalid security version number")
 	}
 
-	if !reflect.DeepEqual(report.Data, data) {
+	if !bytes.Equal(report.Data, data) {
 		return nil, errors.New("token contains invalid public key hash")
 	}
 

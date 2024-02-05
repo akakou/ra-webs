@@ -61,11 +61,6 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByUniqueID orders the results by the unique_id field.
-func ByUniqueID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUniqueID, opts...).ToFunc()
-}
-
 // ByCommitID orders the results by the commit_id field.
 func ByCommitID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCommitID, opts...).ToFunc()

@@ -18,7 +18,7 @@ type TACode struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// UniqueID holds the value of the "unique_id" field.
-	UniqueID uint16 `json:"unique_id,omitempty"`
+	UniqueID []byte `json:"unique_id,omitempty"`
 	// CommitID holds the value of the "commit_id" field.
 	CommitID string `json:"commit_id,omitempty"`
 	// ActivatedAt holds the value of the "activated_at" field.
@@ -52,7 +52,9 @@ func (*TACode) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case tacode.FieldID, tacode.FieldUniqueID:
+		case tacode.FieldUniqueID:
+			values[i] = new([]byte)
+		case tacode.FieldID:
 			values[i] = new(sql.NullInt64)
 		case tacode.FieldCommitID:
 			values[i] = new(sql.NullString)
@@ -80,10 +82,10 @@ func (tc *TACode) assignValues(columns []string, values []any) error {
 			}
 			tc.ID = int(value.Int64)
 		case tacode.FieldUniqueID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field unique_id", values[i])
-			} else if value.Valid {
-				tc.UniqueID = uint16(value.Int64)
+			} else if value != nil {
+				tc.UniqueID = *value
 			}
 		case tacode.FieldCommitID:
 			if value, ok := values[i].(*sql.NullString); !ok {

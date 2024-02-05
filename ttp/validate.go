@@ -25,7 +25,7 @@ func validateDomains(domains []string) (string, []string, error) {
 
 }
 
-func validateAttestation(cert *metact.Certificate, productId uint16) error {
+func validateAttestation(cert *metact.Certificate, uniqueId []byte) error {
 	token, err := findCertExtensions(cert.Extensions, "core.X509_EXTENSION_LABEL")
 	if err != nil {
 		return fmt.Errorf("extension not found: %v", err)
@@ -36,7 +36,7 @@ func validateAttestation(cert *metact.Certificate, productId uint16) error {
 		return fmt.Errorf("failed to decode public key hash: %v", err)
 	}
 
-	_, err = core.VerifyByAzure(token, hashedPublicKey, productId)
+	_, err = core.VerifyByAzure(token, hashedPublicKey, uniqueId)
 	if err != nil {
 		return fmt.Errorf("failed to verify attestation: %v", err)
 	}

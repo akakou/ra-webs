@@ -56,7 +56,7 @@ func IDLTE(id int) predicate.TACode {
 }
 
 // UniqueID applies equality check predicate on the "unique_id" field. It's identical to UniqueIDEQ.
-func UniqueID(v uint16) predicate.TACode {
+func UniqueID(v []byte) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldUniqueID, v))
 }
 
@@ -71,42 +71,42 @@ func ActivatedAt(v time.Time) predicate.TACode {
 }
 
 // UniqueIDEQ applies the EQ predicate on the "unique_id" field.
-func UniqueIDEQ(v uint16) predicate.TACode {
+func UniqueIDEQ(v []byte) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldUniqueID, v))
 }
 
 // UniqueIDNEQ applies the NEQ predicate on the "unique_id" field.
-func UniqueIDNEQ(v uint16) predicate.TACode {
+func UniqueIDNEQ(v []byte) predicate.TACode {
 	return predicate.TACode(sql.FieldNEQ(FieldUniqueID, v))
 }
 
 // UniqueIDIn applies the In predicate on the "unique_id" field.
-func UniqueIDIn(vs ...uint16) predicate.TACode {
+func UniqueIDIn(vs ...[]byte) predicate.TACode {
 	return predicate.TACode(sql.FieldIn(FieldUniqueID, vs...))
 }
 
 // UniqueIDNotIn applies the NotIn predicate on the "unique_id" field.
-func UniqueIDNotIn(vs ...uint16) predicate.TACode {
+func UniqueIDNotIn(vs ...[]byte) predicate.TACode {
 	return predicate.TACode(sql.FieldNotIn(FieldUniqueID, vs...))
 }
 
 // UniqueIDGT applies the GT predicate on the "unique_id" field.
-func UniqueIDGT(v uint16) predicate.TACode {
+func UniqueIDGT(v []byte) predicate.TACode {
 	return predicate.TACode(sql.FieldGT(FieldUniqueID, v))
 }
 
 // UniqueIDGTE applies the GTE predicate on the "unique_id" field.
-func UniqueIDGTE(v uint16) predicate.TACode {
+func UniqueIDGTE(v []byte) predicate.TACode {
 	return predicate.TACode(sql.FieldGTE(FieldUniqueID, v))
 }
 
 // UniqueIDLT applies the LT predicate on the "unique_id" field.
-func UniqueIDLT(v uint16) predicate.TACode {
+func UniqueIDLT(v []byte) predicate.TACode {
 	return predicate.TACode(sql.FieldLT(FieldUniqueID, v))
 }
 
 // UniqueIDLTE applies the LTE predicate on the "unique_id" field.
-func UniqueIDLTE(v uint16) predicate.TACode {
+func UniqueIDLTE(v []byte) predicate.TACode {
 	return predicate.TACode(sql.FieldLTE(FieldUniqueID, v))
 }
 
