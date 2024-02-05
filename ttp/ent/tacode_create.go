@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -29,6 +30,20 @@ func (tcc *TACodeCreate) SetProductID(u uint16) *TACodeCreate {
 // SetCommitID sets the "commit_id" field.
 func (tcc *TACodeCreate) SetCommitID(s string) *TACodeCreate {
 	tcc.mutation.SetCommitID(s)
+	return tcc
+}
+
+// SetActivatedAt sets the "activated_at" field.
+func (tcc *TACodeCreate) SetActivatedAt(t time.Time) *TACodeCreate {
+	tcc.mutation.SetActivatedAt(t)
+	return tcc
+}
+
+// SetNillableActivatedAt sets the "activated_at" field if the given value is not nil.
+func (tcc *TACodeCreate) SetNillableActivatedAt(t *time.Time) *TACodeCreate {
+	if t != nil {
+		tcc.SetActivatedAt(*t)
+	}
 	return tcc
 }
 
@@ -120,6 +135,10 @@ func (tcc *TACodeCreate) createSpec() (*TACode, *sqlgraph.CreateSpec) {
 	if value, ok := tcc.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)
 		_node.CommitID = value
+	}
+	if value, ok := tcc.mutation.ActivatedAt(); ok {
+		_spec.SetField(tacode.FieldActivatedAt, field.TypeTime, value)
+		_node.ActivatedAt = value
 	}
 	if nodes := tcc.mutation.TaInfoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -16,6 +16,8 @@ const (
 	FieldProductID = "product_id"
 	// FieldCommitID holds the string denoting the commit_id field in the database.
 	FieldCommitID = "commit_id"
+	// FieldActivatedAt holds the string denoting the activated_at field in the database.
+	FieldActivatedAt = "activated_at"
 	// EdgeTaInfo holds the string denoting the ta_info edge name in mutations.
 	EdgeTaInfo = "ta_info"
 	// Table holds the table name of the tacode in the database.
@@ -32,6 +34,7 @@ var Columns = []string{
 	FieldID,
 	FieldProductID,
 	FieldCommitID,
+	FieldActivatedAt,
 }
 
 var (
@@ -66,6 +69,11 @@ func ByProductID(opts ...sql.OrderTermOption) OrderOption {
 // ByCommitID orders the results by the commit_id field.
 func ByCommitID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCommitID, opts...).ToFunc()
+}
+
+// ByActivatedAt orders the results by the activated_at field.
+func ByActivatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldActivatedAt, opts...).ToFunc()
 }
 
 // ByTaInfoCount orders the results by ta_info count.

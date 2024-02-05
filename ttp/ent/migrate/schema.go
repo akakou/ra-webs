@@ -25,6 +25,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "product_id", Type: field.TypeUint16},
 		{Name: "commit_id", Type: field.TypeString},
+		{Name: "activated_at", Type: field.TypeTime, Nullable: true},
 	}
 	// TaCodesTable holds the schema information for the "ta_codes" table.
 	TaCodesTable = &schema.Table{

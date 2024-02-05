@@ -3,6 +3,8 @@
 package tacode
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
@@ -61,6 +63,11 @@ func ProductID(v uint16) predicate.TACode {
 // CommitID applies equality check predicate on the "commit_id" field. It's identical to CommitIDEQ.
 func CommitID(v string) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldCommitID, v))
+}
+
+// ActivatedAt applies equality check predicate on the "activated_at" field. It's identical to ActivatedAtEQ.
+func ActivatedAt(v time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldActivatedAt, v))
 }
 
 // ProductIDEQ applies the EQ predicate on the "product_id" field.
@@ -166,6 +173,56 @@ func CommitIDEqualFold(v string) predicate.TACode {
 // CommitIDContainsFold applies the ContainsFold predicate on the "commit_id" field.
 func CommitIDContainsFold(v string) predicate.TACode {
 	return predicate.TACode(sql.FieldContainsFold(FieldCommitID, v))
+}
+
+// ActivatedAtEQ applies the EQ predicate on the "activated_at" field.
+func ActivatedAtEQ(v time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldActivatedAt, v))
+}
+
+// ActivatedAtNEQ applies the NEQ predicate on the "activated_at" field.
+func ActivatedAtNEQ(v time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldNEQ(FieldActivatedAt, v))
+}
+
+// ActivatedAtIn applies the In predicate on the "activated_at" field.
+func ActivatedAtIn(vs ...time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldIn(FieldActivatedAt, vs...))
+}
+
+// ActivatedAtNotIn applies the NotIn predicate on the "activated_at" field.
+func ActivatedAtNotIn(vs ...time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldNotIn(FieldActivatedAt, vs...))
+}
+
+// ActivatedAtGT applies the GT predicate on the "activated_at" field.
+func ActivatedAtGT(v time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldGT(FieldActivatedAt, v))
+}
+
+// ActivatedAtGTE applies the GTE predicate on the "activated_at" field.
+func ActivatedAtGTE(v time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldGTE(FieldActivatedAt, v))
+}
+
+// ActivatedAtLT applies the LT predicate on the "activated_at" field.
+func ActivatedAtLT(v time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldLT(FieldActivatedAt, v))
+}
+
+// ActivatedAtLTE applies the LTE predicate on the "activated_at" field.
+func ActivatedAtLTE(v time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldLTE(FieldActivatedAt, v))
+}
+
+// ActivatedAtIsNil applies the IsNil predicate on the "activated_at" field.
+func ActivatedAtIsNil() predicate.TACode {
+	return predicate.TACode(sql.FieldIsNull(FieldActivatedAt))
+}
+
+// ActivatedAtNotNil applies the NotNil predicate on the "activated_at" field.
+func ActivatedAtNotNil() predicate.TACode {
+	return predicate.TACode(sql.FieldNotNull(FieldActivatedAt))
 }
 
 // HasTaInfo applies the HasEdge predicate on the "ta_info" edge.

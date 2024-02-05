@@ -16,6 +16,7 @@ func (TACode) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint16("product_id"),
 		field.String("commit_id"),
+		field.Time("activated_at").Default(nil).Optional(),
 	}
 }
 

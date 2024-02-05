@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -20,6 +21,8 @@ type TACode struct {
 	ProductID uint16 `json:"product_id,omitempty"`
 	// CommitID holds the value of the "commit_id" field.
 	CommitID string `json:"commit_id,omitempty"`
+	// ActivatedAt holds the value of the "activated_at" field.
+	ActivatedAt time.Time `json:"activated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TACodeQuery when eager-loading is set.
 	Edges        TACodeEdges `json:"edges"`
@@ -53,6 +56,8 @@ func (*TACode) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case tacode.FieldCommitID:
 			values[i] = new(sql.NullString)
+		case tacode.FieldActivatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -85,6 +90,12 @@ func (tc *TACode) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field commit_id", values[i])
 			} else if value.Valid {
 				tc.CommitID = value.String
+			}
+		case tacode.FieldActivatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field activated_at", values[i])
+			} else if value.Valid {
+				tc.ActivatedAt = value.Time
 			}
 		default:
 			tc.selectValues.Set(columns[i], values[i])
@@ -132,6 +143,9 @@ func (tc *TACode) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("commit_id=")
 	builder.WriteString(tc.CommitID)
+	builder.WriteString(", ")
+	builder.WriteString("activated_at=")
+	builder.WriteString(tc.ActivatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
