@@ -1,7 +1,6 @@
 package ttp
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -9,33 +8,30 @@ import (
 
 var RANDOM_SIZE = 32
 
-type echoRoute = func(c echo.Context) error
+type echoRouteFunc = func(c echo.Context) error
 
-type AuditServer struct {
-	auditor *Auditor
+type echoRoute struct {
+	path string
+	f    func(*Auditor) echoRouteFunc
 }
 
-func NewAuditServer(auditor *Auditor) *AuditServer {
-	return &AuditServer{auditor}
+func (er echoRoute) get(e *echo.Echo, auditor *Auditor) {
+	e.GET(er.path, er.f(auditor))
 }
 
-func (auditServ *AuditServer) Route(e *echo.Echo) {
-	webhookPath := "/webhook/" + randomHexString(RANDOM_SIZE)
-	fmt.Printf("webhook path: %s\n", webhookPath)
+func (er echoRoute) post(e *echo.Echo, auditor *Auditor) {
+	e.POST(er.path, er.f(auditor))
+}
+
+func Route(e *echo.Echo, auditor *Auditor) {
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
-	e.POST("/register", auditServ.register())
+	registerTAApi.post(e, auditor)
+	updateTAApi.post(e, auditor)
+	webhook().post(e, auditor)
 
-	e.POST("/compile", auditServ.compile())
-
-	e.GET("/webhook", auditServ.webhook())
-
-	e.GET("/redirect", func(c echo.Context) error {
-		back := c.Request().Header.Get("Referer")
-
-		return c.Render(http.StatusOK, "redirect", back)
-	})
+	redirectWebPage.get(e, auditor)
 }

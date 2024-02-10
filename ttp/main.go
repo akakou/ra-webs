@@ -36,8 +36,7 @@ func NewTTPServer(ct *metact.MetaCT, dbConfig *DBConfig, templatePath string) *e
 		panic(err)
 	}
 
-	auditServ := NewAuditServer(auditor)
-	auditServ.Route(e)
+	Route(e, auditor)
 
 	return e
 }

@@ -1,23 +1,32 @@
 package ttp
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-func (auditServ *AuditServer) webhook() echoRoute {
-	return func(c echo.Context) error {
-		certs, err := auditServ.auditor.ct.WebHookCertificates(c)
-		if err != nil {
-			c.Error(err)
-		}
+func webhook() echoRoute {
+	path := "/webhook/" + randomHexString(RANDOM_SIZE)
+	fmt.Printf("webhook path: %s\n", path)
 
-		err = auditServ.auditor.AuditAll(certs)
-		if err != nil {
-			c.Error(err)
-		}
+	return echoRoute{
+		path: path,
+		f: func(auditor *Auditor) echoRouteFunc {
+			return func(c echo.Context) error {
+				certs, err := auditor.ct.WebHookCertificates(c)
+				if err != nil {
+					c.Error(err)
+				}
 
-		return c.String(http.StatusOK, "ok")
+				err = auditor.AuditAll(certs)
+				if err != nil {
+					c.Error(err)
+				}
+
+				return c.String(http.StatusOK, "ok")
+			}
+		},
 	}
 }
