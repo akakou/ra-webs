@@ -43,6 +43,20 @@ func (tiu *TAInfoUpdate) SetNillableDomain(s *string) *TAInfoUpdate {
 	return tiu
 }
 
+// SetIPAddress sets the "ip_address" field.
+func (tiu *TAInfoUpdate) SetIPAddress(s string) *TAInfoUpdate {
+	tiu.mutation.SetIPAddress(s)
+	return tiu
+}
+
+// SetNillableIPAddress sets the "ip_address" field if the given value is not nil.
+func (tiu *TAInfoUpdate) SetNillableIPAddress(s *string) *TAInfoUpdate {
+	if s != nil {
+		tiu.SetIPAddress(*s)
+	}
+	return tiu
+}
+
 // SetGitRepository sets the "git_repository" field.
 func (tiu *TAInfoUpdate) SetGitRepository(s string) *TAInfoUpdate {
 	tiu.mutation.SetGitRepository(s)
@@ -162,6 +176,9 @@ func (tiu *TAInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tiu.mutation.Domain(); ok {
 		_spec.SetField(tainfo.FieldDomain, field.TypeString, value)
 	}
+	if value, ok := tiu.mutation.IPAddress(); ok {
+		_spec.SetField(tainfo.FieldIPAddress, field.TypeString, value)
+	}
 	if value, ok := tiu.mutation.GitRepository(); ok {
 		_spec.SetField(tainfo.FieldGitRepository, field.TypeString, value)
 	}
@@ -269,6 +286,20 @@ func (tiuo *TAInfoUpdateOne) SetDomain(s string) *TAInfoUpdateOne {
 func (tiuo *TAInfoUpdateOne) SetNillableDomain(s *string) *TAInfoUpdateOne {
 	if s != nil {
 		tiuo.SetDomain(*s)
+	}
+	return tiuo
+}
+
+// SetIPAddress sets the "ip_address" field.
+func (tiuo *TAInfoUpdateOne) SetIPAddress(s string) *TAInfoUpdateOne {
+	tiuo.mutation.SetIPAddress(s)
+	return tiuo
+}
+
+// SetNillableIPAddress sets the "ip_address" field if the given value is not nil.
+func (tiuo *TAInfoUpdateOne) SetNillableIPAddress(s *string) *TAInfoUpdateOne {
+	if s != nil {
+		tiuo.SetIPAddress(*s)
 	}
 	return tiuo
 }
@@ -421,6 +452,9 @@ func (tiuo *TAInfoUpdateOne) sqlSave(ctx context.Context) (_node *TAInfo, err er
 	}
 	if value, ok := tiuo.mutation.Domain(); ok {
 		_spec.SetField(tainfo.FieldDomain, field.TypeString, value)
+	}
+	if value, ok := tiuo.mutation.IPAddress(); ok {
+		_spec.SetField(tainfo.FieldIPAddress, field.TypeString, value)
 	}
 	if value, ok := tiuo.mutation.GitRepository(); ok {
 		_spec.SetField(tainfo.FieldGitRepository, field.TypeString, value)

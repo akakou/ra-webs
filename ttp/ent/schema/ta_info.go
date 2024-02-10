@@ -15,6 +15,7 @@ type TAInfo struct {
 func (TAInfo) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("domain"),
+		field.String("ip_address"),
 		field.String("git_repository"),
 	}
 }

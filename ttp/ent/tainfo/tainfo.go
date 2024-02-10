@@ -14,6 +14,8 @@ const (
 	FieldID = "id"
 	// FieldDomain holds the string denoting the domain field in the database.
 	FieldDomain = "domain"
+	// FieldIPAddress holds the string denoting the ip_address field in the database.
+	FieldIPAddress = "ip_address"
 	// FieldGitRepository holds the string denoting the git_repository field in the database.
 	FieldGitRepository = "git_repository"
 	// EdgeCtLog holds the string denoting the ct_log edge name in mutations.
@@ -40,6 +42,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldDomain,
+	FieldIPAddress,
 	FieldGitRepository,
 }
 
@@ -81,6 +84,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByDomain orders the results by the domain field.
 func ByDomain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDomain, opts...).ToFunc()
+}
+
+// ByIPAddress orders the results by the ip_address field.
+func ByIPAddress(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIPAddress, opts...).ToFunc()
 }
 
 // ByGitRepository orders the results by the git_repository field.

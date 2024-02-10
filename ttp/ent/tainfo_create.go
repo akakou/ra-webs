@@ -27,6 +27,12 @@ func (tic *TAInfoCreate) SetDomain(s string) *TAInfoCreate {
 	return tic
 }
 
+// SetIPAddress sets the "ip_address" field.
+func (tic *TAInfoCreate) SetIPAddress(s string) *TAInfoCreate {
+	tic.mutation.SetIPAddress(s)
+	return tic
+}
+
 // SetGitRepository sets the "git_repository" field.
 func (tic *TAInfoCreate) SetGitRepository(s string) *TAInfoCreate {
 	tic.mutation.SetGitRepository(s)
@@ -104,6 +110,9 @@ func (tic *TAInfoCreate) check() error {
 	if _, ok := tic.mutation.Domain(); !ok {
 		return &ValidationError{Name: "domain", err: errors.New(`ent: missing required field "TAInfo.domain"`)}
 	}
+	if _, ok := tic.mutation.IPAddress(); !ok {
+		return &ValidationError{Name: "ip_address", err: errors.New(`ent: missing required field "TAInfo.ip_address"`)}
+	}
 	if _, ok := tic.mutation.GitRepository(); !ok {
 		return &ValidationError{Name: "git_repository", err: errors.New(`ent: missing required field "TAInfo.git_repository"`)}
 	}
@@ -136,6 +145,10 @@ func (tic *TAInfoCreate) createSpec() (*TAInfo, *sqlgraph.CreateSpec) {
 	if value, ok := tic.mutation.Domain(); ok {
 		_spec.SetField(tainfo.FieldDomain, field.TypeString, value)
 		_node.Domain = value
+	}
+	if value, ok := tic.mutation.IPAddress(); ok {
+		_spec.SetField(tainfo.FieldIPAddress, field.TypeString, value)
+		_node.IPAddress = value
 	}
 	if value, ok := tic.mutation.GitRepository(); ok {
 		_spec.SetField(tainfo.FieldGitRepository, field.TypeString, value)

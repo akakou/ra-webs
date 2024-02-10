@@ -19,6 +19,8 @@ type TAInfo struct {
 	ID int `json:"id,omitempty"`
 	// Domain holds the value of the "domain" field.
 	Domain string `json:"domain,omitempty"`
+	// IPAddress holds the value of the "ip_address" field.
+	IPAddress string `json:"ip_address,omitempty"`
 	// GitRepository holds the value of the "git_repository" field.
 	GitRepository string `json:"git_repository,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -68,7 +70,7 @@ func (*TAInfo) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case tainfo.FieldID:
 			values[i] = new(sql.NullInt64)
-		case tainfo.FieldDomain, tainfo.FieldGitRepository:
+		case tainfo.FieldDomain, tainfo.FieldIPAddress, tainfo.FieldGitRepository:
 			values[i] = new(sql.NullString)
 		case tainfo.ForeignKeys[0]: // ct_log_audit_ta_info
 			values[i] = new(sql.NullInt64)
@@ -98,6 +100,12 @@ func (ti *TAInfo) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field domain", values[i])
 			} else if value.Valid {
 				ti.Domain = value.String
+			}
+		case tainfo.FieldIPAddress:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field ip_address", values[i])
+			} else if value.Valid {
+				ti.IPAddress = value.String
 			}
 		case tainfo.FieldGitRepository:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -160,6 +168,9 @@ func (ti *TAInfo) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", ti.ID))
 	builder.WriteString("domain=")
 	builder.WriteString(ti.Domain)
+	builder.WriteString(", ")
+	builder.WriteString("ip_address=")
+	builder.WriteString(ti.IPAddress)
 	builder.WriteString(", ")
 	builder.WriteString("git_repository=")
 	builder.WriteString(ti.GitRepository)

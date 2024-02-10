@@ -37,6 +37,7 @@ var (
 	TaInfosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "domain", Type: field.TypeString},
+		{Name: "ip_address", Type: field.TypeString},
 		{Name: "git_repository", Type: field.TypeString},
 		{Name: "ct_log_audit_ta_info", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
@@ -48,7 +49,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ta_infos_ct_log_audits_ta_info",
-				Columns:    []*schema.Column{TaInfosColumns[3]},
+				Columns:    []*schema.Column{TaInfosColumns[4]},
 				RefColumns: []*schema.Column{CtLogAuditsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

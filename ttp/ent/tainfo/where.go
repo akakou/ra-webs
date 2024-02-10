@@ -58,6 +58,11 @@ func Domain(v string) predicate.TAInfo {
 	return predicate.TAInfo(sql.FieldEQ(FieldDomain, v))
 }
 
+// IPAddress applies equality check predicate on the "ip_address" field. It's identical to IPAddressEQ.
+func IPAddress(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldEQ(FieldIPAddress, v))
+}
+
 // GitRepository applies equality check predicate on the "git_repository" field. It's identical to GitRepositoryEQ.
 func GitRepository(v string) predicate.TAInfo {
 	return predicate.TAInfo(sql.FieldEQ(FieldGitRepository, v))
@@ -126,6 +131,71 @@ func DomainEqualFold(v string) predicate.TAInfo {
 // DomainContainsFold applies the ContainsFold predicate on the "domain" field.
 func DomainContainsFold(v string) predicate.TAInfo {
 	return predicate.TAInfo(sql.FieldContainsFold(FieldDomain, v))
+}
+
+// IPAddressEQ applies the EQ predicate on the "ip_address" field.
+func IPAddressEQ(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldEQ(FieldIPAddress, v))
+}
+
+// IPAddressNEQ applies the NEQ predicate on the "ip_address" field.
+func IPAddressNEQ(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldNEQ(FieldIPAddress, v))
+}
+
+// IPAddressIn applies the In predicate on the "ip_address" field.
+func IPAddressIn(vs ...string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldIn(FieldIPAddress, vs...))
+}
+
+// IPAddressNotIn applies the NotIn predicate on the "ip_address" field.
+func IPAddressNotIn(vs ...string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldNotIn(FieldIPAddress, vs...))
+}
+
+// IPAddressGT applies the GT predicate on the "ip_address" field.
+func IPAddressGT(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldGT(FieldIPAddress, v))
+}
+
+// IPAddressGTE applies the GTE predicate on the "ip_address" field.
+func IPAddressGTE(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldGTE(FieldIPAddress, v))
+}
+
+// IPAddressLT applies the LT predicate on the "ip_address" field.
+func IPAddressLT(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldLT(FieldIPAddress, v))
+}
+
+// IPAddressLTE applies the LTE predicate on the "ip_address" field.
+func IPAddressLTE(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldLTE(FieldIPAddress, v))
+}
+
+// IPAddressContains applies the Contains predicate on the "ip_address" field.
+func IPAddressContains(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldContains(FieldIPAddress, v))
+}
+
+// IPAddressHasPrefix applies the HasPrefix predicate on the "ip_address" field.
+func IPAddressHasPrefix(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldHasPrefix(FieldIPAddress, v))
+}
+
+// IPAddressHasSuffix applies the HasSuffix predicate on the "ip_address" field.
+func IPAddressHasSuffix(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldHasSuffix(FieldIPAddress, v))
+}
+
+// IPAddressEqualFold applies the EqualFold predicate on the "ip_address" field.
+func IPAddressEqualFold(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldEqualFold(FieldIPAddress, v))
+}
+
+// IPAddressContainsFold applies the ContainsFold predicate on the "ip_address" field.
+func IPAddressContainsFold(v string) predicate.TAInfo {
+	return predicate.TAInfo(sql.FieldContainsFold(FieldIPAddress, v))
 }
 
 // GitRepositoryEQ applies the EQ predicate on the "git_repository" field.

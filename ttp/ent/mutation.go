@@ -1034,6 +1034,7 @@ type TAInfoMutation struct {
 	typ            string
 	id             *int
 	domain         *string
+	ip_address     *string
 	git_repository *string
 	clearedFields  map[string]struct{}
 	ct_log         *int
@@ -1178,6 +1179,42 @@ func (m *TAInfoMutation) OldDomain(ctx context.Context) (v string, err error) {
 // ResetDomain resets all changes to the "domain" field.
 func (m *TAInfoMutation) ResetDomain() {
 	m.domain = nil
+}
+
+// SetIPAddress sets the "ip_address" field.
+func (m *TAInfoMutation) SetIPAddress(s string) {
+	m.ip_address = &s
+}
+
+// IPAddress returns the value of the "ip_address" field in the mutation.
+func (m *TAInfoMutation) IPAddress() (r string, exists bool) {
+	v := m.ip_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIPAddress returns the old "ip_address" field's value of the TAInfo entity.
+// If the TAInfo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TAInfoMutation) OldIPAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIPAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIPAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIPAddress: %w", err)
+	}
+	return oldValue.IPAddress, nil
+}
+
+// ResetIPAddress resets all changes to the "ip_address" field.
+func (m *TAInfoMutation) ResetIPAddress() {
+	m.ip_address = nil
 }
 
 // SetGitRepository sets the "git_repository" field.
@@ -1343,9 +1380,12 @@ func (m *TAInfoMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TAInfoMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.domain != nil {
 		fields = append(fields, tainfo.FieldDomain)
+	}
+	if m.ip_address != nil {
+		fields = append(fields, tainfo.FieldIPAddress)
 	}
 	if m.git_repository != nil {
 		fields = append(fields, tainfo.FieldGitRepository)
@@ -1360,6 +1400,8 @@ func (m *TAInfoMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case tainfo.FieldDomain:
 		return m.Domain()
+	case tainfo.FieldIPAddress:
+		return m.IPAddress()
 	case tainfo.FieldGitRepository:
 		return m.GitRepository()
 	}
@@ -1373,6 +1415,8 @@ func (m *TAInfoMutation) OldField(ctx context.Context, name string) (ent.Value, 
 	switch name {
 	case tainfo.FieldDomain:
 		return m.OldDomain(ctx)
+	case tainfo.FieldIPAddress:
+		return m.OldIPAddress(ctx)
 	case tainfo.FieldGitRepository:
 		return m.OldGitRepository(ctx)
 	}
@@ -1390,6 +1434,13 @@ func (m *TAInfoMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDomain(v)
+		return nil
+	case tainfo.FieldIPAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIPAddress(v)
 		return nil
 	case tainfo.FieldGitRepository:
 		v, ok := value.(string)
@@ -1449,6 +1500,9 @@ func (m *TAInfoMutation) ResetField(name string) error {
 	switch name {
 	case tainfo.FieldDomain:
 		m.ResetDomain()
+		return nil
+	case tainfo.FieldIPAddress:
+		m.ResetIPAddress()
 		return nil
 	case tainfo.FieldGitRepository:
 		m.ResetGitRepository()
