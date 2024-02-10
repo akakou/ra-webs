@@ -14,7 +14,7 @@ var registerTAApi = echoRoute{
 	f: func(auditor *Auditor) echoRouteFunc {
 		return func(c echo.Context) error {
 			reqTAInfo := new(struct {
-				// IP            string
+				IP            string
 				Domain        string
 				GitRepository string
 			})
@@ -26,7 +26,8 @@ var registerTAApi = echoRoute{
 			taInfo := auditor.db.client.TAInfo.
 				Create().
 				SetDomain(reqTAInfo.Domain).
-				SetGitRepository(reqTAInfo.GitRepository)
+				SetGitRepository(reqTAInfo.GitRepository).
+				SetIPAddress(reqTAInfo.IP)
 
 			_, err := taInfo.Save(*auditor.db.ctx)
 			if err != nil {
