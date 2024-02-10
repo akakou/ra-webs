@@ -1,22 +1,22 @@
 package ttp
 
 import (
-	"fmt"
-	"os/exec"
-
 	"github.com/akakou/ra_webs/ttp/ent"
 )
 
 var REPOSITORIES = "./data/repositories"
 
 func compile(tainfo *ent.TAInfo) (string, []byte) {
-	folderName := fmt.Sprintf("%v/%v", REPOSITORIES, tainfo.ID)
-	exec.Command("mkdir", "-p", REPOSITORIES)
+	// todo: compile the code
 
-	exec.Command("git", "clone", tainfo.GitRepository, folderName)
+	// folderName := fmt.Sprintf("%v/%v", REPOSITORIES, tainfo.ID)
+	// exec.Command("mkdir", "-p", REPOSITORIES)
 
-	commitId := ""
-	uniqueId := []byte{}
+	// exec.Command("git", "clone", tainfo.GitRepository, folderName)
 
-	return commitId, uniqueId
+	// commitId := ""
+	// uniqueId := []byte{}
+
+	// return commitId, uniqueId
+	return "", nil
 }
