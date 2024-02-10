@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/akakou/metact"
-	"github.com/akakou/ra_webs/ttp/ent/tainfo"
+	"github.com/akakou/ra_webs/ttp/ent/ta"
 )
 
 var ISSUER_NAME = "Let's Encrypt"
@@ -30,32 +30,32 @@ func (auditor *Auditor) AuditOne(cert *metact.Certificate) error {
 		return fmt.Errorf("domain violation: %w", err)
 	}
 
-	taInfo, err := auditor.db.client.TAInfo.
+	taInfo, err := auditor.db.client.TA.
 		Query().
-		Where(tainfo.DomainEQ(domain)).
-		WithCtLog().
-		WithTaCode().
+		Where(ta.DomainEQ(domain)).
+		WithAuditLog().
+		WithCode().
 		Only(*auditor.db.ctx)
 
 	if err != nil {
 		return fmt.Errorf("failed to get ta info: %w", err)
 	}
 
-	ctLog := taInfo.Edges.CtLog
-	if !ctLog.IsValid {
+	auditLog := taInfo.Edges.AuditLog
+	if !auditLog.IsValid {
 		return errors.New("ct log is not valid")
 	}
 
-	taCode := taInfo.Edges.TaCode[len(taInfo.Edges.TaCode)-1]
+	taCode := taInfo.Edges.Code[len(taInfo.Edges.Code)-1]
 
 	if validateAttestation(cert, taCode.UniqueID) != nil {
-		ctLog.IsValid = false
-		ctLog.Update().Save(*auditor.db.ctx)
+		auditLog.IsValid = false
+		auditLog.Update().Save(*auditor.db.ctx)
 		return fmt.Errorf("failed to check ct logs: %w", err)
 	}
 
-	ctLog.LatestCtID = cert.Id
-	ctLog.Update().Save(*auditor.db.ctx)
+	auditLog.LatestCtID = cert.Id
+	auditLog.Update().Save(*auditor.db.ctx)
 
 	return nil
 }

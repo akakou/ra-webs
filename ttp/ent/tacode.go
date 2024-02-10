@@ -31,20 +31,20 @@ type TACode struct {
 
 // TACodeEdges holds the relations/edges for other nodes in the graph.
 type TACodeEdges struct {
-	// TaInfo holds the value of the ta_info edge.
-	TaInfo []*TAInfo `json:"ta_info,omitempty"`
+	// Ta holds the value of the ta edge.
+	Ta []*TA `json:"ta,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// TaInfoOrErr returns the TaInfo value or an error if the edge
+// TaOrErr returns the Ta value or an error if the edge
 // was not loaded in eager-loading.
-func (e TACodeEdges) TaInfoOrErr() ([]*TAInfo, error) {
+func (e TACodeEdges) TaOrErr() ([]*TA, error) {
 	if e.loadedTypes[0] {
-		return e.TaInfo, nil
+		return e.Ta, nil
 	}
-	return nil, &NotLoadedError{edge: "ta_info"}
+	return nil, &NotLoadedError{edge: "ta"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -112,9 +112,9 @@ func (tc *TACode) Value(name string) (ent.Value, error) {
 	return tc.selectValues.Get(name)
 }
 
-// QueryTaInfo queries the "ta_info" edge of the TACode entity.
-func (tc *TACode) QueryTaInfo() *TAInfoQuery {
-	return NewTACodeClient(tc.config).QueryTaInfo(tc)
+// QueryTa queries the "ta" edge of the TACode entity.
+func (tc *TACode) QueryTa() *TAQuery {
+	return NewTACodeClient(tc.config).QueryTa(tc)
 }
 
 // Update returns a builder for updating this TACode.

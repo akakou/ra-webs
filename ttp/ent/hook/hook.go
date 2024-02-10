@@ -9,16 +9,28 @@ import (
 	"github.com/akakou/ra_webs/ttp/ent"
 )
 
-// The CTLogAuditFunc type is an adapter to allow the use of ordinary
-// function as CTLogAudit mutator.
-type CTLogAuditFunc func(context.Context, *ent.CTLogAuditMutation) (ent.Value, error)
+// The TAFunc type is an adapter to allow the use of ordinary
+// function as TA mutator.
+type TAFunc func(context.Context, *ent.TAMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f CTLogAuditFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.CTLogAuditMutation); ok {
+func (f TAFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TAMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CTLogAuditMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TAMutation", m)
+}
+
+// The TAAuditLogFunc type is an adapter to allow the use of ordinary
+// function as TAAuditLog mutator.
+type TAAuditLogFunc func(context.Context, *ent.TAAuditLogMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TAAuditLogFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TAAuditLogMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TAAuditLogMutation", m)
 }
 
 // The TACodeFunc type is an adapter to allow the use of ordinary
@@ -31,18 +43,6 @@ func (f TACodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TACodeMutation", m)
-}
-
-// The TAInfoFunc type is an adapter to allow the use of ordinary
-// function as TAInfo mutator.
-type TAInfoFunc func(context.Context, *ent.TAInfoMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f TAInfoFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.TAInfoMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TAInfoMutation", m)
 }
 
 // Condition is a hook condition function.

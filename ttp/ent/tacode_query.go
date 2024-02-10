@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
+	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
-	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
 
 // TACodeQuery is the builder for querying TACode entities.
@@ -23,7 +23,7 @@ type TACodeQuery struct {
 	order      []tacode.OrderOption
 	inters     []Interceptor
 	predicates []predicate.TACode
-	withTaInfo *TAInfoQuery
+	withTa     *TAQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,9 +60,9 @@ func (tcq *TACodeQuery) Order(o ...tacode.OrderOption) *TACodeQuery {
 	return tcq
 }
 
-// QueryTaInfo chains the current query on the "ta_info" edge.
-func (tcq *TACodeQuery) QueryTaInfo() *TAInfoQuery {
-	query := (&TAInfoClient{config: tcq.config}).Query()
+// QueryTa chains the current query on the "ta" edge.
+func (tcq *TACodeQuery) QueryTa() *TAQuery {
+	query := (&TAClient{config: tcq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tcq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -73,8 +73,8 @@ func (tcq *TACodeQuery) QueryTaInfo() *TAInfoQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tacode.Table, tacode.FieldID, selector),
-			sqlgraph.To(tainfo.Table, tainfo.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, tacode.TaInfoTable, tacode.TaInfoPrimaryKey...),
+			sqlgraph.To(ta.Table, ta.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, tacode.TaTable, tacode.TaPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(tcq.driver.Dialect(), step)
 		return fromU, nil
@@ -274,21 +274,21 @@ func (tcq *TACodeQuery) Clone() *TACodeQuery {
 		order:      append([]tacode.OrderOption{}, tcq.order...),
 		inters:     append([]Interceptor{}, tcq.inters...),
 		predicates: append([]predicate.TACode{}, tcq.predicates...),
-		withTaInfo: tcq.withTaInfo.Clone(),
+		withTa:     tcq.withTa.Clone(),
 		// clone intermediate query.
 		sql:  tcq.sql.Clone(),
 		path: tcq.path,
 	}
 }
 
-// WithTaInfo tells the query-builder to eager-load the nodes that are connected to
-// the "ta_info" edge. The optional arguments are used to configure the query builder of the edge.
-func (tcq *TACodeQuery) WithTaInfo(opts ...func(*TAInfoQuery)) *TACodeQuery {
-	query := (&TAInfoClient{config: tcq.config}).Query()
+// WithTa tells the query-builder to eager-load the nodes that are connected to
+// the "ta" edge. The optional arguments are used to configure the query builder of the edge.
+func (tcq *TACodeQuery) WithTa(opts ...func(*TAQuery)) *TACodeQuery {
+	query := (&TAClient{config: tcq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tcq.withTaInfo = query
+	tcq.withTa = query
 	return tcq
 }
 
@@ -371,7 +371,7 @@ func (tcq *TACodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TACo
 		nodes       = []*TACode{}
 		_spec       = tcq.querySpec()
 		loadedTypes = [1]bool{
-			tcq.withTaInfo != nil,
+			tcq.withTa != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -392,17 +392,17 @@ func (tcq *TACodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TACo
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := tcq.withTaInfo; query != nil {
-		if err := tcq.loadTaInfo(ctx, query, nodes,
-			func(n *TACode) { n.Edges.TaInfo = []*TAInfo{} },
-			func(n *TACode, e *TAInfo) { n.Edges.TaInfo = append(n.Edges.TaInfo, e) }); err != nil {
+	if query := tcq.withTa; query != nil {
+		if err := tcq.loadTa(ctx, query, nodes,
+			func(n *TACode) { n.Edges.Ta = []*TA{} },
+			func(n *TACode, e *TA) { n.Edges.Ta = append(n.Edges.Ta, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (tcq *TACodeQuery) loadTaInfo(ctx context.Context, query *TAInfoQuery, nodes []*TACode, init func(*TACode), assign func(*TACode, *TAInfo)) error {
+func (tcq *TACodeQuery) loadTa(ctx context.Context, query *TAQuery, nodes []*TACode, init func(*TACode), assign func(*TACode, *TA)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*TACode)
 	nids := make(map[int]map[*TACode]struct{})
@@ -414,11 +414,11 @@ func (tcq *TACodeQuery) loadTaInfo(ctx context.Context, query *TAInfoQuery, node
 		}
 	}
 	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(tacode.TaInfoTable)
-		s.Join(joinT).On(s.C(tainfo.FieldID), joinT.C(tacode.TaInfoPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(tacode.TaInfoPrimaryKey[0]), edgeIDs...))
+		joinT := sql.Table(tacode.TaTable)
+		s.Join(joinT).On(s.C(ta.FieldID), joinT.C(tacode.TaPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(tacode.TaPrimaryKey[0]), edgeIDs...))
 		columns := s.SelectedColumns()
-		s.Select(joinT.C(tacode.TaInfoPrimaryKey[0]))
+		s.Select(joinT.C(tacode.TaPrimaryKey[0]))
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})
@@ -448,14 +448,14 @@ func (tcq *TACodeQuery) loadTaInfo(ctx context.Context, query *TAInfoQuery, node
 			}
 		})
 	})
-	neighbors, err := withInterceptors[[]*TAInfo](ctx, query, qr, query.inters)
+	neighbors, err := withInterceptors[[]*TA](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
 		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "ta_info" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected "ta" node returned %v`, n.ID)
 		}
 		for kn := range nodes {
 			assign(kn, n)

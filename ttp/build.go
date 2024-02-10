@@ -6,7 +6,7 @@ import (
 
 var REPOSITORIES = "./data/repositories"
 
-func compile(tainfo *ent.TAInfo) (string, []byte) {
+func compile(tainfo *ent.TA) (string, []byte) {
 	// todo: compile the code
 
 	// folderName := fmt.Sprintf("%v/%v", REPOSITORIES, tainfo.ID)

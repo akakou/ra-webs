@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/akakou/ra_webs/ttp/ent"
-	"github.com/akakou/ra_webs/ttp/ent/tainfo"
+	"github.com/akakou/ra_webs/ttp/ent/ta"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -43,11 +43,11 @@ func (db *auditDB) close() {
 
 func revokeAllDomain(db *auditDB, domains []string) {
 	for _, violatingDomain := range domains {
-		taInfos, err := db.client.TAInfo.
+		taInfos, err := db.client.TA.
 			Query().
-			Where(tainfo.DomainEQ(violatingDomain)).
-			WithCtLog().
-			WithTaCode().
+			Where(ta.DomainEQ(violatingDomain)).
+			WithAuditLog().
+			WithCode().
 			All(*db.ctx)
 
 		if err != nil {
@@ -55,8 +55,8 @@ func revokeAllDomain(db *auditDB, domains []string) {
 		}
 
 		for _, taInfo := range taInfos {
-			taInfo.Edges.CtLog.IsValid = false
-			taInfo.Edges.CtLog.Update().Save(*db.ctx)
+			taInfo.Edges.AuditLog.IsValid = false
+			taInfo.Edges.AuditLog.Update().Save(*db.ctx)
 
 		}
 	}

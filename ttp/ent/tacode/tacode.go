@@ -18,15 +18,15 @@ const (
 	FieldCommitID = "commit_id"
 	// FieldActivatedAt holds the string denoting the activated_at field in the database.
 	FieldActivatedAt = "activated_at"
-	// EdgeTaInfo holds the string denoting the ta_info edge name in mutations.
-	EdgeTaInfo = "ta_info"
+	// EdgeTa holds the string denoting the ta edge name in mutations.
+	EdgeTa = "ta"
 	// Table holds the table name of the tacode in the database.
 	Table = "ta_codes"
-	// TaInfoTable is the table that holds the ta_info relation/edge. The primary key declared below.
-	TaInfoTable = "ta_code_ta_info"
-	// TaInfoInverseTable is the table name for the TAInfo entity.
-	// It exists in this package in order to avoid circular dependency with the "tainfo" package.
-	TaInfoInverseTable = "ta_infos"
+	// TaTable is the table that holds the ta relation/edge. The primary key declared below.
+	TaTable = "ta_code_ta"
+	// TaInverseTable is the table name for the TA entity.
+	// It exists in this package in order to avoid circular dependency with the "ta" package.
+	TaInverseTable = "tas"
 )
 
 // Columns holds all SQL columns for tacode fields.
@@ -38,9 +38,9 @@ var Columns = []string{
 }
 
 var (
-	// TaInfoPrimaryKey and TaInfoColumn2 are the table columns denoting the
-	// primary key for the ta_info relation (M2M).
-	TaInfoPrimaryKey = []string{"ta_code_id", "ta_info_id"}
+	// TaPrimaryKey and TaColumn2 are the table columns denoting the
+	// primary key for the ta relation (M2M).
+	TaPrimaryKey = []string{"ta_code_id", "ta_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -71,23 +71,23 @@ func ByActivatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldActivatedAt, opts...).ToFunc()
 }
 
-// ByTaInfoCount orders the results by ta_info count.
-func ByTaInfoCount(opts ...sql.OrderTermOption) OrderOption {
+// ByTaCount orders the results by ta count.
+func ByTaCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTaInfoStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newTaStep(), opts...)
 	}
 }
 
-// ByTaInfo orders the results by ta_info terms.
-func ByTaInfo(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByTa orders the results by ta terms.
+func ByTa(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTaInfoStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newTaStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newTaInfoStep() *sqlgraph.Step {
+func newTaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TaInfoInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, TaInfoTable, TaInfoPrimaryKey...),
+		sqlgraph.To(TaInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, TaTable, TaPrimaryKey...),
 	)
 }

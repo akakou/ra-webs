@@ -8,17 +8,39 @@ import (
 )
 
 var (
-	// CtLogAuditsColumns holds the columns for the "ct_log_audits" table.
-	CtLogAuditsColumns = []*schema.Column{
+	// TasColumns holds the columns for the "tas" table.
+	TasColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "domain", Type: field.TypeString},
+		{Name: "ip", Type: field.TypeString},
+		{Name: "git", Type: field.TypeString},
+		{Name: "ta_audit_log_ta", Type: field.TypeInt, Unique: true, Nullable: true},
+	}
+	// TasTable holds the schema information for the "tas" table.
+	TasTable = &schema.Table{
+		Name:       "tas",
+		Columns:    TasColumns,
+		PrimaryKey: []*schema.Column{TasColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "tas_ta_audit_logs_ta",
+				Columns:    []*schema.Column{TasColumns[4]},
+				RefColumns: []*schema.Column{TaAuditLogsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// TaAuditLogsColumns holds the columns for the "ta_audit_logs" table.
+	TaAuditLogsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "is_valid", Type: field.TypeBool},
 		{Name: "latest_ct_id", Type: field.TypeString},
 	}
-	// CtLogAuditsTable holds the schema information for the "ct_log_audits" table.
-	CtLogAuditsTable = &schema.Table{
-		Name:       "ct_log_audits",
-		Columns:    CtLogAuditsColumns,
-		PrimaryKey: []*schema.Column{CtLogAuditsColumns[0]},
+	// TaAuditLogsTable holds the schema information for the "ta_audit_logs" table.
+	TaAuditLogsTable = &schema.Table{
+		Name:       "ta_audit_logs",
+		Columns:    TaAuditLogsColumns,
+		PrimaryKey: []*schema.Column{TaAuditLogsColumns[0]},
 	}
 	// TaCodesColumns holds the columns for the "ta_codes" table.
 	TaCodesColumns = []*schema.Column{
@@ -33,64 +55,42 @@ var (
 		Columns:    TaCodesColumns,
 		PrimaryKey: []*schema.Column{TaCodesColumns[0]},
 	}
-	// TaInfosColumns holds the columns for the "ta_infos" table.
-	TaInfosColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "domain", Type: field.TypeString},
-		{Name: "ip_address", Type: field.TypeString},
-		{Name: "git_repository", Type: field.TypeString},
-		{Name: "ct_log_audit_ta_info", Type: field.TypeInt, Unique: true, Nullable: true},
-	}
-	// TaInfosTable holds the schema information for the "ta_infos" table.
-	TaInfosTable = &schema.Table{
-		Name:       "ta_infos",
-		Columns:    TaInfosColumns,
-		PrimaryKey: []*schema.Column{TaInfosColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "ta_infos_ct_log_audits_ta_info",
-				Columns:    []*schema.Column{TaInfosColumns[4]},
-				RefColumns: []*schema.Column{CtLogAuditsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// TaCodeTaInfoColumns holds the columns for the "ta_code_ta_info" table.
-	TaCodeTaInfoColumns = []*schema.Column{
+	// TaCodeTaColumns holds the columns for the "ta_code_ta" table.
+	TaCodeTaColumns = []*schema.Column{
 		{Name: "ta_code_id", Type: field.TypeInt},
-		{Name: "ta_info_id", Type: field.TypeInt},
+		{Name: "ta_id", Type: field.TypeInt},
 	}
-	// TaCodeTaInfoTable holds the schema information for the "ta_code_ta_info" table.
-	TaCodeTaInfoTable = &schema.Table{
-		Name:       "ta_code_ta_info",
-		Columns:    TaCodeTaInfoColumns,
-		PrimaryKey: []*schema.Column{TaCodeTaInfoColumns[0], TaCodeTaInfoColumns[1]},
+	// TaCodeTaTable holds the schema information for the "ta_code_ta" table.
+	TaCodeTaTable = &schema.Table{
+		Name:       "ta_code_ta",
+		Columns:    TaCodeTaColumns,
+		PrimaryKey: []*schema.Column{TaCodeTaColumns[0], TaCodeTaColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "ta_code_ta_info_ta_code_id",
-				Columns:    []*schema.Column{TaCodeTaInfoColumns[0]},
+				Symbol:     "ta_code_ta_ta_code_id",
+				Columns:    []*schema.Column{TaCodeTaColumns[0]},
 				RefColumns: []*schema.Column{TaCodesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "ta_code_ta_info_ta_info_id",
-				Columns:    []*schema.Column{TaCodeTaInfoColumns[1]},
-				RefColumns: []*schema.Column{TaInfosColumns[0]},
+				Symbol:     "ta_code_ta_ta_id",
+				Columns:    []*schema.Column{TaCodeTaColumns[1]},
+				RefColumns: []*schema.Column{TasColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		CtLogAuditsTable,
+		TasTable,
+		TaAuditLogsTable,
 		TaCodesTable,
-		TaInfosTable,
-		TaCodeTaInfoTable,
+		TaCodeTaTable,
 	}
 )
 
 func init() {
-	TaInfosTable.ForeignKeys[0].RefTable = CtLogAuditsTable
-	TaCodeTaInfoTable.ForeignKeys[0].RefTable = TaCodesTable
-	TaCodeTaInfoTable.ForeignKeys[1].RefTable = TaInfosTable
+	TasTable.ForeignKeys[0].RefTable = TaAuditLogsTable
+	TaCodeTaTable.ForeignKeys[0].RefTable = TaCodesTable
+	TaCodeTaTable.ForeignKeys[1].RefTable = TasTable
 }

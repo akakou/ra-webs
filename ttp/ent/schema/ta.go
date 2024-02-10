@@ -7,23 +7,23 @@ import (
 )
 
 // TA holds the schema definition for the TA entity.
-type TAInfo struct {
+type TA struct {
 	ent.Schema
 }
 
 // Fields of the TA.
-func (TAInfo) Fields() []ent.Field {
+func (TA) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("domain"),
-		field.String("ip_address"),
-		field.String("git_repository"),
+		field.String("ip"),
+		field.String("git"),
 	}
 }
 
 // Edges of the TA.
-func (TAInfo) Edges() []ent.Edge {
+func (TA) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("ct_log", CTLogAudit.Type).Ref("ta_info").Unique(),
-		edge.From("ta_code", TACode.Type).Ref("ta_info"),
+		edge.From("audit_log", TAAuditLog.Type).Ref("ta").Unique(),
+		edge.From("code", TACode.Type).Ref("ta"),
 	}
 }

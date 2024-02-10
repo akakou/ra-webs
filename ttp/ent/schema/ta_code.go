@@ -23,6 +23,6 @@ func (TACode) Fields() []ent.Field {
 // Edges of the TA.
 func (TACode) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("ta_info", TAInfo.Type),
+		edge.To("ta", TA.Type),
 	}
 }

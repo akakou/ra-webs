@@ -225,21 +225,21 @@ func ActivatedAtNotNil() predicate.TACode {
 	return predicate.TACode(sql.FieldNotNull(FieldActivatedAt))
 }
 
-// HasTaInfo applies the HasEdge predicate on the "ta_info" edge.
-func HasTaInfo() predicate.TACode {
+// HasTa applies the HasEdge predicate on the "ta" edge.
+func HasTa() predicate.TACode {
 	return predicate.TACode(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, TaInfoTable, TaInfoPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, false, TaTable, TaPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasTaInfoWith applies the HasEdge predicate on the "ta_info" edge with a given conditions (other predicates).
-func HasTaInfoWith(preds ...predicate.TAInfo) predicate.TACode {
+// HasTaWith applies the HasEdge predicate on the "ta" edge with a given conditions (other predicates).
+func HasTaWith(preds ...predicate.TA) predicate.TACode {
 	return predicate.TACode(func(s *sql.Selector) {
-		step := newTaInfoStep()
+		step := newTaStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

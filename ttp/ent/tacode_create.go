@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
-	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
 
 // TACodeCreate is the builder for creating a TACode entity.
@@ -47,19 +47,19 @@ func (tcc *TACodeCreate) SetNillableActivatedAt(t *time.Time) *TACodeCreate {
 	return tcc
 }
 
-// AddTaInfoIDs adds the "ta_info" edge to the TAInfo entity by IDs.
-func (tcc *TACodeCreate) AddTaInfoIDs(ids ...int) *TACodeCreate {
-	tcc.mutation.AddTaInfoIDs(ids...)
+// AddTumIDs adds the "ta" edge to the TA entity by IDs.
+func (tcc *TACodeCreate) AddTumIDs(ids ...int) *TACodeCreate {
+	tcc.mutation.AddTumIDs(ids...)
 	return tcc
 }
 
-// AddTaInfo adds the "ta_info" edges to the TAInfo entity.
-func (tcc *TACodeCreate) AddTaInfo(t ...*TAInfo) *TACodeCreate {
+// AddTa adds the "ta" edges to the TA entity.
+func (tcc *TACodeCreate) AddTa(t ...*TA) *TACodeCreate {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return tcc.AddTaInfoIDs(ids...)
+	return tcc.AddTumIDs(ids...)
 }
 
 // Mutation returns the TACodeMutation object of the builder.
@@ -140,15 +140,15 @@ func (tcc *TACodeCreate) createSpec() (*TACode, *sqlgraph.CreateSpec) {
 		_spec.SetField(tacode.FieldActivatedAt, field.TypeTime, value)
 		_node.ActivatedAt = value
 	}
-	if nodes := tcc.mutation.TaInfoIDs(); len(nodes) > 0 {
+	if nodes := tcc.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   tacode.TaInfoTable,
-			Columns: tacode.TaInfoPrimaryKey,
+			Table:   tacode.TaTable,
+			Columns: tacode.TaPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tainfo.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
