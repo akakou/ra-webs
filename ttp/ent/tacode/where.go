@@ -3,6 +3,8 @@
 package tacode
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
@@ -53,9 +55,9 @@ func IDLTE(id int) predicate.TACode {
 	return predicate.TACode(sql.FieldLTE(FieldID, id))
 }
 
-// ProductID applies equality check predicate on the "product_id" field. It's identical to ProductIDEQ.
-func ProductID(v uint16) predicate.TACode {
-	return predicate.TACode(sql.FieldEQ(FieldProductID, v))
+// UniqueID applies equality check predicate on the "unique_id" field. It's identical to UniqueIDEQ.
+func UniqueID(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldUniqueID, v))
 }
 
 // CommitID applies equality check predicate on the "commit_id" field. It's identical to CommitIDEQ.
@@ -63,44 +65,49 @@ func CommitID(v string) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldCommitID, v))
 }
 
-// ProductIDEQ applies the EQ predicate on the "product_id" field.
-func ProductIDEQ(v uint16) predicate.TACode {
-	return predicate.TACode(sql.FieldEQ(FieldProductID, v))
+// ActivatedAt applies equality check predicate on the "activated_at" field. It's identical to ActivatedAtEQ.
+func ActivatedAt(v time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldActivatedAt, v))
 }
 
-// ProductIDNEQ applies the NEQ predicate on the "product_id" field.
-func ProductIDNEQ(v uint16) predicate.TACode {
-	return predicate.TACode(sql.FieldNEQ(FieldProductID, v))
+// UniqueIDEQ applies the EQ predicate on the "unique_id" field.
+func UniqueIDEQ(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldUniqueID, v))
 }
 
-// ProductIDIn applies the In predicate on the "product_id" field.
-func ProductIDIn(vs ...uint16) predicate.TACode {
-	return predicate.TACode(sql.FieldIn(FieldProductID, vs...))
+// UniqueIDNEQ applies the NEQ predicate on the "unique_id" field.
+func UniqueIDNEQ(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldNEQ(FieldUniqueID, v))
 }
 
-// ProductIDNotIn applies the NotIn predicate on the "product_id" field.
-func ProductIDNotIn(vs ...uint16) predicate.TACode {
-	return predicate.TACode(sql.FieldNotIn(FieldProductID, vs...))
+// UniqueIDIn applies the In predicate on the "unique_id" field.
+func UniqueIDIn(vs ...[]byte) predicate.TACode {
+	return predicate.TACode(sql.FieldIn(FieldUniqueID, vs...))
 }
 
-// ProductIDGT applies the GT predicate on the "product_id" field.
-func ProductIDGT(v uint16) predicate.TACode {
-	return predicate.TACode(sql.FieldGT(FieldProductID, v))
+// UniqueIDNotIn applies the NotIn predicate on the "unique_id" field.
+func UniqueIDNotIn(vs ...[]byte) predicate.TACode {
+	return predicate.TACode(sql.FieldNotIn(FieldUniqueID, vs...))
 }
 
-// ProductIDGTE applies the GTE predicate on the "product_id" field.
-func ProductIDGTE(v uint16) predicate.TACode {
-	return predicate.TACode(sql.FieldGTE(FieldProductID, v))
+// UniqueIDGT applies the GT predicate on the "unique_id" field.
+func UniqueIDGT(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldGT(FieldUniqueID, v))
 }
 
-// ProductIDLT applies the LT predicate on the "product_id" field.
-func ProductIDLT(v uint16) predicate.TACode {
-	return predicate.TACode(sql.FieldLT(FieldProductID, v))
+// UniqueIDGTE applies the GTE predicate on the "unique_id" field.
+func UniqueIDGTE(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldGTE(FieldUniqueID, v))
 }
 
-// ProductIDLTE applies the LTE predicate on the "product_id" field.
-func ProductIDLTE(v uint16) predicate.TACode {
-	return predicate.TACode(sql.FieldLTE(FieldProductID, v))
+// UniqueIDLT applies the LT predicate on the "unique_id" field.
+func UniqueIDLT(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldLT(FieldUniqueID, v))
+}
+
+// UniqueIDLTE applies the LTE predicate on the "unique_id" field.
+func UniqueIDLTE(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldLTE(FieldUniqueID, v))
 }
 
 // CommitIDEQ applies the EQ predicate on the "commit_id" field.
@@ -166,6 +173,56 @@ func CommitIDEqualFold(v string) predicate.TACode {
 // CommitIDContainsFold applies the ContainsFold predicate on the "commit_id" field.
 func CommitIDContainsFold(v string) predicate.TACode {
 	return predicate.TACode(sql.FieldContainsFold(FieldCommitID, v))
+}
+
+// ActivatedAtEQ applies the EQ predicate on the "activated_at" field.
+func ActivatedAtEQ(v time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldActivatedAt, v))
+}
+
+// ActivatedAtNEQ applies the NEQ predicate on the "activated_at" field.
+func ActivatedAtNEQ(v time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldNEQ(FieldActivatedAt, v))
+}
+
+// ActivatedAtIn applies the In predicate on the "activated_at" field.
+func ActivatedAtIn(vs ...time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldIn(FieldActivatedAt, vs...))
+}
+
+// ActivatedAtNotIn applies the NotIn predicate on the "activated_at" field.
+func ActivatedAtNotIn(vs ...time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldNotIn(FieldActivatedAt, vs...))
+}
+
+// ActivatedAtGT applies the GT predicate on the "activated_at" field.
+func ActivatedAtGT(v time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldGT(FieldActivatedAt, v))
+}
+
+// ActivatedAtGTE applies the GTE predicate on the "activated_at" field.
+func ActivatedAtGTE(v time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldGTE(FieldActivatedAt, v))
+}
+
+// ActivatedAtLT applies the LT predicate on the "activated_at" field.
+func ActivatedAtLT(v time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldLT(FieldActivatedAt, v))
+}
+
+// ActivatedAtLTE applies the LTE predicate on the "activated_at" field.
+func ActivatedAtLTE(v time.Time) predicate.TACode {
+	return predicate.TACode(sql.FieldLTE(FieldActivatedAt, v))
+}
+
+// ActivatedAtIsNil applies the IsNil predicate on the "activated_at" field.
+func ActivatedAtIsNil() predicate.TACode {
+	return predicate.TACode(sql.FieldIsNull(FieldActivatedAt))
+}
+
+// ActivatedAtNotNil applies the NotNil predicate on the "activated_at" field.
+func ActivatedAtNotNil() predicate.TACode {
+	return predicate.TACode(sql.FieldNotNull(FieldActivatedAt))
 }
 
 // HasTaInfo applies the HasEdge predicate on the "ta_info" edge.

@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -16,10 +17,12 @@ type TACode struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// ProductID holds the value of the "product_id" field.
-	ProductID uint16 `json:"product_id,omitempty"`
+	// UniqueID holds the value of the "unique_id" field.
+	UniqueID []byte `json:"unique_id,omitempty"`
 	// CommitID holds the value of the "commit_id" field.
 	CommitID string `json:"commit_id,omitempty"`
+	// ActivatedAt holds the value of the "activated_at" field.
+	ActivatedAt time.Time `json:"activated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TACodeQuery when eager-loading is set.
 	Edges        TACodeEdges `json:"edges"`
@@ -49,10 +52,14 @@ func (*TACode) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case tacode.FieldID, tacode.FieldProductID:
+		case tacode.FieldUniqueID:
+			values[i] = new([]byte)
+		case tacode.FieldID:
 			values[i] = new(sql.NullInt64)
 		case tacode.FieldCommitID:
 			values[i] = new(sql.NullString)
+		case tacode.FieldActivatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -74,17 +81,23 @@ func (tc *TACode) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			tc.ID = int(value.Int64)
-		case tacode.FieldProductID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field product_id", values[i])
-			} else if value.Valid {
-				tc.ProductID = uint16(value.Int64)
+		case tacode.FieldUniqueID:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field unique_id", values[i])
+			} else if value != nil {
+				tc.UniqueID = *value
 			}
 		case tacode.FieldCommitID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field commit_id", values[i])
 			} else if value.Valid {
 				tc.CommitID = value.String
+			}
+		case tacode.FieldActivatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field activated_at", values[i])
+			} else if value.Valid {
+				tc.ActivatedAt = value.Time
 			}
 		default:
 			tc.selectValues.Set(columns[i], values[i])
@@ -127,11 +140,14 @@ func (tc *TACode) String() string {
 	var builder strings.Builder
 	builder.WriteString("TACode(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", tc.ID))
-	builder.WriteString("product_id=")
-	builder.WriteString(fmt.Sprintf("%v", tc.ProductID))
+	builder.WriteString("unique_id=")
+	builder.WriteString(fmt.Sprintf("%v", tc.UniqueID))
 	builder.WriteString(", ")
 	builder.WriteString("commit_id=")
 	builder.WriteString(tc.CommitID)
+	builder.WriteString(", ")
+	builder.WriteString("activated_at=")
+	builder.WriteString(tc.ActivatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

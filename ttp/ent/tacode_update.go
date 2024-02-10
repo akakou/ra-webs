@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,24 +29,9 @@ func (tcu *TACodeUpdate) Where(ps ...predicate.TACode) *TACodeUpdate {
 	return tcu
 }
 
-// SetProductID sets the "product_id" field.
-func (tcu *TACodeUpdate) SetProductID(u uint16) *TACodeUpdate {
-	tcu.mutation.ResetProductID()
-	tcu.mutation.SetProductID(u)
-	return tcu
-}
-
-// SetNillableProductID sets the "product_id" field if the given value is not nil.
-func (tcu *TACodeUpdate) SetNillableProductID(u *uint16) *TACodeUpdate {
-	if u != nil {
-		tcu.SetProductID(*u)
-	}
-	return tcu
-}
-
-// AddProductID adds u to the "product_id" field.
-func (tcu *TACodeUpdate) AddProductID(u int16) *TACodeUpdate {
-	tcu.mutation.AddProductID(u)
+// SetUniqueID sets the "unique_id" field.
+func (tcu *TACodeUpdate) SetUniqueID(b []byte) *TACodeUpdate {
+	tcu.mutation.SetUniqueID(b)
 	return tcu
 }
 
@@ -60,6 +46,26 @@ func (tcu *TACodeUpdate) SetNillableCommitID(s *string) *TACodeUpdate {
 	if s != nil {
 		tcu.SetCommitID(*s)
 	}
+	return tcu
+}
+
+// SetActivatedAt sets the "activated_at" field.
+func (tcu *TACodeUpdate) SetActivatedAt(t time.Time) *TACodeUpdate {
+	tcu.mutation.SetActivatedAt(t)
+	return tcu
+}
+
+// SetNillableActivatedAt sets the "activated_at" field if the given value is not nil.
+func (tcu *TACodeUpdate) SetNillableActivatedAt(t *time.Time) *TACodeUpdate {
+	if t != nil {
+		tcu.SetActivatedAt(*t)
+	}
+	return tcu
+}
+
+// ClearActivatedAt clears the value of the "activated_at" field.
+func (tcu *TACodeUpdate) ClearActivatedAt() *TACodeUpdate {
+	tcu.mutation.ClearActivatedAt()
 	return tcu
 }
 
@@ -140,14 +146,17 @@ func (tcu *TACodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := tcu.mutation.ProductID(); ok {
-		_spec.SetField(tacode.FieldProductID, field.TypeUint16, value)
-	}
-	if value, ok := tcu.mutation.AddedProductID(); ok {
-		_spec.AddField(tacode.FieldProductID, field.TypeUint16, value)
+	if value, ok := tcu.mutation.UniqueID(); ok {
+		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
 	}
 	if value, ok := tcu.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)
+	}
+	if value, ok := tcu.mutation.ActivatedAt(); ok {
+		_spec.SetField(tacode.FieldActivatedAt, field.TypeTime, value)
+	}
+	if tcu.mutation.ActivatedAtCleared() {
+		_spec.ClearField(tacode.FieldActivatedAt, field.TypeTime)
 	}
 	if tcu.mutation.TaInfoCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -214,24 +223,9 @@ type TACodeUpdateOne struct {
 	mutation *TACodeMutation
 }
 
-// SetProductID sets the "product_id" field.
-func (tcuo *TACodeUpdateOne) SetProductID(u uint16) *TACodeUpdateOne {
-	tcuo.mutation.ResetProductID()
-	tcuo.mutation.SetProductID(u)
-	return tcuo
-}
-
-// SetNillableProductID sets the "product_id" field if the given value is not nil.
-func (tcuo *TACodeUpdateOne) SetNillableProductID(u *uint16) *TACodeUpdateOne {
-	if u != nil {
-		tcuo.SetProductID(*u)
-	}
-	return tcuo
-}
-
-// AddProductID adds u to the "product_id" field.
-func (tcuo *TACodeUpdateOne) AddProductID(u int16) *TACodeUpdateOne {
-	tcuo.mutation.AddProductID(u)
+// SetUniqueID sets the "unique_id" field.
+func (tcuo *TACodeUpdateOne) SetUniqueID(b []byte) *TACodeUpdateOne {
+	tcuo.mutation.SetUniqueID(b)
 	return tcuo
 }
 
@@ -246,6 +240,26 @@ func (tcuo *TACodeUpdateOne) SetNillableCommitID(s *string) *TACodeUpdateOne {
 	if s != nil {
 		tcuo.SetCommitID(*s)
 	}
+	return tcuo
+}
+
+// SetActivatedAt sets the "activated_at" field.
+func (tcuo *TACodeUpdateOne) SetActivatedAt(t time.Time) *TACodeUpdateOne {
+	tcuo.mutation.SetActivatedAt(t)
+	return tcuo
+}
+
+// SetNillableActivatedAt sets the "activated_at" field if the given value is not nil.
+func (tcuo *TACodeUpdateOne) SetNillableActivatedAt(t *time.Time) *TACodeUpdateOne {
+	if t != nil {
+		tcuo.SetActivatedAt(*t)
+	}
+	return tcuo
+}
+
+// ClearActivatedAt clears the value of the "activated_at" field.
+func (tcuo *TACodeUpdateOne) ClearActivatedAt() *TACodeUpdateOne {
+	tcuo.mutation.ClearActivatedAt()
 	return tcuo
 }
 
@@ -356,14 +370,17 @@ func (tcuo *TACodeUpdateOne) sqlSave(ctx context.Context) (_node *TACode, err er
 			}
 		}
 	}
-	if value, ok := tcuo.mutation.ProductID(); ok {
-		_spec.SetField(tacode.FieldProductID, field.TypeUint16, value)
-	}
-	if value, ok := tcuo.mutation.AddedProductID(); ok {
-		_spec.AddField(tacode.FieldProductID, field.TypeUint16, value)
+	if value, ok := tcuo.mutation.UniqueID(); ok {
+		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
 	}
 	if value, ok := tcuo.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)
+	}
+	if value, ok := tcuo.mutation.ActivatedAt(); ok {
+		_spec.SetField(tacode.FieldActivatedAt, field.TypeTime, value)
+	}
+	if tcuo.mutation.ActivatedAtCleared() {
+		_spec.ClearField(tacode.FieldActivatedAt, field.TypeTime)
 	}
 	if tcuo.mutation.TaInfoCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -483,9 +484,9 @@ type TACodeMutation struct {
 	op             Op
 	typ            string
 	id             *int
-	product_id     *uint16
-	addproduct_id  *int16
+	unique_id      *[]byte
 	commit_id      *string
+	activated_at   *time.Time
 	clearedFields  map[string]struct{}
 	ta_info        map[int]struct{}
 	removedta_info map[int]struct{}
@@ -593,60 +594,40 @@ func (m *TACodeMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetProductID sets the "product_id" field.
-func (m *TACodeMutation) SetProductID(u uint16) {
-	m.product_id = &u
-	m.addproduct_id = nil
+// SetUniqueID sets the "unique_id" field.
+func (m *TACodeMutation) SetUniqueID(b []byte) {
+	m.unique_id = &b
 }
 
-// ProductID returns the value of the "product_id" field in the mutation.
-func (m *TACodeMutation) ProductID() (r uint16, exists bool) {
-	v := m.product_id
+// UniqueID returns the value of the "unique_id" field in the mutation.
+func (m *TACodeMutation) UniqueID() (r []byte, exists bool) {
+	v := m.unique_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldProductID returns the old "product_id" field's value of the TACode entity.
+// OldUniqueID returns the old "unique_id" field's value of the TACode entity.
 // If the TACode object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TACodeMutation) OldProductID(ctx context.Context) (v uint16, err error) {
+func (m *TACodeMutation) OldUniqueID(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldProductID is only allowed on UpdateOne operations")
+		return v, errors.New("OldUniqueID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldProductID requires an ID field in the mutation")
+		return v, errors.New("OldUniqueID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProductID: %w", err)
+		return v, fmt.Errorf("querying old value for OldUniqueID: %w", err)
 	}
-	return oldValue.ProductID, nil
+	return oldValue.UniqueID, nil
 }
 
-// AddProductID adds u to the "product_id" field.
-func (m *TACodeMutation) AddProductID(u int16) {
-	if m.addproduct_id != nil {
-		*m.addproduct_id += u
-	} else {
-		m.addproduct_id = &u
-	}
-}
-
-// AddedProductID returns the value that was added to the "product_id" field in this mutation.
-func (m *TACodeMutation) AddedProductID() (r int16, exists bool) {
-	v := m.addproduct_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetProductID resets all changes to the "product_id" field.
-func (m *TACodeMutation) ResetProductID() {
-	m.product_id = nil
-	m.addproduct_id = nil
+// ResetUniqueID resets all changes to the "unique_id" field.
+func (m *TACodeMutation) ResetUniqueID() {
+	m.unique_id = nil
 }
 
 // SetCommitID sets the "commit_id" field.
@@ -683,6 +664,55 @@ func (m *TACodeMutation) OldCommitID(ctx context.Context) (v string, err error) 
 // ResetCommitID resets all changes to the "commit_id" field.
 func (m *TACodeMutation) ResetCommitID() {
 	m.commit_id = nil
+}
+
+// SetActivatedAt sets the "activated_at" field.
+func (m *TACodeMutation) SetActivatedAt(t time.Time) {
+	m.activated_at = &t
+}
+
+// ActivatedAt returns the value of the "activated_at" field in the mutation.
+func (m *TACodeMutation) ActivatedAt() (r time.Time, exists bool) {
+	v := m.activated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActivatedAt returns the old "activated_at" field's value of the TACode entity.
+// If the TACode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TACodeMutation) OldActivatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActivatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActivatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActivatedAt: %w", err)
+	}
+	return oldValue.ActivatedAt, nil
+}
+
+// ClearActivatedAt clears the value of the "activated_at" field.
+func (m *TACodeMutation) ClearActivatedAt() {
+	m.activated_at = nil
+	m.clearedFields[tacode.FieldActivatedAt] = struct{}{}
+}
+
+// ActivatedAtCleared returns if the "activated_at" field was cleared in this mutation.
+func (m *TACodeMutation) ActivatedAtCleared() bool {
+	_, ok := m.clearedFields[tacode.FieldActivatedAt]
+	return ok
+}
+
+// ResetActivatedAt resets all changes to the "activated_at" field.
+func (m *TACodeMutation) ResetActivatedAt() {
+	m.activated_at = nil
+	delete(m.clearedFields, tacode.FieldActivatedAt)
 }
 
 // AddTaInfoIDs adds the "ta_info" edge to the TAInfo entity by ids.
@@ -773,12 +803,15 @@ func (m *TACodeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TACodeMutation) Fields() []string {
-	fields := make([]string, 0, 2)
-	if m.product_id != nil {
-		fields = append(fields, tacode.FieldProductID)
+	fields := make([]string, 0, 3)
+	if m.unique_id != nil {
+		fields = append(fields, tacode.FieldUniqueID)
 	}
 	if m.commit_id != nil {
 		fields = append(fields, tacode.FieldCommitID)
+	}
+	if m.activated_at != nil {
+		fields = append(fields, tacode.FieldActivatedAt)
 	}
 	return fields
 }
@@ -788,10 +821,12 @@ func (m *TACodeMutation) Fields() []string {
 // schema.
 func (m *TACodeMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case tacode.FieldProductID:
-		return m.ProductID()
+	case tacode.FieldUniqueID:
+		return m.UniqueID()
 	case tacode.FieldCommitID:
 		return m.CommitID()
+	case tacode.FieldActivatedAt:
+		return m.ActivatedAt()
 	}
 	return nil, false
 }
@@ -801,10 +836,12 @@ func (m *TACodeMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *TACodeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case tacode.FieldProductID:
-		return m.OldProductID(ctx)
+	case tacode.FieldUniqueID:
+		return m.OldUniqueID(ctx)
 	case tacode.FieldCommitID:
 		return m.OldCommitID(ctx)
+	case tacode.FieldActivatedAt:
+		return m.OldActivatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown TACode field %s", name)
 }
@@ -814,12 +851,12 @@ func (m *TACodeMutation) OldField(ctx context.Context, name string) (ent.Value, 
 // type.
 func (m *TACodeMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case tacode.FieldProductID:
-		v, ok := value.(uint16)
+	case tacode.FieldUniqueID:
+		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetProductID(v)
+		m.SetUniqueID(v)
 		return nil
 	case tacode.FieldCommitID:
 		v, ok := value.(string)
@@ -828,6 +865,13 @@ func (m *TACodeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCommitID(v)
 		return nil
+	case tacode.FieldActivatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActivatedAt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown TACode field %s", name)
 }
@@ -835,21 +879,13 @@ func (m *TACodeMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *TACodeMutation) AddedFields() []string {
-	var fields []string
-	if m.addproduct_id != nil {
-		fields = append(fields, tacode.FieldProductID)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *TACodeMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case tacode.FieldProductID:
-		return m.AddedProductID()
-	}
 	return nil, false
 }
 
@@ -858,13 +894,6 @@ func (m *TACodeMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *TACodeMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case tacode.FieldProductID:
-		v, ok := value.(int16)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddProductID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown TACode numeric field %s", name)
 }
@@ -872,7 +901,11 @@ func (m *TACodeMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *TACodeMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(tacode.FieldActivatedAt) {
+		fields = append(fields, tacode.FieldActivatedAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -885,6 +918,11 @@ func (m *TACodeMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *TACodeMutation) ClearField(name string) error {
+	switch name {
+	case tacode.FieldActivatedAt:
+		m.ClearActivatedAt()
+		return nil
+	}
 	return fmt.Errorf("unknown TACode nullable field %s", name)
 }
 
@@ -892,11 +930,14 @@ func (m *TACodeMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *TACodeMutation) ResetField(name string) error {
 	switch name {
-	case tacode.FieldProductID:
-		m.ResetProductID()
+	case tacode.FieldUniqueID:
+		m.ResetUniqueID()
 		return nil
 	case tacode.FieldCommitID:
 		m.ResetCommitID()
+		return nil
+	case tacode.FieldActivatedAt:
+		m.ResetActivatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown TACode field %s", name)

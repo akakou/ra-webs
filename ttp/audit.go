@@ -48,7 +48,7 @@ func (auditor *Auditor) AuditOne(cert *metact.Certificate) error {
 
 	taCode := taInfo.Edges.TaCode[len(taInfo.Edges.TaCode)-1]
 
-	if validateAttestation(cert, taCode.ProductID) != nil {
+	if validateAttestation(cert, taCode.UniqueID) != nil {
 		ctLog.IsValid = false
 		ctLog.Update().Save(*auditor.db.ctx)
 		return fmt.Errorf("failed to check ct logs: %w", err)

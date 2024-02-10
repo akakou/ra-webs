@@ -23,8 +23,9 @@ var (
 	// TaCodesColumns holds the columns for the "ta_codes" table.
 	TaCodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "product_id", Type: field.TypeUint16},
+		{Name: "unique_id", Type: field.TypeBytes},
 		{Name: "commit_id", Type: field.TypeString},
+		{Name: "activated_at", Type: field.TypeTime, Nullable: true},
 	}
 	// TaCodesTable holds the schema information for the "ta_codes" table.
 	TaCodesTable = &schema.Table{
