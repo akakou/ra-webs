@@ -48,7 +48,7 @@ func Route(e *echo.Echo, auditor *Auditor) {
 
 	e.POST("/compile", func(c echo.Context) error {
 		idReq := new(struct {
-			id int `json:"id"`
+			Id int `json:"id"`
 		})
 
 		if c.Bind(idReq) != nil {
@@ -56,7 +56,7 @@ func Route(e *echo.Echo, auditor *Auditor) {
 		}
 
 		taInfo, err := auditor.db.client.TAInfo.
-			Query().Where(tainfo.IDEQ(idReq.id)).First(*auditor.db.ctx)
+			Query().Where(tainfo.IDEQ(idReq.Id)).First(*auditor.db.ctx)
 
 		if err != nil {
 			c.Error(err)
