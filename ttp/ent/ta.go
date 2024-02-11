@@ -23,6 +23,8 @@ type TA struct {
 	IP string `json:"ip,omitempty"`
 	// Git holds the value of the "git" field.
 	Git string `json:"git,omitempty"`
+	// PublicKey holds the value of the "public_key" field.
+	PublicKey string `json:"public_key,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TAQuery when eager-loading is set.
 	Edges           TAEdges `json:"edges"`
@@ -70,7 +72,7 @@ func (*TA) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case ta.FieldID:
 			values[i] = new(sql.NullInt64)
-		case ta.FieldDomain, ta.FieldIP, ta.FieldGit:
+		case ta.FieldDomain, ta.FieldIP, ta.FieldGit, ta.FieldPublicKey:
 			values[i] = new(sql.NullString)
 		case ta.ForeignKeys[0]: // ta_audit_log_ta
 			values[i] = new(sql.NullInt64)
@@ -112,6 +114,12 @@ func (t *TA) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field git", values[i])
 			} else if value.Valid {
 				t.Git = value.String
+			}
+		case ta.FieldPublicKey:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field public_key", values[i])
+			} else if value.Valid {
+				t.PublicKey = value.String
 			}
 		case ta.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -174,6 +182,9 @@ func (t *TA) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("git=")
 	builder.WriteString(t.Git)
+	builder.WriteString(", ")
+	builder.WriteString("public_key=")
+	builder.WriteString(t.PublicKey)
 	builder.WriteByte(')')
 	return builder.String()
 }

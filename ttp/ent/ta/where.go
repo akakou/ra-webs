@@ -68,6 +68,11 @@ func Git(v string) predicate.TA {
 	return predicate.TA(sql.FieldEQ(FieldGit, v))
 }
 
+// PublicKey applies equality check predicate on the "public_key" field. It's identical to PublicKeyEQ.
+func PublicKey(v string) predicate.TA {
+	return predicate.TA(sql.FieldEQ(FieldPublicKey, v))
+}
+
 // DomainEQ applies the EQ predicate on the "domain" field.
 func DomainEQ(v string) predicate.TA {
 	return predicate.TA(sql.FieldEQ(FieldDomain, v))
@@ -261,6 +266,71 @@ func GitEqualFold(v string) predicate.TA {
 // GitContainsFold applies the ContainsFold predicate on the "git" field.
 func GitContainsFold(v string) predicate.TA {
 	return predicate.TA(sql.FieldContainsFold(FieldGit, v))
+}
+
+// PublicKeyEQ applies the EQ predicate on the "public_key" field.
+func PublicKeyEQ(v string) predicate.TA {
+	return predicate.TA(sql.FieldEQ(FieldPublicKey, v))
+}
+
+// PublicKeyNEQ applies the NEQ predicate on the "public_key" field.
+func PublicKeyNEQ(v string) predicate.TA {
+	return predicate.TA(sql.FieldNEQ(FieldPublicKey, v))
+}
+
+// PublicKeyIn applies the In predicate on the "public_key" field.
+func PublicKeyIn(vs ...string) predicate.TA {
+	return predicate.TA(sql.FieldIn(FieldPublicKey, vs...))
+}
+
+// PublicKeyNotIn applies the NotIn predicate on the "public_key" field.
+func PublicKeyNotIn(vs ...string) predicate.TA {
+	return predicate.TA(sql.FieldNotIn(FieldPublicKey, vs...))
+}
+
+// PublicKeyGT applies the GT predicate on the "public_key" field.
+func PublicKeyGT(v string) predicate.TA {
+	return predicate.TA(sql.FieldGT(FieldPublicKey, v))
+}
+
+// PublicKeyGTE applies the GTE predicate on the "public_key" field.
+func PublicKeyGTE(v string) predicate.TA {
+	return predicate.TA(sql.FieldGTE(FieldPublicKey, v))
+}
+
+// PublicKeyLT applies the LT predicate on the "public_key" field.
+func PublicKeyLT(v string) predicate.TA {
+	return predicate.TA(sql.FieldLT(FieldPublicKey, v))
+}
+
+// PublicKeyLTE applies the LTE predicate on the "public_key" field.
+func PublicKeyLTE(v string) predicate.TA {
+	return predicate.TA(sql.FieldLTE(FieldPublicKey, v))
+}
+
+// PublicKeyContains applies the Contains predicate on the "public_key" field.
+func PublicKeyContains(v string) predicate.TA {
+	return predicate.TA(sql.FieldContains(FieldPublicKey, v))
+}
+
+// PublicKeyHasPrefix applies the HasPrefix predicate on the "public_key" field.
+func PublicKeyHasPrefix(v string) predicate.TA {
+	return predicate.TA(sql.FieldHasPrefix(FieldPublicKey, v))
+}
+
+// PublicKeyHasSuffix applies the HasSuffix predicate on the "public_key" field.
+func PublicKeyHasSuffix(v string) predicate.TA {
+	return predicate.TA(sql.FieldHasSuffix(FieldPublicKey, v))
+}
+
+// PublicKeyEqualFold applies the EqualFold predicate on the "public_key" field.
+func PublicKeyEqualFold(v string) predicate.TA {
+	return predicate.TA(sql.FieldEqualFold(FieldPublicKey, v))
+}
+
+// PublicKeyContainsFold applies the ContainsFold predicate on the "public_key" field.
+func PublicKeyContainsFold(v string) predicate.TA {
+	return predicate.TA(sql.FieldContainsFold(FieldPublicKey, v))
 }
 
 // HasAuditLog applies the HasEdge predicate on the "audit_log" edge.

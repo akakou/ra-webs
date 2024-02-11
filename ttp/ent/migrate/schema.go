@@ -14,6 +14,7 @@ var (
 		{Name: "domain", Type: field.TypeString},
 		{Name: "ip", Type: field.TypeString},
 		{Name: "git", Type: field.TypeString},
+		{Name: "public_key", Type: field.TypeString},
 		{Name: "ta_audit_log_ta", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// TasTable holds the schema information for the "tas" table.
@@ -24,7 +25,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "tas_ta_audit_logs_ta",
-				Columns:    []*schema.Column{TasColumns[4]},
+				Columns:    []*schema.Column{TasColumns[5]},
 				RefColumns: []*schema.Column{TaAuditLogsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

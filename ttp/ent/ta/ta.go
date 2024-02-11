@@ -18,6 +18,8 @@ const (
 	FieldIP = "ip"
 	// FieldGit holds the string denoting the git field in the database.
 	FieldGit = "git"
+	// FieldPublicKey holds the string denoting the public_key field in the database.
+	FieldPublicKey = "public_key"
 	// EdgeAuditLog holds the string denoting the audit_log edge name in mutations.
 	EdgeAuditLog = "audit_log"
 	// EdgeCode holds the string denoting the code edge name in mutations.
@@ -44,6 +46,7 @@ var Columns = []string{
 	FieldDomain,
 	FieldIP,
 	FieldGit,
+	FieldPublicKey,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tas"
@@ -94,6 +97,11 @@ func ByIP(opts ...sql.OrderTermOption) OrderOption {
 // ByGit orders the results by the git field.
 func ByGit(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGit, opts...).ToFunc()
+}
+
+// ByPublicKey orders the results by the public_key field.
+func ByPublicKey(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPublicKey, opts...).ToFunc()
 }
 
 // ByAuditLogField orders the results by audit_log field.

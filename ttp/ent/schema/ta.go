@@ -17,6 +17,7 @@ func (TA) Fields() []ent.Field {
 		field.String("domain"),
 		field.String("ip"),
 		field.String("git"),
+		field.String("public_key"),
 	}
 }
 
