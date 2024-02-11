@@ -4,15 +4,21 @@ import (
 	"fmt"
 	"net/http"
 
+	goutils "github.com/akakou/go-utils"
 	"github.com/labstack/echo/v4"
 )
 
 func webhook() echoRoute {
-	path := "/webhook/" + randomHexString(RANDOM_SIZE)
+	hex, err := goutils.RandomHex(RANDOM_SIZE)
+	if err != nil {
+		panic(err)
+	}
+	path := "/webhook/" + hex
 	fmt.Printf("webhook path: %s\n", path)
 
 	return echoRoute{
-		path: path,
+		method: POST,
+		path:   path,
 		f: func(auditor *Auditor) echoRouteFunc {
 			return func(c echo.Context) error {
 				certs, err := auditor.ct.WebHookCertificates(c)
