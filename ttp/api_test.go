@@ -1,6 +1,10 @@
 package ttp
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -15,6 +19,13 @@ func TestAPI(t *testing.T) {
 	e := echo.New()
 	e.Debug = true
 	auditor, err := DefaultAuditor()
+	assert.NoError(t, err)
+
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	assert.NoError(t, err)
+	publicKey := privateKey.PublicKey
+
+	publicKeyBuf := x509.MarshalPKCS1PublicKey(&publicKey)
 
 	t.Run("TestRegisterTAApi", func(t *testing.T) {
 		body := `{"domain":"example.com","public_key":"public_key", "ip":"0.0.0.0", "git":"github.com/ra-webs/ra_webs"}`
@@ -32,11 +43,14 @@ func TestAPI(t *testing.T) {
 	})
 
 	t.Run("TestUpdateTAApi", func(t *testing.T) {
+		body, err := json.Marshal(map[string]interface{}{"public_key": publicKeyBuf})
+		assert.NoError(t, err)
+
 		path := fmt.Sprintf("/ta/%d/update", 1)
 		fmt.Printf("path: %v\n", path)
 
-		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(""))
-		req.Header.Set(echo.HeaderContentType, echo.MIMETextPlain)
+		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(string(body)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 		rec := httptest.NewRecorder()
 

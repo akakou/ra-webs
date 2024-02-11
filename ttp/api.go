@@ -18,7 +18,6 @@ var registerTAApi = echoRoute{
 				IP            string `json:"ip"`
 				Domain        string `json:"domain"`
 				GitRepository string `json:"git"`
-				PublicKey     string `json:"public_key"`
 			})
 
 			if c.Bind(reqTAInfo) != nil {
@@ -29,8 +28,7 @@ var registerTAApi = echoRoute{
 				Create().
 				SetDomain(reqTAInfo.Domain).
 				SetGit(reqTAInfo.GitRepository).
-				SetIP(reqTAInfo.IP).
-				SetPublicKey(reqTAInfo.PublicKey)
+				SetIP(reqTAInfo.IP)
 
 			t, err := ta.Save(*auditor.db.Ctx)
 
@@ -60,6 +58,14 @@ var updateTAApi = echoRoute{
 				return c.String(http.StatusBadRequest, "bad id")
 			}
 
+			publicKey := new(struct {
+				PublicKey []byte `json:"public_key"`
+			})
+
+			if c.Bind(publicKey) != nil {
+				return c.String(http.StatusBadRequest, "bad public key")
+			}
+
 			taInfo, err := auditor.db.Client.TA.
 				Query().Where(ta.IDEQ(id)).First(*auditor.db.Ctx)
 
@@ -70,7 +76,11 @@ var updateTAApi = echoRoute{
 			commitId, uniqueId := compile(taInfo)
 
 			taCode := auditor.db.Client.TACode.
-				Create().AddTa(taInfo).SetCommitID(commitId).SetUniqueID(uniqueId)
+				Create().
+				AddTa(taInfo).
+				SetCommitID(commitId).
+				SetUniqueID(uniqueId).
+				SetPublicKey(publicKey.PublicKey)
 
 			_, err = taCode.Save(*auditor.db.Ctx)
 			if err != nil {
