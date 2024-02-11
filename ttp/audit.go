@@ -6,7 +6,7 @@ import (
 	"os"
 
 	golangutils "github.com/akakou/golang-utils"
-	"github.com/akakou/metact"
+	metact "github.com/akakou/meta-ct"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	simplecertify "github.com/akakou/simple-certify"
 )

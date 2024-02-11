@@ -1,6 +1,7 @@
 package ttp
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -25,7 +26,8 @@ func (er echoRoute) post(e *echo.Echo, auditor *Auditor) {
 
 func Route(e *echo.Echo, auditor *Auditor) {
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
+		r := fmt.Sprintf("%v", e.Routers())
+		return c.String(http.StatusOK, r)
 	})
 
 	registerTAApi.post(e, auditor)

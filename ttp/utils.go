@@ -6,7 +6,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/akakou/metact"
+	metact "github.com/akakou/meta-ct"
 )
 
 func findCertExtensions(extensions []metact.KeyValue, label string) (string, error) {
