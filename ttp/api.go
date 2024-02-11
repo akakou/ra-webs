@@ -1,11 +1,14 @@
 package ttp
 
 import (
+	"crypto/x509/pkix"
 	"net/http"
 
 	"strconv"
 
+	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
+	simplecertify "github.com/akakou/simple-certify"
 	"github.com/labstack/echo/v4"
 )
 
@@ -66,18 +69,18 @@ var updateTAApi = echoRoute{
 				return c.String(http.StatusBadRequest, "bad public key")
 			}
 
-			taInfo, err := auditor.db.Client.TA.
+			ta, err := auditor.db.Client.TA.
 				Query().Where(ta.IDEQ(id)).First(*auditor.db.Ctx)
 
 			if err != nil {
 				c.Error(err)
 			}
 
-			commitId, uniqueId := compile(taInfo)
+			commitId, uniqueId := compile(ta)
 
 			taCode := auditor.db.Client.TACode.
 				Create().
-				AddTa(taInfo).
+				AddTa(ta).
 				SetCommitID(commitId).
 				SetUniqueID(uniqueId).
 				SetPublicKey(publicKey.PublicKey)
@@ -87,7 +90,29 @@ var updateTAApi = echoRoute{
 				c.Error(err)
 			}
 
-			return c.String(http.StatusOK, "ok")
+			templ := simplecertify.ServerTemplate()
+			templ.PublicKey = publicKey.PublicKey
+			templ.Subject = pkix.Name{
+				Country:      []string{"Japan"},
+				Organization: []string{"ra-webs"},
+				Locality:     []string{"Kanagawa"},
+				Province:     []string{"Yokohama"},
+				CommonName:   ta.Domain,
+			}
+			templ.Issuer = auditor.ca.Certificate.Subject
+			templ.Extensions = []pkix.Extension{
+				{
+					Id:    core.X509_EXTENSION_LABEL,
+					Value: uniqueId,
+				},
+			}
+
+			cert, err := auditor.ca.Certify(&templ)
+			if err != nil {
+				c.Error(err)
+			}
+
+			return c.Blob(http.StatusOK, "application/x-x509-cert", cert.Raw)
 		}
 	},
 }
