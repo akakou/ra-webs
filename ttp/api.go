@@ -81,7 +81,7 @@ var certApi = echoRoute{
 	f: func(auditor *Auditor) echoRouteFunc {
 		return func(c echo.Context) error {
 			cert := auditor.ca.Certificate.Raw
-			return c.JSON(http.StatusOK, cert)
+			return c.Blob(http.StatusOK, "application/x-x509-ca-cert", cert)
 		}
 	},
 }
