@@ -19,6 +19,8 @@ type TACode struct {
 	ID int `json:"id,omitempty"`
 	// UniqueID holds the value of the "unique_id" field.
 	UniqueID []byte `json:"unique_id,omitempty"`
+	// PublicKey holds the value of the "public_key" field.
+	PublicKey []byte `json:"public_key,omitempty"`
 	// CommitID holds the value of the "commit_id" field.
 	CommitID string `json:"commit_id,omitempty"`
 	// ActivatedAt holds the value of the "activated_at" field.
@@ -52,7 +54,7 @@ func (*TACode) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case tacode.FieldUniqueID:
+		case tacode.FieldUniqueID, tacode.FieldPublicKey:
 			values[i] = new([]byte)
 		case tacode.FieldID:
 			values[i] = new(sql.NullInt64)
@@ -86,6 +88,12 @@ func (tc *TACode) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field unique_id", values[i])
 			} else if value != nil {
 				tc.UniqueID = *value
+			}
+		case tacode.FieldPublicKey:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field public_key", values[i])
+			} else if value != nil {
+				tc.PublicKey = *value
 			}
 		case tacode.FieldCommitID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -142,6 +150,9 @@ func (tc *TACode) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", tc.ID))
 	builder.WriteString("unique_id=")
 	builder.WriteString(fmt.Sprintf("%v", tc.UniqueID))
+	builder.WriteString(", ")
+	builder.WriteString("public_key=")
+	builder.WriteString(fmt.Sprintf("%v", tc.PublicKey))
 	builder.WriteString(", ")
 	builder.WriteString("commit_id=")
 	builder.WriteString(tc.CommitID)

@@ -27,6 +27,12 @@ func (tcc *TACodeCreate) SetUniqueID(b []byte) *TACodeCreate {
 	return tcc
 }
 
+// SetPublicKey sets the "public_key" field.
+func (tcc *TACodeCreate) SetPublicKey(b []byte) *TACodeCreate {
+	tcc.mutation.SetPublicKey(b)
+	return tcc
+}
+
 // SetCommitID sets the "commit_id" field.
 func (tcc *TACodeCreate) SetCommitID(s string) *TACodeCreate {
 	tcc.mutation.SetCommitID(s)
@@ -99,6 +105,9 @@ func (tcc *TACodeCreate) check() error {
 	if _, ok := tcc.mutation.UniqueID(); !ok {
 		return &ValidationError{Name: "unique_id", err: errors.New(`ent: missing required field "TACode.unique_id"`)}
 	}
+	if _, ok := tcc.mutation.PublicKey(); !ok {
+		return &ValidationError{Name: "public_key", err: errors.New(`ent: missing required field "TACode.public_key"`)}
+	}
 	if _, ok := tcc.mutation.CommitID(); !ok {
 		return &ValidationError{Name: "commit_id", err: errors.New(`ent: missing required field "TACode.commit_id"`)}
 	}
@@ -131,6 +140,10 @@ func (tcc *TACodeCreate) createSpec() (*TACode, *sqlgraph.CreateSpec) {
 	if value, ok := tcc.mutation.UniqueID(); ok {
 		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
 		_node.UniqueID = value
+	}
+	if value, ok := tcc.mutation.PublicKey(); ok {
+		_spec.SetField(tacode.FieldPublicKey, field.TypeBytes, value)
+		_node.PublicKey = value
 	}
 	if value, ok := tcc.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)

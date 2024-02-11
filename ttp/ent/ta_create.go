@@ -39,12 +39,6 @@ func (tc *TACreate) SetGit(s string) *TACreate {
 	return tc
 }
 
-// SetPublicKey sets the "public_key" field.
-func (tc *TACreate) SetPublicKey(s string) *TACreate {
-	tc.mutation.SetPublicKey(s)
-	return tc
-}
-
 // SetAuditLogID sets the "audit_log" edge to the TAAuditLog entity by ID.
 func (tc *TACreate) SetAuditLogID(id int) *TACreate {
 	tc.mutation.SetAuditLogID(id)
@@ -122,9 +116,6 @@ func (tc *TACreate) check() error {
 	if _, ok := tc.mutation.Git(); !ok {
 		return &ValidationError{Name: "git", err: errors.New(`ent: missing required field "TA.git"`)}
 	}
-	if _, ok := tc.mutation.PublicKey(); !ok {
-		return &ValidationError{Name: "public_key", err: errors.New(`ent: missing required field "TA.public_key"`)}
-	}
 	return nil
 }
 
@@ -162,10 +153,6 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.Git(); ok {
 		_spec.SetField(ta.FieldGit, field.TypeString, value)
 		_node.Git = value
-	}
-	if value, ok := tc.mutation.PublicKey(); ok {
-		_spec.SetField(ta.FieldPublicKey, field.TypeString, value)
-		_node.PublicKey = value
 	}
 	if nodes := tc.mutation.AuditLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

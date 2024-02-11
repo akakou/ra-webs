@@ -60,6 +60,11 @@ func UniqueID(v []byte) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldUniqueID, v))
 }
 
+// PublicKey applies equality check predicate on the "public_key" field. It's identical to PublicKeyEQ.
+func PublicKey(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldPublicKey, v))
+}
+
 // CommitID applies equality check predicate on the "commit_id" field. It's identical to CommitIDEQ.
 func CommitID(v string) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldCommitID, v))
@@ -108,6 +113,46 @@ func UniqueIDLT(v []byte) predicate.TACode {
 // UniqueIDLTE applies the LTE predicate on the "unique_id" field.
 func UniqueIDLTE(v []byte) predicate.TACode {
 	return predicate.TACode(sql.FieldLTE(FieldUniqueID, v))
+}
+
+// PublicKeyEQ applies the EQ predicate on the "public_key" field.
+func PublicKeyEQ(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldPublicKey, v))
+}
+
+// PublicKeyNEQ applies the NEQ predicate on the "public_key" field.
+func PublicKeyNEQ(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldNEQ(FieldPublicKey, v))
+}
+
+// PublicKeyIn applies the In predicate on the "public_key" field.
+func PublicKeyIn(vs ...[]byte) predicate.TACode {
+	return predicate.TACode(sql.FieldIn(FieldPublicKey, vs...))
+}
+
+// PublicKeyNotIn applies the NotIn predicate on the "public_key" field.
+func PublicKeyNotIn(vs ...[]byte) predicate.TACode {
+	return predicate.TACode(sql.FieldNotIn(FieldPublicKey, vs...))
+}
+
+// PublicKeyGT applies the GT predicate on the "public_key" field.
+func PublicKeyGT(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldGT(FieldPublicKey, v))
+}
+
+// PublicKeyGTE applies the GTE predicate on the "public_key" field.
+func PublicKeyGTE(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldGTE(FieldPublicKey, v))
+}
+
+// PublicKeyLT applies the LT predicate on the "public_key" field.
+func PublicKeyLT(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldLT(FieldPublicKey, v))
+}
+
+// PublicKeyLTE applies the LTE predicate on the "public_key" field.
+func PublicKeyLTE(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldLTE(FieldPublicKey, v))
 }
 
 // CommitIDEQ applies the EQ predicate on the "commit_id" field.

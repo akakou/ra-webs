@@ -14,6 +14,8 @@ const (
 	FieldID = "id"
 	// FieldUniqueID holds the string denoting the unique_id field in the database.
 	FieldUniqueID = "unique_id"
+	// FieldPublicKey holds the string denoting the public_key field in the database.
+	FieldPublicKey = "public_key"
 	// FieldCommitID holds the string denoting the commit_id field in the database.
 	FieldCommitID = "commit_id"
 	// FieldActivatedAt holds the string denoting the activated_at field in the database.
@@ -33,6 +35,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldUniqueID,
+	FieldPublicKey,
 	FieldCommitID,
 	FieldActivatedAt,
 }

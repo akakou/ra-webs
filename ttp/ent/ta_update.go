@@ -71,20 +71,6 @@ func (tu *TAUpdate) SetNillableGit(s *string) *TAUpdate {
 	return tu
 }
 
-// SetPublicKey sets the "public_key" field.
-func (tu *TAUpdate) SetPublicKey(s string) *TAUpdate {
-	tu.mutation.SetPublicKey(s)
-	return tu
-}
-
-// SetNillablePublicKey sets the "public_key" field if the given value is not nil.
-func (tu *TAUpdate) SetNillablePublicKey(s *string) *TAUpdate {
-	if s != nil {
-		tu.SetPublicKey(*s)
-	}
-	return tu
-}
-
 // SetAuditLogID sets the "audit_log" edge to the TAAuditLog entity by ID.
 func (tu *TAUpdate) SetAuditLogID(id int) *TAUpdate {
 	tu.mutation.SetAuditLogID(id)
@@ -195,9 +181,6 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tu.mutation.Git(); ok {
 		_spec.SetField(ta.FieldGit, field.TypeString, value)
-	}
-	if value, ok := tu.mutation.PublicKey(); ok {
-		_spec.SetField(ta.FieldPublicKey, field.TypeString, value)
 	}
 	if tu.mutation.AuditLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -331,20 +314,6 @@ func (tuo *TAUpdateOne) SetGit(s string) *TAUpdateOne {
 func (tuo *TAUpdateOne) SetNillableGit(s *string) *TAUpdateOne {
 	if s != nil {
 		tuo.SetGit(*s)
-	}
-	return tuo
-}
-
-// SetPublicKey sets the "public_key" field.
-func (tuo *TAUpdateOne) SetPublicKey(s string) *TAUpdateOne {
-	tuo.mutation.SetPublicKey(s)
-	return tuo
-}
-
-// SetNillablePublicKey sets the "public_key" field if the given value is not nil.
-func (tuo *TAUpdateOne) SetNillablePublicKey(s *string) *TAUpdateOne {
-	if s != nil {
-		tuo.SetPublicKey(*s)
 	}
 	return tuo
 }
@@ -489,9 +458,6 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 	}
 	if value, ok := tuo.mutation.Git(); ok {
 		_spec.SetField(ta.FieldGit, field.TypeString, value)
-	}
-	if value, ok := tuo.mutation.PublicKey(); ok {
-		_spec.SetField(ta.FieldPublicKey, field.TypeString, value)
 	}
 	if tuo.mutation.AuditLogCleared() {
 		edge := &sqlgraph.EdgeSpec{

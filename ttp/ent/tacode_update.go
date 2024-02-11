@@ -35,6 +35,12 @@ func (tcu *TACodeUpdate) SetUniqueID(b []byte) *TACodeUpdate {
 	return tcu
 }
 
+// SetPublicKey sets the "public_key" field.
+func (tcu *TACodeUpdate) SetPublicKey(b []byte) *TACodeUpdate {
+	tcu.mutation.SetPublicKey(b)
+	return tcu
+}
+
 // SetCommitID sets the "commit_id" field.
 func (tcu *TACodeUpdate) SetCommitID(s string) *TACodeUpdate {
 	tcu.mutation.SetCommitID(s)
@@ -149,6 +155,9 @@ func (tcu *TACodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tcu.mutation.UniqueID(); ok {
 		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
 	}
+	if value, ok := tcu.mutation.PublicKey(); ok {
+		_spec.SetField(tacode.FieldPublicKey, field.TypeBytes, value)
+	}
 	if value, ok := tcu.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)
 	}
@@ -226,6 +235,12 @@ type TACodeUpdateOne struct {
 // SetUniqueID sets the "unique_id" field.
 func (tcuo *TACodeUpdateOne) SetUniqueID(b []byte) *TACodeUpdateOne {
 	tcuo.mutation.SetUniqueID(b)
+	return tcuo
+}
+
+// SetPublicKey sets the "public_key" field.
+func (tcuo *TACodeUpdateOne) SetPublicKey(b []byte) *TACodeUpdateOne {
+	tcuo.mutation.SetPublicKey(b)
 	return tcuo
 }
 
@@ -372,6 +387,9 @@ func (tcuo *TACodeUpdateOne) sqlSave(ctx context.Context) (_node *TACode, err er
 	}
 	if value, ok := tcuo.mutation.UniqueID(); ok {
 		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
+	}
+	if value, ok := tcuo.mutation.PublicKey(); ok {
+		_spec.SetField(tacode.FieldPublicKey, field.TypeBytes, value)
 	}
 	if value, ok := tcuo.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)

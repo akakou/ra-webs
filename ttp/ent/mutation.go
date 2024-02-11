@@ -40,7 +40,6 @@ type TAMutation struct {
 	domain           *string
 	ip               *string
 	git              *string
-	public_key       *string
 	clearedFields    map[string]struct{}
 	audit_log        *int
 	clearedaudit_log bool
@@ -258,42 +257,6 @@ func (m *TAMutation) ResetGit() {
 	m.git = nil
 }
 
-// SetPublicKey sets the "public_key" field.
-func (m *TAMutation) SetPublicKey(s string) {
-	m.public_key = &s
-}
-
-// PublicKey returns the value of the "public_key" field in the mutation.
-func (m *TAMutation) PublicKey() (r string, exists bool) {
-	v := m.public_key
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPublicKey returns the old "public_key" field's value of the TA entity.
-// If the TA object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAMutation) OldPublicKey(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPublicKey is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPublicKey requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPublicKey: %w", err)
-	}
-	return oldValue.PublicKey, nil
-}
-
-// ResetPublicKey resets all changes to the "public_key" field.
-func (m *TAMutation) ResetPublicKey() {
-	m.public_key = nil
-}
-
 // SetAuditLogID sets the "audit_log" edge to the TAAuditLog entity by id.
 func (m *TAMutation) SetAuditLogID(id int) {
 	m.audit_log = &id
@@ -421,7 +384,7 @@ func (m *TAMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TAMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 3)
 	if m.domain != nil {
 		fields = append(fields, ta.FieldDomain)
 	}
@@ -430,9 +393,6 @@ func (m *TAMutation) Fields() []string {
 	}
 	if m.git != nil {
 		fields = append(fields, ta.FieldGit)
-	}
-	if m.public_key != nil {
-		fields = append(fields, ta.FieldPublicKey)
 	}
 	return fields
 }
@@ -448,8 +408,6 @@ func (m *TAMutation) Field(name string) (ent.Value, bool) {
 		return m.IP()
 	case ta.FieldGit:
 		return m.Git()
-	case ta.FieldPublicKey:
-		return m.PublicKey()
 	}
 	return nil, false
 }
@@ -465,8 +423,6 @@ func (m *TAMutation) OldField(ctx context.Context, name string) (ent.Value, erro
 		return m.OldIP(ctx)
 	case ta.FieldGit:
 		return m.OldGit(ctx)
-	case ta.FieldPublicKey:
-		return m.OldPublicKey(ctx)
 	}
 	return nil, fmt.Errorf("unknown TA field %s", name)
 }
@@ -496,13 +452,6 @@ func (m *TAMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetGit(v)
-		return nil
-	case ta.FieldPublicKey:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPublicKey(v)
 		return nil
 	}
 	return fmt.Errorf("unknown TA field %s", name)
@@ -561,9 +510,6 @@ func (m *TAMutation) ResetField(name string) error {
 		return nil
 	case ta.FieldGit:
 		m.ResetGit()
-		return nil
-	case ta.FieldPublicKey:
-		m.ResetPublicKey()
 		return nil
 	}
 	return fmt.Errorf("unknown TA field %s", name)
@@ -1125,6 +1071,7 @@ type TACodeMutation struct {
 	typ           string
 	id            *int
 	unique_id     *[]byte
+	public_key    *[]byte
 	commit_id     *string
 	activated_at  *time.Time
 	clearedFields map[string]struct{}
@@ -1268,6 +1215,42 @@ func (m *TACodeMutation) OldUniqueID(ctx context.Context) (v []byte, err error) 
 // ResetUniqueID resets all changes to the "unique_id" field.
 func (m *TACodeMutation) ResetUniqueID() {
 	m.unique_id = nil
+}
+
+// SetPublicKey sets the "public_key" field.
+func (m *TACodeMutation) SetPublicKey(b []byte) {
+	m.public_key = &b
+}
+
+// PublicKey returns the value of the "public_key" field in the mutation.
+func (m *TACodeMutation) PublicKey() (r []byte, exists bool) {
+	v := m.public_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPublicKey returns the old "public_key" field's value of the TACode entity.
+// If the TACode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TACodeMutation) OldPublicKey(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPublicKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPublicKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPublicKey: %w", err)
+	}
+	return oldValue.PublicKey, nil
+}
+
+// ResetPublicKey resets all changes to the "public_key" field.
+func (m *TACodeMutation) ResetPublicKey() {
+	m.public_key = nil
 }
 
 // SetCommitID sets the "commit_id" field.
@@ -1443,9 +1426,12 @@ func (m *TACodeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TACodeMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.unique_id != nil {
 		fields = append(fields, tacode.FieldUniqueID)
+	}
+	if m.public_key != nil {
+		fields = append(fields, tacode.FieldPublicKey)
 	}
 	if m.commit_id != nil {
 		fields = append(fields, tacode.FieldCommitID)
@@ -1463,6 +1449,8 @@ func (m *TACodeMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case tacode.FieldUniqueID:
 		return m.UniqueID()
+	case tacode.FieldPublicKey:
+		return m.PublicKey()
 	case tacode.FieldCommitID:
 		return m.CommitID()
 	case tacode.FieldActivatedAt:
@@ -1478,6 +1466,8 @@ func (m *TACodeMutation) OldField(ctx context.Context, name string) (ent.Value, 
 	switch name {
 	case tacode.FieldUniqueID:
 		return m.OldUniqueID(ctx)
+	case tacode.FieldPublicKey:
+		return m.OldPublicKey(ctx)
 	case tacode.FieldCommitID:
 		return m.OldCommitID(ctx)
 	case tacode.FieldActivatedAt:
@@ -1497,6 +1487,13 @@ func (m *TACodeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUniqueID(v)
+		return nil
+	case tacode.FieldPublicKey:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPublicKey(v)
 		return nil
 	case tacode.FieldCommitID:
 		v, ok := value.(string)
@@ -1572,6 +1569,9 @@ func (m *TACodeMutation) ResetField(name string) error {
 	switch name {
 	case tacode.FieldUniqueID:
 		m.ResetUniqueID()
+		return nil
+	case tacode.FieldPublicKey:
+		m.ResetPublicKey()
 		return nil
 	case tacode.FieldCommitID:
 		m.ResetCommitID()

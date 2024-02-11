@@ -15,6 +15,7 @@ type TACode struct {
 func (TACode) Fields() []ent.Field {
 	return []ent.Field{
 		field.Bytes("unique_id"),
+		field.Bytes("public_key"),
 		field.String("commit_id"),
 		field.Time("activated_at").Default(nil).Optional(),
 	}
