@@ -76,16 +76,12 @@ var updateTAApi = echoRoute{
 	},
 }
 
-// var certApi = echoRoute{
-// 	path: "/cert",
-// 	f: func(auditor *Auditor) echoRouteFunc {
-// 		return func(c echo.Context) error {
-// 			certs, err := auditor.ct.GetCertificates()
-// 			if err != nil {
-// 				c.Error(err)
-// 			}
-
-// 			return c.JSON(http.StatusOK, certs)
-// 		}
-// 	},
-// }
+var certApi = echoRoute{
+	path: "/cert",
+	f: func(auditor *Auditor) echoRouteFunc {
+		return func(c echo.Context) error {
+			cert := auditor.ca.Certificate.Raw
+			return c.JSON(http.StatusOK, cert)
+		}
+	},
+}

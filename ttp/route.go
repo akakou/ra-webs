@@ -30,6 +30,8 @@ func Route(e *echo.Echo, auditor *Auditor) {
 
 	registerTAApi.post(e, auditor)
 	updateTAApi.post(e, auditor)
+	certApi.get(e, auditor)
+
 	webhook().post(e, auditor)
 
 	redirectWebPage.get(e, auditor)
