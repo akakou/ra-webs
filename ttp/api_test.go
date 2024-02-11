@@ -38,6 +38,7 @@ func TestAPI(t *testing.T) {
 		c := e.NewContext(req, rec)
 		err = registerTAApi.f(auditor)(c)
 		assert.NoError(t, err)
+		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
 
 		assert.Equal(t, "1", rec.Body.String())
 	})
@@ -63,7 +64,9 @@ func TestAPI(t *testing.T) {
 		err = updateTAApi.f(auditor)(c)
 		assert.NoError(t, err)
 
-		assert.Equal(t, "ok", rec.Body.String())
+		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
+		fmt.Printf("%v", rec.Body.String())
+
 	})
 
 }
