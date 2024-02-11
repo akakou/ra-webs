@@ -18,5 +18,5 @@ func compile(tainfo *ent.TA) (string, []byte) {
 	// uniqueId := []byte{}
 
 	// return commitId, uniqueId
-	return "", nil
+	return "todo", []byte("todo")
 }

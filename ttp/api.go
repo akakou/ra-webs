@@ -15,10 +15,10 @@ var registerTAApi = echoRoute{
 	f: func(auditor *Auditor) echoRouteFunc {
 		return func(c echo.Context) error {
 			reqTAInfo := new(struct {
-				IP            string
-				Domain        string
-				GitRepository string
-				PublicKey     string
+				IP            string `json:"ip"`
+				Domain        string `json:"domain"`
+				GitRepository string `json:"git"`
+				PublicKey     string `json:"public_key"`
 			})
 
 			if c.Bind(reqTAInfo) != nil {
@@ -33,6 +33,7 @@ var registerTAApi = echoRoute{
 				SetPublicKey(reqTAInfo.PublicKey)
 
 			t, err := ta.Save(*auditor.db.Ctx)
+
 			if err != nil {
 				c.Error(err)
 			}
@@ -53,6 +54,7 @@ var updateTAApi = echoRoute{
 	f: func(auditor *Auditor) echoRouteFunc {
 		return func(c echo.Context) error {
 			idParam := c.Param("id")
+
 			id, err := strconv.Atoi(idParam)
 			if err != nil {
 				return c.String(http.StatusBadRequest, "bad id")
