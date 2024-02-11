@@ -2,10 +2,10 @@ package ttp
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 
+	golangutils "github.com/akakou/golang-utils"
 	"github.com/akakou/metact"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	simplecertify "github.com/akakou/simple-certify"
@@ -28,19 +28,18 @@ func NewAuditor(db *DB, ca *simplecertify.Certifier, ct *metact.MetaCT) (*Audito
 }
 
 func DefaultAuditor() (*Auditor, error) {
-	dbType := flag.String("db_type", "sqlite3", "database type")
-	dbConfig := flag.String("db_config", "file:ent?mode=memory&cache=shared&_fk=1", "database config")
+	dbType := golangutils.GetEnv("DB_TYPE", "sqlite3")
+	dbConfig := golangutils.GetEnv("DB_CONFIG", "file:ent?mode=memory&cache=shared&_fk=1")
+	fmt.Printf("We use %s as database type and %s as database config\n", dbType, dbConfig)
 
 	metaAppId := os.Getenv("META_APP_ID")
 	metaAccessToken := os.Getenv("META_ACCESS_TOKEN")
 
-	fmt.Printf("We use %s as database type and %s as database config\n", *dbType, *dbConfig)
-
 	caTempl := simplecertify.CATemplate()
 
 	dbc := DBConfig{
-		Type:   *dbType,
-		Config: *dbConfig,
+		Type:   dbType,
+		Config: dbConfig,
 	}
 
 	db, err := NewDB(&dbc)
