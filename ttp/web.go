@@ -7,7 +7,8 @@ import (
 )
 
 var redirectWebPage = echoRoute{
-	path: "/redirect",
+	method: GET,
+	path:   "/redirect",
 	f: func(auditor *Auditor) echoRouteFunc {
 		return func(c echo.Context) error {
 			back := c.Request().Header.Get("Referer")

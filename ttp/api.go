@@ -10,7 +10,8 @@ import (
 )
 
 var registerTAApi = echoRoute{
-	path: "/ta",
+	method: POST,
+	path:   "/ta",
 	f: func(auditor *Auditor) echoRouteFunc {
 		return func(c echo.Context) error {
 			reqTAInfo := new(struct {
@@ -45,7 +46,8 @@ var registerTAApi = echoRoute{
 }
 
 var updateTAApi = echoRoute{
-	path: "/ta/:id/update",
+	method: POST,
+	path:   "/ta/:id/update",
 	f: func(auditor *Auditor) echoRouteFunc {
 		return func(c echo.Context) error {
 			idParam := c.Param("id")
@@ -77,7 +79,8 @@ var updateTAApi = echoRoute{
 }
 
 var certApi = echoRoute{
-	path: "/cert",
+	method: GET,
+	path:   "/cert",
 	f: func(auditor *Auditor) echoRouteFunc {
 		return func(c echo.Context) error {
 			cert := auditor.ca.Certificate.Raw

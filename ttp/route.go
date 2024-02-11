@@ -12,16 +12,27 @@ var RANDOM_SIZE = 32
 type echoRouteFunc = func(c echo.Context) error
 
 type echoRoute struct {
-	path string
-	f    func(*Auditor) echoRouteFunc
+	method int
+	path   string
+	f      func(*Auditor) echoRouteFunc
 }
 
-func (er echoRoute) get(e *echo.Echo, auditor *Auditor) {
-	e.GET(er.path, er.f(auditor))
-}
+const (
+	ANY = iota
+	GET
+	POST
+)
 
-func (er echoRoute) post(e *echo.Echo, auditor *Auditor) {
-	e.POST(er.path, er.f(auditor))
+func (er echoRoute) set(e *echo.Echo, auditor *Auditor) {
+	if er.method == ANY {
+		e.Any(er.path, er.f(auditor))
+	}
+	if er.method == GET {
+		e.GET(er.path, er.f(auditor))
+	}
+	if er.method == POST {
+		e.POST(er.path, er.f(auditor))
+	}
 }
 
 func Route(e *echo.Echo, auditor *Auditor) {
@@ -30,11 +41,11 @@ func Route(e *echo.Echo, auditor *Auditor) {
 		return c.String(http.StatusOK, r)
 	})
 
-	registerTAApi.post(e, auditor)
-	updateTAApi.post(e, auditor)
-	certApi.get(e, auditor)
+	registerTAApi.set(e, auditor)
+	updateTAApi.set(e, auditor)
+	certApi.set(e, auditor)
 
-	webhook().post(e, auditor)
+	webhook().set(e, auditor)
 
-	redirectWebPage.get(e, auditor)
+	redirectWebPage.set(e, auditor)
 }
