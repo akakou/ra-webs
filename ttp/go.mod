@@ -12,6 +12,7 @@ require (
 
 require (
 	github.com/akakou/metact v0.0.0-00010101000000-000000000000 // indirect
+	github.com/akakou/simple-certify v0.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect

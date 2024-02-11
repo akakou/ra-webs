@@ -24,7 +24,6 @@ func (er echoRoute) post(e *echo.Echo, auditor *Auditor) {
 }
 
 func Route(e *echo.Echo, auditor *Auditor) {
-
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})

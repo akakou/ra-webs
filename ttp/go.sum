@@ -11,6 +11,8 @@ github.com/akakou/meta-ct v0.0.0-20240205140333-b7e6cf086dfb/go.mod h1:qzJzMiq+Q
 github.com/akakou/meta-ct v0.0.1/go.mod h1:qzJzMiq+QQtcihg5RgrtA1RHsTVNy2QkucZD1rqR5KA=
 github.com/akakou/meta-ct v0.0.2-0.20240205142617-89ebbf85e6b7 h1:LA49sVdBrNhLSRfOBW7ASNA5YINedt+yDdhji1QvC60=
 github.com/akakou/meta-ct v0.0.2-0.20240205142617-89ebbf85e6b7/go.mod h1:7r3wARccJosR0DiKCukRkhe2EOQ96Sjcsffz73V4DMc=
+github.com/akakou/simple-certify v0.0.1 h1:w9PAmuYH1CyZHqUbcbDzCBKtyAsF01GuzEW2Ae8KtKA=
+github.com/akakou/simple-certify v0.0.1/go.mod h1:Zzm6CSeKwgyf2YluNfYxpAqBeNBgKMJdcAKQHS7Dkho=
 github.com/apparentlymart/go-textseg/v13 v13.0.0 h1:Y+KvPE1NYz0xl601PVImeQfFyEy6iT90AvPUL1NNfNw=
 github.com/apparentlymart/go-textseg/v13 v13.0.0/go.mod h1:ZK2fH7c4NqDTLtiYLvIkEghdlcqw7yxLeM89kiTRPUo=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
