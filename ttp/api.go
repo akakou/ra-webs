@@ -18,19 +18,21 @@ var registerTAApi = echoRoute{
 				IP            string
 				Domain        string
 				GitRepository string
+				PublicKey     string
 			})
 
 			if c.Bind(reqTAInfo) != nil {
 				return c.String(http.StatusBadRequest, "bad attestation")
 			}
 
-			taInfo := auditor.db.Client.TA.
+			ta := auditor.db.Client.TA.
 				Create().
 				SetDomain(reqTAInfo.Domain).
 				SetGit(reqTAInfo.GitRepository).
-				SetIP(reqTAInfo.IP)
+				SetIP(reqTAInfo.IP).
+				SetPublicKey(reqTAInfo.PublicKey)
 
-			_, err := taInfo.Save(*auditor.db.Ctx)
+			t, err := ta.Save(*auditor.db.Ctx)
 			if err != nil {
 				c.Error(err)
 			}
@@ -40,7 +42,7 @@ var registerTAApi = echoRoute{
 				c.Error(err)
 			}
 
-			return c.String(http.StatusOK, "ok")
+			return c.String(http.StatusOK, strconv.Itoa(t.ID))
 		}
 	},
 }
