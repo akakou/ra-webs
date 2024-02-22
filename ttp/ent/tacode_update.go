@@ -55,6 +55,20 @@ func (tcu *TACodeUpdate) SetNillableCommitID(s *string) *TACodeUpdate {
 	return tcu
 }
 
+// SetActivated sets the "activated" field.
+func (tcu *TACodeUpdate) SetActivated(b bool) *TACodeUpdate {
+	tcu.mutation.SetActivated(b)
+	return tcu
+}
+
+// SetNillableActivated sets the "activated" field if the given value is not nil.
+func (tcu *TACodeUpdate) SetNillableActivated(b *bool) *TACodeUpdate {
+	if b != nil {
+		tcu.SetActivated(*b)
+	}
+	return tcu
+}
+
 // SetActivatedAt sets the "activated_at" field.
 func (tcu *TACodeUpdate) SetActivatedAt(t time.Time) *TACodeUpdate {
 	tcu.mutation.SetActivatedAt(t)
@@ -66,12 +80,6 @@ func (tcu *TACodeUpdate) SetNillableActivatedAt(t *time.Time) *TACodeUpdate {
 	if t != nil {
 		tcu.SetActivatedAt(*t)
 	}
-	return tcu
-}
-
-// ClearActivatedAt clears the value of the "activated_at" field.
-func (tcu *TACodeUpdate) ClearActivatedAt() *TACodeUpdate {
-	tcu.mutation.ClearActivatedAt()
 	return tcu
 }
 
@@ -161,11 +169,11 @@ func (tcu *TACodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tcu.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)
 	}
+	if value, ok := tcu.mutation.Activated(); ok {
+		_spec.SetField(tacode.FieldActivated, field.TypeBool, value)
+	}
 	if value, ok := tcu.mutation.ActivatedAt(); ok {
 		_spec.SetField(tacode.FieldActivatedAt, field.TypeTime, value)
-	}
-	if tcu.mutation.ActivatedAtCleared() {
-		_spec.ClearField(tacode.FieldActivatedAt, field.TypeTime)
 	}
 	if tcu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -258,6 +266,20 @@ func (tcuo *TACodeUpdateOne) SetNillableCommitID(s *string) *TACodeUpdateOne {
 	return tcuo
 }
 
+// SetActivated sets the "activated" field.
+func (tcuo *TACodeUpdateOne) SetActivated(b bool) *TACodeUpdateOne {
+	tcuo.mutation.SetActivated(b)
+	return tcuo
+}
+
+// SetNillableActivated sets the "activated" field if the given value is not nil.
+func (tcuo *TACodeUpdateOne) SetNillableActivated(b *bool) *TACodeUpdateOne {
+	if b != nil {
+		tcuo.SetActivated(*b)
+	}
+	return tcuo
+}
+
 // SetActivatedAt sets the "activated_at" field.
 func (tcuo *TACodeUpdateOne) SetActivatedAt(t time.Time) *TACodeUpdateOne {
 	tcuo.mutation.SetActivatedAt(t)
@@ -269,12 +291,6 @@ func (tcuo *TACodeUpdateOne) SetNillableActivatedAt(t *time.Time) *TACodeUpdateO
 	if t != nil {
 		tcuo.SetActivatedAt(*t)
 	}
-	return tcuo
-}
-
-// ClearActivatedAt clears the value of the "activated_at" field.
-func (tcuo *TACodeUpdateOne) ClearActivatedAt() *TACodeUpdateOne {
-	tcuo.mutation.ClearActivatedAt()
 	return tcuo
 }
 
@@ -394,11 +410,11 @@ func (tcuo *TACodeUpdateOne) sqlSave(ctx context.Context) (_node *TACode, err er
 	if value, ok := tcuo.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)
 	}
+	if value, ok := tcuo.mutation.Activated(); ok {
+		_spec.SetField(tacode.FieldActivated, field.TypeBool, value)
+	}
 	if value, ok := tcuo.mutation.ActivatedAt(); ok {
 		_spec.SetField(tacode.FieldActivatedAt, field.TypeTime, value)
-	}
-	if tcuo.mutation.ActivatedAtCleared() {
-		_spec.ClearField(tacode.FieldActivatedAt, field.TypeTime)
 	}
 	if tcuo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{

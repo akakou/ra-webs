@@ -23,6 +23,8 @@ type TACode struct {
 	PublicKey []byte `json:"public_key,omitempty"`
 	// CommitID holds the value of the "commit_id" field.
 	CommitID string `json:"commit_id,omitempty"`
+	// Activated holds the value of the "activated" field.
+	Activated bool `json:"activated,omitempty"`
 	// ActivatedAt holds the value of the "activated_at" field.
 	ActivatedAt time.Time `json:"activated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -56,6 +58,8 @@ func (*TACode) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case tacode.FieldUniqueID, tacode.FieldPublicKey:
 			values[i] = new([]byte)
+		case tacode.FieldActivated:
+			values[i] = new(sql.NullBool)
 		case tacode.FieldID:
 			values[i] = new(sql.NullInt64)
 		case tacode.FieldCommitID:
@@ -100,6 +104,12 @@ func (tc *TACode) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field commit_id", values[i])
 			} else if value.Valid {
 				tc.CommitID = value.String
+			}
+		case tacode.FieldActivated:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field activated", values[i])
+			} else if value.Valid {
+				tc.Activated = value.Bool
 			}
 		case tacode.FieldActivatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -156,6 +166,9 @@ func (tc *TACode) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("commit_id=")
 	builder.WriteString(tc.CommitID)
+	builder.WriteString(", ")
+	builder.WriteString("activated=")
+	builder.WriteString(fmt.Sprintf("%v", tc.Activated))
 	builder.WriteString(", ")
 	builder.WriteString("activated_at=")
 	builder.WriteString(tc.ActivatedAt.Format(time.ANSIC))

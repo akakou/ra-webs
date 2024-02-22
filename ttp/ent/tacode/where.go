@@ -70,6 +70,11 @@ func CommitID(v string) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldCommitID, v))
 }
 
+// Activated applies equality check predicate on the "activated" field. It's identical to ActivatedEQ.
+func Activated(v bool) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldActivated, v))
+}
+
 // ActivatedAt applies equality check predicate on the "activated_at" field. It's identical to ActivatedAtEQ.
 func ActivatedAt(v time.Time) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldActivatedAt, v))
@@ -220,6 +225,16 @@ func CommitIDContainsFold(v string) predicate.TACode {
 	return predicate.TACode(sql.FieldContainsFold(FieldCommitID, v))
 }
 
+// ActivatedEQ applies the EQ predicate on the "activated" field.
+func ActivatedEQ(v bool) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldActivated, v))
+}
+
+// ActivatedNEQ applies the NEQ predicate on the "activated" field.
+func ActivatedNEQ(v bool) predicate.TACode {
+	return predicate.TACode(sql.FieldNEQ(FieldActivated, v))
+}
+
 // ActivatedAtEQ applies the EQ predicate on the "activated_at" field.
 func ActivatedAtEQ(v time.Time) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldActivatedAt, v))
@@ -258,16 +273,6 @@ func ActivatedAtLT(v time.Time) predicate.TACode {
 // ActivatedAtLTE applies the LTE predicate on the "activated_at" field.
 func ActivatedAtLTE(v time.Time) predicate.TACode {
 	return predicate.TACode(sql.FieldLTE(FieldActivatedAt, v))
-}
-
-// ActivatedAtIsNil applies the IsNil predicate on the "activated_at" field.
-func ActivatedAtIsNil() predicate.TACode {
-	return predicate.TACode(sql.FieldIsNull(FieldActivatedAt))
-}
-
-// ActivatedAtNotNil applies the NotNil predicate on the "activated_at" field.
-func ActivatedAtNotNil() predicate.TACode {
-	return predicate.TACode(sql.FieldNotNull(FieldActivatedAt))
 }
 
 // HasTa applies the HasEdge predicate on the "ta" edge.

@@ -48,7 +48,8 @@ var (
 		{Name: "unique_id", Type: field.TypeBytes},
 		{Name: "public_key", Type: field.TypeBytes},
 		{Name: "commit_id", Type: field.TypeString},
-		{Name: "activated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "activated", Type: field.TypeBool, Default: false},
+		{Name: "activated_at", Type: field.TypeTime},
 	}
 	// TaCodesTable holds the schema information for the "ta_codes" table.
 	TaCodesTable = &schema.Table{

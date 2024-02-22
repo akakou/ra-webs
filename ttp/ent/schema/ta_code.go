@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -17,7 +19,8 @@ func (TACode) Fields() []ent.Field {
 		field.Bytes("unique_id"),
 		field.Bytes("public_key"),
 		field.String("commit_id"),
-		field.Time("activated_at").Default(nil).Optional(),
+		field.Bool("activated").Default(false),
+		field.Time("activated_at").Default(time.Now()),
 	}
 }
 

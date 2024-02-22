@@ -39,6 +39,20 @@ func (tcc *TACodeCreate) SetCommitID(s string) *TACodeCreate {
 	return tcc
 }
 
+// SetActivated sets the "activated" field.
+func (tcc *TACodeCreate) SetActivated(b bool) *TACodeCreate {
+	tcc.mutation.SetActivated(b)
+	return tcc
+}
+
+// SetNillableActivated sets the "activated" field if the given value is not nil.
+func (tcc *TACodeCreate) SetNillableActivated(b *bool) *TACodeCreate {
+	if b != nil {
+		tcc.SetActivated(*b)
+	}
+	return tcc
+}
+
 // SetActivatedAt sets the "activated_at" field.
 func (tcc *TACodeCreate) SetActivatedAt(t time.Time) *TACodeCreate {
 	tcc.mutation.SetActivatedAt(t)
@@ -75,6 +89,7 @@ func (tcc *TACodeCreate) Mutation() *TACodeMutation {
 
 // Save creates the TACode in the database.
 func (tcc *TACodeCreate) Save(ctx context.Context) (*TACode, error) {
+	tcc.defaults()
 	return withHooks(ctx, tcc.sqlSave, tcc.mutation, tcc.hooks)
 }
 
@@ -100,6 +115,18 @@ func (tcc *TACodeCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tcc *TACodeCreate) defaults() {
+	if _, ok := tcc.mutation.Activated(); !ok {
+		v := tacode.DefaultActivated
+		tcc.mutation.SetActivated(v)
+	}
+	if _, ok := tcc.mutation.ActivatedAt(); !ok {
+		v := tacode.DefaultActivatedAt
+		tcc.mutation.SetActivatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (tcc *TACodeCreate) check() error {
 	if _, ok := tcc.mutation.UniqueID(); !ok {
@@ -110,6 +137,12 @@ func (tcc *TACodeCreate) check() error {
 	}
 	if _, ok := tcc.mutation.CommitID(); !ok {
 		return &ValidationError{Name: "commit_id", err: errors.New(`ent: missing required field "TACode.commit_id"`)}
+	}
+	if _, ok := tcc.mutation.Activated(); !ok {
+		return &ValidationError{Name: "activated", err: errors.New(`ent: missing required field "TACode.activated"`)}
+	}
+	if _, ok := tcc.mutation.ActivatedAt(); !ok {
+		return &ValidationError{Name: "activated_at", err: errors.New(`ent: missing required field "TACode.activated_at"`)}
 	}
 	return nil
 }
@@ -148,6 +181,10 @@ func (tcc *TACodeCreate) createSpec() (*TACode, *sqlgraph.CreateSpec) {
 	if value, ok := tcc.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)
 		_node.CommitID = value
+	}
+	if value, ok := tcc.mutation.Activated(); ok {
+		_spec.SetField(tacode.FieldActivated, field.TypeBool, value)
+		_node.Activated = value
 	}
 	if value, ok := tcc.mutation.ActivatedAt(); ok {
 		_spec.SetField(tacode.FieldActivatedAt, field.TypeTime, value)
@@ -190,6 +227,7 @@ func (tccb *TACodeCreateBulk) Save(ctx context.Context) ([]*TACode, error) {
 	for i := range tccb.builders {
 		func(i int, root context.Context) {
 			builder := tccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TACodeMutation)
 				if !ok {

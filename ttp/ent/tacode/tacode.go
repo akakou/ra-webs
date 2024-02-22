@@ -3,6 +3,8 @@
 package tacode
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -18,6 +20,8 @@ const (
 	FieldPublicKey = "public_key"
 	// FieldCommitID holds the string denoting the commit_id field in the database.
 	FieldCommitID = "commit_id"
+	// FieldActivated holds the string denoting the activated field in the database.
+	FieldActivated = "activated"
 	// FieldActivatedAt holds the string denoting the activated_at field in the database.
 	FieldActivatedAt = "activated_at"
 	// EdgeTa holds the string denoting the ta edge name in mutations.
@@ -37,6 +41,7 @@ var Columns = []string{
 	FieldUniqueID,
 	FieldPublicKey,
 	FieldCommitID,
+	FieldActivated,
 	FieldActivatedAt,
 }
 
@@ -56,6 +61,13 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultActivated holds the default value on creation for the "activated" field.
+	DefaultActivated bool
+	// DefaultActivatedAt holds the default value on creation for the "activated_at" field.
+	DefaultActivatedAt time.Time
+)
+
 // OrderOption defines the ordering options for the TACode queries.
 type OrderOption func(*sql.Selector)
 
@@ -67,6 +79,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByCommitID orders the results by the commit_id field.
 func ByCommitID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCommitID, opts...).ToFunc()
+}
+
+// ByActivated orders the results by the activated field.
+func ByActivated(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldActivated, opts...).ToFunc()
 }
 
 // ByActivatedAt orders the results by the activated_at field.

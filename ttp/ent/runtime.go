@@ -2,8 +2,25 @@
 
 package ent
 
+import (
+	"time"
+
+	"github.com/akakou/ra_webs/ttp/ent/schema"
+	"github.com/akakou/ra_webs/ttp/ent/tacode"
+)
+
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	tacodeFields := schema.TACode{}.Fields()
+	_ = tacodeFields
+	// tacodeDescActivated is the schema descriptor for activated field.
+	tacodeDescActivated := tacodeFields[3].Descriptor()
+	// tacode.DefaultActivated holds the default value on creation for the activated field.
+	tacode.DefaultActivated = tacodeDescActivated.Default.(bool)
+	// tacodeDescActivatedAt is the schema descriptor for activated_at field.
+	tacodeDescActivatedAt := tacodeFields[4].Descriptor()
+	// tacode.DefaultActivatedAt holds the default value on creation for the activated_at field.
+	tacode.DefaultActivatedAt = tacodeDescActivatedAt.Default.(time.Time)
 }

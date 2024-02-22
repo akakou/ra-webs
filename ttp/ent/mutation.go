@@ -1073,6 +1073,7 @@ type TACodeMutation struct {
 	unique_id     *[]byte
 	public_key    *[]byte
 	commit_id     *string
+	activated     *bool
 	activated_at  *time.Time
 	clearedFields map[string]struct{}
 	ta            map[int]struct{}
@@ -1289,6 +1290,42 @@ func (m *TACodeMutation) ResetCommitID() {
 	m.commit_id = nil
 }
 
+// SetActivated sets the "activated" field.
+func (m *TACodeMutation) SetActivated(b bool) {
+	m.activated = &b
+}
+
+// Activated returns the value of the "activated" field in the mutation.
+func (m *TACodeMutation) Activated() (r bool, exists bool) {
+	v := m.activated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActivated returns the old "activated" field's value of the TACode entity.
+// If the TACode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TACodeMutation) OldActivated(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActivated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActivated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActivated: %w", err)
+	}
+	return oldValue.Activated, nil
+}
+
+// ResetActivated resets all changes to the "activated" field.
+func (m *TACodeMutation) ResetActivated() {
+	m.activated = nil
+}
+
 // SetActivatedAt sets the "activated_at" field.
 func (m *TACodeMutation) SetActivatedAt(t time.Time) {
 	m.activated_at = &t
@@ -1320,22 +1357,9 @@ func (m *TACodeMutation) OldActivatedAt(ctx context.Context) (v time.Time, err e
 	return oldValue.ActivatedAt, nil
 }
 
-// ClearActivatedAt clears the value of the "activated_at" field.
-func (m *TACodeMutation) ClearActivatedAt() {
-	m.activated_at = nil
-	m.clearedFields[tacode.FieldActivatedAt] = struct{}{}
-}
-
-// ActivatedAtCleared returns if the "activated_at" field was cleared in this mutation.
-func (m *TACodeMutation) ActivatedAtCleared() bool {
-	_, ok := m.clearedFields[tacode.FieldActivatedAt]
-	return ok
-}
-
 // ResetActivatedAt resets all changes to the "activated_at" field.
 func (m *TACodeMutation) ResetActivatedAt() {
 	m.activated_at = nil
-	delete(m.clearedFields, tacode.FieldActivatedAt)
 }
 
 // AddTumIDs adds the "ta" edge to the TA entity by ids.
@@ -1426,7 +1450,7 @@ func (m *TACodeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TACodeMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.unique_id != nil {
 		fields = append(fields, tacode.FieldUniqueID)
 	}
@@ -1435,6 +1459,9 @@ func (m *TACodeMutation) Fields() []string {
 	}
 	if m.commit_id != nil {
 		fields = append(fields, tacode.FieldCommitID)
+	}
+	if m.activated != nil {
+		fields = append(fields, tacode.FieldActivated)
 	}
 	if m.activated_at != nil {
 		fields = append(fields, tacode.FieldActivatedAt)
@@ -1453,6 +1480,8 @@ func (m *TACodeMutation) Field(name string) (ent.Value, bool) {
 		return m.PublicKey()
 	case tacode.FieldCommitID:
 		return m.CommitID()
+	case tacode.FieldActivated:
+		return m.Activated()
 	case tacode.FieldActivatedAt:
 		return m.ActivatedAt()
 	}
@@ -1470,6 +1499,8 @@ func (m *TACodeMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldPublicKey(ctx)
 	case tacode.FieldCommitID:
 		return m.OldCommitID(ctx)
+	case tacode.FieldActivated:
+		return m.OldActivated(ctx)
 	case tacode.FieldActivatedAt:
 		return m.OldActivatedAt(ctx)
 	}
@@ -1501,6 +1532,13 @@ func (m *TACodeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCommitID(v)
+		return nil
+	case tacode.FieldActivated:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActivated(v)
 		return nil
 	case tacode.FieldActivatedAt:
 		v, ok := value.(time.Time)
@@ -1538,11 +1576,7 @@ func (m *TACodeMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *TACodeMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(tacode.FieldActivatedAt) {
-		fields = append(fields, tacode.FieldActivatedAt)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1555,11 +1589,6 @@ func (m *TACodeMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *TACodeMutation) ClearField(name string) error {
-	switch name {
-	case tacode.FieldActivatedAt:
-		m.ClearActivatedAt()
-		return nil
-	}
 	return fmt.Errorf("unknown TACode nullable field %s", name)
 }
 
@@ -1575,6 +1604,9 @@ func (m *TACodeMutation) ResetField(name string) error {
 		return nil
 	case tacode.FieldCommitID:
 		m.ResetCommitID()
+		return nil
+	case tacode.FieldActivated:
+		m.ResetActivated()
 		return nil
 	case tacode.FieldActivatedAt:
 		m.ResetActivatedAt()
