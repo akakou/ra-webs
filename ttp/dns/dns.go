@@ -7,7 +7,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/core"
 	"github.com/miekg/dns"
 )
 
