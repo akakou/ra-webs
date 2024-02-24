@@ -27,6 +27,8 @@ func TestAPI(t *testing.T) {
 
 	publicKeyBuf := x509.MarshalPKCS1PublicKey(&publicKey)
 
+	token := ""
+
 	t.Run("TestPostTACode", func(t *testing.T) {
 		body := `{"repository":"github.com/ra-webs/ra_webs", "commit_id": "1111111111", "unique_id": "aGVsbG8K"}`
 
@@ -55,8 +57,16 @@ func TestAPI(t *testing.T) {
 		err = postServerApi.f(auditor)(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
+		resp := new(struct {
+			ID    int    `json:"server_id"`
+			Token string `json:"token"`
+		})
 
-		assert.Equal(t, "1", rec.Body.String())
+		err := json.Unmarshal(rec.Body.Bytes(), resp)
+		assert.NoError(t, err)
+
+		assert.Equal(t, 1, resp.ID)
+		token = resp.Token
 	})
 
 	t.Run("TestActivateCode", func(t *testing.T) {
@@ -108,6 +118,7 @@ func TestAPI(t *testing.T) {
 		assert.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodPost, postTAApi.path, strings.NewReader(string(body)))
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 		rec := httptest.NewRecorder()
