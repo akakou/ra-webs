@@ -18,6 +18,8 @@ const (
 	FieldIP = "ip"
 	// FieldServiceID holds the string denoting the service_id field in the database.
 	FieldServiceID = "service_id"
+	// FieldToken holds the string denoting the token field in the database.
+	FieldToken = "token"
 	// FieldActivate holds the string denoting the activate field in the database.
 	FieldActivate = "activate"
 	// EdgeTa holds the string denoting the ta edge name in mutations.
@@ -39,6 +41,7 @@ var Columns = []string{
 	FieldDomain,
 	FieldIP,
 	FieldServiceID,
+	FieldToken,
 	FieldActivate,
 }
 
@@ -89,6 +92,11 @@ func ByIP(opts ...sql.OrderTermOption) OrderOption {
 // ByServiceID orders the results by the service_id field.
 func ByServiceID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldServiceID, opts...).ToFunc()
+}
+
+// ByToken orders the results by the token field.
+func ByToken(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldToken, opts...).ToFunc()
 }
 
 // ByActivate orders the results by the activate field.

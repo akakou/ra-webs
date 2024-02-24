@@ -50,6 +50,7 @@ var (
 		{Name: "domain", Type: field.TypeString, Unique: true},
 		{Name: "ip", Type: field.TypeString, Unique: true},
 		{Name: "service_id", Type: field.TypeString},
+		{Name: "token", Type: field.TypeString},
 		{Name: "activate", Type: field.TypeBool, Default: false},
 		{Name: "ta_server", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
@@ -61,7 +62,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ta_servers_tas_server",
-				Columns:    []*schema.Column{TaServersColumns[5]},
+				Columns:    []*schema.Column{TaServersColumns[6]},
 				RefColumns: []*schema.Column{TasColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

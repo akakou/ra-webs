@@ -28,7 +28,7 @@ func init() {
 	taserverFields := schema.TAServer{}.Fields()
 	_ = taserverFields
 	// taserverDescActivate is the schema descriptor for activate field.
-	taserverDescActivate := taserverFields[3].Descriptor()
+	taserverDescActivate := taserverFields[4].Descriptor()
 	// taserver.DefaultActivate holds the default value on creation for the activate field.
 	taserver.DefaultActivate = taserverDescActivate.Default.(bool)
 }

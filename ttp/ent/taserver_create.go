@@ -38,6 +38,12 @@ func (tsc *TAServerCreate) SetServiceID(s string) *TAServerCreate {
 	return tsc
 }
 
+// SetToken sets the "token" field.
+func (tsc *TAServerCreate) SetToken(s string) *TAServerCreate {
+	tsc.mutation.SetToken(s)
+	return tsc
+}
+
 // SetActivate sets the "activate" field.
 func (tsc *TAServerCreate) SetActivate(b bool) *TAServerCreate {
 	tsc.mutation.SetActivate(b)
@@ -123,6 +129,9 @@ func (tsc *TAServerCreate) check() error {
 	if _, ok := tsc.mutation.ServiceID(); !ok {
 		return &ValidationError{Name: "service_id", err: errors.New(`ent: missing required field "TAServer.service_id"`)}
 	}
+	if _, ok := tsc.mutation.Token(); !ok {
+		return &ValidationError{Name: "token", err: errors.New(`ent: missing required field "TAServer.token"`)}
+	}
 	if _, ok := tsc.mutation.Activate(); !ok {
 		return &ValidationError{Name: "activate", err: errors.New(`ent: missing required field "TAServer.activate"`)}
 	}
@@ -163,6 +172,10 @@ func (tsc *TAServerCreate) createSpec() (*TAServer, *sqlgraph.CreateSpec) {
 	if value, ok := tsc.mutation.ServiceID(); ok {
 		_spec.SetField(taserver.FieldServiceID, field.TypeString, value)
 		_node.ServiceID = value
+	}
+	if value, ok := tsc.mutation.Token(); ok {
+		_spec.SetField(taserver.FieldToken, field.TypeString, value)
+		_node.Token = value
 	}
 	if value, ok := tsc.mutation.Activate(); ok {
 		_spec.SetField(taserver.FieldActivate, field.TypeBool, value)

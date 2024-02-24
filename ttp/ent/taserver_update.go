@@ -70,6 +70,20 @@ func (tsu *TAServerUpdate) SetNillableServiceID(s *string) *TAServerUpdate {
 	return tsu
 }
 
+// SetToken sets the "token" field.
+func (tsu *TAServerUpdate) SetToken(s string) *TAServerUpdate {
+	tsu.mutation.SetToken(s)
+	return tsu
+}
+
+// SetNillableToken sets the "token" field if the given value is not nil.
+func (tsu *TAServerUpdate) SetNillableToken(s *string) *TAServerUpdate {
+	if s != nil {
+		tsu.SetToken(*s)
+	}
+	return tsu
+}
+
 // SetActivate sets the "activate" field.
 func (tsu *TAServerUpdate) SetActivate(b bool) *TAServerUpdate {
 	tsu.mutation.SetActivate(b)
@@ -158,6 +172,9 @@ func (tsu *TAServerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tsu.mutation.ServiceID(); ok {
 		_spec.SetField(taserver.FieldServiceID, field.TypeString, value)
+	}
+	if value, ok := tsu.mutation.Token(); ok {
+		_spec.SetField(taserver.FieldToken, field.TypeString, value)
 	}
 	if value, ok := tsu.mutation.Activate(); ok {
 		_spec.SetField(taserver.FieldActivate, field.TypeBool, value)
@@ -249,6 +266,20 @@ func (tsuo *TAServerUpdateOne) SetServiceID(s string) *TAServerUpdateOne {
 func (tsuo *TAServerUpdateOne) SetNillableServiceID(s *string) *TAServerUpdateOne {
 	if s != nil {
 		tsuo.SetServiceID(*s)
+	}
+	return tsuo
+}
+
+// SetToken sets the "token" field.
+func (tsuo *TAServerUpdateOne) SetToken(s string) *TAServerUpdateOne {
+	tsuo.mutation.SetToken(s)
+	return tsuo
+}
+
+// SetNillableToken sets the "token" field if the given value is not nil.
+func (tsuo *TAServerUpdateOne) SetNillableToken(s *string) *TAServerUpdateOne {
+	if s != nil {
+		tsuo.SetToken(*s)
 	}
 	return tsuo
 }
@@ -371,6 +402,9 @@ func (tsuo *TAServerUpdateOne) sqlSave(ctx context.Context) (_node *TAServer, er
 	}
 	if value, ok := tsuo.mutation.ServiceID(); ok {
 		_spec.SetField(taserver.FieldServiceID, field.TypeString, value)
+	}
+	if value, ok := tsuo.mutation.Token(); ok {
+		_spec.SetField(taserver.FieldToken, field.TypeString, value)
 	}
 	if value, ok := tsuo.mutation.Activate(); ok {
 		_spec.SetField(taserver.FieldActivate, field.TypeBool, value)

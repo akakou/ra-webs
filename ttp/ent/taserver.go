@@ -23,6 +23,8 @@ type TAServer struct {
 	IP string `json:"ip,omitempty"`
 	// ServiceID holds the value of the "service_id" field.
 	ServiceID string `json:"service_id,omitempty"`
+	// Token holds the value of the "token" field.
+	Token string `json:"token,omitempty"`
 	// Activate holds the value of the "activate" field.
 	Activate bool `json:"activate,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -63,7 +65,7 @@ func (*TAServer) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case taserver.FieldID:
 			values[i] = new(sql.NullInt64)
-		case taserver.FieldDomain, taserver.FieldIP, taserver.FieldServiceID:
+		case taserver.FieldDomain, taserver.FieldIP, taserver.FieldServiceID, taserver.FieldToken:
 			values[i] = new(sql.NullString)
 		case taserver.ForeignKeys[0]: // ta_server
 			values[i] = new(sql.NullInt64)
@@ -105,6 +107,12 @@ func (ts *TAServer) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field service_id", values[i])
 			} else if value.Valid {
 				ts.ServiceID = value.String
+			}
+		case taserver.FieldToken:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field token", values[i])
+			} else if value.Valid {
+				ts.Token = value.String
 			}
 		case taserver.FieldActivate:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -168,6 +176,9 @@ func (ts *TAServer) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("service_id=")
 	builder.WriteString(ts.ServiceID)
+	builder.WriteString(", ")
+	builder.WriteString("token=")
+	builder.WriteString(ts.Token)
 	builder.WriteString(", ")
 	builder.WriteString("activate=")
 	builder.WriteString(fmt.Sprintf("%v", ts.Activate))

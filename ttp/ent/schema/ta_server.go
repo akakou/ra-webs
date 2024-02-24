@@ -17,6 +17,7 @@ func (TAServer) Fields() []ent.Field {
 		field.String("domain").Unique(),
 		field.String("ip").Unique(),
 		field.String("service_id"),
+		field.String("token"),
 		field.Bool("activate").Default(false),
 	}
 }
