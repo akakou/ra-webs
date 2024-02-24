@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/akakou/ra_webs/core"
+	"github.com/akakou/ra_webs/ttp/ent/ta"
 	simplecertify "github.com/akakou/simple-certify"
 	"github.com/labstack/echo/v4"
 )
@@ -85,6 +86,24 @@ var postTAApi = echoRoute{
 			// }
 
 			return c.Blob(http.StatusOK, "application/x-x509-cert", cert.Raw)
+		}
+	},
+}
+
+var getTAApi = echoRoute{
+	method: GET,
+	path:   "/ta",
+	f: func(auditor *Auditor) echoRouteFunc {
+		return func(c echo.Context) error {
+			valid := c.QueryParam("valid") != "false"
+
+			ta, err := auditor.db.Client.TA.Query().Where(ta.IsValid(valid)).All(*auditor.db.Ctx)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			return c.JSON(http.StatusOK, ta)
 		}
 	},
 }

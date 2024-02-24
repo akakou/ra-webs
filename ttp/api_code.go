@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/labstack/echo/v4"
 )
 
@@ -38,6 +39,7 @@ var postCodeApi = echoRoute{
 		}
 	},
 }
+
 var postActivateCodeApi = echoRoute{
 	method: POST,
 	path:   "/code/:id/activate",
@@ -71,6 +73,24 @@ var postActivateCodeApi = echoRoute{
 			}
 
 			return c.String(http.StatusOK, strconv.Itoa(code.ID))
+		}
+	},
+}
+
+var getCodeApi = echoRoute{
+	method: GET,
+	path:   "/code",
+	f: func(auditor *Auditor) echoRouteFunc {
+		return func(c echo.Context) error {
+			activate := c.QueryParam("activate") != "false"
+
+			code, err := auditor.db.Client.TACode.Query().Where(tacode.Activate(activate)).All(*auditor.db.Ctx)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			return c.JSON(http.StatusOK, code)
 		}
 	},
 }

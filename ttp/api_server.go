@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	goutils "github.com/akakou/go-utils"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/labstack/echo/v4"
 )
 
@@ -79,6 +80,24 @@ var postActivateServerApi = echoRoute{
 			}
 
 			return c.String(http.StatusOK, strconv.Itoa(server.ID))
+		}
+	},
+}
+
+var getServerApi = echoRoute{
+	method: GET,
+	path:   "/server",
+	f: func(auditor *Auditor) echoRouteFunc {
+		return func(c echo.Context) error {
+			activate := c.QueryParam("activate") != "false"
+
+			code, err := auditor.db.Client.TAServer.Query().Where(taserver.Activate(activate)).All(*auditor.db.Ctx)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			return c.JSON(http.StatusOK, code)
 		}
 	},
 }

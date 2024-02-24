@@ -45,6 +45,10 @@ func Route(e *echo.Echo, auditor *Auditor) {
 	postServerApi.set(e, auditor)
 	postTAApi.set(e, auditor)
 	certApi.set(e, auditor)
+
+	getCodeApi.set(e, auditor)
+	getServerApi.set(e, auditor)
+	getTAApi.set(e, auditor)
 	
 	postActivateServerApi.set(e, auditor)
 	postActivateCodeApi.set(e, auditor)
