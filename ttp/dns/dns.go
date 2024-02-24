@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 
+	"github.com/akakou/ra_webs/ttp/core"
 	"github.com/miekg/dns"
 )
 
@@ -86,12 +87,20 @@ func (s *Server) Serve(w dns.ResponseWriter, req *dns.Msg) {
 
 	ip := net.ParseIP(ipStr)
 
-	rr := &dns.A{
+	ar := &dns.A{
 		Hdr: newRrHeader(query.Name),
 		A:   ip,
 	}
 
-	m.Answer = append(m.Answer, rr)
+	caar := &dns.CAA{
+		Hdr:   newRrHeader(query.Name),
+		Flag:  0,
+		Tag:   "issue",
+		Value: core.CA_NAME,
+	}
+
+	m.Answer = append(m.Answer, ar)
+	m.Answer = append(m.Answer, caar)
 	w.WriteMsg(m)
 
 	log.Printf("Lookup: served a query successfully: %v => %v\n", query.Name, ip)

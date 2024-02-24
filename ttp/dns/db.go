@@ -2,7 +2,7 @@ package dns
 
 import "github.com/akakou/ra_webs/ttp/core"
 
-func (s *Server) LoadDatabase(db *core.DB) error {
+func (s *Server) LoadDB(db *core.DB) error {
 	tas, err := db.Client.TA.Query().WithServer().All(*db.Ctx)
 	if err != nil {
 		return err
@@ -15,6 +15,8 @@ func (s *Server) LoadDatabase(db *core.DB) error {
 			return err
 		}
 	}
+
+	
 
 	return nil
 }
