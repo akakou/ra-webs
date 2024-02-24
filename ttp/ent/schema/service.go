@@ -7,24 +7,23 @@ import (
 )
 
 // TA holds the schema definition for the TA entity.
-type TACode struct {
+type Service struct {
 	ent.Schema
 }
 
 // Fields of the TA.
-func (TACode) Fields() []ent.Field {
+func (Service) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("repository"),
-		field.String("commit_id"),
-		field.Bytes("unique_id"),
+		field.String("name"),
+		field.String("token"),
 		field.Bool("has_activated").Default(false),
 	}
 }
 
 // Edges of the TA.
-func (TACode) Edges() []ent.Edge {
+func (Service) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("ta", TA.Type).Ref("code"),
-		edge.To("service", Service.Type).Unique(),
+		edge.From("taserver", TAServer.Type).Ref("service"),
+		edge.From("tacode", TACode.Type).Ref("service"),
 	}
 }

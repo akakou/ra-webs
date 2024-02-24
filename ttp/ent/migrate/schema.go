@@ -8,88 +8,105 @@ import (
 )
 
 var (
-	// CtLogAuditsColumns holds the columns for the "ct_log_audits" table.
-	CtLogAuditsColumns = []*schema.Column{
+	// ServicesColumns holds the columns for the "services" table.
+	ServicesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "is_valid", Type: field.TypeBool},
-		{Name: "latest_ct_id", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+		{Name: "token", Type: field.TypeString},
+		{Name: "has_activated", Type: field.TypeBool, Default: false},
 	}
-	// CtLogAuditsTable holds the schema information for the "ct_log_audits" table.
-	CtLogAuditsTable = &schema.Table{
-		Name:       "ct_log_audits",
-		Columns:    CtLogAuditsColumns,
-		PrimaryKey: []*schema.Column{CtLogAuditsColumns[0]},
+	// ServicesTable holds the schema information for the "services" table.
+	ServicesTable = &schema.Table{
+		Name:       "services",
+		Columns:    ServicesColumns,
+		PrimaryKey: []*schema.Column{ServicesColumns[0]},
+	}
+	// TasColumns holds the columns for the "tas" table.
+	TasColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "public_key", Type: field.TypeBytes},
+		{Name: "is_valid", Type: field.TypeBool, Default: false},
+		{Name: "last_ct", Type: field.TypeString},
+		{Name: "ta_code", Type: field.TypeInt, Nullable: true},
+	}
+	// TasTable holds the schema information for the "tas" table.
+	TasTable = &schema.Table{
+		Name:       "tas",
+		Columns:    TasColumns,
+		PrimaryKey: []*schema.Column{TasColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "tas_ta_codes_code",
+				Columns:    []*schema.Column{TasColumns[4]},
+				RefColumns: []*schema.Column{TaCodesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// TaCodesColumns holds the columns for the "ta_codes" table.
 	TaCodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "unique_id", Type: field.TypeBytes},
+		{Name: "repository", Type: field.TypeString},
 		{Name: "commit_id", Type: field.TypeString},
-		{Name: "activated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "unique_id", Type: field.TypeBytes},
+		{Name: "has_activated", Type: field.TypeBool, Default: false},
+		{Name: "ta_code_service", Type: field.TypeInt, Nullable: true},
 	}
 	// TaCodesTable holds the schema information for the "ta_codes" table.
 	TaCodesTable = &schema.Table{
 		Name:       "ta_codes",
 		Columns:    TaCodesColumns,
 		PrimaryKey: []*schema.Column{TaCodesColumns[0]},
-	}
-	// TaInfosColumns holds the columns for the "ta_infos" table.
-	TaInfosColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "domain", Type: field.TypeString},
-		{Name: "git_repository", Type: field.TypeString},
-		{Name: "ct_log_audit_ta_info", Type: field.TypeInt, Unique: true, Nullable: true},
-	}
-	// TaInfosTable holds the schema information for the "ta_infos" table.
-	TaInfosTable = &schema.Table{
-		Name:       "ta_infos",
-		Columns:    TaInfosColumns,
-		PrimaryKey: []*schema.Column{TaInfosColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "ta_infos_ct_log_audits_ta_info",
-				Columns:    []*schema.Column{TaInfosColumns[3]},
-				RefColumns: []*schema.Column{CtLogAuditsColumns[0]},
+				Symbol:     "ta_codes_services_service",
+				Columns:    []*schema.Column{TaCodesColumns[5]},
+				RefColumns: []*schema.Column{ServicesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 	}
-	// TaCodeTaInfoColumns holds the columns for the "ta_code_ta_info" table.
-	TaCodeTaInfoColumns = []*schema.Column{
-		{Name: "ta_code_id", Type: field.TypeInt},
-		{Name: "ta_info_id", Type: field.TypeInt},
+	// TaServersColumns holds the columns for the "ta_servers" table.
+	TaServersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "domain", Type: field.TypeString, Unique: true},
+		{Name: "ip", Type: field.TypeString, Unique: true},
+		{Name: "has_activated", Type: field.TypeBool, Default: false},
+		{Name: "ta_server", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "ta_server_service", Type: field.TypeInt, Nullable: true},
 	}
-	// TaCodeTaInfoTable holds the schema information for the "ta_code_ta_info" table.
-	TaCodeTaInfoTable = &schema.Table{
-		Name:       "ta_code_ta_info",
-		Columns:    TaCodeTaInfoColumns,
-		PrimaryKey: []*schema.Column{TaCodeTaInfoColumns[0], TaCodeTaInfoColumns[1]},
+	// TaServersTable holds the schema information for the "ta_servers" table.
+	TaServersTable = &schema.Table{
+		Name:       "ta_servers",
+		Columns:    TaServersColumns,
+		PrimaryKey: []*schema.Column{TaServersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "ta_code_ta_info_ta_code_id",
-				Columns:    []*schema.Column{TaCodeTaInfoColumns[0]},
-				RefColumns: []*schema.Column{TaCodesColumns[0]},
-				OnDelete:   schema.Cascade,
+				Symbol:     "ta_servers_tas_server",
+				Columns:    []*schema.Column{TaServersColumns[4]},
+				RefColumns: []*schema.Column{TasColumns[0]},
+				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "ta_code_ta_info_ta_info_id",
-				Columns:    []*schema.Column{TaCodeTaInfoColumns[1]},
-				RefColumns: []*schema.Column{TaInfosColumns[0]},
-				OnDelete:   schema.Cascade,
+				Symbol:     "ta_servers_services_service",
+				Columns:    []*schema.Column{TaServersColumns[5]},
+				RefColumns: []*schema.Column{ServicesColumns[0]},
+				OnDelete:   schema.SetNull,
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		CtLogAuditsTable,
+		ServicesTable,
+		TasTable,
 		TaCodesTable,
-		TaInfosTable,
-		TaCodeTaInfoTable,
+		TaServersTable,
 	}
 )
 
 func init() {
-	TaInfosTable.ForeignKeys[0].RefTable = CtLogAuditsTable
-	TaCodeTaInfoTable.ForeignKeys[0].RefTable = TaCodesTable
-	TaCodeTaInfoTable.ForeignKeys[1].RefTable = TaInfosTable
+	TasTable.ForeignKeys[0].RefTable = TaCodesTable
+	TaCodesTable.ForeignKeys[0].RefTable = ServicesTable
+	TaServersTable.ForeignKeys[0].RefTable = TasTable
+	TaServersTable.ForeignKeys[1].RefTable = ServicesTable
 }

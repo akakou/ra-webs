@@ -6,11 +6,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// CTLogAudit is the predicate function for ctlogaudit builders.
-type CTLogAudit func(*sql.Selector)
+// Service is the predicate function for service builders.
+type Service func(*sql.Selector)
+
+// TA is the predicate function for ta builders.
+type TA func(*sql.Selector)
 
 // TACode is the predicate function for tacode builders.
 type TACode func(*sql.Selector)
 
-// TAInfo is the predicate function for tainfo builders.
-type TAInfo func(*sql.Selector)
+// TAServer is the predicate function for taserver builders.
+type TAServer func(*sql.Selector)

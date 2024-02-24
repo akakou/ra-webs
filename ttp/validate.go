@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/akakou/metact"
+	metact "github.com/akakou/meta-ct"
 	"github.com/akakou/ra_webs/core"
 )
 

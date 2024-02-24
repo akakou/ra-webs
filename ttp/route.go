@@ -4,94 +4,58 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 	"github.com/labstack/echo/v4"
 )
 
 var RANDOM_SIZE = 32
 
+type echoRouteFunc = func(c echo.Context) error
+
+type echoRoute struct {
+	method int
+	path   string
+	f      func(*Auditor) echoRouteFunc
+}
+
+const (
+	ANY = iota
+	GET
+	POST
+)
+
+func (er echoRoute) set(e *echo.Echo, auditor *Auditor) {
+	if er.method == ANY {
+		e.Any(er.path, er.f(auditor))
+	}
+	if er.method == GET {
+		e.GET(er.path, er.f(auditor))
+	}
+	if er.method == POST {
+		e.POST(er.path, er.f(auditor))
+	}
+}
+
 func Route(e *echo.Echo, auditor *Auditor) {
-	webhookPath := "/webhook/" + randomHexString(RANDOM_SIZE)
-	fmt.Printf("webhook path: %s\n", webhookPath)
-
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
+		r := fmt.Sprintf("%v", e.Routers())
+		return c.String(http.StatusOK, r)
 	})
 
-	e.POST("/register", func(c echo.Context) error {
-		reqTAInfo := new(struct {
-			Domain        string
-			GitRepository string
-		})
+	postCodeApi.set(e, auditor)
+	postServerApi.set(e, auditor)
+	postTAApi.set(e, auditor)
+	certApi.set(e, auditor)
 
-		if c.Bind(reqTAInfo) != nil {
-			return c.String(http.StatusBadRequest, "bad attestation")
-		}
+	getCodeApi.set(e, auditor)
+	getServerApi.set(e, auditor)
+	getTAApi.set(e, auditor)
 
-		taInfo := auditor.db.client.TAInfo.
-			Create().
-			SetDomain(reqTAInfo.Domain).
-			SetGitRepository(reqTAInfo.GitRepository)
+	postActivateServerApi.set(e, auditor)
+	postActivateCodeApi.set(e, auditor)
 
-		_, err := taInfo.Save(*auditor.db.ctx)
-		if err != nil {
-			c.Error(err)
-		}
+	postServiceByAdmin.set(e, auditor)
 
-		err = auditor.ct.Subscribe(reqTAInfo.Domain)
-		if err != nil {
-			c.Error(err)
-		}
+	webhook().set(e, auditor)
 
-		return c.String(http.StatusOK, "ok")
-	})
-
-	e.POST("/compile", func(c echo.Context) error {
-		idReq := new(struct {
-			Id int `json:"id"`
-		})
-
-		if c.Bind(idReq) != nil {
-			return c.String(http.StatusBadRequest, "bad attestation")
-		}
-
-		taInfo, err := auditor.db.client.TAInfo.
-			Query().Where(tainfo.IDEQ(idReq.Id)).First(*auditor.db.ctx)
-
-		if err != nil {
-			c.Error(err)
-		}
-
-		commitId, uniqueId := compile(taInfo)
-
-		taCode := auditor.db.client.TACode.
-			Create().AddTaInfo(taInfo).SetCommitID(commitId).SetUniqueID(uniqueId)
-
-		_, err = taCode.Save(*auditor.db.ctx)
-		if err != nil {
-			c.Error(err)
-		}
-
-		return c.String(http.StatusOK, "ok")
-	})
-
-	e.GET(webhookPath, func(c echo.Context) error {
-		certs, err := auditor.ct.WebHookCertificates(c)
-		if err != nil {
-			c.Error(err)
-		}
-
-		err = auditor.AuditAll(certs)
-		if err != nil {
-			c.Error(err)
-		}
-
-		return c.String(http.StatusOK, "ok")
-	})
-
-	e.GET("/redirect", func(c echo.Context) error {
-		back := c.Request().Header.Get("Referer")
-
-		return c.Render(http.StatusOK, "redirect", back)
-	})
+	redirectWebPage.set(e, auditor)
 }

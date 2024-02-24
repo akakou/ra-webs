@@ -6,12 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/akakou/ra_webs/ttp/ent/service"
+	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
-	"github.com/akakou/ra_webs/ttp/ent/tainfo"
 )
 
 // TACodeCreate is the builder for creating a TACode entity.
@@ -21,9 +21,9 @@ type TACodeCreate struct {
 	hooks    []Hook
 }
 
-// SetUniqueID sets the "unique_id" field.
-func (tcc *TACodeCreate) SetUniqueID(b []byte) *TACodeCreate {
-	tcc.mutation.SetUniqueID(b)
+// SetRepository sets the "repository" field.
+func (tcc *TACodeCreate) SetRepository(s string) *TACodeCreate {
+	tcc.mutation.SetRepository(s)
 	return tcc
 }
 
@@ -33,33 +33,58 @@ func (tcc *TACodeCreate) SetCommitID(s string) *TACodeCreate {
 	return tcc
 }
 
-// SetActivatedAt sets the "activated_at" field.
-func (tcc *TACodeCreate) SetActivatedAt(t time.Time) *TACodeCreate {
-	tcc.mutation.SetActivatedAt(t)
+// SetUniqueID sets the "unique_id" field.
+func (tcc *TACodeCreate) SetUniqueID(b []byte) *TACodeCreate {
+	tcc.mutation.SetUniqueID(b)
 	return tcc
 }
 
-// SetNillableActivatedAt sets the "activated_at" field if the given value is not nil.
-func (tcc *TACodeCreate) SetNillableActivatedAt(t *time.Time) *TACodeCreate {
-	if t != nil {
-		tcc.SetActivatedAt(*t)
+// SetHasActivated sets the "has_activated" field.
+func (tcc *TACodeCreate) SetHasActivated(b bool) *TACodeCreate {
+	tcc.mutation.SetHasActivated(b)
+	return tcc
+}
+
+// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
+func (tcc *TACodeCreate) SetNillableHasActivated(b *bool) *TACodeCreate {
+	if b != nil {
+		tcc.SetHasActivated(*b)
 	}
 	return tcc
 }
 
-// AddTaInfoIDs adds the "ta_info" edge to the TAInfo entity by IDs.
-func (tcc *TACodeCreate) AddTaInfoIDs(ids ...int) *TACodeCreate {
-	tcc.mutation.AddTaInfoIDs(ids...)
+// AddTumIDs adds the "ta" edge to the TA entity by IDs.
+func (tcc *TACodeCreate) AddTumIDs(ids ...int) *TACodeCreate {
+	tcc.mutation.AddTumIDs(ids...)
 	return tcc
 }
 
-// AddTaInfo adds the "ta_info" edges to the TAInfo entity.
-func (tcc *TACodeCreate) AddTaInfo(t ...*TAInfo) *TACodeCreate {
+// AddTa adds the "ta" edges to the TA entity.
+func (tcc *TACodeCreate) AddTa(t ...*TA) *TACodeCreate {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return tcc.AddTaInfoIDs(ids...)
+	return tcc.AddTumIDs(ids...)
+}
+
+// SetServiceID sets the "service" edge to the Service entity by ID.
+func (tcc *TACodeCreate) SetServiceID(id int) *TACodeCreate {
+	tcc.mutation.SetServiceID(id)
+	return tcc
+}
+
+// SetNillableServiceID sets the "service" edge to the Service entity by ID if the given value is not nil.
+func (tcc *TACodeCreate) SetNillableServiceID(id *int) *TACodeCreate {
+	if id != nil {
+		tcc = tcc.SetServiceID(*id)
+	}
+	return tcc
+}
+
+// SetService sets the "service" edge to the Service entity.
+func (tcc *TACodeCreate) SetService(s *Service) *TACodeCreate {
+	return tcc.SetServiceID(s.ID)
 }
 
 // Mutation returns the TACodeMutation object of the builder.
@@ -69,6 +94,7 @@ func (tcc *TACodeCreate) Mutation() *TACodeMutation {
 
 // Save creates the TACode in the database.
 func (tcc *TACodeCreate) Save(ctx context.Context) (*TACode, error) {
+	tcc.defaults()
 	return withHooks(ctx, tcc.sqlSave, tcc.mutation, tcc.hooks)
 }
 
@@ -94,13 +120,27 @@ func (tcc *TACodeCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tcc *TACodeCreate) defaults() {
+	if _, ok := tcc.mutation.HasActivated(); !ok {
+		v := tacode.DefaultHasActivated
+		tcc.mutation.SetHasActivated(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (tcc *TACodeCreate) check() error {
-	if _, ok := tcc.mutation.UniqueID(); !ok {
-		return &ValidationError{Name: "unique_id", err: errors.New(`ent: missing required field "TACode.unique_id"`)}
+	if _, ok := tcc.mutation.Repository(); !ok {
+		return &ValidationError{Name: "repository", err: errors.New(`ent: missing required field "TACode.repository"`)}
 	}
 	if _, ok := tcc.mutation.CommitID(); !ok {
 		return &ValidationError{Name: "commit_id", err: errors.New(`ent: missing required field "TACode.commit_id"`)}
+	}
+	if _, ok := tcc.mutation.UniqueID(); !ok {
+		return &ValidationError{Name: "unique_id", err: errors.New(`ent: missing required field "TACode.unique_id"`)}
+	}
+	if _, ok := tcc.mutation.HasActivated(); !ok {
+		return &ValidationError{Name: "has_activated", err: errors.New(`ent: missing required field "TACode.has_activated"`)}
 	}
 	return nil
 }
@@ -128,32 +168,53 @@ func (tcc *TACodeCreate) createSpec() (*TACode, *sqlgraph.CreateSpec) {
 		_node = &TACode{config: tcc.config}
 		_spec = sqlgraph.NewCreateSpec(tacode.Table, sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt))
 	)
-	if value, ok := tcc.mutation.UniqueID(); ok {
-		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
-		_node.UniqueID = value
+	if value, ok := tcc.mutation.Repository(); ok {
+		_spec.SetField(tacode.FieldRepository, field.TypeString, value)
+		_node.Repository = value
 	}
 	if value, ok := tcc.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)
 		_node.CommitID = value
 	}
-	if value, ok := tcc.mutation.ActivatedAt(); ok {
-		_spec.SetField(tacode.FieldActivatedAt, field.TypeTime, value)
-		_node.ActivatedAt = value
+	if value, ok := tcc.mutation.UniqueID(); ok {
+		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
+		_node.UniqueID = value
 	}
-	if nodes := tcc.mutation.TaInfoIDs(); len(nodes) > 0 {
+	if value, ok := tcc.mutation.HasActivated(); ok {
+		_spec.SetField(tacode.FieldHasActivated, field.TypeBool, value)
+		_node.HasActivated = value
+	}
+	if nodes := tcc.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   tacode.TaInfoTable,
-			Columns: tacode.TaInfoPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tacode.TaTable,
+			Columns: []string{tacode.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tainfo.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tcc.mutation.ServiceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tacode.ServiceTable,
+			Columns: []string{tacode.ServiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(service.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ta_code_service = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -177,6 +238,7 @@ func (tccb *TACodeCreateBulk) Save(ctx context.Context) ([]*TACode, error) {
 	for i := range tccb.builders {
 		func(i int, root context.Context) {
 			builder := tccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TACodeMutation)
 				if !ok {

@@ -1,12 +1,16 @@
 package ttp
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"errors"
+	"fmt"
+	"net/http"
 	"strings"
 
-	"github.com/akakou/metact"
+	metact "github.com/akakou/meta-ct"
+	"github.com/akakou/ra_webs/ttp/ent"
+	"github.com/akakou/ra_webs/ttp/ent/service"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
+	"github.com/labstack/echo/v4"
 )
 
 func findCertExtensions(extensions []metact.KeyValue, label string) (string, error) {
@@ -36,14 +40,43 @@ func extractDomainLast(domain string) string {
 	return lastDomain
 }
 
-func randomHexString(size int) string {
-	buf := make([]byte, size)
-	// then we can call rand.Read.
-	_, err := rand.Read(buf)
-	if err != nil {
-		panic(err)
-	}
-	r := hex.EncodeToString(buf)
+func revokeByDomain(db *DB, domains []string) {
+	for _, violatingDomain := range domains {
+		taServer, err := db.Client.TAServer.
+			Query().
+			WithTa().
+			Where(taserver.DomainEQ(violatingDomain)).
+			First(*db.Ctx)
 
-	return r
+		if err != nil {
+			continue
+		}
+
+		ta := taServer.Edges.Ta
+		ta.IsValid = false
+		ta.Update().Save(*db.Ctx)
+	}
+}
+
+func authenticateService(db *DB, c echo.Context) (*ent.Service, error) {
+	authorization := c.Request().Header["Authorization"][0]
+	token := authorization[len("Bearer "):]
+
+	service, err := db.Client.Service.Query().Where(service.TokenEQ(token)).First(*db.Ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to authenticate service: %w", err)
+	}
+
+	return service, nil
+}
+
+func authenticateAdmin(auditor *Auditor, c echo.Context) error {
+	authorization := c.Request().Header["Authorization"][0]
+	token := authorization[len("Bearer "):]
+
+	if token != auditor.adminToken {
+		return c.String(http.StatusUnauthorized, "token is invalid")
+	}
+
+	return nil
 }

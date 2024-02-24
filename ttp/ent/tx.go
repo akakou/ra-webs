@@ -12,12 +12,14 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// CTLogAudit is the client for interacting with the CTLogAudit builders.
-	CTLogAudit *CTLogAuditClient
+	// Service is the client for interacting with the Service builders.
+	Service *ServiceClient
+	// TA is the client for interacting with the TA builders.
+	TA *TAClient
 	// TACode is the client for interacting with the TACode builders.
 	TACode *TACodeClient
-	// TAInfo is the client for interacting with the TAInfo builders.
-	TAInfo *TAInfoClient
+	// TAServer is the client for interacting with the TAServer builders.
+	TAServer *TAServerClient
 
 	// lazily loaded.
 	client     *Client
@@ -149,9 +151,10 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.CTLogAudit = NewCTLogAuditClient(tx.config)
+	tx.Service = NewServiceClient(tx.config)
+	tx.TA = NewTAClient(tx.config)
 	tx.TACode = NewTACodeClient(tx.config)
-	tx.TAInfo = NewTAInfoClient(tx.config)
+	tx.TAServer = NewTAServerClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -161,7 +164,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: CTLogAudit.QueryXXX(), the query will be executed
+// applies a query, for example: Service.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

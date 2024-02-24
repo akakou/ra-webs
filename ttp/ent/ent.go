@@ -12,9 +12,10 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/akakou/ra_webs/ttp/ent/ctlogaudit"
+	"github.com/akakou/ra_webs/ttp/ent/service"
+	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
-	"github.com/akakou/ra_webs/ttp/ent/tainfo"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -75,9 +76,10 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			ctlogaudit.Table: ctlogaudit.ValidColumn,
-			tacode.Table:     tacode.ValidColumn,
-			tainfo.Table:     tainfo.ValidColumn,
+			service.Table:  service.ValidColumn,
+			ta.Table:       ta.ValidColumn,
+			tacode.Table:   tacode.ValidColumn,
+			taserver.Table: taserver.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)
