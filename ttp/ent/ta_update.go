@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
-	"github.com/akakou/ra_webs/ttp/ent/taauditlog"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
 // TAUpdate is the builder for updating TA entities.
@@ -29,80 +29,76 @@ func (tu *TAUpdate) Where(ps ...predicate.TA) *TAUpdate {
 	return tu
 }
 
-// SetDomain sets the "domain" field.
-func (tu *TAUpdate) SetDomain(s string) *TAUpdate {
-	tu.mutation.SetDomain(s)
+// SetPublicKey sets the "public_key" field.
+func (tu *TAUpdate) SetPublicKey(b []byte) *TAUpdate {
+	tu.mutation.SetPublicKey(b)
 	return tu
 }
 
-// SetNillableDomain sets the "domain" field if the given value is not nil.
-func (tu *TAUpdate) SetNillableDomain(s *string) *TAUpdate {
-	if s != nil {
-		tu.SetDomain(*s)
+// SetIsValid sets the "is_valid" field.
+func (tu *TAUpdate) SetIsValid(b bool) *TAUpdate {
+	tu.mutation.SetIsValid(b)
+	return tu
+}
+
+// SetNillableIsValid sets the "is_valid" field if the given value is not nil.
+func (tu *TAUpdate) SetNillableIsValid(b *bool) *TAUpdate {
+	if b != nil {
+		tu.SetIsValid(*b)
 	}
 	return tu
 }
 
-// SetIP sets the "ip" field.
-func (tu *TAUpdate) SetIP(s string) *TAUpdate {
-	tu.mutation.SetIP(s)
+// SetLastCt sets the "last_ct" field.
+func (tu *TAUpdate) SetLastCt(s string) *TAUpdate {
+	tu.mutation.SetLastCt(s)
 	return tu
 }
 
-// SetNillableIP sets the "ip" field if the given value is not nil.
-func (tu *TAUpdate) SetNillableIP(s *string) *TAUpdate {
+// SetNillableLastCt sets the "last_ct" field if the given value is not nil.
+func (tu *TAUpdate) SetNillableLastCt(s *string) *TAUpdate {
 	if s != nil {
-		tu.SetIP(*s)
+		tu.SetLastCt(*s)
 	}
 	return tu
 }
 
-// SetGit sets the "git" field.
-func (tu *TAUpdate) SetGit(s string) *TAUpdate {
-	tu.mutation.SetGit(s)
+// SetCodeID sets the "code" edge to the TACode entity by ID.
+func (tu *TAUpdate) SetCodeID(id int) *TAUpdate {
+	tu.mutation.SetCodeID(id)
 	return tu
 }
 
-// SetNillableGit sets the "git" field if the given value is not nil.
-func (tu *TAUpdate) SetNillableGit(s *string) *TAUpdate {
-	if s != nil {
-		tu.SetGit(*s)
-	}
-	return tu
-}
-
-// SetAuditLogID sets the "audit_log" edge to the TAAuditLog entity by ID.
-func (tu *TAUpdate) SetAuditLogID(id int) *TAUpdate {
-	tu.mutation.SetAuditLogID(id)
-	return tu
-}
-
-// SetNillableAuditLogID sets the "audit_log" edge to the TAAuditLog entity by ID if the given value is not nil.
-func (tu *TAUpdate) SetNillableAuditLogID(id *int) *TAUpdate {
+// SetNillableCodeID sets the "code" edge to the TACode entity by ID if the given value is not nil.
+func (tu *TAUpdate) SetNillableCodeID(id *int) *TAUpdate {
 	if id != nil {
-		tu = tu.SetAuditLogID(*id)
+		tu = tu.SetCodeID(*id)
 	}
 	return tu
 }
 
-// SetAuditLog sets the "audit_log" edge to the TAAuditLog entity.
-func (tu *TAUpdate) SetAuditLog(t *TAAuditLog) *TAUpdate {
-	return tu.SetAuditLogID(t.ID)
+// SetCode sets the "code" edge to the TACode entity.
+func (tu *TAUpdate) SetCode(t *TACode) *TAUpdate {
+	return tu.SetCodeID(t.ID)
 }
 
-// AddCodeIDs adds the "code" edge to the TACode entity by IDs.
-func (tu *TAUpdate) AddCodeIDs(ids ...int) *TAUpdate {
-	tu.mutation.AddCodeIDs(ids...)
+// SetServerID sets the "server" edge to the TAServer entity by ID.
+func (tu *TAUpdate) SetServerID(id int) *TAUpdate {
+	tu.mutation.SetServerID(id)
 	return tu
 }
 
-// AddCode adds the "code" edges to the TACode entity.
-func (tu *TAUpdate) AddCode(t ...*TACode) *TAUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableServerID sets the "server" edge to the TAServer entity by ID if the given value is not nil.
+func (tu *TAUpdate) SetNillableServerID(id *int) *TAUpdate {
+	if id != nil {
+		tu = tu.SetServerID(*id)
 	}
-	return tu.AddCodeIDs(ids...)
+	return tu
+}
+
+// SetServer sets the "server" edge to the TAServer entity.
+func (tu *TAUpdate) SetServer(t *TAServer) *TAUpdate {
+	return tu.SetServerID(t.ID)
 }
 
 // Mutation returns the TAMutation object of the builder.
@@ -110,31 +106,16 @@ func (tu *TAUpdate) Mutation() *TAMutation {
 	return tu.mutation
 }
 
-// ClearAuditLog clears the "audit_log" edge to the TAAuditLog entity.
-func (tu *TAUpdate) ClearAuditLog() *TAUpdate {
-	tu.mutation.ClearAuditLog()
-	return tu
-}
-
-// ClearCode clears all "code" edges to the TACode entity.
+// ClearCode clears the "code" edge to the TACode entity.
 func (tu *TAUpdate) ClearCode() *TAUpdate {
 	tu.mutation.ClearCode()
 	return tu
 }
 
-// RemoveCodeIDs removes the "code" edge to TACode entities by IDs.
-func (tu *TAUpdate) RemoveCodeIDs(ids ...int) *TAUpdate {
-	tu.mutation.RemoveCodeIDs(ids...)
+// ClearServer clears the "server" edge to the TAServer entity.
+func (tu *TAUpdate) ClearServer() *TAUpdate {
+	tu.mutation.ClearServer()
 	return tu
-}
-
-// RemoveCode removes "code" edges to TACode entities.
-func (tu *TAUpdate) RemoveCode(t ...*TACode) *TAUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return tu.RemoveCodeIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -173,37 +154,37 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := tu.mutation.Domain(); ok {
-		_spec.SetField(ta.FieldDomain, field.TypeString, value)
+	if value, ok := tu.mutation.PublicKey(); ok {
+		_spec.SetField(ta.FieldPublicKey, field.TypeBytes, value)
 	}
-	if value, ok := tu.mutation.IP(); ok {
-		_spec.SetField(ta.FieldIP, field.TypeString, value)
+	if value, ok := tu.mutation.IsValid(); ok {
+		_spec.SetField(ta.FieldIsValid, field.TypeBool, value)
 	}
-	if value, ok := tu.mutation.Git(); ok {
-		_spec.SetField(ta.FieldGit, field.TypeString, value)
+	if value, ok := tu.mutation.LastCt(); ok {
+		_spec.SetField(ta.FieldLastCt, field.TypeString, value)
 	}
-	if tu.mutation.AuditLogCleared() {
+	if tu.mutation.CodeCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   ta.AuditLogTable,
-			Columns: []string{ta.AuditLogColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   ta.CodeTable,
+			Columns: []string{ta.CodeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taauditlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.AuditLogIDs(); len(nodes) > 0 {
+	if nodes := tu.mutation.CodeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   ta.AuditLogTable,
-			Columns: []string{ta.AuditLogColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   ta.CodeTable,
+			Columns: []string{ta.CodeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taauditlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -211,44 +192,28 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tu.mutation.CodeCleared() {
+	if tu.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   ta.CodeTable,
-			Columns: ta.CodePrimaryKey,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   ta.ServerTable,
+			Columns: []string{ta.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RemovedCodeIDs(); len(nodes) > 0 && !tu.mutation.CodeCleared() {
+	if nodes := tu.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   ta.CodeTable,
-			Columns: ta.CodePrimaryKey,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   ta.ServerTable,
+			Columns: []string{ta.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tu.mutation.CodeIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   ta.CodeTable,
-			Columns: ta.CodePrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -276,80 +241,76 @@ type TAUpdateOne struct {
 	mutation *TAMutation
 }
 
-// SetDomain sets the "domain" field.
-func (tuo *TAUpdateOne) SetDomain(s string) *TAUpdateOne {
-	tuo.mutation.SetDomain(s)
+// SetPublicKey sets the "public_key" field.
+func (tuo *TAUpdateOne) SetPublicKey(b []byte) *TAUpdateOne {
+	tuo.mutation.SetPublicKey(b)
 	return tuo
 }
 
-// SetNillableDomain sets the "domain" field if the given value is not nil.
-func (tuo *TAUpdateOne) SetNillableDomain(s *string) *TAUpdateOne {
-	if s != nil {
-		tuo.SetDomain(*s)
+// SetIsValid sets the "is_valid" field.
+func (tuo *TAUpdateOne) SetIsValid(b bool) *TAUpdateOne {
+	tuo.mutation.SetIsValid(b)
+	return tuo
+}
+
+// SetNillableIsValid sets the "is_valid" field if the given value is not nil.
+func (tuo *TAUpdateOne) SetNillableIsValid(b *bool) *TAUpdateOne {
+	if b != nil {
+		tuo.SetIsValid(*b)
 	}
 	return tuo
 }
 
-// SetIP sets the "ip" field.
-func (tuo *TAUpdateOne) SetIP(s string) *TAUpdateOne {
-	tuo.mutation.SetIP(s)
+// SetLastCt sets the "last_ct" field.
+func (tuo *TAUpdateOne) SetLastCt(s string) *TAUpdateOne {
+	tuo.mutation.SetLastCt(s)
 	return tuo
 }
 
-// SetNillableIP sets the "ip" field if the given value is not nil.
-func (tuo *TAUpdateOne) SetNillableIP(s *string) *TAUpdateOne {
+// SetNillableLastCt sets the "last_ct" field if the given value is not nil.
+func (tuo *TAUpdateOne) SetNillableLastCt(s *string) *TAUpdateOne {
 	if s != nil {
-		tuo.SetIP(*s)
+		tuo.SetLastCt(*s)
 	}
 	return tuo
 }
 
-// SetGit sets the "git" field.
-func (tuo *TAUpdateOne) SetGit(s string) *TAUpdateOne {
-	tuo.mutation.SetGit(s)
+// SetCodeID sets the "code" edge to the TACode entity by ID.
+func (tuo *TAUpdateOne) SetCodeID(id int) *TAUpdateOne {
+	tuo.mutation.SetCodeID(id)
 	return tuo
 }
 
-// SetNillableGit sets the "git" field if the given value is not nil.
-func (tuo *TAUpdateOne) SetNillableGit(s *string) *TAUpdateOne {
-	if s != nil {
-		tuo.SetGit(*s)
-	}
-	return tuo
-}
-
-// SetAuditLogID sets the "audit_log" edge to the TAAuditLog entity by ID.
-func (tuo *TAUpdateOne) SetAuditLogID(id int) *TAUpdateOne {
-	tuo.mutation.SetAuditLogID(id)
-	return tuo
-}
-
-// SetNillableAuditLogID sets the "audit_log" edge to the TAAuditLog entity by ID if the given value is not nil.
-func (tuo *TAUpdateOne) SetNillableAuditLogID(id *int) *TAUpdateOne {
+// SetNillableCodeID sets the "code" edge to the TACode entity by ID if the given value is not nil.
+func (tuo *TAUpdateOne) SetNillableCodeID(id *int) *TAUpdateOne {
 	if id != nil {
-		tuo = tuo.SetAuditLogID(*id)
+		tuo = tuo.SetCodeID(*id)
 	}
 	return tuo
 }
 
-// SetAuditLog sets the "audit_log" edge to the TAAuditLog entity.
-func (tuo *TAUpdateOne) SetAuditLog(t *TAAuditLog) *TAUpdateOne {
-	return tuo.SetAuditLogID(t.ID)
+// SetCode sets the "code" edge to the TACode entity.
+func (tuo *TAUpdateOne) SetCode(t *TACode) *TAUpdateOne {
+	return tuo.SetCodeID(t.ID)
 }
 
-// AddCodeIDs adds the "code" edge to the TACode entity by IDs.
-func (tuo *TAUpdateOne) AddCodeIDs(ids ...int) *TAUpdateOne {
-	tuo.mutation.AddCodeIDs(ids...)
+// SetServerID sets the "server" edge to the TAServer entity by ID.
+func (tuo *TAUpdateOne) SetServerID(id int) *TAUpdateOne {
+	tuo.mutation.SetServerID(id)
 	return tuo
 }
 
-// AddCode adds the "code" edges to the TACode entity.
-func (tuo *TAUpdateOne) AddCode(t ...*TACode) *TAUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableServerID sets the "server" edge to the TAServer entity by ID if the given value is not nil.
+func (tuo *TAUpdateOne) SetNillableServerID(id *int) *TAUpdateOne {
+	if id != nil {
+		tuo = tuo.SetServerID(*id)
 	}
-	return tuo.AddCodeIDs(ids...)
+	return tuo
+}
+
+// SetServer sets the "server" edge to the TAServer entity.
+func (tuo *TAUpdateOne) SetServer(t *TAServer) *TAUpdateOne {
+	return tuo.SetServerID(t.ID)
 }
 
 // Mutation returns the TAMutation object of the builder.
@@ -357,31 +318,16 @@ func (tuo *TAUpdateOne) Mutation() *TAMutation {
 	return tuo.mutation
 }
 
-// ClearAuditLog clears the "audit_log" edge to the TAAuditLog entity.
-func (tuo *TAUpdateOne) ClearAuditLog() *TAUpdateOne {
-	tuo.mutation.ClearAuditLog()
-	return tuo
-}
-
-// ClearCode clears all "code" edges to the TACode entity.
+// ClearCode clears the "code" edge to the TACode entity.
 func (tuo *TAUpdateOne) ClearCode() *TAUpdateOne {
 	tuo.mutation.ClearCode()
 	return tuo
 }
 
-// RemoveCodeIDs removes the "code" edge to TACode entities by IDs.
-func (tuo *TAUpdateOne) RemoveCodeIDs(ids ...int) *TAUpdateOne {
-	tuo.mutation.RemoveCodeIDs(ids...)
+// ClearServer clears the "server" edge to the TAServer entity.
+func (tuo *TAUpdateOne) ClearServer() *TAUpdateOne {
+	tuo.mutation.ClearServer()
 	return tuo
-}
-
-// RemoveCode removes "code" edges to TACode entities.
-func (tuo *TAUpdateOne) RemoveCode(t ...*TACode) *TAUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return tuo.RemoveCodeIDs(ids...)
 }
 
 // Where appends a list predicates to the TAUpdate builder.
@@ -450,37 +396,37 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 			}
 		}
 	}
-	if value, ok := tuo.mutation.Domain(); ok {
-		_spec.SetField(ta.FieldDomain, field.TypeString, value)
+	if value, ok := tuo.mutation.PublicKey(); ok {
+		_spec.SetField(ta.FieldPublicKey, field.TypeBytes, value)
 	}
-	if value, ok := tuo.mutation.IP(); ok {
-		_spec.SetField(ta.FieldIP, field.TypeString, value)
+	if value, ok := tuo.mutation.IsValid(); ok {
+		_spec.SetField(ta.FieldIsValid, field.TypeBool, value)
 	}
-	if value, ok := tuo.mutation.Git(); ok {
-		_spec.SetField(ta.FieldGit, field.TypeString, value)
+	if value, ok := tuo.mutation.LastCt(); ok {
+		_spec.SetField(ta.FieldLastCt, field.TypeString, value)
 	}
-	if tuo.mutation.AuditLogCleared() {
+	if tuo.mutation.CodeCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   ta.AuditLogTable,
-			Columns: []string{ta.AuditLogColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   ta.CodeTable,
+			Columns: []string{ta.CodeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taauditlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.AuditLogIDs(); len(nodes) > 0 {
+	if nodes := tuo.mutation.CodeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   ta.AuditLogTable,
-			Columns: []string{ta.AuditLogColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   ta.CodeTable,
+			Columns: []string{ta.CodeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taauditlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -488,44 +434,28 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tuo.mutation.CodeCleared() {
+	if tuo.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   ta.CodeTable,
-			Columns: ta.CodePrimaryKey,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   ta.ServerTable,
+			Columns: []string{ta.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RemovedCodeIDs(); len(nodes) > 0 && !tuo.mutation.CodeCleared() {
+	if nodes := tuo.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   ta.CodeTable,
-			Columns: ta.CodePrimaryKey,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   ta.ServerTable,
+			Columns: []string{ta.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tuo.mutation.CodeIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   ta.CodeTable,
-			Columns: ta.CodePrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

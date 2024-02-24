@@ -21,18 +21,6 @@ func (f TAFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TAMutation", m)
 }
 
-// The TAAuditLogFunc type is an adapter to allow the use of ordinary
-// function as TAAuditLog mutator.
-type TAAuditLogFunc func(context.Context, *ent.TAAuditLogMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f TAAuditLogFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.TAAuditLogMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TAAuditLogMutation", m)
-}
-
 // The TACodeFunc type is an adapter to allow the use of ordinary
 // function as TACode mutator.
 type TACodeFunc func(context.Context, *ent.TACodeMutation) (ent.Value, error)
@@ -43,6 +31,18 @@ func (f TACodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TACodeMutation", m)
+}
+
+// The TAServerFunc type is an adapter to allow the use of ordinary
+// function as TAServer mutator.
+type TAServerFunc func(context.Context, *ent.TAServerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TAServerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TAServerMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TAServerMutation", m)
 }
 
 // Condition is a hook condition function.

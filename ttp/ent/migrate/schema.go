@@ -11,10 +11,10 @@ var (
 	// TasColumns holds the columns for the "tas" table.
 	TasColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "domain", Type: field.TypeString},
-		{Name: "ip", Type: field.TypeString},
-		{Name: "git", Type: field.TypeString},
-		{Name: "ta_audit_log_ta", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "public_key", Type: field.TypeBytes},
+		{Name: "is_valid", Type: field.TypeBool, Default: false},
+		{Name: "last_ct", Type: field.TypeString},
+		{Name: "ta_code", Type: field.TypeInt, Nullable: true},
 	}
 	// TasTable holds the schema information for the "tas" table.
 	TasTable = &schema.Table{
@@ -23,33 +23,20 @@ var (
 		PrimaryKey: []*schema.Column{TasColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "tas_ta_audit_logs_ta",
+				Symbol:     "tas_ta_codes_code",
 				Columns:    []*schema.Column{TasColumns[4]},
-				RefColumns: []*schema.Column{TaAuditLogsColumns[0]},
+				RefColumns: []*schema.Column{TaCodesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 	}
-	// TaAuditLogsColumns holds the columns for the "ta_audit_logs" table.
-	TaAuditLogsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "is_valid", Type: field.TypeBool},
-		{Name: "latest_ct_id", Type: field.TypeString},
-	}
-	// TaAuditLogsTable holds the schema information for the "ta_audit_logs" table.
-	TaAuditLogsTable = &schema.Table{
-		Name:       "ta_audit_logs",
-		Columns:    TaAuditLogsColumns,
-		PrimaryKey: []*schema.Column{TaAuditLogsColumns[0]},
-	}
 	// TaCodesColumns holds the columns for the "ta_codes" table.
 	TaCodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "unique_id", Type: field.TypeBytes},
-		{Name: "public_key", Type: field.TypeBytes},
+		{Name: "repository", Type: field.TypeString},
 		{Name: "commit_id", Type: field.TypeString},
-		{Name: "activated", Type: field.TypeBool, Default: false},
-		{Name: "activated_at", Type: field.TypeTime},
+		{Name: "unique_id", Type: field.TypeBytes},
+		{Name: "activate", Type: field.TypeBool, Default: false},
 	}
 	// TaCodesTable holds the schema information for the "ta_codes" table.
 	TaCodesTable = &schema.Table{
@@ -57,42 +44,38 @@ var (
 		Columns:    TaCodesColumns,
 		PrimaryKey: []*schema.Column{TaCodesColumns[0]},
 	}
-	// TaCodeTaColumns holds the columns for the "ta_code_ta" table.
-	TaCodeTaColumns = []*schema.Column{
-		{Name: "ta_code_id", Type: field.TypeInt},
-		{Name: "ta_id", Type: field.TypeInt},
+	// TaServersColumns holds the columns for the "ta_servers" table.
+	TaServersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "domain", Type: field.TypeString, Unique: true},
+		{Name: "ip", Type: field.TypeString, Unique: true},
+		{Name: "service_id", Type: field.TypeString},
+		{Name: "activate", Type: field.TypeBool, Default: false},
+		{Name: "ta_server", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
-	// TaCodeTaTable holds the schema information for the "ta_code_ta" table.
-	TaCodeTaTable = &schema.Table{
-		Name:       "ta_code_ta",
-		Columns:    TaCodeTaColumns,
-		PrimaryKey: []*schema.Column{TaCodeTaColumns[0], TaCodeTaColumns[1]},
+	// TaServersTable holds the schema information for the "ta_servers" table.
+	TaServersTable = &schema.Table{
+		Name:       "ta_servers",
+		Columns:    TaServersColumns,
+		PrimaryKey: []*schema.Column{TaServersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "ta_code_ta_ta_code_id",
-				Columns:    []*schema.Column{TaCodeTaColumns[0]},
-				RefColumns: []*schema.Column{TaCodesColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "ta_code_ta_ta_id",
-				Columns:    []*schema.Column{TaCodeTaColumns[1]},
+				Symbol:     "ta_servers_tas_server",
+				Columns:    []*schema.Column{TaServersColumns[5]},
 				RefColumns: []*schema.Column{TasColumns[0]},
-				OnDelete:   schema.Cascade,
+				OnDelete:   schema.SetNull,
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		TasTable,
-		TaAuditLogsTable,
 		TaCodesTable,
-		TaCodeTaTable,
+		TaServersTable,
 	}
 )
 
 func init() {
-	TasTable.ForeignKeys[0].RefTable = TaAuditLogsTable
-	TaCodeTaTable.ForeignKeys[0].RefTable = TaCodesTable
-	TaCodeTaTable.ForeignKeys[1].RefTable = TasTable
+	TasTable.ForeignKeys[0].RefTable = TaCodesTable
+	TaServersTable.ForeignKeys[0].RefTable = TasTable
 }

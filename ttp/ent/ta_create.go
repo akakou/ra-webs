@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
-	"github.com/akakou/ra_webs/ttp/ent/taauditlog"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
 // TACreate is the builder for creating a TA entity.
@@ -21,56 +21,68 @@ type TACreate struct {
 	hooks    []Hook
 }
 
-// SetDomain sets the "domain" field.
-func (tc *TACreate) SetDomain(s string) *TACreate {
-	tc.mutation.SetDomain(s)
+// SetPublicKey sets the "public_key" field.
+func (tc *TACreate) SetPublicKey(b []byte) *TACreate {
+	tc.mutation.SetPublicKey(b)
 	return tc
 }
 
-// SetIP sets the "ip" field.
-func (tc *TACreate) SetIP(s string) *TACreate {
-	tc.mutation.SetIP(s)
+// SetIsValid sets the "is_valid" field.
+func (tc *TACreate) SetIsValid(b bool) *TACreate {
+	tc.mutation.SetIsValid(b)
 	return tc
 }
 
-// SetGit sets the "git" field.
-func (tc *TACreate) SetGit(s string) *TACreate {
-	tc.mutation.SetGit(s)
+// SetNillableIsValid sets the "is_valid" field if the given value is not nil.
+func (tc *TACreate) SetNillableIsValid(b *bool) *TACreate {
+	if b != nil {
+		tc.SetIsValid(*b)
+	}
 	return tc
 }
 
-// SetAuditLogID sets the "audit_log" edge to the TAAuditLog entity by ID.
-func (tc *TACreate) SetAuditLogID(id int) *TACreate {
-	tc.mutation.SetAuditLogID(id)
+// SetLastCt sets the "last_ct" field.
+func (tc *TACreate) SetLastCt(s string) *TACreate {
+	tc.mutation.SetLastCt(s)
 	return tc
 }
 
-// SetNillableAuditLogID sets the "audit_log" edge to the TAAuditLog entity by ID if the given value is not nil.
-func (tc *TACreate) SetNillableAuditLogID(id *int) *TACreate {
+// SetCodeID sets the "code" edge to the TACode entity by ID.
+func (tc *TACreate) SetCodeID(id int) *TACreate {
+	tc.mutation.SetCodeID(id)
+	return tc
+}
+
+// SetNillableCodeID sets the "code" edge to the TACode entity by ID if the given value is not nil.
+func (tc *TACreate) SetNillableCodeID(id *int) *TACreate {
 	if id != nil {
-		tc = tc.SetAuditLogID(*id)
+		tc = tc.SetCodeID(*id)
 	}
 	return tc
 }
 
-// SetAuditLog sets the "audit_log" edge to the TAAuditLog entity.
-func (tc *TACreate) SetAuditLog(t *TAAuditLog) *TACreate {
-	return tc.SetAuditLogID(t.ID)
+// SetCode sets the "code" edge to the TACode entity.
+func (tc *TACreate) SetCode(t *TACode) *TACreate {
+	return tc.SetCodeID(t.ID)
 }
 
-// AddCodeIDs adds the "code" edge to the TACode entity by IDs.
-func (tc *TACreate) AddCodeIDs(ids ...int) *TACreate {
-	tc.mutation.AddCodeIDs(ids...)
+// SetServerID sets the "server" edge to the TAServer entity by ID.
+func (tc *TACreate) SetServerID(id int) *TACreate {
+	tc.mutation.SetServerID(id)
 	return tc
 }
 
-// AddCode adds the "code" edges to the TACode entity.
-func (tc *TACreate) AddCode(t ...*TACode) *TACreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableServerID sets the "server" edge to the TAServer entity by ID if the given value is not nil.
+func (tc *TACreate) SetNillableServerID(id *int) *TACreate {
+	if id != nil {
+		tc = tc.SetServerID(*id)
 	}
-	return tc.AddCodeIDs(ids...)
+	return tc
+}
+
+// SetServer sets the "server" edge to the TAServer entity.
+func (tc *TACreate) SetServer(t *TAServer) *TACreate {
+	return tc.SetServerID(t.ID)
 }
 
 // Mutation returns the TAMutation object of the builder.
@@ -80,6 +92,7 @@ func (tc *TACreate) Mutation() *TAMutation {
 
 // Save creates the TA in the database.
 func (tc *TACreate) Save(ctx context.Context) (*TA, error) {
+	tc.defaults()
 	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
 }
 
@@ -105,16 +118,24 @@ func (tc *TACreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tc *TACreate) defaults() {
+	if _, ok := tc.mutation.IsValid(); !ok {
+		v := ta.DefaultIsValid
+		tc.mutation.SetIsValid(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (tc *TACreate) check() error {
-	if _, ok := tc.mutation.Domain(); !ok {
-		return &ValidationError{Name: "domain", err: errors.New(`ent: missing required field "TA.domain"`)}
+	if _, ok := tc.mutation.PublicKey(); !ok {
+		return &ValidationError{Name: "public_key", err: errors.New(`ent: missing required field "TA.public_key"`)}
 	}
-	if _, ok := tc.mutation.IP(); !ok {
-		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "TA.ip"`)}
+	if _, ok := tc.mutation.IsValid(); !ok {
+		return &ValidationError{Name: "is_valid", err: errors.New(`ent: missing required field "TA.is_valid"`)}
 	}
-	if _, ok := tc.mutation.Git(); !ok {
-		return &ValidationError{Name: "git", err: errors.New(`ent: missing required field "TA.git"`)}
+	if _, ok := tc.mutation.LastCt(); !ok {
+		return &ValidationError{Name: "last_ct", err: errors.New(`ent: missing required field "TA.last_ct"`)}
 	}
 	return nil
 }
@@ -142,44 +163,44 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 		_node = &TA{config: tc.config}
 		_spec = sqlgraph.NewCreateSpec(ta.Table, sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt))
 	)
-	if value, ok := tc.mutation.Domain(); ok {
-		_spec.SetField(ta.FieldDomain, field.TypeString, value)
-		_node.Domain = value
+	if value, ok := tc.mutation.PublicKey(); ok {
+		_spec.SetField(ta.FieldPublicKey, field.TypeBytes, value)
+		_node.PublicKey = value
 	}
-	if value, ok := tc.mutation.IP(); ok {
-		_spec.SetField(ta.FieldIP, field.TypeString, value)
-		_node.IP = value
+	if value, ok := tc.mutation.IsValid(); ok {
+		_spec.SetField(ta.FieldIsValid, field.TypeBool, value)
+		_node.IsValid = value
 	}
-	if value, ok := tc.mutation.Git(); ok {
-		_spec.SetField(ta.FieldGit, field.TypeString, value)
-		_node.Git = value
+	if value, ok := tc.mutation.LastCt(); ok {
+		_spec.SetField(ta.FieldLastCt, field.TypeString, value)
+		_node.LastCt = value
 	}
-	if nodes := tc.mutation.AuditLogIDs(); len(nodes) > 0 {
+	if nodes := tc.mutation.CodeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   ta.AuditLogTable,
-			Columns: []string{ta.AuditLogColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   ta.CodeTable,
+			Columns: []string{ta.CodeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taauditlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.ta_audit_log_ta = &nodes[0]
+		_node.ta_code = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := tc.mutation.CodeIDs(); len(nodes) > 0 {
+	if nodes := tc.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   ta.CodeTable,
-			Columns: ta.CodePrimaryKey,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   ta.ServerTable,
+			Columns: []string{ta.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -208,6 +229,7 @@ func (tcb *TACreateBulk) Save(ctx context.Context) ([]*TA, error) {
 	for i := range tcb.builders {
 		func(i int, root context.Context) {
 			builder := tcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TAMutation)
 				if !ok {

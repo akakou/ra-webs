@@ -3,8 +3,6 @@
 package tacode
 
 import (
-	"time"
-
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
@@ -55,14 +53,9 @@ func IDLTE(id int) predicate.TACode {
 	return predicate.TACode(sql.FieldLTE(FieldID, id))
 }
 
-// UniqueID applies equality check predicate on the "unique_id" field. It's identical to UniqueIDEQ.
-func UniqueID(v []byte) predicate.TACode {
-	return predicate.TACode(sql.FieldEQ(FieldUniqueID, v))
-}
-
-// PublicKey applies equality check predicate on the "public_key" field. It's identical to PublicKeyEQ.
-func PublicKey(v []byte) predicate.TACode {
-	return predicate.TACode(sql.FieldEQ(FieldPublicKey, v))
+// Repository applies equality check predicate on the "repository" field. It's identical to RepositoryEQ.
+func Repository(v string) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldRepository, v))
 }
 
 // CommitID applies equality check predicate on the "commit_id" field. It's identical to CommitIDEQ.
@@ -70,94 +63,79 @@ func CommitID(v string) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldCommitID, v))
 }
 
-// Activated applies equality check predicate on the "activated" field. It's identical to ActivatedEQ.
-func Activated(v bool) predicate.TACode {
-	return predicate.TACode(sql.FieldEQ(FieldActivated, v))
-}
-
-// ActivatedAt applies equality check predicate on the "activated_at" field. It's identical to ActivatedAtEQ.
-func ActivatedAt(v time.Time) predicate.TACode {
-	return predicate.TACode(sql.FieldEQ(FieldActivatedAt, v))
-}
-
-// UniqueIDEQ applies the EQ predicate on the "unique_id" field.
-func UniqueIDEQ(v []byte) predicate.TACode {
+// UniqueID applies equality check predicate on the "unique_id" field. It's identical to UniqueIDEQ.
+func UniqueID(v []byte) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldUniqueID, v))
 }
 
-// UniqueIDNEQ applies the NEQ predicate on the "unique_id" field.
-func UniqueIDNEQ(v []byte) predicate.TACode {
-	return predicate.TACode(sql.FieldNEQ(FieldUniqueID, v))
+// Activate applies equality check predicate on the "activate" field. It's identical to ActivateEQ.
+func Activate(v bool) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldActivate, v))
 }
 
-// UniqueIDIn applies the In predicate on the "unique_id" field.
-func UniqueIDIn(vs ...[]byte) predicate.TACode {
-	return predicate.TACode(sql.FieldIn(FieldUniqueID, vs...))
+// RepositoryEQ applies the EQ predicate on the "repository" field.
+func RepositoryEQ(v string) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldRepository, v))
 }
 
-// UniqueIDNotIn applies the NotIn predicate on the "unique_id" field.
-func UniqueIDNotIn(vs ...[]byte) predicate.TACode {
-	return predicate.TACode(sql.FieldNotIn(FieldUniqueID, vs...))
+// RepositoryNEQ applies the NEQ predicate on the "repository" field.
+func RepositoryNEQ(v string) predicate.TACode {
+	return predicate.TACode(sql.FieldNEQ(FieldRepository, v))
 }
 
-// UniqueIDGT applies the GT predicate on the "unique_id" field.
-func UniqueIDGT(v []byte) predicate.TACode {
-	return predicate.TACode(sql.FieldGT(FieldUniqueID, v))
+// RepositoryIn applies the In predicate on the "repository" field.
+func RepositoryIn(vs ...string) predicate.TACode {
+	return predicate.TACode(sql.FieldIn(FieldRepository, vs...))
 }
 
-// UniqueIDGTE applies the GTE predicate on the "unique_id" field.
-func UniqueIDGTE(v []byte) predicate.TACode {
-	return predicate.TACode(sql.FieldGTE(FieldUniqueID, v))
+// RepositoryNotIn applies the NotIn predicate on the "repository" field.
+func RepositoryNotIn(vs ...string) predicate.TACode {
+	return predicate.TACode(sql.FieldNotIn(FieldRepository, vs...))
 }
 
-// UniqueIDLT applies the LT predicate on the "unique_id" field.
-func UniqueIDLT(v []byte) predicate.TACode {
-	return predicate.TACode(sql.FieldLT(FieldUniqueID, v))
+// RepositoryGT applies the GT predicate on the "repository" field.
+func RepositoryGT(v string) predicate.TACode {
+	return predicate.TACode(sql.FieldGT(FieldRepository, v))
 }
 
-// UniqueIDLTE applies the LTE predicate on the "unique_id" field.
-func UniqueIDLTE(v []byte) predicate.TACode {
-	return predicate.TACode(sql.FieldLTE(FieldUniqueID, v))
+// RepositoryGTE applies the GTE predicate on the "repository" field.
+func RepositoryGTE(v string) predicate.TACode {
+	return predicate.TACode(sql.FieldGTE(FieldRepository, v))
 }
 
-// PublicKeyEQ applies the EQ predicate on the "public_key" field.
-func PublicKeyEQ(v []byte) predicate.TACode {
-	return predicate.TACode(sql.FieldEQ(FieldPublicKey, v))
+// RepositoryLT applies the LT predicate on the "repository" field.
+func RepositoryLT(v string) predicate.TACode {
+	return predicate.TACode(sql.FieldLT(FieldRepository, v))
 }
 
-// PublicKeyNEQ applies the NEQ predicate on the "public_key" field.
-func PublicKeyNEQ(v []byte) predicate.TACode {
-	return predicate.TACode(sql.FieldNEQ(FieldPublicKey, v))
+// RepositoryLTE applies the LTE predicate on the "repository" field.
+func RepositoryLTE(v string) predicate.TACode {
+	return predicate.TACode(sql.FieldLTE(FieldRepository, v))
 }
 
-// PublicKeyIn applies the In predicate on the "public_key" field.
-func PublicKeyIn(vs ...[]byte) predicate.TACode {
-	return predicate.TACode(sql.FieldIn(FieldPublicKey, vs...))
+// RepositoryContains applies the Contains predicate on the "repository" field.
+func RepositoryContains(v string) predicate.TACode {
+	return predicate.TACode(sql.FieldContains(FieldRepository, v))
 }
 
-// PublicKeyNotIn applies the NotIn predicate on the "public_key" field.
-func PublicKeyNotIn(vs ...[]byte) predicate.TACode {
-	return predicate.TACode(sql.FieldNotIn(FieldPublicKey, vs...))
+// RepositoryHasPrefix applies the HasPrefix predicate on the "repository" field.
+func RepositoryHasPrefix(v string) predicate.TACode {
+	return predicate.TACode(sql.FieldHasPrefix(FieldRepository, v))
 }
 
-// PublicKeyGT applies the GT predicate on the "public_key" field.
-func PublicKeyGT(v []byte) predicate.TACode {
-	return predicate.TACode(sql.FieldGT(FieldPublicKey, v))
+// RepositoryHasSuffix applies the HasSuffix predicate on the "repository" field.
+func RepositoryHasSuffix(v string) predicate.TACode {
+	return predicate.TACode(sql.FieldHasSuffix(FieldRepository, v))
 }
 
-// PublicKeyGTE applies the GTE predicate on the "public_key" field.
-func PublicKeyGTE(v []byte) predicate.TACode {
-	return predicate.TACode(sql.FieldGTE(FieldPublicKey, v))
+// RepositoryEqualFold applies the EqualFold predicate on the "repository" field.
+func RepositoryEqualFold(v string) predicate.TACode {
+	return predicate.TACode(sql.FieldEqualFold(FieldRepository, v))
 }
 
-// PublicKeyLT applies the LT predicate on the "public_key" field.
-func PublicKeyLT(v []byte) predicate.TACode {
-	return predicate.TACode(sql.FieldLT(FieldPublicKey, v))
-}
-
-// PublicKeyLTE applies the LTE predicate on the "public_key" field.
-func PublicKeyLTE(v []byte) predicate.TACode {
-	return predicate.TACode(sql.FieldLTE(FieldPublicKey, v))
+// RepositoryContainsFold applies the ContainsFold predicate on the "repository" field.
+func RepositoryContainsFold(v string) predicate.TACode {
+	return predicate.TACode(sql.FieldContainsFold(FieldRepository, v))
 }
 
 // CommitIDEQ applies the EQ predicate on the "commit_id" field.
@@ -225,54 +203,54 @@ func CommitIDContainsFold(v string) predicate.TACode {
 	return predicate.TACode(sql.FieldContainsFold(FieldCommitID, v))
 }
 
-// ActivatedEQ applies the EQ predicate on the "activated" field.
-func ActivatedEQ(v bool) predicate.TACode {
-	return predicate.TACode(sql.FieldEQ(FieldActivated, v))
+// UniqueIDEQ applies the EQ predicate on the "unique_id" field.
+func UniqueIDEQ(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldUniqueID, v))
 }
 
-// ActivatedNEQ applies the NEQ predicate on the "activated" field.
-func ActivatedNEQ(v bool) predicate.TACode {
-	return predicate.TACode(sql.FieldNEQ(FieldActivated, v))
+// UniqueIDNEQ applies the NEQ predicate on the "unique_id" field.
+func UniqueIDNEQ(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldNEQ(FieldUniqueID, v))
 }
 
-// ActivatedAtEQ applies the EQ predicate on the "activated_at" field.
-func ActivatedAtEQ(v time.Time) predicate.TACode {
-	return predicate.TACode(sql.FieldEQ(FieldActivatedAt, v))
+// UniqueIDIn applies the In predicate on the "unique_id" field.
+func UniqueIDIn(vs ...[]byte) predicate.TACode {
+	return predicate.TACode(sql.FieldIn(FieldUniqueID, vs...))
 }
 
-// ActivatedAtNEQ applies the NEQ predicate on the "activated_at" field.
-func ActivatedAtNEQ(v time.Time) predicate.TACode {
-	return predicate.TACode(sql.FieldNEQ(FieldActivatedAt, v))
+// UniqueIDNotIn applies the NotIn predicate on the "unique_id" field.
+func UniqueIDNotIn(vs ...[]byte) predicate.TACode {
+	return predicate.TACode(sql.FieldNotIn(FieldUniqueID, vs...))
 }
 
-// ActivatedAtIn applies the In predicate on the "activated_at" field.
-func ActivatedAtIn(vs ...time.Time) predicate.TACode {
-	return predicate.TACode(sql.FieldIn(FieldActivatedAt, vs...))
+// UniqueIDGT applies the GT predicate on the "unique_id" field.
+func UniqueIDGT(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldGT(FieldUniqueID, v))
 }
 
-// ActivatedAtNotIn applies the NotIn predicate on the "activated_at" field.
-func ActivatedAtNotIn(vs ...time.Time) predicate.TACode {
-	return predicate.TACode(sql.FieldNotIn(FieldActivatedAt, vs...))
+// UniqueIDGTE applies the GTE predicate on the "unique_id" field.
+func UniqueIDGTE(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldGTE(FieldUniqueID, v))
 }
 
-// ActivatedAtGT applies the GT predicate on the "activated_at" field.
-func ActivatedAtGT(v time.Time) predicate.TACode {
-	return predicate.TACode(sql.FieldGT(FieldActivatedAt, v))
+// UniqueIDLT applies the LT predicate on the "unique_id" field.
+func UniqueIDLT(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldLT(FieldUniqueID, v))
 }
 
-// ActivatedAtGTE applies the GTE predicate on the "activated_at" field.
-func ActivatedAtGTE(v time.Time) predicate.TACode {
-	return predicate.TACode(sql.FieldGTE(FieldActivatedAt, v))
+// UniqueIDLTE applies the LTE predicate on the "unique_id" field.
+func UniqueIDLTE(v []byte) predicate.TACode {
+	return predicate.TACode(sql.FieldLTE(FieldUniqueID, v))
 }
 
-// ActivatedAtLT applies the LT predicate on the "activated_at" field.
-func ActivatedAtLT(v time.Time) predicate.TACode {
-	return predicate.TACode(sql.FieldLT(FieldActivatedAt, v))
+// ActivateEQ applies the EQ predicate on the "activate" field.
+func ActivateEQ(v bool) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldActivate, v))
 }
 
-// ActivatedAtLTE applies the LTE predicate on the "activated_at" field.
-func ActivatedAtLTE(v time.Time) predicate.TACode {
-	return predicate.TACode(sql.FieldLTE(FieldActivatedAt, v))
+// ActivateNEQ applies the NEQ predicate on the "activate" field.
+func ActivateNEQ(v bool) predicate.TACode {
+	return predicate.TACode(sql.FieldNEQ(FieldActivate, v))
 }
 
 // HasTa applies the HasEdge predicate on the "ta" edge.
@@ -280,7 +258,7 @@ func HasTa() predicate.TACode {
 	return predicate.TACode(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, TaTable, TaPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, TaTable, TaColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

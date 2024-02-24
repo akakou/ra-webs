@@ -13,20 +13,20 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
-	"github.com/akakou/ra_webs/ttp/ent/taauditlog"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
 // TAQuery is the builder for querying TA entities.
 type TAQuery struct {
 	config
-	ctx          *QueryContext
-	order        []ta.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.TA
-	withAuditLog *TAAuditLogQuery
-	withCode     *TACodeQuery
-	withFKs      bool
+	ctx        *QueryContext
+	order      []ta.OrderOption
+	inters     []Interceptor
+	predicates []predicate.TA
+	withCode   *TACodeQuery
+	withServer *TAServerQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -63,28 +63,6 @@ func (tq *TAQuery) Order(o ...ta.OrderOption) *TAQuery {
 	return tq
 }
 
-// QueryAuditLog chains the current query on the "audit_log" edge.
-func (tq *TAQuery) QueryAuditLog() *TAAuditLogQuery {
-	query := (&TAAuditLogClient{config: tq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := tq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ta.Table, ta.FieldID, selector),
-			sqlgraph.To(taauditlog.Table, taauditlog.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, ta.AuditLogTable, ta.AuditLogColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryCode chains the current query on the "code" edge.
 func (tq *TAQuery) QueryCode() *TACodeQuery {
 	query := (&TACodeClient{config: tq.config}).Query()
@@ -99,7 +77,29 @@ func (tq *TAQuery) QueryCode() *TACodeQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ta.Table, ta.FieldID, selector),
 			sqlgraph.To(tacode.Table, tacode.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, ta.CodeTable, ta.CodePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, ta.CodeTable, ta.CodeColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryServer chains the current query on the "server" edge.
+func (tq *TAQuery) QueryServer() *TAServerQuery {
+	query := (&TAServerClient{config: tq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ta.Table, ta.FieldID, selector),
+			sqlgraph.To(taserver.Table, taserver.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, ta.ServerTable, ta.ServerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -294,28 +294,17 @@ func (tq *TAQuery) Clone() *TAQuery {
 		return nil
 	}
 	return &TAQuery{
-		config:       tq.config,
-		ctx:          tq.ctx.Clone(),
-		order:        append([]ta.OrderOption{}, tq.order...),
-		inters:       append([]Interceptor{}, tq.inters...),
-		predicates:   append([]predicate.TA{}, tq.predicates...),
-		withAuditLog: tq.withAuditLog.Clone(),
-		withCode:     tq.withCode.Clone(),
+		config:     tq.config,
+		ctx:        tq.ctx.Clone(),
+		order:      append([]ta.OrderOption{}, tq.order...),
+		inters:     append([]Interceptor{}, tq.inters...),
+		predicates: append([]predicate.TA{}, tq.predicates...),
+		withCode:   tq.withCode.Clone(),
+		withServer: tq.withServer.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
 	}
-}
-
-// WithAuditLog tells the query-builder to eager-load the nodes that are connected to
-// the "audit_log" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TAQuery) WithAuditLog(opts ...func(*TAAuditLogQuery)) *TAQuery {
-	query := (&TAAuditLogClient{config: tq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	tq.withAuditLog = query
-	return tq
 }
 
 // WithCode tells the query-builder to eager-load the nodes that are connected to
@@ -329,18 +318,29 @@ func (tq *TAQuery) WithCode(opts ...func(*TACodeQuery)) *TAQuery {
 	return tq
 }
 
+// WithServer tells the query-builder to eager-load the nodes that are connected to
+// the "server" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TAQuery) WithServer(opts ...func(*TAServerQuery)) *TAQuery {
+	query := (&TAServerClient{config: tq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withServer = query
+	return tq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		Domain string `json:"domain,omitempty"`
+//		PublicKey []byte `json:"public_key,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.TA.Query().
-//		GroupBy(ta.FieldDomain).
+//		GroupBy(ta.FieldPublicKey).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (tq *TAQuery) GroupBy(field string, fields ...string) *TAGroupBy {
@@ -358,11 +358,11 @@ func (tq *TAQuery) GroupBy(field string, fields ...string) *TAGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Domain string `json:"domain,omitempty"`
+//		PublicKey []byte `json:"public_key,omitempty"`
 //	}
 //
 //	client.TA.Query().
-//		Select(ta.FieldDomain).
+//		Select(ta.FieldPublicKey).
 //		Scan(ctx, &v)
 func (tq *TAQuery) Select(fields ...string) *TASelect {
 	tq.ctx.Fields = append(tq.ctx.Fields, fields...)
@@ -409,11 +409,11 @@ func (tq *TAQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA, error
 		withFKs     = tq.withFKs
 		_spec       = tq.querySpec()
 		loadedTypes = [2]bool{
-			tq.withAuditLog != nil,
 			tq.withCode != nil,
+			tq.withServer != nil,
 		}
 	)
-	if tq.withAuditLog != nil {
+	if tq.withCode != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -437,30 +437,29 @@ func (tq *TAQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA, error
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := tq.withAuditLog; query != nil {
-		if err := tq.loadAuditLog(ctx, query, nodes, nil,
-			func(n *TA, e *TAAuditLog) { n.Edges.AuditLog = e }); err != nil {
+	if query := tq.withCode; query != nil {
+		if err := tq.loadCode(ctx, query, nodes, nil,
+			func(n *TA, e *TACode) { n.Edges.Code = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := tq.withCode; query != nil {
-		if err := tq.loadCode(ctx, query, nodes,
-			func(n *TA) { n.Edges.Code = []*TACode{} },
-			func(n *TA, e *TACode) { n.Edges.Code = append(n.Edges.Code, e) }); err != nil {
+	if query := tq.withServer; query != nil {
+		if err := tq.loadServer(ctx, query, nodes, nil,
+			func(n *TA, e *TAServer) { n.Edges.Server = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (tq *TAQuery) loadAuditLog(ctx context.Context, query *TAAuditLogQuery, nodes []*TA, init func(*TA), assign func(*TA, *TAAuditLog)) error {
+func (tq *TAQuery) loadCode(ctx context.Context, query *TACodeQuery, nodes []*TA, init func(*TA), assign func(*TA, *TACode)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*TA)
 	for i := range nodes {
-		if nodes[i].ta_audit_log_ta == nil {
+		if nodes[i].ta_code == nil {
 			continue
 		}
-		fk := *nodes[i].ta_audit_log_ta
+		fk := *nodes[i].ta_code
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -469,7 +468,7 @@ func (tq *TAQuery) loadAuditLog(ctx context.Context, query *TAAuditLogQuery, nod
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(taauditlog.IDIn(ids...))
+	query.Where(tacode.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -477,7 +476,7 @@ func (tq *TAQuery) loadAuditLog(ctx context.Context, query *TAAuditLogQuery, nod
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "ta_audit_log_ta" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "ta_code" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -485,64 +484,31 @@ func (tq *TAQuery) loadAuditLog(ctx context.Context, query *TAAuditLogQuery, nod
 	}
 	return nil
 }
-func (tq *TAQuery) loadCode(ctx context.Context, query *TACodeQuery, nodes []*TA, init func(*TA), assign func(*TA, *TACode)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*TA)
-	nids := make(map[int]map[*TA]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
-		}
+func (tq *TAQuery) loadServer(ctx context.Context, query *TAServerQuery, nodes []*TA, init func(*TA), assign func(*TA, *TAServer)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*TA)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(ta.CodeTable)
-		s.Join(joinT).On(s.C(tacode.FieldID), joinT.C(ta.CodePrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(ta.CodePrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(ta.CodePrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*TA]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*TACode](ctx, query, qr, query.inters)
+	query.withFKs = true
+	query.Where(predicate.TAServer(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(ta.ServerColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		fk := n.ta_server
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "ta_server" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected "code" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "ta_server" returned %v for node %v`, *fk, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
+		assign(node, n)
 	}
 	return nil
 }

@@ -9,7 +9,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
-	"github.com/akakou/ra_webs/ttp/ent/taauditlog"
+	"github.com/akakou/ra_webs/ttp/ent/tacode"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
 // TA is the model entity for the TA schema.
@@ -17,50 +18,54 @@ type TA struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Domain holds the value of the "domain" field.
-	Domain string `json:"domain,omitempty"`
-	// IP holds the value of the "ip" field.
-	IP string `json:"ip,omitempty"`
-	// Git holds the value of the "git" field.
-	Git string `json:"git,omitempty"`
+	// PublicKey holds the value of the "public_key" field.
+	PublicKey []byte `json:"public_key,omitempty"`
+	// IsValid holds the value of the "is_valid" field.
+	IsValid bool `json:"is_valid,omitempty"`
+	// LastCt holds the value of the "last_ct" field.
+	LastCt string `json:"last_ct,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TAQuery when eager-loading is set.
-	Edges           TAEdges `json:"edges"`
-	ta_audit_log_ta *int
-	selectValues    sql.SelectValues
+	Edges        TAEdges `json:"edges"`
+	ta_code      *int
+	selectValues sql.SelectValues
 }
 
 // TAEdges holds the relations/edges for other nodes in the graph.
 type TAEdges struct {
-	// AuditLog holds the value of the audit_log edge.
-	AuditLog *TAAuditLog `json:"audit_log,omitempty"`
 	// Code holds the value of the code edge.
-	Code []*TACode `json:"code,omitempty"`
+	Code *TACode `json:"code,omitempty"`
+	// Server holds the value of the server edge.
+	Server *TAServer `json:"server,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
 }
 
-// AuditLogOrErr returns the AuditLog value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TAEdges) AuditLogOrErr() (*TAAuditLog, error) {
-	if e.loadedTypes[0] {
-		if e.AuditLog == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: taauditlog.Label}
-		}
-		return e.AuditLog, nil
-	}
-	return nil, &NotLoadedError{edge: "audit_log"}
-}
-
 // CodeOrErr returns the Code value or an error if the edge
-// was not loaded in eager-loading.
-func (e TAEdges) CodeOrErr() ([]*TACode, error) {
-	if e.loadedTypes[1] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TAEdges) CodeOrErr() (*TACode, error) {
+	if e.loadedTypes[0] {
+		if e.Code == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: tacode.Label}
+		}
 		return e.Code, nil
 	}
 	return nil, &NotLoadedError{edge: "code"}
+}
+
+// ServerOrErr returns the Server value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TAEdges) ServerOrErr() (*TAServer, error) {
+	if e.loadedTypes[1] {
+		if e.Server == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: taserver.Label}
+		}
+		return e.Server, nil
+	}
+	return nil, &NotLoadedError{edge: "server"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -68,11 +73,15 @@ func (*TA) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case ta.FieldPublicKey:
+			values[i] = new([]byte)
+		case ta.FieldIsValid:
+			values[i] = new(sql.NullBool)
 		case ta.FieldID:
 			values[i] = new(sql.NullInt64)
-		case ta.FieldDomain, ta.FieldIP, ta.FieldGit:
+		case ta.FieldLastCt:
 			values[i] = new(sql.NullString)
-		case ta.ForeignKeys[0]: // ta_audit_log_ta
+		case ta.ForeignKeys[0]: // ta_code
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -95,30 +104,30 @@ func (t *TA) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			t.ID = int(value.Int64)
-		case ta.FieldDomain:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field domain", values[i])
-			} else if value.Valid {
-				t.Domain = value.String
+		case ta.FieldPublicKey:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field public_key", values[i])
+			} else if value != nil {
+				t.PublicKey = *value
 			}
-		case ta.FieldIP:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field ip", values[i])
+		case ta.FieldIsValid:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_valid", values[i])
 			} else if value.Valid {
-				t.IP = value.String
+				t.IsValid = value.Bool
 			}
-		case ta.FieldGit:
+		case ta.FieldLastCt:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field git", values[i])
+				return fmt.Errorf("unexpected type %T for field last_ct", values[i])
 			} else if value.Valid {
-				t.Git = value.String
+				t.LastCt = value.String
 			}
 		case ta.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field ta_audit_log_ta", value)
+				return fmt.Errorf("unexpected type %T for edge-field ta_code", value)
 			} else if value.Valid {
-				t.ta_audit_log_ta = new(int)
-				*t.ta_audit_log_ta = int(value.Int64)
+				t.ta_code = new(int)
+				*t.ta_code = int(value.Int64)
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -133,14 +142,14 @@ func (t *TA) Value(name string) (ent.Value, error) {
 	return t.selectValues.Get(name)
 }
 
-// QueryAuditLog queries the "audit_log" edge of the TA entity.
-func (t *TA) QueryAuditLog() *TAAuditLogQuery {
-	return NewTAClient(t.config).QueryAuditLog(t)
-}
-
 // QueryCode queries the "code" edge of the TA entity.
 func (t *TA) QueryCode() *TACodeQuery {
 	return NewTAClient(t.config).QueryCode(t)
+}
+
+// QueryServer queries the "server" edge of the TA entity.
+func (t *TA) QueryServer() *TAServerQuery {
+	return NewTAClient(t.config).QueryServer(t)
 }
 
 // Update returns a builder for updating this TA.
@@ -166,14 +175,14 @@ func (t *TA) String() string {
 	var builder strings.Builder
 	builder.WriteString("TA(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
-	builder.WriteString("domain=")
-	builder.WriteString(t.Domain)
+	builder.WriteString("public_key=")
+	builder.WriteString(fmt.Sprintf("%v", t.PublicKey))
 	builder.WriteString(", ")
-	builder.WriteString("ip=")
-	builder.WriteString(t.IP)
+	builder.WriteString("is_valid=")
+	builder.WriteString(fmt.Sprintf("%v", t.IsValid))
 	builder.WriteString(", ")
-	builder.WriteString("git=")
-	builder.WriteString(t.Git)
+	builder.WriteString("last_ct=")
+	builder.WriteString(t.LastCt)
 	builder.WriteByte(')')
 	return builder.String()
 }

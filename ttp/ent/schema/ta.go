@@ -14,16 +14,16 @@ type TA struct {
 // Fields of the TA.
 func (TA) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("domain"),
-		field.String("ip"),
-		field.String("git"),
+		field.Bytes("public_key"),
+		field.Bool("is_valid").Default(false),
+		field.String("last_ct"),
 	}
 }
 
 // Edges of the TA.
 func (TA) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("audit_log", TAAuditLog.Type).Ref("ta").Unique(),
-		edge.From("code", TACode.Type).Ref("ta"),
+		edge.To("code", TACode.Type).Unique(),
+		edge.To("server", TAServer.Type).Unique(),
 	}
 }

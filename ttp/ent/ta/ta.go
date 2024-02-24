@@ -12,51 +12,47 @@ const (
 	Label = "ta"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldDomain holds the string denoting the domain field in the database.
-	FieldDomain = "domain"
-	// FieldIP holds the string denoting the ip field in the database.
-	FieldIP = "ip"
-	// FieldGit holds the string denoting the git field in the database.
-	FieldGit = "git"
-	// EdgeAuditLog holds the string denoting the audit_log edge name in mutations.
-	EdgeAuditLog = "audit_log"
+	// FieldPublicKey holds the string denoting the public_key field in the database.
+	FieldPublicKey = "public_key"
+	// FieldIsValid holds the string denoting the is_valid field in the database.
+	FieldIsValid = "is_valid"
+	// FieldLastCt holds the string denoting the last_ct field in the database.
+	FieldLastCt = "last_ct"
 	// EdgeCode holds the string denoting the code edge name in mutations.
 	EdgeCode = "code"
+	// EdgeServer holds the string denoting the server edge name in mutations.
+	EdgeServer = "server"
 	// Table holds the table name of the ta in the database.
 	Table = "tas"
-	// AuditLogTable is the table that holds the audit_log relation/edge.
-	AuditLogTable = "tas"
-	// AuditLogInverseTable is the table name for the TAAuditLog entity.
-	// It exists in this package in order to avoid circular dependency with the "taauditlog" package.
-	AuditLogInverseTable = "ta_audit_logs"
-	// AuditLogColumn is the table column denoting the audit_log relation/edge.
-	AuditLogColumn = "ta_audit_log_ta"
-	// CodeTable is the table that holds the code relation/edge. The primary key declared below.
-	CodeTable = "ta_code_ta"
+	// CodeTable is the table that holds the code relation/edge.
+	CodeTable = "tas"
 	// CodeInverseTable is the table name for the TACode entity.
 	// It exists in this package in order to avoid circular dependency with the "tacode" package.
 	CodeInverseTable = "ta_codes"
+	// CodeColumn is the table column denoting the code relation/edge.
+	CodeColumn = "ta_code"
+	// ServerTable is the table that holds the server relation/edge.
+	ServerTable = "ta_servers"
+	// ServerInverseTable is the table name for the TAServer entity.
+	// It exists in this package in order to avoid circular dependency with the "taserver" package.
+	ServerInverseTable = "ta_servers"
+	// ServerColumn is the table column denoting the server relation/edge.
+	ServerColumn = "ta_server"
 )
 
 // Columns holds all SQL columns for ta fields.
 var Columns = []string{
 	FieldID,
-	FieldDomain,
-	FieldIP,
-	FieldGit,
+	FieldPublicKey,
+	FieldIsValid,
+	FieldLastCt,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tas"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"ta_audit_log_ta",
+	"ta_code",
 }
-
-var (
-	// CodePrimaryKey and CodeColumn2 are the table columns denoting the
-	// primary key for the code relation (M2M).
-	CodePrimaryKey = []string{"ta_code_id", "ta_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -73,6 +69,11 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultIsValid holds the default value on creation for the "is_valid" field.
+	DefaultIsValid bool
+)
+
 // OrderOption defines the ordering options for the TA queries.
 type OrderOption func(*sql.Selector)
 
@@ -81,52 +82,40 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByDomain orders the results by the domain field.
-func ByDomain(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDomain, opts...).ToFunc()
+// ByIsValid orders the results by the is_valid field.
+func ByIsValid(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsValid, opts...).ToFunc()
 }
 
-// ByIP orders the results by the ip field.
-func ByIP(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIP, opts...).ToFunc()
+// ByLastCt orders the results by the last_ct field.
+func ByLastCt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastCt, opts...).ToFunc()
 }
 
-// ByGit orders the results by the git field.
-func ByGit(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldGit, opts...).ToFunc()
-}
-
-// ByAuditLogField orders the results by audit_log field.
-func ByAuditLogField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByCodeField orders the results by code field.
+func ByCodeField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newAuditLogStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newCodeStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByCodeCount orders the results by code count.
-func ByCodeCount(opts ...sql.OrderTermOption) OrderOption {
+// ByServerField orders the results by server field.
+func ByServerField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newCodeStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newServerStep(), sql.OrderByField(field, opts...))
 	}
-}
-
-// ByCode orders the results by code terms.
-func ByCode(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newCodeStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-func newAuditLogStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(AuditLogInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, AuditLogTable, AuditLogColumn),
-	)
 }
 func newCodeStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CodeInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, CodeTable, CodePrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2O, false, CodeTable, CodeColumn),
+	)
+}
+func newServerStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ServerInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, ServerTable, ServerColumn),
 	)
 }

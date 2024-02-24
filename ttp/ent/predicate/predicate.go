@@ -9,8 +9,8 @@ import (
 // TA is the predicate function for ta builders.
 type TA func(*sql.Selector)
 
-// TAAuditLog is the predicate function for taauditlog builders.
-type TAAuditLog func(*sql.Selector)
-
 // TACode is the predicate function for tacode builders.
 type TACode func(*sql.Selector)
+
+// TAServer is the predicate function for taserver builders.
+type TAServer func(*sql.Selector)

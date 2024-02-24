@@ -3,24 +3,32 @@
 package ent
 
 import (
-	"time"
-
 	"github.com/akakou/ra_webs/ttp/ent/schema"
+	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	taFields := schema.TA{}.Fields()
+	_ = taFields
+	// taDescIsValid is the schema descriptor for is_valid field.
+	taDescIsValid := taFields[1].Descriptor()
+	// ta.DefaultIsValid holds the default value on creation for the is_valid field.
+	ta.DefaultIsValid = taDescIsValid.Default.(bool)
 	tacodeFields := schema.TACode{}.Fields()
 	_ = tacodeFields
-	// tacodeDescActivated is the schema descriptor for activated field.
-	tacodeDescActivated := tacodeFields[3].Descriptor()
-	// tacode.DefaultActivated holds the default value on creation for the activated field.
-	tacode.DefaultActivated = tacodeDescActivated.Default.(bool)
-	// tacodeDescActivatedAt is the schema descriptor for activated_at field.
-	tacodeDescActivatedAt := tacodeFields[4].Descriptor()
-	// tacode.DefaultActivatedAt holds the default value on creation for the activated_at field.
-	tacode.DefaultActivatedAt = tacodeDescActivatedAt.Default.(time.Time)
+	// tacodeDescActivate is the schema descriptor for activate field.
+	tacodeDescActivate := tacodeFields[3].Descriptor()
+	// tacode.DefaultActivate holds the default value on creation for the activate field.
+	tacode.DefaultActivate = tacodeDescActivate.Default.(bool)
+	taserverFields := schema.TAServer{}.Fields()
+	_ = taserverFields
+	// taserverDescActivate is the schema descriptor for activate field.
+	taserverDescActivate := taserverFields[3].Descriptor()
+	// taserver.DefaultActivate holds the default value on creation for the activate field.
+	taserver.DefaultActivate = taserverDescActivate.Default.(bool)
 }

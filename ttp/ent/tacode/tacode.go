@@ -3,8 +3,6 @@
 package tacode
 
 import (
-	"time"
-
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -14,42 +12,35 @@ const (
 	Label = "ta_code"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldUniqueID holds the string denoting the unique_id field in the database.
-	FieldUniqueID = "unique_id"
-	// FieldPublicKey holds the string denoting the public_key field in the database.
-	FieldPublicKey = "public_key"
+	// FieldRepository holds the string denoting the repository field in the database.
+	FieldRepository = "repository"
 	// FieldCommitID holds the string denoting the commit_id field in the database.
 	FieldCommitID = "commit_id"
-	// FieldActivated holds the string denoting the activated field in the database.
-	FieldActivated = "activated"
-	// FieldActivatedAt holds the string denoting the activated_at field in the database.
-	FieldActivatedAt = "activated_at"
+	// FieldUniqueID holds the string denoting the unique_id field in the database.
+	FieldUniqueID = "unique_id"
+	// FieldActivate holds the string denoting the activate field in the database.
+	FieldActivate = "activate"
 	// EdgeTa holds the string denoting the ta edge name in mutations.
 	EdgeTa = "ta"
 	// Table holds the table name of the tacode in the database.
 	Table = "ta_codes"
-	// TaTable is the table that holds the ta relation/edge. The primary key declared below.
-	TaTable = "ta_code_ta"
+	// TaTable is the table that holds the ta relation/edge.
+	TaTable = "tas"
 	// TaInverseTable is the table name for the TA entity.
 	// It exists in this package in order to avoid circular dependency with the "ta" package.
 	TaInverseTable = "tas"
+	// TaColumn is the table column denoting the ta relation/edge.
+	TaColumn = "ta_code"
 )
 
 // Columns holds all SQL columns for tacode fields.
 var Columns = []string{
 	FieldID,
-	FieldUniqueID,
-	FieldPublicKey,
+	FieldRepository,
 	FieldCommitID,
-	FieldActivated,
-	FieldActivatedAt,
+	FieldUniqueID,
+	FieldActivate,
 }
-
-var (
-	// TaPrimaryKey and TaColumn2 are the table columns denoting the
-	// primary key for the ta relation (M2M).
-	TaPrimaryKey = []string{"ta_code_id", "ta_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -62,10 +53,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultActivated holds the default value on creation for the "activated" field.
-	DefaultActivated bool
-	// DefaultActivatedAt holds the default value on creation for the "activated_at" field.
-	DefaultActivatedAt time.Time
+	// DefaultActivate holds the default value on creation for the "activate" field.
+	DefaultActivate bool
 )
 
 // OrderOption defines the ordering options for the TACode queries.
@@ -76,19 +65,19 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByRepository orders the results by the repository field.
+func ByRepository(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRepository, opts...).ToFunc()
+}
+
 // ByCommitID orders the results by the commit_id field.
 func ByCommitID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCommitID, opts...).ToFunc()
 }
 
-// ByActivated orders the results by the activated field.
-func ByActivated(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldActivated, opts...).ToFunc()
-}
-
-// ByActivatedAt orders the results by the activated_at field.
-func ByActivatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldActivatedAt, opts...).ToFunc()
+// ByActivate orders the results by the activate field.
+func ByActivate(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldActivate, opts...).ToFunc()
 }
 
 // ByTaCount orders the results by ta count.
@@ -108,6 +97,6 @@ func newTaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TaInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, TaTable, TaPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, true, TaTable, TaColumn),
 	)
 }

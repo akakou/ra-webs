@@ -5,7 +5,6 @@ package ent
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -17,16 +16,14 @@ type TACode struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// UniqueID holds the value of the "unique_id" field.
-	UniqueID []byte `json:"unique_id,omitempty"`
-	// PublicKey holds the value of the "public_key" field.
-	PublicKey []byte `json:"public_key,omitempty"`
+	// Repository holds the value of the "repository" field.
+	Repository string `json:"repository,omitempty"`
 	// CommitID holds the value of the "commit_id" field.
 	CommitID string `json:"commit_id,omitempty"`
-	// Activated holds the value of the "activated" field.
-	Activated bool `json:"activated,omitempty"`
-	// ActivatedAt holds the value of the "activated_at" field.
-	ActivatedAt time.Time `json:"activated_at,omitempty"`
+	// UniqueID holds the value of the "unique_id" field.
+	UniqueID []byte `json:"unique_id,omitempty"`
+	// Activate holds the value of the "activate" field.
+	Activate bool `json:"activate,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TACodeQuery when eager-loading is set.
 	Edges        TACodeEdges `json:"edges"`
@@ -56,16 +53,14 @@ func (*TACode) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case tacode.FieldUniqueID, tacode.FieldPublicKey:
+		case tacode.FieldUniqueID:
 			values[i] = new([]byte)
-		case tacode.FieldActivated:
+		case tacode.FieldActivate:
 			values[i] = new(sql.NullBool)
 		case tacode.FieldID:
 			values[i] = new(sql.NullInt64)
-		case tacode.FieldCommitID:
+		case tacode.FieldRepository, tacode.FieldCommitID:
 			values[i] = new(sql.NullString)
-		case tacode.FieldActivatedAt:
-			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -87,17 +82,11 @@ func (tc *TACode) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			tc.ID = int(value.Int64)
-		case tacode.FieldUniqueID:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field unique_id", values[i])
-			} else if value != nil {
-				tc.UniqueID = *value
-			}
-		case tacode.FieldPublicKey:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field public_key", values[i])
-			} else if value != nil {
-				tc.PublicKey = *value
+		case tacode.FieldRepository:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field repository", values[i])
+			} else if value.Valid {
+				tc.Repository = value.String
 			}
 		case tacode.FieldCommitID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -105,17 +94,17 @@ func (tc *TACode) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				tc.CommitID = value.String
 			}
-		case tacode.FieldActivated:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field activated", values[i])
-			} else if value.Valid {
-				tc.Activated = value.Bool
+		case tacode.FieldUniqueID:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field unique_id", values[i])
+			} else if value != nil {
+				tc.UniqueID = *value
 			}
-		case tacode.FieldActivatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field activated_at", values[i])
+		case tacode.FieldActivate:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field activate", values[i])
 			} else if value.Valid {
-				tc.ActivatedAt = value.Time
+				tc.Activate = value.Bool
 			}
 		default:
 			tc.selectValues.Set(columns[i], values[i])
@@ -158,20 +147,17 @@ func (tc *TACode) String() string {
 	var builder strings.Builder
 	builder.WriteString("TACode(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", tc.ID))
-	builder.WriteString("unique_id=")
-	builder.WriteString(fmt.Sprintf("%v", tc.UniqueID))
-	builder.WriteString(", ")
-	builder.WriteString("public_key=")
-	builder.WriteString(fmt.Sprintf("%v", tc.PublicKey))
+	builder.WriteString("repository=")
+	builder.WriteString(tc.Repository)
 	builder.WriteString(", ")
 	builder.WriteString("commit_id=")
 	builder.WriteString(tc.CommitID)
 	builder.WriteString(", ")
-	builder.WriteString("activated=")
-	builder.WriteString(fmt.Sprintf("%v", tc.Activated))
+	builder.WriteString("unique_id=")
+	builder.WriteString(fmt.Sprintf("%v", tc.UniqueID))
 	builder.WriteString(", ")
-	builder.WriteString("activated_at=")
-	builder.WriteString(tc.ActivatedAt.Format(time.ANSIC))
+	builder.WriteString("activate=")
+	builder.WriteString(fmt.Sprintf("%v", tc.Activate))
 	builder.WriteByte(')')
 	return builder.String()
 }

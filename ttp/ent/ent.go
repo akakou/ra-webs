@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
-	"github.com/akakou/ra_webs/ttp/ent/taauditlog"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -75,9 +75,9 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			ta.Table:         ta.ValidColumn,
-			taauditlog.Table: taauditlog.ValidColumn,
-			tacode.Table:     tacode.ValidColumn,
+			ta.Table:       ta.ValidColumn,
+			tacode.Table:   tacode.ValidColumn,
+			taserver.Table: taserver.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

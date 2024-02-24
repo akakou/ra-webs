@@ -53,237 +53,134 @@ func IDLTE(id int) predicate.TA {
 	return predicate.TA(sql.FieldLTE(FieldID, id))
 }
 
-// Domain applies equality check predicate on the "domain" field. It's identical to DomainEQ.
-func Domain(v string) predicate.TA {
-	return predicate.TA(sql.FieldEQ(FieldDomain, v))
+// PublicKey applies equality check predicate on the "public_key" field. It's identical to PublicKeyEQ.
+func PublicKey(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldEQ(FieldPublicKey, v))
 }
 
-// IP applies equality check predicate on the "ip" field. It's identical to IPEQ.
-func IP(v string) predicate.TA {
-	return predicate.TA(sql.FieldEQ(FieldIP, v))
+// IsValid applies equality check predicate on the "is_valid" field. It's identical to IsValidEQ.
+func IsValid(v bool) predicate.TA {
+	return predicate.TA(sql.FieldEQ(FieldIsValid, v))
 }
 
-// Git applies equality check predicate on the "git" field. It's identical to GitEQ.
-func Git(v string) predicate.TA {
-	return predicate.TA(sql.FieldEQ(FieldGit, v))
+// LastCt applies equality check predicate on the "last_ct" field. It's identical to LastCtEQ.
+func LastCt(v string) predicate.TA {
+	return predicate.TA(sql.FieldEQ(FieldLastCt, v))
 }
 
-// DomainEQ applies the EQ predicate on the "domain" field.
-func DomainEQ(v string) predicate.TA {
-	return predicate.TA(sql.FieldEQ(FieldDomain, v))
+// PublicKeyEQ applies the EQ predicate on the "public_key" field.
+func PublicKeyEQ(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldEQ(FieldPublicKey, v))
 }
 
-// DomainNEQ applies the NEQ predicate on the "domain" field.
-func DomainNEQ(v string) predicate.TA {
-	return predicate.TA(sql.FieldNEQ(FieldDomain, v))
+// PublicKeyNEQ applies the NEQ predicate on the "public_key" field.
+func PublicKeyNEQ(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldNEQ(FieldPublicKey, v))
 }
 
-// DomainIn applies the In predicate on the "domain" field.
-func DomainIn(vs ...string) predicate.TA {
-	return predicate.TA(sql.FieldIn(FieldDomain, vs...))
+// PublicKeyIn applies the In predicate on the "public_key" field.
+func PublicKeyIn(vs ...[]byte) predicate.TA {
+	return predicate.TA(sql.FieldIn(FieldPublicKey, vs...))
 }
 
-// DomainNotIn applies the NotIn predicate on the "domain" field.
-func DomainNotIn(vs ...string) predicate.TA {
-	return predicate.TA(sql.FieldNotIn(FieldDomain, vs...))
+// PublicKeyNotIn applies the NotIn predicate on the "public_key" field.
+func PublicKeyNotIn(vs ...[]byte) predicate.TA {
+	return predicate.TA(sql.FieldNotIn(FieldPublicKey, vs...))
 }
 
-// DomainGT applies the GT predicate on the "domain" field.
-func DomainGT(v string) predicate.TA {
-	return predicate.TA(sql.FieldGT(FieldDomain, v))
+// PublicKeyGT applies the GT predicate on the "public_key" field.
+func PublicKeyGT(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldGT(FieldPublicKey, v))
 }
 
-// DomainGTE applies the GTE predicate on the "domain" field.
-func DomainGTE(v string) predicate.TA {
-	return predicate.TA(sql.FieldGTE(FieldDomain, v))
+// PublicKeyGTE applies the GTE predicate on the "public_key" field.
+func PublicKeyGTE(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldGTE(FieldPublicKey, v))
 }
 
-// DomainLT applies the LT predicate on the "domain" field.
-func DomainLT(v string) predicate.TA {
-	return predicate.TA(sql.FieldLT(FieldDomain, v))
+// PublicKeyLT applies the LT predicate on the "public_key" field.
+func PublicKeyLT(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldLT(FieldPublicKey, v))
 }
 
-// DomainLTE applies the LTE predicate on the "domain" field.
-func DomainLTE(v string) predicate.TA {
-	return predicate.TA(sql.FieldLTE(FieldDomain, v))
+// PublicKeyLTE applies the LTE predicate on the "public_key" field.
+func PublicKeyLTE(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldLTE(FieldPublicKey, v))
 }
 
-// DomainContains applies the Contains predicate on the "domain" field.
-func DomainContains(v string) predicate.TA {
-	return predicate.TA(sql.FieldContains(FieldDomain, v))
+// IsValidEQ applies the EQ predicate on the "is_valid" field.
+func IsValidEQ(v bool) predicate.TA {
+	return predicate.TA(sql.FieldEQ(FieldIsValid, v))
 }
 
-// DomainHasPrefix applies the HasPrefix predicate on the "domain" field.
-func DomainHasPrefix(v string) predicate.TA {
-	return predicate.TA(sql.FieldHasPrefix(FieldDomain, v))
+// IsValidNEQ applies the NEQ predicate on the "is_valid" field.
+func IsValidNEQ(v bool) predicate.TA {
+	return predicate.TA(sql.FieldNEQ(FieldIsValid, v))
 }
 
-// DomainHasSuffix applies the HasSuffix predicate on the "domain" field.
-func DomainHasSuffix(v string) predicate.TA {
-	return predicate.TA(sql.FieldHasSuffix(FieldDomain, v))
+// LastCtEQ applies the EQ predicate on the "last_ct" field.
+func LastCtEQ(v string) predicate.TA {
+	return predicate.TA(sql.FieldEQ(FieldLastCt, v))
 }
 
-// DomainEqualFold applies the EqualFold predicate on the "domain" field.
-func DomainEqualFold(v string) predicate.TA {
-	return predicate.TA(sql.FieldEqualFold(FieldDomain, v))
+// LastCtNEQ applies the NEQ predicate on the "last_ct" field.
+func LastCtNEQ(v string) predicate.TA {
+	return predicate.TA(sql.FieldNEQ(FieldLastCt, v))
 }
 
-// DomainContainsFold applies the ContainsFold predicate on the "domain" field.
-func DomainContainsFold(v string) predicate.TA {
-	return predicate.TA(sql.FieldContainsFold(FieldDomain, v))
+// LastCtIn applies the In predicate on the "last_ct" field.
+func LastCtIn(vs ...string) predicate.TA {
+	return predicate.TA(sql.FieldIn(FieldLastCt, vs...))
 }
 
-// IPEQ applies the EQ predicate on the "ip" field.
-func IPEQ(v string) predicate.TA {
-	return predicate.TA(sql.FieldEQ(FieldIP, v))
+// LastCtNotIn applies the NotIn predicate on the "last_ct" field.
+func LastCtNotIn(vs ...string) predicate.TA {
+	return predicate.TA(sql.FieldNotIn(FieldLastCt, vs...))
 }
 
-// IPNEQ applies the NEQ predicate on the "ip" field.
-func IPNEQ(v string) predicate.TA {
-	return predicate.TA(sql.FieldNEQ(FieldIP, v))
+// LastCtGT applies the GT predicate on the "last_ct" field.
+func LastCtGT(v string) predicate.TA {
+	return predicate.TA(sql.FieldGT(FieldLastCt, v))
 }
 
-// IPIn applies the In predicate on the "ip" field.
-func IPIn(vs ...string) predicate.TA {
-	return predicate.TA(sql.FieldIn(FieldIP, vs...))
+// LastCtGTE applies the GTE predicate on the "last_ct" field.
+func LastCtGTE(v string) predicate.TA {
+	return predicate.TA(sql.FieldGTE(FieldLastCt, v))
 }
 
-// IPNotIn applies the NotIn predicate on the "ip" field.
-func IPNotIn(vs ...string) predicate.TA {
-	return predicate.TA(sql.FieldNotIn(FieldIP, vs...))
+// LastCtLT applies the LT predicate on the "last_ct" field.
+func LastCtLT(v string) predicate.TA {
+	return predicate.TA(sql.FieldLT(FieldLastCt, v))
 }
 
-// IPGT applies the GT predicate on the "ip" field.
-func IPGT(v string) predicate.TA {
-	return predicate.TA(sql.FieldGT(FieldIP, v))
+// LastCtLTE applies the LTE predicate on the "last_ct" field.
+func LastCtLTE(v string) predicate.TA {
+	return predicate.TA(sql.FieldLTE(FieldLastCt, v))
 }
 
-// IPGTE applies the GTE predicate on the "ip" field.
-func IPGTE(v string) predicate.TA {
-	return predicate.TA(sql.FieldGTE(FieldIP, v))
+// LastCtContains applies the Contains predicate on the "last_ct" field.
+func LastCtContains(v string) predicate.TA {
+	return predicate.TA(sql.FieldContains(FieldLastCt, v))
 }
 
-// IPLT applies the LT predicate on the "ip" field.
-func IPLT(v string) predicate.TA {
-	return predicate.TA(sql.FieldLT(FieldIP, v))
+// LastCtHasPrefix applies the HasPrefix predicate on the "last_ct" field.
+func LastCtHasPrefix(v string) predicate.TA {
+	return predicate.TA(sql.FieldHasPrefix(FieldLastCt, v))
 }
 
-// IPLTE applies the LTE predicate on the "ip" field.
-func IPLTE(v string) predicate.TA {
-	return predicate.TA(sql.FieldLTE(FieldIP, v))
+// LastCtHasSuffix applies the HasSuffix predicate on the "last_ct" field.
+func LastCtHasSuffix(v string) predicate.TA {
+	return predicate.TA(sql.FieldHasSuffix(FieldLastCt, v))
 }
 
-// IPContains applies the Contains predicate on the "ip" field.
-func IPContains(v string) predicate.TA {
-	return predicate.TA(sql.FieldContains(FieldIP, v))
+// LastCtEqualFold applies the EqualFold predicate on the "last_ct" field.
+func LastCtEqualFold(v string) predicate.TA {
+	return predicate.TA(sql.FieldEqualFold(FieldLastCt, v))
 }
 
-// IPHasPrefix applies the HasPrefix predicate on the "ip" field.
-func IPHasPrefix(v string) predicate.TA {
-	return predicate.TA(sql.FieldHasPrefix(FieldIP, v))
-}
-
-// IPHasSuffix applies the HasSuffix predicate on the "ip" field.
-func IPHasSuffix(v string) predicate.TA {
-	return predicate.TA(sql.FieldHasSuffix(FieldIP, v))
-}
-
-// IPEqualFold applies the EqualFold predicate on the "ip" field.
-func IPEqualFold(v string) predicate.TA {
-	return predicate.TA(sql.FieldEqualFold(FieldIP, v))
-}
-
-// IPContainsFold applies the ContainsFold predicate on the "ip" field.
-func IPContainsFold(v string) predicate.TA {
-	return predicate.TA(sql.FieldContainsFold(FieldIP, v))
-}
-
-// GitEQ applies the EQ predicate on the "git" field.
-func GitEQ(v string) predicate.TA {
-	return predicate.TA(sql.FieldEQ(FieldGit, v))
-}
-
-// GitNEQ applies the NEQ predicate on the "git" field.
-func GitNEQ(v string) predicate.TA {
-	return predicate.TA(sql.FieldNEQ(FieldGit, v))
-}
-
-// GitIn applies the In predicate on the "git" field.
-func GitIn(vs ...string) predicate.TA {
-	return predicate.TA(sql.FieldIn(FieldGit, vs...))
-}
-
-// GitNotIn applies the NotIn predicate on the "git" field.
-func GitNotIn(vs ...string) predicate.TA {
-	return predicate.TA(sql.FieldNotIn(FieldGit, vs...))
-}
-
-// GitGT applies the GT predicate on the "git" field.
-func GitGT(v string) predicate.TA {
-	return predicate.TA(sql.FieldGT(FieldGit, v))
-}
-
-// GitGTE applies the GTE predicate on the "git" field.
-func GitGTE(v string) predicate.TA {
-	return predicate.TA(sql.FieldGTE(FieldGit, v))
-}
-
-// GitLT applies the LT predicate on the "git" field.
-func GitLT(v string) predicate.TA {
-	return predicate.TA(sql.FieldLT(FieldGit, v))
-}
-
-// GitLTE applies the LTE predicate on the "git" field.
-func GitLTE(v string) predicate.TA {
-	return predicate.TA(sql.FieldLTE(FieldGit, v))
-}
-
-// GitContains applies the Contains predicate on the "git" field.
-func GitContains(v string) predicate.TA {
-	return predicate.TA(sql.FieldContains(FieldGit, v))
-}
-
-// GitHasPrefix applies the HasPrefix predicate on the "git" field.
-func GitHasPrefix(v string) predicate.TA {
-	return predicate.TA(sql.FieldHasPrefix(FieldGit, v))
-}
-
-// GitHasSuffix applies the HasSuffix predicate on the "git" field.
-func GitHasSuffix(v string) predicate.TA {
-	return predicate.TA(sql.FieldHasSuffix(FieldGit, v))
-}
-
-// GitEqualFold applies the EqualFold predicate on the "git" field.
-func GitEqualFold(v string) predicate.TA {
-	return predicate.TA(sql.FieldEqualFold(FieldGit, v))
-}
-
-// GitContainsFold applies the ContainsFold predicate on the "git" field.
-func GitContainsFold(v string) predicate.TA {
-	return predicate.TA(sql.FieldContainsFold(FieldGit, v))
-}
-
-// HasAuditLog applies the HasEdge predicate on the "audit_log" edge.
-func HasAuditLog() predicate.TA {
-	return predicate.TA(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, AuditLogTable, AuditLogColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasAuditLogWith applies the HasEdge predicate on the "audit_log" edge with a given conditions (other predicates).
-func HasAuditLogWith(preds ...predicate.TAAuditLog) predicate.TA {
-	return predicate.TA(func(s *sql.Selector) {
-		step := newAuditLogStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
+// LastCtContainsFold applies the ContainsFold predicate on the "last_ct" field.
+func LastCtContainsFold(v string) predicate.TA {
+	return predicate.TA(sql.FieldContainsFold(FieldLastCt, v))
 }
 
 // HasCode applies the HasEdge predicate on the "code" edge.
@@ -291,7 +188,7 @@ func HasCode() predicate.TA {
 	return predicate.TA(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, CodeTable, CodePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, CodeTable, CodeColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -301,6 +198,29 @@ func HasCode() predicate.TA {
 func HasCodeWith(preds ...predicate.TACode) predicate.TA {
 	return predicate.TA(func(s *sql.Selector) {
 		step := newCodeStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasServer applies the HasEdge predicate on the "server" edge.
+func HasServer() predicate.TA {
+	return predicate.TA(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, ServerTable, ServerColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasServerWith applies the HasEdge predicate on the "server" edge with a given conditions (other predicates).
+func HasServerWith(preds ...predicate.TAServer) predicate.TA {
+	return predicate.TA(func(s *sql.Selector) {
+		step := newServerStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

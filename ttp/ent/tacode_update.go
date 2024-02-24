@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -29,15 +28,17 @@ func (tcu *TACodeUpdate) Where(ps ...predicate.TACode) *TACodeUpdate {
 	return tcu
 }
 
-// SetUniqueID sets the "unique_id" field.
-func (tcu *TACodeUpdate) SetUniqueID(b []byte) *TACodeUpdate {
-	tcu.mutation.SetUniqueID(b)
+// SetRepository sets the "repository" field.
+func (tcu *TACodeUpdate) SetRepository(s string) *TACodeUpdate {
+	tcu.mutation.SetRepository(s)
 	return tcu
 }
 
-// SetPublicKey sets the "public_key" field.
-func (tcu *TACodeUpdate) SetPublicKey(b []byte) *TACodeUpdate {
-	tcu.mutation.SetPublicKey(b)
+// SetNillableRepository sets the "repository" field if the given value is not nil.
+func (tcu *TACodeUpdate) SetNillableRepository(s *string) *TACodeUpdate {
+	if s != nil {
+		tcu.SetRepository(*s)
+	}
 	return tcu
 }
 
@@ -55,30 +56,22 @@ func (tcu *TACodeUpdate) SetNillableCommitID(s *string) *TACodeUpdate {
 	return tcu
 }
 
-// SetActivated sets the "activated" field.
-func (tcu *TACodeUpdate) SetActivated(b bool) *TACodeUpdate {
-	tcu.mutation.SetActivated(b)
+// SetUniqueID sets the "unique_id" field.
+func (tcu *TACodeUpdate) SetUniqueID(b []byte) *TACodeUpdate {
+	tcu.mutation.SetUniqueID(b)
 	return tcu
 }
 
-// SetNillableActivated sets the "activated" field if the given value is not nil.
-func (tcu *TACodeUpdate) SetNillableActivated(b *bool) *TACodeUpdate {
+// SetActivate sets the "activate" field.
+func (tcu *TACodeUpdate) SetActivate(b bool) *TACodeUpdate {
+	tcu.mutation.SetActivate(b)
+	return tcu
+}
+
+// SetNillableActivate sets the "activate" field if the given value is not nil.
+func (tcu *TACodeUpdate) SetNillableActivate(b *bool) *TACodeUpdate {
 	if b != nil {
-		tcu.SetActivated(*b)
-	}
-	return tcu
-}
-
-// SetActivatedAt sets the "activated_at" field.
-func (tcu *TACodeUpdate) SetActivatedAt(t time.Time) *TACodeUpdate {
-	tcu.mutation.SetActivatedAt(t)
-	return tcu
-}
-
-// SetNillableActivatedAt sets the "activated_at" field if the given value is not nil.
-func (tcu *TACodeUpdate) SetNillableActivatedAt(t *time.Time) *TACodeUpdate {
-	if t != nil {
-		tcu.SetActivatedAt(*t)
+		tcu.SetActivate(*b)
 	}
 	return tcu
 }
@@ -160,27 +153,24 @@ func (tcu *TACodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := tcu.mutation.UniqueID(); ok {
-		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
-	}
-	if value, ok := tcu.mutation.PublicKey(); ok {
-		_spec.SetField(tacode.FieldPublicKey, field.TypeBytes, value)
+	if value, ok := tcu.mutation.Repository(); ok {
+		_spec.SetField(tacode.FieldRepository, field.TypeString, value)
 	}
 	if value, ok := tcu.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)
 	}
-	if value, ok := tcu.mutation.Activated(); ok {
-		_spec.SetField(tacode.FieldActivated, field.TypeBool, value)
+	if value, ok := tcu.mutation.UniqueID(); ok {
+		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
 	}
-	if value, ok := tcu.mutation.ActivatedAt(); ok {
-		_spec.SetField(tacode.FieldActivatedAt, field.TypeTime, value)
+	if value, ok := tcu.mutation.Activate(); ok {
+		_spec.SetField(tacode.FieldActivate, field.TypeBool, value)
 	}
 	if tcu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
 			Table:   tacode.TaTable,
-			Columns: tacode.TaPrimaryKey,
+			Columns: []string{tacode.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
@@ -190,10 +180,10 @@ func (tcu *TACodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tcu.mutation.RemovedTaIDs(); len(nodes) > 0 && !tcu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
 			Table:   tacode.TaTable,
-			Columns: tacode.TaPrimaryKey,
+			Columns: []string{tacode.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
@@ -206,10 +196,10 @@ func (tcu *TACodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tcu.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
 			Table:   tacode.TaTable,
-			Columns: tacode.TaPrimaryKey,
+			Columns: []string{tacode.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
@@ -240,15 +230,17 @@ type TACodeUpdateOne struct {
 	mutation *TACodeMutation
 }
 
-// SetUniqueID sets the "unique_id" field.
-func (tcuo *TACodeUpdateOne) SetUniqueID(b []byte) *TACodeUpdateOne {
-	tcuo.mutation.SetUniqueID(b)
+// SetRepository sets the "repository" field.
+func (tcuo *TACodeUpdateOne) SetRepository(s string) *TACodeUpdateOne {
+	tcuo.mutation.SetRepository(s)
 	return tcuo
 }
 
-// SetPublicKey sets the "public_key" field.
-func (tcuo *TACodeUpdateOne) SetPublicKey(b []byte) *TACodeUpdateOne {
-	tcuo.mutation.SetPublicKey(b)
+// SetNillableRepository sets the "repository" field if the given value is not nil.
+func (tcuo *TACodeUpdateOne) SetNillableRepository(s *string) *TACodeUpdateOne {
+	if s != nil {
+		tcuo.SetRepository(*s)
+	}
 	return tcuo
 }
 
@@ -266,30 +258,22 @@ func (tcuo *TACodeUpdateOne) SetNillableCommitID(s *string) *TACodeUpdateOne {
 	return tcuo
 }
 
-// SetActivated sets the "activated" field.
-func (tcuo *TACodeUpdateOne) SetActivated(b bool) *TACodeUpdateOne {
-	tcuo.mutation.SetActivated(b)
+// SetUniqueID sets the "unique_id" field.
+func (tcuo *TACodeUpdateOne) SetUniqueID(b []byte) *TACodeUpdateOne {
+	tcuo.mutation.SetUniqueID(b)
 	return tcuo
 }
 
-// SetNillableActivated sets the "activated" field if the given value is not nil.
-func (tcuo *TACodeUpdateOne) SetNillableActivated(b *bool) *TACodeUpdateOne {
+// SetActivate sets the "activate" field.
+func (tcuo *TACodeUpdateOne) SetActivate(b bool) *TACodeUpdateOne {
+	tcuo.mutation.SetActivate(b)
+	return tcuo
+}
+
+// SetNillableActivate sets the "activate" field if the given value is not nil.
+func (tcuo *TACodeUpdateOne) SetNillableActivate(b *bool) *TACodeUpdateOne {
 	if b != nil {
-		tcuo.SetActivated(*b)
-	}
-	return tcuo
-}
-
-// SetActivatedAt sets the "activated_at" field.
-func (tcuo *TACodeUpdateOne) SetActivatedAt(t time.Time) *TACodeUpdateOne {
-	tcuo.mutation.SetActivatedAt(t)
-	return tcuo
-}
-
-// SetNillableActivatedAt sets the "activated_at" field if the given value is not nil.
-func (tcuo *TACodeUpdateOne) SetNillableActivatedAt(t *time.Time) *TACodeUpdateOne {
-	if t != nil {
-		tcuo.SetActivatedAt(*t)
+		tcuo.SetActivate(*b)
 	}
 	return tcuo
 }
@@ -401,27 +385,24 @@ func (tcuo *TACodeUpdateOne) sqlSave(ctx context.Context) (_node *TACode, err er
 			}
 		}
 	}
-	if value, ok := tcuo.mutation.UniqueID(); ok {
-		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
-	}
-	if value, ok := tcuo.mutation.PublicKey(); ok {
-		_spec.SetField(tacode.FieldPublicKey, field.TypeBytes, value)
+	if value, ok := tcuo.mutation.Repository(); ok {
+		_spec.SetField(tacode.FieldRepository, field.TypeString, value)
 	}
 	if value, ok := tcuo.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)
 	}
-	if value, ok := tcuo.mutation.Activated(); ok {
-		_spec.SetField(tacode.FieldActivated, field.TypeBool, value)
+	if value, ok := tcuo.mutation.UniqueID(); ok {
+		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
 	}
-	if value, ok := tcuo.mutation.ActivatedAt(); ok {
-		_spec.SetField(tacode.FieldActivatedAt, field.TypeTime, value)
+	if value, ok := tcuo.mutation.Activate(); ok {
+		_spec.SetField(tacode.FieldActivate, field.TypeBool, value)
 	}
 	if tcuo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
 			Table:   tacode.TaTable,
-			Columns: tacode.TaPrimaryKey,
+			Columns: []string{tacode.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
@@ -431,10 +412,10 @@ func (tcuo *TACodeUpdateOne) sqlSave(ctx context.Context) (_node *TACode, err er
 	}
 	if nodes := tcuo.mutation.RemovedTaIDs(); len(nodes) > 0 && !tcuo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
 			Table:   tacode.TaTable,
-			Columns: tacode.TaPrimaryKey,
+			Columns: []string{tacode.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
@@ -447,10 +428,10 @@ func (tcuo *TACodeUpdateOne) sqlSave(ctx context.Context) (_node *TACode, err er
 	}
 	if nodes := tcuo.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
 			Table:   tacode.TaTable,
-			Columns: tacode.TaPrimaryKey,
+			Columns: []string{tacode.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),

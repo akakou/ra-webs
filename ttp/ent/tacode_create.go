@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -21,15 +20,9 @@ type TACodeCreate struct {
 	hooks    []Hook
 }
 
-// SetUniqueID sets the "unique_id" field.
-func (tcc *TACodeCreate) SetUniqueID(b []byte) *TACodeCreate {
-	tcc.mutation.SetUniqueID(b)
-	return tcc
-}
-
-// SetPublicKey sets the "public_key" field.
-func (tcc *TACodeCreate) SetPublicKey(b []byte) *TACodeCreate {
-	tcc.mutation.SetPublicKey(b)
+// SetRepository sets the "repository" field.
+func (tcc *TACodeCreate) SetRepository(s string) *TACodeCreate {
+	tcc.mutation.SetRepository(s)
 	return tcc
 }
 
@@ -39,30 +32,22 @@ func (tcc *TACodeCreate) SetCommitID(s string) *TACodeCreate {
 	return tcc
 }
 
-// SetActivated sets the "activated" field.
-func (tcc *TACodeCreate) SetActivated(b bool) *TACodeCreate {
-	tcc.mutation.SetActivated(b)
+// SetUniqueID sets the "unique_id" field.
+func (tcc *TACodeCreate) SetUniqueID(b []byte) *TACodeCreate {
+	tcc.mutation.SetUniqueID(b)
 	return tcc
 }
 
-// SetNillableActivated sets the "activated" field if the given value is not nil.
-func (tcc *TACodeCreate) SetNillableActivated(b *bool) *TACodeCreate {
+// SetActivate sets the "activate" field.
+func (tcc *TACodeCreate) SetActivate(b bool) *TACodeCreate {
+	tcc.mutation.SetActivate(b)
+	return tcc
+}
+
+// SetNillableActivate sets the "activate" field if the given value is not nil.
+func (tcc *TACodeCreate) SetNillableActivate(b *bool) *TACodeCreate {
 	if b != nil {
-		tcc.SetActivated(*b)
-	}
-	return tcc
-}
-
-// SetActivatedAt sets the "activated_at" field.
-func (tcc *TACodeCreate) SetActivatedAt(t time.Time) *TACodeCreate {
-	tcc.mutation.SetActivatedAt(t)
-	return tcc
-}
-
-// SetNillableActivatedAt sets the "activated_at" field if the given value is not nil.
-func (tcc *TACodeCreate) SetNillableActivatedAt(t *time.Time) *TACodeCreate {
-	if t != nil {
-		tcc.SetActivatedAt(*t)
+		tcc.SetActivate(*b)
 	}
 	return tcc
 }
@@ -117,32 +102,25 @@ func (tcc *TACodeCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tcc *TACodeCreate) defaults() {
-	if _, ok := tcc.mutation.Activated(); !ok {
-		v := tacode.DefaultActivated
-		tcc.mutation.SetActivated(v)
-	}
-	if _, ok := tcc.mutation.ActivatedAt(); !ok {
-		v := tacode.DefaultActivatedAt
-		tcc.mutation.SetActivatedAt(v)
+	if _, ok := tcc.mutation.Activate(); !ok {
+		v := tacode.DefaultActivate
+		tcc.mutation.SetActivate(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (tcc *TACodeCreate) check() error {
-	if _, ok := tcc.mutation.UniqueID(); !ok {
-		return &ValidationError{Name: "unique_id", err: errors.New(`ent: missing required field "TACode.unique_id"`)}
-	}
-	if _, ok := tcc.mutation.PublicKey(); !ok {
-		return &ValidationError{Name: "public_key", err: errors.New(`ent: missing required field "TACode.public_key"`)}
+	if _, ok := tcc.mutation.Repository(); !ok {
+		return &ValidationError{Name: "repository", err: errors.New(`ent: missing required field "TACode.repository"`)}
 	}
 	if _, ok := tcc.mutation.CommitID(); !ok {
 		return &ValidationError{Name: "commit_id", err: errors.New(`ent: missing required field "TACode.commit_id"`)}
 	}
-	if _, ok := tcc.mutation.Activated(); !ok {
-		return &ValidationError{Name: "activated", err: errors.New(`ent: missing required field "TACode.activated"`)}
+	if _, ok := tcc.mutation.UniqueID(); !ok {
+		return &ValidationError{Name: "unique_id", err: errors.New(`ent: missing required field "TACode.unique_id"`)}
 	}
-	if _, ok := tcc.mutation.ActivatedAt(); !ok {
-		return &ValidationError{Name: "activated_at", err: errors.New(`ent: missing required field "TACode.activated_at"`)}
+	if _, ok := tcc.mutation.Activate(); !ok {
+		return &ValidationError{Name: "activate", err: errors.New(`ent: missing required field "TACode.activate"`)}
 	}
 	return nil
 }
@@ -170,32 +148,28 @@ func (tcc *TACodeCreate) createSpec() (*TACode, *sqlgraph.CreateSpec) {
 		_node = &TACode{config: tcc.config}
 		_spec = sqlgraph.NewCreateSpec(tacode.Table, sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt))
 	)
-	if value, ok := tcc.mutation.UniqueID(); ok {
-		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
-		_node.UniqueID = value
-	}
-	if value, ok := tcc.mutation.PublicKey(); ok {
-		_spec.SetField(tacode.FieldPublicKey, field.TypeBytes, value)
-		_node.PublicKey = value
+	if value, ok := tcc.mutation.Repository(); ok {
+		_spec.SetField(tacode.FieldRepository, field.TypeString, value)
+		_node.Repository = value
 	}
 	if value, ok := tcc.mutation.CommitID(); ok {
 		_spec.SetField(tacode.FieldCommitID, field.TypeString, value)
 		_node.CommitID = value
 	}
-	if value, ok := tcc.mutation.Activated(); ok {
-		_spec.SetField(tacode.FieldActivated, field.TypeBool, value)
-		_node.Activated = value
+	if value, ok := tcc.mutation.UniqueID(); ok {
+		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
+		_node.UniqueID = value
 	}
-	if value, ok := tcc.mutation.ActivatedAt(); ok {
-		_spec.SetField(tacode.FieldActivatedAt, field.TypeTime, value)
-		_node.ActivatedAt = value
+	if value, ok := tcc.mutation.Activate(); ok {
+		_spec.SetField(tacode.FieldActivate, field.TypeBool, value)
+		_node.Activate = value
 	}
 	if nodes := tcc.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
 			Table:   tacode.TaTable,
-			Columns: tacode.TaPrimaryKey,
+			Columns: []string{tacode.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),

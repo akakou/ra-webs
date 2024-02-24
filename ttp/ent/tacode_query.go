@@ -74,7 +74,7 @@ func (tcq *TACodeQuery) QueryTa() *TAQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tacode.Table, tacode.FieldID, selector),
 			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, tacode.TaTable, tacode.TaPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, tacode.TaTable, tacode.TaColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tcq.driver.Dialect(), step)
 		return fromU, nil
@@ -298,12 +298,12 @@ func (tcq *TACodeQuery) WithTa(opts ...func(*TAQuery)) *TACodeQuery {
 // Example:
 //
 //	var v []struct {
-//		UniqueID []byte `json:"unique_id,omitempty"`
+//		Repository string `json:"repository,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.TACode.Query().
-//		GroupBy(tacode.FieldUniqueID).
+//		GroupBy(tacode.FieldRepository).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (tcq *TACodeQuery) GroupBy(field string, fields ...string) *TACodeGroupBy {
@@ -321,11 +321,11 @@ func (tcq *TACodeQuery) GroupBy(field string, fields ...string) *TACodeGroupBy {
 // Example:
 //
 //	var v []struct {
-//		UniqueID []byte `json:"unique_id,omitempty"`
+//		Repository string `json:"repository,omitempty"`
 //	}
 //
 //	client.TACode.Query().
-//		Select(tacode.FieldUniqueID).
+//		Select(tacode.FieldRepository).
 //		Scan(ctx, &v)
 func (tcq *TACodeQuery) Select(fields ...string) *TACodeSelect {
 	tcq.ctx.Fields = append(tcq.ctx.Fields, fields...)
@@ -403,63 +403,33 @@ func (tcq *TACodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TACo
 }
 
 func (tcq *TACodeQuery) loadTa(ctx context.Context, query *TAQuery, nodes []*TACode, init func(*TACode), assign func(*TACode, *TA)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*TACode)
-	nids := make(map[int]map[*TACode]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*TACode)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
 		if init != nil {
-			init(node)
+			init(nodes[i])
 		}
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(tacode.TaTable)
-		s.Join(joinT).On(s.C(ta.FieldID), joinT.C(tacode.TaPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(tacode.TaPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(tacode.TaPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*TACode]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*TA](ctx, query, qr, query.inters)
+	query.withFKs = true
+	query.Where(predicate.TA(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tacode.TaColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		fk := n.ta_code
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "ta_code" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected "ta" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "ta_code" returned %v for node %v`, *fk, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
+		assign(node, n)
 	}
 	return nil
 }
