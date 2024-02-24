@@ -49,9 +49,11 @@ func Route(e *echo.Echo, auditor *Auditor) {
 	getCodeApi.set(e, auditor)
 	getServerApi.set(e, auditor)
 	getTAApi.set(e, auditor)
-	
+
 	postActivateServerApi.set(e, auditor)
 	postActivateCodeApi.set(e, auditor)
+
+	postServiceByAdmin.set(e, auditor)
 
 	webhook().set(e, auditor)
 

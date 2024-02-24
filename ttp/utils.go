@@ -2,10 +2,15 @@ package ttp
 
 import (
 	"errors"
+	"fmt"
+	"net/http"
 	"strings"
 
 	metact "github.com/akakou/meta-ct"
+	"github.com/akakou/ra_webs/ttp/ent"
+	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
+	"github.com/labstack/echo/v4"
 )
 
 func findCertExtensions(extensions []metact.KeyValue, label string) (string, error) {
@@ -51,4 +56,27 @@ func revokeByDomain(db *DB, domains []string) {
 		ta.IsValid = false
 		ta.Update().Save(*db.Ctx)
 	}
+}
+
+func authenticateService(db *DB, c echo.Context) (*ent.Service, error) {
+	authorization := c.Request().Header["Authorization"][0]
+	token := authorization[len("Bearer "):]
+
+	service, err := db.Client.Service.Query().Where(service.TokenEQ(token)).First(*db.Ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to authenticate service: %w", err)
+	}
+
+	return service, nil
+}
+
+func authenticateAdmin(auditor *Auditor, c echo.Context) error {
+	authorization := c.Request().Header["Authorization"][0]
+	token := authorization[len("Bearer "):]
+
+	if token != auditor.adminToken {
+		return c.String(http.StatusUnauthorized, "token is invalid")
+	}
+
+	return nil
 }

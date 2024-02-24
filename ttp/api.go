@@ -6,6 +6,7 @@ import (
 
 	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	simplecertify "github.com/akakou/simple-certify"
 	"github.com/labstack/echo/v4"
 )
@@ -15,34 +16,37 @@ var postTAApi = echoRoute{
 	path:   "/ta",
 	f: func(auditor *Auditor) echoRouteFunc {
 		return func(c echo.Context) error {
+			service, err := authenticateService(auditor.db, c)
+
+			if err != nil {
+				return c.String(http.StatusUnauthorized, "token is invalid")
+			}
+
 			req := new(struct {
 				PublicKey []byte `json:"public_key"`
 				CodeId    int    `json:"code_id"`
 				ServerId  int    `json:"server_id"`
 			})
 
-			err := c.Bind(req)
+			err = c.Bind(req)
 			if err != nil {
 				c.Error(err)
 				return err
 			}
 
-			serv, err := auditor.db.Client.TAServer.Get(*auditor.db.Ctx, req.ServerId)
+			serv, err := auditor.db.Client.TAServer.Query().WithService().Where(taserver.ID(req.ServerId)).Only(*auditor.db.Ctx)
 
 			if err != nil {
 				c.Error(err)
 				return err
 			}
 
-			if !serv.Activate {
+			if !serv.HasActivated {
 				return c.String(http.StatusUnauthorized, "server is not activated")
 			}
 
-			authorization := c.Request().Header["Authorization"][0]
-			token := authorization[len("Bearer "):]
-
-			if token != serv.Token {
-				return c.String(http.StatusUnauthorized, "token is invalid")
+			if serv.Edges.Service.ID != service.ID {
+				return c.String(http.StatusUnauthorized, "server is not authorized")
 			}
 
 			code, err := auditor.db.Client.TACode.Get(*auditor.db.Ctx, req.CodeId)
@@ -51,7 +55,7 @@ var postTAApi = echoRoute{
 				return err
 			}
 
-			if !code.Activate {
+			if !code.HasActivated {
 				return c.String(http.StatusUnauthorized, "code is not activated")
 			}
 

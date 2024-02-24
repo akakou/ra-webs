@@ -29,11 +29,27 @@ func TestAPI(t *testing.T) {
 
 	token := ""
 
+	t.Run("TestPostServiceByAdmin", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, postServiceByAdmin.path, strings.NewReader(""))
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", auditor.adminToken))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+		rec := httptest.NewRecorder()
+
+		c := e.NewContext(req, rec)
+		err = postServiceByAdmin.f(auditor)(c)
+		assert.NoError(t, err)
+		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
+
+		token = rec.Body.String()
+	})
+
 	t.Run("TestPostTACode", func(t *testing.T) {
 		body := `{"repository":"github.com/ra-webs/ra_webs", "commit_id": "1111111111", "unique_id": "aGVsbG8K"}`
 
 		req := httptest.NewRequest(http.MethodPost, postCodeApi.path, strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
 
 		rec := httptest.NewRecorder()
 
@@ -50,6 +66,7 @@ func TestAPI(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPost, postServerApi.path, strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
 
 		rec := httptest.NewRecorder()
 
@@ -57,16 +74,10 @@ func TestAPI(t *testing.T) {
 		err = postServerApi.f(auditor)(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
-		resp := new(struct {
-			ID    int    `json:"server_id"`
-			Token string `json:"token"`
-		})
 
-		err := json.Unmarshal(rec.Body.Bytes(), resp)
 		assert.NoError(t, err)
 
-		assert.Equal(t, 1, resp.ID)
-		token = resp.Token
+		assert.Equal(t, "1", rec.Body.String())
 	})
 
 	t.Run("TestActivateCode", func(t *testing.T) {

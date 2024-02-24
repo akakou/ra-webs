@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/labstack/echo/v4"
 )
@@ -14,36 +13,28 @@ var postServerApi = echoRoute{
 	path:   "/server",
 	f: func(auditor *Auditor) echoRouteFunc {
 		return func(c echo.Context) error {
-			serviceId := "000"
+			service, err := authenticateService(auditor.db, c)
+			if err != nil {
+				return c.String(http.StatusUnauthorized, "token is invalid")
+			}
 
 			req := new(struct {
 				IP     string `json:"ip"`
 				Domain string `json:"domain"`
 			})
 
-			token, err := goutils.RandomHex(32)
-			if err != nil {
-				c.Error(err)
-				return err
-			}
-
 			taServerCreate := auditor.db.Client.TAServer.
 				Create().
 				SetIP(req.IP).
 				SetDomain(req.Domain).
-				SetServiceID(serviceId).
-				SetToken(token)
+				SetService(service)
 
 			taServer, err := taServerCreate.Save(*auditor.db.Ctx)
 			if err != nil {
 				c.Error(err)
 			}
 
-			return c.JSON(200,
-				map[string]interface{}{
-					"server_id": taServer.ID,
-					"token":     taServer.Token,
-				})
+			return c.String(http.StatusOK, strconv.Itoa(taServer.ID))
 		}
 	},
 }
@@ -60,10 +51,8 @@ var postActivateServerApi = echoRoute{
 				return err
 			}
 
-			authorization := c.Request().Header["Authorization"][0]
-			token := authorization[len("Bearer "):]
-
-			if token != auditor.adminToken {
+			err = authenticateAdmin(auditor, c)
+			if err != nil {
 				return c.String(http.StatusUnauthorized, "token is invalid")
 			}
 
@@ -73,7 +62,7 @@ var postActivateServerApi = echoRoute{
 				return err
 			}
 
-			_, err = server.Update().SetActivate(true).Save(*auditor.db.Ctx)
+			_, err = server.Update().SetHasActivated(true).Save(*auditor.db.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err
@@ -91,7 +80,7 @@ var getServerApi = echoRoute{
 		return func(c echo.Context) error {
 			activate := c.QueryParam("activate") != "false"
 
-			code, err := auditor.db.Client.TAServer.Query().Where(taserver.Activate(activate)).All(*auditor.db.Ctx)
+			code, err := auditor.db.Client.TAServer.Query().Where(taserver.HasActivated(activate)).All(*auditor.db.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err

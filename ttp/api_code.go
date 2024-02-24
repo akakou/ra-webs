@@ -53,10 +53,8 @@ var postActivateCodeApi = echoRoute{
 				return err
 			}
 
-			authorization := c.Request().Header["Authorization"][0]
-			token := authorization[len("Bearer "):]
-
-			if token != auditor.adminToken {
+			err = authenticateAdmin(auditor, c)
+			if err != nil {
 				return c.String(http.StatusUnauthorized, "token is invalid")
 			}
 
@@ -66,7 +64,7 @@ var postActivateCodeApi = echoRoute{
 				return err
 			}
 
-			_, err = code.Update().SetActivate(true).Save(*auditor.db.Ctx)
+			_, err = code.Update().SetHasActivated(true).Save(*auditor.db.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err
@@ -84,7 +82,7 @@ var getCodeApi = echoRoute{
 		return func(c echo.Context) error {
 			activate := c.QueryParam("activate") != "false"
 
-			code, err := auditor.db.Client.TACode.Query().Where(tacode.Activate(activate)).All(*auditor.db.Ctx)
+			code, err := auditor.db.Client.TACode.Query().Where(tacode.HasActivated(activate)).All(*auditor.db.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err
