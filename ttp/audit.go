@@ -7,7 +7,7 @@ import (
 
 	golangutils "github.com/akakou/golang-utils"
 	metact "github.com/akakou/meta-ct"
-	"github.com/akakou/ra_webs/ttp/ent/ta"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	simplecertify "github.com/akakou/simple-certify"
 )
 
@@ -64,36 +64,35 @@ func (auditor *Auditor) AuditOne(cert *metact.Certificate) error {
 	domain, violatingDomains, err := validateDomains(cert.Domains)
 
 	if err != nil || cert.IssuerName != ISSUER_NAME {
-		revokeAllDomain(auditor.db, violatingDomains)
+		revokeByDomain(auditor.db, violatingDomains)
 		return fmt.Errorf("domain violation: %w", err)
 	}
 
-	taInfo, err := auditor.db.Client.TA.
+	taServ, err := auditor.db.Client.TAServer.
 		Query().
-		Where(ta.DomainEQ(domain)).
-		WithAuditLog().
-		WithCode().
+		Where(taserver.DomainEQ(domain)).
+		WithTa().
 		Only(*auditor.db.Ctx)
 
 	if err != nil {
 		return fmt.Errorf("failed to get ta info: %w", err)
 	}
 
-	auditLog := taInfo.Edges.AuditLog
-	if !auditLog.IsValid {
+	ta := taServ.Edges.Ta
+	if !ta.IsValid {
 		return errors.New("ct log is not valid")
 	}
 
-	taCode := taInfo.Edges.Code[len(taInfo.Edges.Code)-1]
+	taCode := ta.Edges.Code
 
 	if validateAttestation(cert, taCode.UniqueID) != nil {
-		auditLog.IsValid = false
-		auditLog.Update().Save(*auditor.db.Ctx)
+		ta.IsValid = false
+		ta.Update().Save(*auditor.db.Ctx)
 		return fmt.Errorf("failed to check ct logs: %w", err)
 	}
 
-	auditLog.LatestCtID = cert.Id
-	auditLog.Update().Save(*auditor.db.Ctx)
+	ta.LastCt = cert.Id
+	ta.Update().Save(*auditor.db.Ctx)
 
 	return nil
 }

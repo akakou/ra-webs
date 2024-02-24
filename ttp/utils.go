@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	metact "github.com/akakou/meta-ct"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
 func findCertExtensions(extensions []metact.KeyValue, label string) (string, error) {
@@ -32,4 +33,22 @@ func extractDomainLast(domain string) string {
 	lastDomain := strings.Join(last, ".")
 
 	return lastDomain
+}
+
+func revokeByDomain(db *DB, domains []string) {
+	for _, violatingDomain := range domains {
+		taServer, err := db.Client.TAServer.
+			Query().
+			WithTa().
+			Where(taserver.DomainEQ(violatingDomain)).
+			First(*db.Ctx)
+
+		if err != nil {
+			continue
+		}
+
+		ta := taServer.Edges.Ta
+		ta.IsValid = false
+		ta.Update().Save(*db.Ctx)
+	}
 }
