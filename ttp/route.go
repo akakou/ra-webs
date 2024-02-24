@@ -41,8 +41,9 @@ func Route(e *echo.Echo, auditor *Auditor) {
 		return c.String(http.StatusOK, r)
 	})
 
-	registerTAApi.set(e, auditor)
-	updateTAApi.set(e, auditor)
+	postCodeApi.set(e, auditor)
+	postServerApi.set(e, auditor)
+	postTAApi.set(e, auditor)
 	certApi.set(e, auditor)
 
 	webhook().set(e, auditor)
