@@ -2,11 +2,11 @@ package ttp
 
 import (
 	"crypto/x509/pkix"
-	"fmt"
 	"net/http"
 
 	"strconv"
 
+	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/core"
 	simplecertify "github.com/akakou/simple-certify"
 	"github.com/labstack/echo/v4"
@@ -70,13 +70,11 @@ var postActivateCodeApi = echoRoute{
 				return err
 			}
 
-			updated, err := code.Update().SetActivate(true).Save(*auditor.db.Ctx)
+			_, err = code.Update().SetActivate(true).Save(*auditor.db.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err
 			}
-
-			fmt.Printf("code1 : %v\n", updated)
 
 			return c.String(http.StatusOK, strconv.Itoa(code.ID))
 		}
@@ -95,30 +93,29 @@ var postServerApi = echoRoute{
 				Domain string `json:"domain"`
 			})
 
-			// token, err := goutils.RandomHex(32)
-			// if err != nil {
-			// 	c.Error(err)
-			// 	return err
-			// }
+			token, err := goutils.RandomHex(32)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
 
 			taServerCreate := auditor.db.Client.TAServer.
 				Create().
 				SetIP(req.IP).
 				SetDomain(req.Domain).
 				SetServiceID(serviceId).
-				SetToken("")
+				SetToken(token)
 
 			taServer, err := taServerCreate.Save(*auditor.db.Ctx)
 			if err != nil {
 				c.Error(err)
 			}
 
-			return c.String(http.StatusOK, strconv.Itoa(taServer.ID))
-			// return c.JSON(200,
-			// 	map[string]interface{}{
-			// 		"id":    taServer.ID,
-			// 		"token": taServer.Token,
-			// 	})
+			return c.JSON(200,
+				map[string]interface{}{
+					"server_id": taServer.ID,
+					"token":     taServer.Token,
+				})
 		}
 	},
 }
@@ -176,18 +173,6 @@ var postTAApi = echoRoute{
 				return err
 			}
 
-			code, err := auditor.db.Client.TACode.Get(*auditor.db.Ctx, req.CodeId)
-			if err != nil {
-				c.Error(err)
-				return err
-			}
-
-			fmt.Printf("code2 : %v\n", code)
-
-			if !code.Activate {
-				return c.String(http.StatusUnauthorized, "code is not activated")
-			}
-
 			serv, err := auditor.db.Client.TAServer.Get(*auditor.db.Ctx, req.ServerId)
 
 			if err != nil {
@@ -197,6 +182,23 @@ var postTAApi = echoRoute{
 
 			if !serv.Activate {
 				return c.String(http.StatusUnauthorized, "server is not activated")
+			}
+
+			authorization := c.Request().Header["Authorization"][0]
+			token := authorization[len("Bearer "):]
+
+			if token != serv.Token {
+				return c.String(http.StatusUnauthorized, "token is invalid")
+			}
+
+			code, err := auditor.db.Client.TACode.Get(*auditor.db.Ctx, req.CodeId)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			if !code.Activate {
+				return c.String(http.StatusUnauthorized, "code is not activated")
 			}
 
 			templ := simplecertify.ServerTemplate()
