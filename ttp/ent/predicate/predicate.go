@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Service is the predicate function for service builders.
+type Service func(*sql.Selector)
+
 // TA is the predicate function for ta builders.
 type TA func(*sql.Selector)
 

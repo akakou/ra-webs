@@ -16,14 +16,12 @@ const (
 	FieldDomain = "domain"
 	// FieldIP holds the string denoting the ip field in the database.
 	FieldIP = "ip"
-	// FieldServiceID holds the string denoting the service_id field in the database.
-	FieldServiceID = "service_id"
-	// FieldToken holds the string denoting the token field in the database.
-	FieldToken = "token"
-	// FieldActivate holds the string denoting the activate field in the database.
-	FieldActivate = "activate"
+	// FieldHasActivated holds the string denoting the has_activated field in the database.
+	FieldHasActivated = "has_activated"
 	// EdgeTa holds the string denoting the ta edge name in mutations.
 	EdgeTa = "ta"
+	// EdgeService holds the string denoting the service edge name in mutations.
+	EdgeService = "service"
 	// Table holds the table name of the taserver in the database.
 	Table = "ta_servers"
 	// TaTable is the table that holds the ta relation/edge.
@@ -33,6 +31,13 @@ const (
 	TaInverseTable = "tas"
 	// TaColumn is the table column denoting the ta relation/edge.
 	TaColumn = "ta_server"
+	// ServiceTable is the table that holds the service relation/edge.
+	ServiceTable = "ta_servers"
+	// ServiceInverseTable is the table name for the Service entity.
+	// It exists in this package in order to avoid circular dependency with the "service" package.
+	ServiceInverseTable = "services"
+	// ServiceColumn is the table column denoting the service relation/edge.
+	ServiceColumn = "ta_server_service"
 )
 
 // Columns holds all SQL columns for taserver fields.
@@ -40,15 +45,14 @@ var Columns = []string{
 	FieldID,
 	FieldDomain,
 	FieldIP,
-	FieldServiceID,
-	FieldToken,
-	FieldActivate,
+	FieldHasActivated,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "ta_servers"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"ta_server",
+	"ta_server_service",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -67,8 +71,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultActivate holds the default value on creation for the "activate" field.
-	DefaultActivate bool
+	// DefaultHasActivated holds the default value on creation for the "has_activated" field.
+	DefaultHasActivated bool
 )
 
 // OrderOption defines the ordering options for the TAServer queries.
@@ -89,19 +93,9 @@ func ByIP(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIP, opts...).ToFunc()
 }
 
-// ByServiceID orders the results by the service_id field.
-func ByServiceID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldServiceID, opts...).ToFunc()
-}
-
-// ByToken orders the results by the token field.
-func ByToken(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldToken, opts...).ToFunc()
-}
-
-// ByActivate orders the results by the activate field.
-func ByActivate(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldActivate, opts...).ToFunc()
+// ByHasActivated orders the results by the has_activated field.
+func ByHasActivated(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHasActivated, opts...).ToFunc()
 }
 
 // ByTaField orders the results by ta field.
@@ -110,10 +104,24 @@ func ByTaField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTaStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByServiceField orders the results by service field.
+func ByServiceField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newServiceStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newTaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TaInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, true, TaTable, TaColumn),
+	)
+}
+func newServiceStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ServiceInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, ServiceTable, ServiceColumn),
 	)
 }

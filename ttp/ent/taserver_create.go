@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
@@ -32,28 +33,16 @@ func (tsc *TAServerCreate) SetIP(s string) *TAServerCreate {
 	return tsc
 }
 
-// SetServiceID sets the "service_id" field.
-func (tsc *TAServerCreate) SetServiceID(s string) *TAServerCreate {
-	tsc.mutation.SetServiceID(s)
+// SetHasActivated sets the "has_activated" field.
+func (tsc *TAServerCreate) SetHasActivated(b bool) *TAServerCreate {
+	tsc.mutation.SetHasActivated(b)
 	return tsc
 }
 
-// SetToken sets the "token" field.
-func (tsc *TAServerCreate) SetToken(s string) *TAServerCreate {
-	tsc.mutation.SetToken(s)
-	return tsc
-}
-
-// SetActivate sets the "activate" field.
-func (tsc *TAServerCreate) SetActivate(b bool) *TAServerCreate {
-	tsc.mutation.SetActivate(b)
-	return tsc
-}
-
-// SetNillableActivate sets the "activate" field if the given value is not nil.
-func (tsc *TAServerCreate) SetNillableActivate(b *bool) *TAServerCreate {
+// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
+func (tsc *TAServerCreate) SetNillableHasActivated(b *bool) *TAServerCreate {
 	if b != nil {
-		tsc.SetActivate(*b)
+		tsc.SetHasActivated(*b)
 	}
 	return tsc
 }
@@ -75,6 +64,25 @@ func (tsc *TAServerCreate) SetNillableTaID(id *int) *TAServerCreate {
 // SetTa sets the "ta" edge to the TA entity.
 func (tsc *TAServerCreate) SetTa(t *TA) *TAServerCreate {
 	return tsc.SetTaID(t.ID)
+}
+
+// SetServiceID sets the "service" edge to the Service entity by ID.
+func (tsc *TAServerCreate) SetServiceID(id int) *TAServerCreate {
+	tsc.mutation.SetServiceID(id)
+	return tsc
+}
+
+// SetNillableServiceID sets the "service" edge to the Service entity by ID if the given value is not nil.
+func (tsc *TAServerCreate) SetNillableServiceID(id *int) *TAServerCreate {
+	if id != nil {
+		tsc = tsc.SetServiceID(*id)
+	}
+	return tsc
+}
+
+// SetService sets the "service" edge to the Service entity.
+func (tsc *TAServerCreate) SetService(s *Service) *TAServerCreate {
+	return tsc.SetServiceID(s.ID)
 }
 
 // Mutation returns the TAServerMutation object of the builder.
@@ -112,9 +120,9 @@ func (tsc *TAServerCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tsc *TAServerCreate) defaults() {
-	if _, ok := tsc.mutation.Activate(); !ok {
-		v := taserver.DefaultActivate
-		tsc.mutation.SetActivate(v)
+	if _, ok := tsc.mutation.HasActivated(); !ok {
+		v := taserver.DefaultHasActivated
+		tsc.mutation.SetHasActivated(v)
 	}
 }
 
@@ -126,14 +134,8 @@ func (tsc *TAServerCreate) check() error {
 	if _, ok := tsc.mutation.IP(); !ok {
 		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "TAServer.ip"`)}
 	}
-	if _, ok := tsc.mutation.ServiceID(); !ok {
-		return &ValidationError{Name: "service_id", err: errors.New(`ent: missing required field "TAServer.service_id"`)}
-	}
-	if _, ok := tsc.mutation.Token(); !ok {
-		return &ValidationError{Name: "token", err: errors.New(`ent: missing required field "TAServer.token"`)}
-	}
-	if _, ok := tsc.mutation.Activate(); !ok {
-		return &ValidationError{Name: "activate", err: errors.New(`ent: missing required field "TAServer.activate"`)}
+	if _, ok := tsc.mutation.HasActivated(); !ok {
+		return &ValidationError{Name: "has_activated", err: errors.New(`ent: missing required field "TAServer.has_activated"`)}
 	}
 	return nil
 }
@@ -169,17 +171,9 @@ func (tsc *TAServerCreate) createSpec() (*TAServer, *sqlgraph.CreateSpec) {
 		_spec.SetField(taserver.FieldIP, field.TypeString, value)
 		_node.IP = value
 	}
-	if value, ok := tsc.mutation.ServiceID(); ok {
-		_spec.SetField(taserver.FieldServiceID, field.TypeString, value)
-		_node.ServiceID = value
-	}
-	if value, ok := tsc.mutation.Token(); ok {
-		_spec.SetField(taserver.FieldToken, field.TypeString, value)
-		_node.Token = value
-	}
-	if value, ok := tsc.mutation.Activate(); ok {
-		_spec.SetField(taserver.FieldActivate, field.TypeBool, value)
-		_node.Activate = value
+	if value, ok := tsc.mutation.HasActivated(); ok {
+		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)
+		_node.HasActivated = value
 	}
 	if nodes := tsc.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -196,6 +190,23 @@ func (tsc *TAServerCreate) createSpec() (*TAServer, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.ta_server = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tsc.mutation.ServiceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   taserver.ServiceTable,
+			Columns: []string{taserver.ServiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(service.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ta_server_service = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

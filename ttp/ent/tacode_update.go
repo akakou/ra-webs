@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
+	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 )
@@ -62,16 +63,16 @@ func (tcu *TACodeUpdate) SetUniqueID(b []byte) *TACodeUpdate {
 	return tcu
 }
 
-// SetActivate sets the "activate" field.
-func (tcu *TACodeUpdate) SetActivate(b bool) *TACodeUpdate {
-	tcu.mutation.SetActivate(b)
+// SetHasActivated sets the "has_activated" field.
+func (tcu *TACodeUpdate) SetHasActivated(b bool) *TACodeUpdate {
+	tcu.mutation.SetHasActivated(b)
 	return tcu
 }
 
-// SetNillableActivate sets the "activate" field if the given value is not nil.
-func (tcu *TACodeUpdate) SetNillableActivate(b *bool) *TACodeUpdate {
+// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
+func (tcu *TACodeUpdate) SetNillableHasActivated(b *bool) *TACodeUpdate {
 	if b != nil {
-		tcu.SetActivate(*b)
+		tcu.SetHasActivated(*b)
 	}
 	return tcu
 }
@@ -89,6 +90,25 @@ func (tcu *TACodeUpdate) AddTa(t ...*TA) *TACodeUpdate {
 		ids[i] = t[i].ID
 	}
 	return tcu.AddTumIDs(ids...)
+}
+
+// SetServiceID sets the "service" edge to the Service entity by ID.
+func (tcu *TACodeUpdate) SetServiceID(id int) *TACodeUpdate {
+	tcu.mutation.SetServiceID(id)
+	return tcu
+}
+
+// SetNillableServiceID sets the "service" edge to the Service entity by ID if the given value is not nil.
+func (tcu *TACodeUpdate) SetNillableServiceID(id *int) *TACodeUpdate {
+	if id != nil {
+		tcu = tcu.SetServiceID(*id)
+	}
+	return tcu
+}
+
+// SetService sets the "service" edge to the Service entity.
+func (tcu *TACodeUpdate) SetService(s *Service) *TACodeUpdate {
+	return tcu.SetServiceID(s.ID)
 }
 
 // Mutation returns the TACodeMutation object of the builder.
@@ -115,6 +135,12 @@ func (tcu *TACodeUpdate) RemoveTa(t ...*TA) *TACodeUpdate {
 		ids[i] = t[i].ID
 	}
 	return tcu.RemoveTumIDs(ids...)
+}
+
+// ClearService clears the "service" edge to the Service entity.
+func (tcu *TACodeUpdate) ClearService() *TACodeUpdate {
+	tcu.mutation.ClearService()
+	return tcu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -162,8 +188,8 @@ func (tcu *TACodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tcu.mutation.UniqueID(); ok {
 		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
 	}
-	if value, ok := tcu.mutation.Activate(); ok {
-		_spec.SetField(tacode.FieldActivate, field.TypeBool, value)
+	if value, ok := tcu.mutation.HasActivated(); ok {
+		_spec.SetField(tacode.FieldHasActivated, field.TypeBool, value)
 	}
 	if tcu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -203,6 +229,35 @@ func (tcu *TACodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tcu.mutation.ServiceCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tacode.ServiceTable,
+			Columns: []string{tacode.ServiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(service.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcu.mutation.ServiceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tacode.ServiceTable,
+			Columns: []string{tacode.ServiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(service.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -264,16 +319,16 @@ func (tcuo *TACodeUpdateOne) SetUniqueID(b []byte) *TACodeUpdateOne {
 	return tcuo
 }
 
-// SetActivate sets the "activate" field.
-func (tcuo *TACodeUpdateOne) SetActivate(b bool) *TACodeUpdateOne {
-	tcuo.mutation.SetActivate(b)
+// SetHasActivated sets the "has_activated" field.
+func (tcuo *TACodeUpdateOne) SetHasActivated(b bool) *TACodeUpdateOne {
+	tcuo.mutation.SetHasActivated(b)
 	return tcuo
 }
 
-// SetNillableActivate sets the "activate" field if the given value is not nil.
-func (tcuo *TACodeUpdateOne) SetNillableActivate(b *bool) *TACodeUpdateOne {
+// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
+func (tcuo *TACodeUpdateOne) SetNillableHasActivated(b *bool) *TACodeUpdateOne {
 	if b != nil {
-		tcuo.SetActivate(*b)
+		tcuo.SetHasActivated(*b)
 	}
 	return tcuo
 }
@@ -291,6 +346,25 @@ func (tcuo *TACodeUpdateOne) AddTa(t ...*TA) *TACodeUpdateOne {
 		ids[i] = t[i].ID
 	}
 	return tcuo.AddTumIDs(ids...)
+}
+
+// SetServiceID sets the "service" edge to the Service entity by ID.
+func (tcuo *TACodeUpdateOne) SetServiceID(id int) *TACodeUpdateOne {
+	tcuo.mutation.SetServiceID(id)
+	return tcuo
+}
+
+// SetNillableServiceID sets the "service" edge to the Service entity by ID if the given value is not nil.
+func (tcuo *TACodeUpdateOne) SetNillableServiceID(id *int) *TACodeUpdateOne {
+	if id != nil {
+		tcuo = tcuo.SetServiceID(*id)
+	}
+	return tcuo
+}
+
+// SetService sets the "service" edge to the Service entity.
+func (tcuo *TACodeUpdateOne) SetService(s *Service) *TACodeUpdateOne {
+	return tcuo.SetServiceID(s.ID)
 }
 
 // Mutation returns the TACodeMutation object of the builder.
@@ -317,6 +391,12 @@ func (tcuo *TACodeUpdateOne) RemoveTa(t ...*TA) *TACodeUpdateOne {
 		ids[i] = t[i].ID
 	}
 	return tcuo.RemoveTumIDs(ids...)
+}
+
+// ClearService clears the "service" edge to the Service entity.
+func (tcuo *TACodeUpdateOne) ClearService() *TACodeUpdateOne {
+	tcuo.mutation.ClearService()
+	return tcuo
 }
 
 // Where appends a list predicates to the TACodeUpdate builder.
@@ -394,8 +474,8 @@ func (tcuo *TACodeUpdateOne) sqlSave(ctx context.Context) (_node *TACode, err er
 	if value, ok := tcuo.mutation.UniqueID(); ok {
 		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
 	}
-	if value, ok := tcuo.mutation.Activate(); ok {
-		_spec.SetField(tacode.FieldActivate, field.TypeBool, value)
+	if value, ok := tcuo.mutation.HasActivated(); ok {
+		_spec.SetField(tacode.FieldHasActivated, field.TypeBool, value)
 	}
 	if tcuo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -435,6 +515,35 @@ func (tcuo *TACodeUpdateOne) sqlSave(ctx context.Context) (_node *TACode, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tcuo.mutation.ServiceCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tacode.ServiceTable,
+			Columns: []string{tacode.ServiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(service.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcuo.mutation.ServiceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tacode.ServiceTable,
+			Columns: []string{tacode.ServiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(service.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

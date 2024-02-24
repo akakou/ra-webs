@@ -7,23 +7,23 @@ import (
 )
 
 // TA holds the schema definition for the TA entity.
-type TAServer struct {
+type Service struct {
 	ent.Schema
 }
 
 // Fields of the TA.
-func (TAServer) Fields() []ent.Field {
+func (Service) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("domain").Unique(),
-		field.String("ip").Unique(),
+		field.String("name"),
+		field.String("token"),
 		field.Bool("has_activated").Default(false),
 	}
 }
 
 // Edges of the TA.
-func (TAServer) Edges() []ent.Edge {
+func (Service) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("ta", TA.Type).Ref("server").Unique(),
-		edge.To("service", Service.Type).Unique(),
+		edge.From("taserver", TAServer.Type).Ref("service"),
+		edge.From("tacode", TACode.Type).Ref("service"),
 	}
 }

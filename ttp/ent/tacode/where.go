@@ -68,9 +68,9 @@ func UniqueID(v []byte) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldUniqueID, v))
 }
 
-// Activate applies equality check predicate on the "activate" field. It's identical to ActivateEQ.
-func Activate(v bool) predicate.TACode {
-	return predicate.TACode(sql.FieldEQ(FieldActivate, v))
+// HasActivated applies equality check predicate on the "has_activated" field. It's identical to HasActivatedEQ.
+func HasActivated(v bool) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldHasActivated, v))
 }
 
 // RepositoryEQ applies the EQ predicate on the "repository" field.
@@ -243,14 +243,14 @@ func UniqueIDLTE(v []byte) predicate.TACode {
 	return predicate.TACode(sql.FieldLTE(FieldUniqueID, v))
 }
 
-// ActivateEQ applies the EQ predicate on the "activate" field.
-func ActivateEQ(v bool) predicate.TACode {
-	return predicate.TACode(sql.FieldEQ(FieldActivate, v))
+// HasActivatedEQ applies the EQ predicate on the "has_activated" field.
+func HasActivatedEQ(v bool) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldHasActivated, v))
 }
 
-// ActivateNEQ applies the NEQ predicate on the "activate" field.
-func ActivateNEQ(v bool) predicate.TACode {
-	return predicate.TACode(sql.FieldNEQ(FieldActivate, v))
+// HasActivatedNEQ applies the NEQ predicate on the "has_activated" field.
+func HasActivatedNEQ(v bool) predicate.TACode {
+	return predicate.TACode(sql.FieldNEQ(FieldHasActivated, v))
 }
 
 // HasTa applies the HasEdge predicate on the "ta" edge.
@@ -268,6 +268,29 @@ func HasTa() predicate.TACode {
 func HasTaWith(preds ...predicate.TA) predicate.TACode {
 	return predicate.TACode(func(s *sql.Selector) {
 		step := newTaStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasService applies the HasEdge predicate on the "service" edge.
+func HasService() predicate.TACode {
+	return predicate.TACode(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, ServiceTable, ServiceColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasServiceWith applies the HasEdge predicate on the "service" edge with a given conditions (other predicates).
+func HasServiceWith(preds ...predicate.Service) predicate.TACode {
+	return predicate.TACode(func(s *sql.Selector) {
+		step := newServiceStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

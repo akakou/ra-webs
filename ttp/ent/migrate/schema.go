@@ -8,6 +8,19 @@ import (
 )
 
 var (
+	// ServicesColumns holds the columns for the "services" table.
+	ServicesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "token", Type: field.TypeString},
+		{Name: "has_activated", Type: field.TypeBool, Default: false},
+	}
+	// ServicesTable holds the schema information for the "services" table.
+	ServicesTable = &schema.Table{
+		Name:       "services",
+		Columns:    ServicesColumns,
+		PrimaryKey: []*schema.Column{ServicesColumns[0]},
+	}
 	// TasColumns holds the columns for the "tas" table.
 	TasColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -36,23 +49,31 @@ var (
 		{Name: "repository", Type: field.TypeString},
 		{Name: "commit_id", Type: field.TypeString},
 		{Name: "unique_id", Type: field.TypeBytes},
-		{Name: "activate", Type: field.TypeBool, Default: false},
+		{Name: "has_activated", Type: field.TypeBool, Default: false},
+		{Name: "ta_code_service", Type: field.TypeInt, Nullable: true},
 	}
 	// TaCodesTable holds the schema information for the "ta_codes" table.
 	TaCodesTable = &schema.Table{
 		Name:       "ta_codes",
 		Columns:    TaCodesColumns,
 		PrimaryKey: []*schema.Column{TaCodesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ta_codes_services_service",
+				Columns:    []*schema.Column{TaCodesColumns[5]},
+				RefColumns: []*schema.Column{ServicesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// TaServersColumns holds the columns for the "ta_servers" table.
 	TaServersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "domain", Type: field.TypeString, Unique: true},
 		{Name: "ip", Type: field.TypeString, Unique: true},
-		{Name: "service_id", Type: field.TypeString},
-		{Name: "token", Type: field.TypeString},
-		{Name: "activate", Type: field.TypeBool, Default: false},
+		{Name: "has_activated", Type: field.TypeBool, Default: false},
 		{Name: "ta_server", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "ta_server_service", Type: field.TypeInt, Nullable: true},
 	}
 	// TaServersTable holds the schema information for the "ta_servers" table.
 	TaServersTable = &schema.Table{
@@ -62,14 +83,21 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ta_servers_tas_server",
-				Columns:    []*schema.Column{TaServersColumns[6]},
+				Columns:    []*schema.Column{TaServersColumns[4]},
 				RefColumns: []*schema.Column{TasColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "ta_servers_services_service",
+				Columns:    []*schema.Column{TaServersColumns[5]},
+				RefColumns: []*schema.Column{ServicesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		ServicesTable,
 		TasTable,
 		TaCodesTable,
 		TaServersTable,
@@ -78,5 +106,7 @@ var (
 
 func init() {
 	TasTable.ForeignKeys[0].RefTable = TaCodesTable
+	TaCodesTable.ForeignKeys[0].RefTable = ServicesTable
 	TaServersTable.ForeignKeys[0].RefTable = TasTable
+	TaServersTable.ForeignKeys[1].RefTable = ServicesTable
 }

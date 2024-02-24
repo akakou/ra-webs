@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 )
@@ -38,16 +39,16 @@ func (tcc *TACodeCreate) SetUniqueID(b []byte) *TACodeCreate {
 	return tcc
 }
 
-// SetActivate sets the "activate" field.
-func (tcc *TACodeCreate) SetActivate(b bool) *TACodeCreate {
-	tcc.mutation.SetActivate(b)
+// SetHasActivated sets the "has_activated" field.
+func (tcc *TACodeCreate) SetHasActivated(b bool) *TACodeCreate {
+	tcc.mutation.SetHasActivated(b)
 	return tcc
 }
 
-// SetNillableActivate sets the "activate" field if the given value is not nil.
-func (tcc *TACodeCreate) SetNillableActivate(b *bool) *TACodeCreate {
+// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
+func (tcc *TACodeCreate) SetNillableHasActivated(b *bool) *TACodeCreate {
 	if b != nil {
-		tcc.SetActivate(*b)
+		tcc.SetHasActivated(*b)
 	}
 	return tcc
 }
@@ -65,6 +66,25 @@ func (tcc *TACodeCreate) AddTa(t ...*TA) *TACodeCreate {
 		ids[i] = t[i].ID
 	}
 	return tcc.AddTumIDs(ids...)
+}
+
+// SetServiceID sets the "service" edge to the Service entity by ID.
+func (tcc *TACodeCreate) SetServiceID(id int) *TACodeCreate {
+	tcc.mutation.SetServiceID(id)
+	return tcc
+}
+
+// SetNillableServiceID sets the "service" edge to the Service entity by ID if the given value is not nil.
+func (tcc *TACodeCreate) SetNillableServiceID(id *int) *TACodeCreate {
+	if id != nil {
+		tcc = tcc.SetServiceID(*id)
+	}
+	return tcc
+}
+
+// SetService sets the "service" edge to the Service entity.
+func (tcc *TACodeCreate) SetService(s *Service) *TACodeCreate {
+	return tcc.SetServiceID(s.ID)
 }
 
 // Mutation returns the TACodeMutation object of the builder.
@@ -102,9 +122,9 @@ func (tcc *TACodeCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tcc *TACodeCreate) defaults() {
-	if _, ok := tcc.mutation.Activate(); !ok {
-		v := tacode.DefaultActivate
-		tcc.mutation.SetActivate(v)
+	if _, ok := tcc.mutation.HasActivated(); !ok {
+		v := tacode.DefaultHasActivated
+		tcc.mutation.SetHasActivated(v)
 	}
 }
 
@@ -119,8 +139,8 @@ func (tcc *TACodeCreate) check() error {
 	if _, ok := tcc.mutation.UniqueID(); !ok {
 		return &ValidationError{Name: "unique_id", err: errors.New(`ent: missing required field "TACode.unique_id"`)}
 	}
-	if _, ok := tcc.mutation.Activate(); !ok {
-		return &ValidationError{Name: "activate", err: errors.New(`ent: missing required field "TACode.activate"`)}
+	if _, ok := tcc.mutation.HasActivated(); !ok {
+		return &ValidationError{Name: "has_activated", err: errors.New(`ent: missing required field "TACode.has_activated"`)}
 	}
 	return nil
 }
@@ -160,9 +180,9 @@ func (tcc *TACodeCreate) createSpec() (*TACode, *sqlgraph.CreateSpec) {
 		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
 		_node.UniqueID = value
 	}
-	if value, ok := tcc.mutation.Activate(); ok {
-		_spec.SetField(tacode.FieldActivate, field.TypeBool, value)
-		_node.Activate = value
+	if value, ok := tcc.mutation.HasActivated(); ok {
+		_spec.SetField(tacode.FieldHasActivated, field.TypeBool, value)
+		_node.HasActivated = value
 	}
 	if nodes := tcc.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -178,6 +198,23 @@ func (tcc *TACodeCreate) createSpec() (*TACode, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tcc.mutation.ServiceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tacode.ServiceTable,
+			Columns: []string{tacode.ServiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(service.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ta_code_service = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

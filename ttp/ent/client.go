@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
@@ -25,6 +26,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Service is the client for interacting with the Service builders.
+	Service *ServiceClient
 	// TA is the client for interacting with the TA builders.
 	TA *TAClient
 	// TACode is the client for interacting with the TACode builders.
@@ -42,6 +45,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Service = NewServiceClient(c.config)
 	c.TA = NewTAClient(c.config)
 	c.TACode = NewTACodeClient(c.config)
 	c.TAServer = NewTAServerClient(c.config)
@@ -137,6 +141,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:      ctx,
 		config:   cfg,
+		Service:  NewServiceClient(cfg),
 		TA:       NewTAClient(cfg),
 		TACode:   NewTACodeClient(cfg),
 		TAServer: NewTAServerClient(cfg),
@@ -159,6 +164,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:      ctx,
 		config:   cfg,
+		Service:  NewServiceClient(cfg),
 		TA:       NewTAClient(cfg),
 		TACode:   NewTACodeClient(cfg),
 		TAServer: NewTAServerClient(cfg),
@@ -168,7 +174,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		TA.
+//		Service.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -190,6 +196,7 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Service.Use(hooks...)
 	c.TA.Use(hooks...)
 	c.TACode.Use(hooks...)
 	c.TAServer.Use(hooks...)
@@ -198,6 +205,7 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Service.Intercept(interceptors...)
 	c.TA.Intercept(interceptors...)
 	c.TACode.Intercept(interceptors...)
 	c.TAServer.Intercept(interceptors...)
@@ -206,6 +214,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *ServiceMutation:
+		return c.Service.mutate(ctx, m)
 	case *TAMutation:
 		return c.TA.mutate(ctx, m)
 	case *TACodeMutation:
@@ -214,6 +224,171 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.TAServer.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// ServiceClient is a client for the Service schema.
+type ServiceClient struct {
+	config
+}
+
+// NewServiceClient returns a client for the Service from the given config.
+func NewServiceClient(c config) *ServiceClient {
+	return &ServiceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `service.Hooks(f(g(h())))`.
+func (c *ServiceClient) Use(hooks ...Hook) {
+	c.hooks.Service = append(c.hooks.Service, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `service.Intercept(f(g(h())))`.
+func (c *ServiceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Service = append(c.inters.Service, interceptors...)
+}
+
+// Create returns a builder for creating a Service entity.
+func (c *ServiceClient) Create() *ServiceCreate {
+	mutation := newServiceMutation(c.config, OpCreate)
+	return &ServiceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Service entities.
+func (c *ServiceClient) CreateBulk(builders ...*ServiceCreate) *ServiceCreateBulk {
+	return &ServiceCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ServiceClient) MapCreateBulk(slice any, setFunc func(*ServiceCreate, int)) *ServiceCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ServiceCreateBulk{err: fmt.Errorf("calling to ServiceClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ServiceCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ServiceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Service.
+func (c *ServiceClient) Update() *ServiceUpdate {
+	mutation := newServiceMutation(c.config, OpUpdate)
+	return &ServiceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ServiceClient) UpdateOne(s *Service) *ServiceUpdateOne {
+	mutation := newServiceMutation(c.config, OpUpdateOne, withService(s))
+	return &ServiceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ServiceClient) UpdateOneID(id int) *ServiceUpdateOne {
+	mutation := newServiceMutation(c.config, OpUpdateOne, withServiceID(id))
+	return &ServiceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Service.
+func (c *ServiceClient) Delete() *ServiceDelete {
+	mutation := newServiceMutation(c.config, OpDelete)
+	return &ServiceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ServiceClient) DeleteOne(s *Service) *ServiceDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ServiceClient) DeleteOneID(id int) *ServiceDeleteOne {
+	builder := c.Delete().Where(service.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ServiceDeleteOne{builder}
+}
+
+// Query returns a query builder for Service.
+func (c *ServiceClient) Query() *ServiceQuery {
+	return &ServiceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeService},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Service entity by its id.
+func (c *ServiceClient) Get(ctx context.Context, id int) (*Service, error) {
+	return c.Query().Where(service.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ServiceClient) GetX(ctx context.Context, id int) *Service {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTaserver queries the taserver edge of a Service.
+func (c *ServiceClient) QueryTaserver(s *Service) *TAServerQuery {
+	query := (&TAServerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(service.Table, service.FieldID, id),
+			sqlgraph.To(taserver.Table, taserver.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, service.TaserverTable, service.TaserverColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTacode queries the tacode edge of a Service.
+func (c *ServiceClient) QueryTacode(s *Service) *TACodeQuery {
+	query := (&TACodeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(service.Table, service.FieldID, id),
+			sqlgraph.To(tacode.Table, tacode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, service.TacodeTable, service.TacodeColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ServiceClient) Hooks() []Hook {
+	return c.hooks.Service
+}
+
+// Interceptors returns the client interceptors.
+func (c *ServiceClient) Interceptors() []Interceptor {
+	return c.inters.Service
+}
+
+func (c *ServiceClient) mutate(ctx context.Context, m *ServiceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ServiceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ServiceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ServiceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ServiceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Service mutation op: %q", m.Op())
 	}
 }
 
@@ -506,6 +681,22 @@ func (c *TACodeClient) QueryTa(tc *TACode) *TAQuery {
 	return query
 }
 
+// QueryService queries the service edge of a TACode.
+func (c *TACodeClient) QueryService(tc *TACode) *ServiceQuery {
+	query := (&ServiceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tacode.Table, tacode.FieldID, id),
+			sqlgraph.To(service.Table, service.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, tacode.ServiceTable, tacode.ServiceColumn),
+		)
+		fromV = sqlgraph.Neighbors(tc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *TACodeClient) Hooks() []Hook {
 	return c.hooks.TACode
@@ -655,6 +846,22 @@ func (c *TAServerClient) QueryTa(ts *TAServer) *TAQuery {
 	return query
 }
 
+// QueryService queries the service edge of a TAServer.
+func (c *TAServerClient) QueryService(ts *TAServer) *ServiceQuery {
+	query := (&ServiceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ts.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(taserver.Table, taserver.FieldID, id),
+			sqlgraph.To(service.Table, service.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, taserver.ServiceTable, taserver.ServiceColumn),
+		)
+		fromV = sqlgraph.Neighbors(ts.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *TAServerClient) Hooks() []Hook {
 	return c.hooks.TAServer
@@ -683,9 +890,9 @@ func (c *TAServerClient) mutate(ctx context.Context, m *TAServerMutation) (Value
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		TA, TACode, TAServer []ent.Hook
+		Service, TA, TACode, TAServer []ent.Hook
 	}
 	inters struct {
-		TA, TACode, TAServer []ent.Interceptor
+		Service, TA, TACode, TAServer []ent.Interceptor
 	}
 )

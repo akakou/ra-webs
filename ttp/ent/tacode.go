@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 )
 
@@ -22,21 +23,24 @@ type TACode struct {
 	CommitID string `json:"commit_id,omitempty"`
 	// UniqueID holds the value of the "unique_id" field.
 	UniqueID []byte `json:"unique_id,omitempty"`
-	// Activate holds the value of the "activate" field.
-	Activate bool `json:"activate,omitempty"`
+	// HasActivated holds the value of the "has_activated" field.
+	HasActivated bool `json:"has_activated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TACodeQuery when eager-loading is set.
-	Edges        TACodeEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges           TACodeEdges `json:"edges"`
+	ta_code_service *int
+	selectValues    sql.SelectValues
 }
 
 // TACodeEdges holds the relations/edges for other nodes in the graph.
 type TACodeEdges struct {
 	// Ta holds the value of the ta edge.
 	Ta []*TA `json:"ta,omitempty"`
+	// Service holds the value of the service edge.
+	Service *Service `json:"service,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // TaOrErr returns the Ta value or an error if the edge
@@ -48,6 +52,19 @@ func (e TACodeEdges) TaOrErr() ([]*TA, error) {
 	return nil, &NotLoadedError{edge: "ta"}
 }
 
+// ServiceOrErr returns the Service value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TACodeEdges) ServiceOrErr() (*Service, error) {
+	if e.loadedTypes[1] {
+		if e.Service == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: service.Label}
+		}
+		return e.Service, nil
+	}
+	return nil, &NotLoadedError{edge: "service"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*TACode) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -55,12 +72,14 @@ func (*TACode) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case tacode.FieldUniqueID:
 			values[i] = new([]byte)
-		case tacode.FieldActivate:
+		case tacode.FieldHasActivated:
 			values[i] = new(sql.NullBool)
 		case tacode.FieldID:
 			values[i] = new(sql.NullInt64)
 		case tacode.FieldRepository, tacode.FieldCommitID:
 			values[i] = new(sql.NullString)
+		case tacode.ForeignKeys[0]: // ta_code_service
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -100,11 +119,18 @@ func (tc *TACode) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				tc.UniqueID = *value
 			}
-		case tacode.FieldActivate:
+		case tacode.FieldHasActivated:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field activate", values[i])
+				return fmt.Errorf("unexpected type %T for field has_activated", values[i])
 			} else if value.Valid {
-				tc.Activate = value.Bool
+				tc.HasActivated = value.Bool
+			}
+		case tacode.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field ta_code_service", value)
+			} else if value.Valid {
+				tc.ta_code_service = new(int)
+				*tc.ta_code_service = int(value.Int64)
 			}
 		default:
 			tc.selectValues.Set(columns[i], values[i])
@@ -122,6 +148,11 @@ func (tc *TACode) Value(name string) (ent.Value, error) {
 // QueryTa queries the "ta" edge of the TACode entity.
 func (tc *TACode) QueryTa() *TAQuery {
 	return NewTACodeClient(tc.config).QueryTa(tc)
+}
+
+// QueryService queries the "service" edge of the TACode entity.
+func (tc *TACode) QueryService() *ServiceQuery {
+	return NewTACodeClient(tc.config).QueryService(tc)
 }
 
 // Update returns a builder for updating this TACode.
@@ -156,8 +187,8 @@ func (tc *TACode) String() string {
 	builder.WriteString("unique_id=")
 	builder.WriteString(fmt.Sprintf("%v", tc.UniqueID))
 	builder.WriteString(", ")
-	builder.WriteString("activate=")
-	builder.WriteString(fmt.Sprintf("%v", tc.Activate))
+	builder.WriteString("has_activated=")
+	builder.WriteString(fmt.Sprintf("%v", tc.HasActivated))
 	builder.WriteByte(')')
 	return builder.String()
 }

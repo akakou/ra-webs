@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
+	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
@@ -56,44 +57,16 @@ func (tsu *TAServerUpdate) SetNillableIP(s *string) *TAServerUpdate {
 	return tsu
 }
 
-// SetServiceID sets the "service_id" field.
-func (tsu *TAServerUpdate) SetServiceID(s string) *TAServerUpdate {
-	tsu.mutation.SetServiceID(s)
+// SetHasActivated sets the "has_activated" field.
+func (tsu *TAServerUpdate) SetHasActivated(b bool) *TAServerUpdate {
+	tsu.mutation.SetHasActivated(b)
 	return tsu
 }
 
-// SetNillableServiceID sets the "service_id" field if the given value is not nil.
-func (tsu *TAServerUpdate) SetNillableServiceID(s *string) *TAServerUpdate {
-	if s != nil {
-		tsu.SetServiceID(*s)
-	}
-	return tsu
-}
-
-// SetToken sets the "token" field.
-func (tsu *TAServerUpdate) SetToken(s string) *TAServerUpdate {
-	tsu.mutation.SetToken(s)
-	return tsu
-}
-
-// SetNillableToken sets the "token" field if the given value is not nil.
-func (tsu *TAServerUpdate) SetNillableToken(s *string) *TAServerUpdate {
-	if s != nil {
-		tsu.SetToken(*s)
-	}
-	return tsu
-}
-
-// SetActivate sets the "activate" field.
-func (tsu *TAServerUpdate) SetActivate(b bool) *TAServerUpdate {
-	tsu.mutation.SetActivate(b)
-	return tsu
-}
-
-// SetNillableActivate sets the "activate" field if the given value is not nil.
-func (tsu *TAServerUpdate) SetNillableActivate(b *bool) *TAServerUpdate {
+// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
+func (tsu *TAServerUpdate) SetNillableHasActivated(b *bool) *TAServerUpdate {
 	if b != nil {
-		tsu.SetActivate(*b)
+		tsu.SetHasActivated(*b)
 	}
 	return tsu
 }
@@ -117,6 +90,25 @@ func (tsu *TAServerUpdate) SetTa(t *TA) *TAServerUpdate {
 	return tsu.SetTaID(t.ID)
 }
 
+// SetServiceID sets the "service" edge to the Service entity by ID.
+func (tsu *TAServerUpdate) SetServiceID(id int) *TAServerUpdate {
+	tsu.mutation.SetServiceID(id)
+	return tsu
+}
+
+// SetNillableServiceID sets the "service" edge to the Service entity by ID if the given value is not nil.
+func (tsu *TAServerUpdate) SetNillableServiceID(id *int) *TAServerUpdate {
+	if id != nil {
+		tsu = tsu.SetServiceID(*id)
+	}
+	return tsu
+}
+
+// SetService sets the "service" edge to the Service entity.
+func (tsu *TAServerUpdate) SetService(s *Service) *TAServerUpdate {
+	return tsu.SetServiceID(s.ID)
+}
+
 // Mutation returns the TAServerMutation object of the builder.
 func (tsu *TAServerUpdate) Mutation() *TAServerMutation {
 	return tsu.mutation
@@ -125,6 +117,12 @@ func (tsu *TAServerUpdate) Mutation() *TAServerMutation {
 // ClearTa clears the "ta" edge to the TA entity.
 func (tsu *TAServerUpdate) ClearTa() *TAServerUpdate {
 	tsu.mutation.ClearTa()
+	return tsu
+}
+
+// ClearService clears the "service" edge to the Service entity.
+func (tsu *TAServerUpdate) ClearService() *TAServerUpdate {
+	tsu.mutation.ClearService()
 	return tsu
 }
 
@@ -170,14 +168,8 @@ func (tsu *TAServerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tsu.mutation.IP(); ok {
 		_spec.SetField(taserver.FieldIP, field.TypeString, value)
 	}
-	if value, ok := tsu.mutation.ServiceID(); ok {
-		_spec.SetField(taserver.FieldServiceID, field.TypeString, value)
-	}
-	if value, ok := tsu.mutation.Token(); ok {
-		_spec.SetField(taserver.FieldToken, field.TypeString, value)
-	}
-	if value, ok := tsu.mutation.Activate(); ok {
-		_spec.SetField(taserver.FieldActivate, field.TypeBool, value)
+	if value, ok := tsu.mutation.HasActivated(); ok {
+		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)
 	}
 	if tsu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -201,6 +193,35 @@ func (tsu *TAServerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tsu.mutation.ServiceCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   taserver.ServiceTable,
+			Columns: []string{taserver.ServiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(service.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tsu.mutation.ServiceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   taserver.ServiceTable,
+			Columns: []string{taserver.ServiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(service.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -256,44 +277,16 @@ func (tsuo *TAServerUpdateOne) SetNillableIP(s *string) *TAServerUpdateOne {
 	return tsuo
 }
 
-// SetServiceID sets the "service_id" field.
-func (tsuo *TAServerUpdateOne) SetServiceID(s string) *TAServerUpdateOne {
-	tsuo.mutation.SetServiceID(s)
+// SetHasActivated sets the "has_activated" field.
+func (tsuo *TAServerUpdateOne) SetHasActivated(b bool) *TAServerUpdateOne {
+	tsuo.mutation.SetHasActivated(b)
 	return tsuo
 }
 
-// SetNillableServiceID sets the "service_id" field if the given value is not nil.
-func (tsuo *TAServerUpdateOne) SetNillableServiceID(s *string) *TAServerUpdateOne {
-	if s != nil {
-		tsuo.SetServiceID(*s)
-	}
-	return tsuo
-}
-
-// SetToken sets the "token" field.
-func (tsuo *TAServerUpdateOne) SetToken(s string) *TAServerUpdateOne {
-	tsuo.mutation.SetToken(s)
-	return tsuo
-}
-
-// SetNillableToken sets the "token" field if the given value is not nil.
-func (tsuo *TAServerUpdateOne) SetNillableToken(s *string) *TAServerUpdateOne {
-	if s != nil {
-		tsuo.SetToken(*s)
-	}
-	return tsuo
-}
-
-// SetActivate sets the "activate" field.
-func (tsuo *TAServerUpdateOne) SetActivate(b bool) *TAServerUpdateOne {
-	tsuo.mutation.SetActivate(b)
-	return tsuo
-}
-
-// SetNillableActivate sets the "activate" field if the given value is not nil.
-func (tsuo *TAServerUpdateOne) SetNillableActivate(b *bool) *TAServerUpdateOne {
+// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
+func (tsuo *TAServerUpdateOne) SetNillableHasActivated(b *bool) *TAServerUpdateOne {
 	if b != nil {
-		tsuo.SetActivate(*b)
+		tsuo.SetHasActivated(*b)
 	}
 	return tsuo
 }
@@ -317,6 +310,25 @@ func (tsuo *TAServerUpdateOne) SetTa(t *TA) *TAServerUpdateOne {
 	return tsuo.SetTaID(t.ID)
 }
 
+// SetServiceID sets the "service" edge to the Service entity by ID.
+func (tsuo *TAServerUpdateOne) SetServiceID(id int) *TAServerUpdateOne {
+	tsuo.mutation.SetServiceID(id)
+	return tsuo
+}
+
+// SetNillableServiceID sets the "service" edge to the Service entity by ID if the given value is not nil.
+func (tsuo *TAServerUpdateOne) SetNillableServiceID(id *int) *TAServerUpdateOne {
+	if id != nil {
+		tsuo = tsuo.SetServiceID(*id)
+	}
+	return tsuo
+}
+
+// SetService sets the "service" edge to the Service entity.
+func (tsuo *TAServerUpdateOne) SetService(s *Service) *TAServerUpdateOne {
+	return tsuo.SetServiceID(s.ID)
+}
+
 // Mutation returns the TAServerMutation object of the builder.
 func (tsuo *TAServerUpdateOne) Mutation() *TAServerMutation {
 	return tsuo.mutation
@@ -325,6 +337,12 @@ func (tsuo *TAServerUpdateOne) Mutation() *TAServerMutation {
 // ClearTa clears the "ta" edge to the TA entity.
 func (tsuo *TAServerUpdateOne) ClearTa() *TAServerUpdateOne {
 	tsuo.mutation.ClearTa()
+	return tsuo
+}
+
+// ClearService clears the "service" edge to the Service entity.
+func (tsuo *TAServerUpdateOne) ClearService() *TAServerUpdateOne {
+	tsuo.mutation.ClearService()
 	return tsuo
 }
 
@@ -400,14 +418,8 @@ func (tsuo *TAServerUpdateOne) sqlSave(ctx context.Context) (_node *TAServer, er
 	if value, ok := tsuo.mutation.IP(); ok {
 		_spec.SetField(taserver.FieldIP, field.TypeString, value)
 	}
-	if value, ok := tsuo.mutation.ServiceID(); ok {
-		_spec.SetField(taserver.FieldServiceID, field.TypeString, value)
-	}
-	if value, ok := tsuo.mutation.Token(); ok {
-		_spec.SetField(taserver.FieldToken, field.TypeString, value)
-	}
-	if value, ok := tsuo.mutation.Activate(); ok {
-		_spec.SetField(taserver.FieldActivate, field.TypeBool, value)
+	if value, ok := tsuo.mutation.HasActivated(); ok {
+		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)
 	}
 	if tsuo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -431,6 +443,35 @@ func (tsuo *TAServerUpdateOne) sqlSave(ctx context.Context) (_node *TAServer, er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tsuo.mutation.ServiceCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   taserver.ServiceTable,
+			Columns: []string{taserver.ServiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(service.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tsuo.mutation.ServiceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   taserver.ServiceTable,
+			Columns: []string{taserver.ServiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(service.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
+	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
@@ -18,12 +19,13 @@ import (
 // TAServerQuery is the builder for querying TAServer entities.
 type TAServerQuery struct {
 	config
-	ctx        *QueryContext
-	order      []taserver.OrderOption
-	inters     []Interceptor
-	predicates []predicate.TAServer
-	withTa     *TAQuery
-	withFKs    bool
+	ctx         *QueryContext
+	order       []taserver.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.TAServer
+	withTa      *TAQuery
+	withService *ServiceQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,6 +77,28 @@ func (tsq *TAServerQuery) QueryTa() *TAQuery {
 			sqlgraph.From(taserver.Table, taserver.FieldID, selector),
 			sqlgraph.To(ta.Table, ta.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, taserver.TaTable, taserver.TaColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tsq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryService chains the current query on the "service" edge.
+func (tsq *TAServerQuery) QueryService() *ServiceQuery {
+	query := (&ServiceClient{config: tsq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tsq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tsq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(taserver.Table, taserver.FieldID, selector),
+			sqlgraph.To(service.Table, service.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, taserver.ServiceTable, taserver.ServiceColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tsq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,12 +293,13 @@ func (tsq *TAServerQuery) Clone() *TAServerQuery {
 		return nil
 	}
 	return &TAServerQuery{
-		config:     tsq.config,
-		ctx:        tsq.ctx.Clone(),
-		order:      append([]taserver.OrderOption{}, tsq.order...),
-		inters:     append([]Interceptor{}, tsq.inters...),
-		predicates: append([]predicate.TAServer{}, tsq.predicates...),
-		withTa:     tsq.withTa.Clone(),
+		config:      tsq.config,
+		ctx:         tsq.ctx.Clone(),
+		order:       append([]taserver.OrderOption{}, tsq.order...),
+		inters:      append([]Interceptor{}, tsq.inters...),
+		predicates:  append([]predicate.TAServer{}, tsq.predicates...),
+		withTa:      tsq.withTa.Clone(),
+		withService: tsq.withService.Clone(),
 		// clone intermediate query.
 		sql:  tsq.sql.Clone(),
 		path: tsq.path,
@@ -289,6 +314,17 @@ func (tsq *TAServerQuery) WithTa(opts ...func(*TAQuery)) *TAServerQuery {
 		opt(query)
 	}
 	tsq.withTa = query
+	return tsq
+}
+
+// WithService tells the query-builder to eager-load the nodes that are connected to
+// the "service" edge. The optional arguments are used to configure the query builder of the edge.
+func (tsq *TAServerQuery) WithService(opts ...func(*ServiceQuery)) *TAServerQuery {
+	query := (&ServiceClient{config: tsq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tsq.withService = query
 	return tsq
 }
 
@@ -371,11 +407,12 @@ func (tsq *TAServerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA
 		nodes       = []*TAServer{}
 		withFKs     = tsq.withFKs
 		_spec       = tsq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			tsq.withTa != nil,
+			tsq.withService != nil,
 		}
 	)
-	if tsq.withTa != nil {
+	if tsq.withTa != nil || tsq.withService != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -402,6 +439,12 @@ func (tsq *TAServerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA
 	if query := tsq.withTa; query != nil {
 		if err := tsq.loadTa(ctx, query, nodes, nil,
 			func(n *TAServer, e *TA) { n.Edges.Ta = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := tsq.withService; query != nil {
+		if err := tsq.loadService(ctx, query, nodes, nil,
+			func(n *TAServer, e *Service) { n.Edges.Service = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -433,6 +476,38 @@ func (tsq *TAServerQuery) loadTa(ctx context.Context, query *TAQuery, nodes []*T
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "ta_server" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (tsq *TAServerQuery) loadService(ctx context.Context, query *ServiceQuery, nodes []*TAServer, init func(*TAServer), assign func(*TAServer, *Service)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TAServer)
+	for i := range nodes {
+		if nodes[i].ta_server_service == nil {
+			continue
+		}
+		fk := *nodes[i].ta_server_service
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(service.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "ta_server_service" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

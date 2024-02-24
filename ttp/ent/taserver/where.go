@@ -63,19 +63,9 @@ func IP(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldEQ(FieldIP, v))
 }
 
-// ServiceID applies equality check predicate on the "service_id" field. It's identical to ServiceIDEQ.
-func ServiceID(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldServiceID, v))
-}
-
-// Token applies equality check predicate on the "token" field. It's identical to TokenEQ.
-func Token(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldToken, v))
-}
-
-// Activate applies equality check predicate on the "activate" field. It's identical to ActivateEQ.
-func Activate(v bool) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldActivate, v))
+// HasActivated applies equality check predicate on the "has_activated" field. It's identical to HasActivatedEQ.
+func HasActivated(v bool) predicate.TAServer {
+	return predicate.TAServer(sql.FieldEQ(FieldHasActivated, v))
 }
 
 // DomainEQ applies the EQ predicate on the "domain" field.
@@ -208,144 +198,14 @@ func IPContainsFold(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldContainsFold(FieldIP, v))
 }
 
-// ServiceIDEQ applies the EQ predicate on the "service_id" field.
-func ServiceIDEQ(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldServiceID, v))
+// HasActivatedEQ applies the EQ predicate on the "has_activated" field.
+func HasActivatedEQ(v bool) predicate.TAServer {
+	return predicate.TAServer(sql.FieldEQ(FieldHasActivated, v))
 }
 
-// ServiceIDNEQ applies the NEQ predicate on the "service_id" field.
-func ServiceIDNEQ(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldNEQ(FieldServiceID, v))
-}
-
-// ServiceIDIn applies the In predicate on the "service_id" field.
-func ServiceIDIn(vs ...string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldIn(FieldServiceID, vs...))
-}
-
-// ServiceIDNotIn applies the NotIn predicate on the "service_id" field.
-func ServiceIDNotIn(vs ...string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldNotIn(FieldServiceID, vs...))
-}
-
-// ServiceIDGT applies the GT predicate on the "service_id" field.
-func ServiceIDGT(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldGT(FieldServiceID, v))
-}
-
-// ServiceIDGTE applies the GTE predicate on the "service_id" field.
-func ServiceIDGTE(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldGTE(FieldServiceID, v))
-}
-
-// ServiceIDLT applies the LT predicate on the "service_id" field.
-func ServiceIDLT(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldLT(FieldServiceID, v))
-}
-
-// ServiceIDLTE applies the LTE predicate on the "service_id" field.
-func ServiceIDLTE(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldLTE(FieldServiceID, v))
-}
-
-// ServiceIDContains applies the Contains predicate on the "service_id" field.
-func ServiceIDContains(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldContains(FieldServiceID, v))
-}
-
-// ServiceIDHasPrefix applies the HasPrefix predicate on the "service_id" field.
-func ServiceIDHasPrefix(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldHasPrefix(FieldServiceID, v))
-}
-
-// ServiceIDHasSuffix applies the HasSuffix predicate on the "service_id" field.
-func ServiceIDHasSuffix(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldHasSuffix(FieldServiceID, v))
-}
-
-// ServiceIDEqualFold applies the EqualFold predicate on the "service_id" field.
-func ServiceIDEqualFold(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEqualFold(FieldServiceID, v))
-}
-
-// ServiceIDContainsFold applies the ContainsFold predicate on the "service_id" field.
-func ServiceIDContainsFold(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldContainsFold(FieldServiceID, v))
-}
-
-// TokenEQ applies the EQ predicate on the "token" field.
-func TokenEQ(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldToken, v))
-}
-
-// TokenNEQ applies the NEQ predicate on the "token" field.
-func TokenNEQ(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldNEQ(FieldToken, v))
-}
-
-// TokenIn applies the In predicate on the "token" field.
-func TokenIn(vs ...string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldIn(FieldToken, vs...))
-}
-
-// TokenNotIn applies the NotIn predicate on the "token" field.
-func TokenNotIn(vs ...string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldNotIn(FieldToken, vs...))
-}
-
-// TokenGT applies the GT predicate on the "token" field.
-func TokenGT(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldGT(FieldToken, v))
-}
-
-// TokenGTE applies the GTE predicate on the "token" field.
-func TokenGTE(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldGTE(FieldToken, v))
-}
-
-// TokenLT applies the LT predicate on the "token" field.
-func TokenLT(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldLT(FieldToken, v))
-}
-
-// TokenLTE applies the LTE predicate on the "token" field.
-func TokenLTE(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldLTE(FieldToken, v))
-}
-
-// TokenContains applies the Contains predicate on the "token" field.
-func TokenContains(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldContains(FieldToken, v))
-}
-
-// TokenHasPrefix applies the HasPrefix predicate on the "token" field.
-func TokenHasPrefix(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldHasPrefix(FieldToken, v))
-}
-
-// TokenHasSuffix applies the HasSuffix predicate on the "token" field.
-func TokenHasSuffix(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldHasSuffix(FieldToken, v))
-}
-
-// TokenEqualFold applies the EqualFold predicate on the "token" field.
-func TokenEqualFold(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEqualFold(FieldToken, v))
-}
-
-// TokenContainsFold applies the ContainsFold predicate on the "token" field.
-func TokenContainsFold(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldContainsFold(FieldToken, v))
-}
-
-// ActivateEQ applies the EQ predicate on the "activate" field.
-func ActivateEQ(v bool) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldActivate, v))
-}
-
-// ActivateNEQ applies the NEQ predicate on the "activate" field.
-func ActivateNEQ(v bool) predicate.TAServer {
-	return predicate.TAServer(sql.FieldNEQ(FieldActivate, v))
+// HasActivatedNEQ applies the NEQ predicate on the "has_activated" field.
+func HasActivatedNEQ(v bool) predicate.TAServer {
+	return predicate.TAServer(sql.FieldNEQ(FieldHasActivated, v))
 }
 
 // HasTa applies the HasEdge predicate on the "ta" edge.
@@ -363,6 +223,29 @@ func HasTa() predicate.TAServer {
 func HasTaWith(preds ...predicate.TA) predicate.TAServer {
 	return predicate.TAServer(func(s *sql.Selector) {
 		step := newTaStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasService applies the HasEdge predicate on the "service" edge.
+func HasService() predicate.TAServer {
+	return predicate.TAServer(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, ServiceTable, ServiceColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasServiceWith applies the HasEdge predicate on the "service" edge with a given conditions (other predicates).
+func HasServiceWith(preds ...predicate.Service) predicate.TAServer {
+	return predicate.TAServer(func(s *sql.Selector) {
+		step := newServiceStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

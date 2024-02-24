@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
+	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 )
@@ -19,11 +20,13 @@ import (
 // TACodeQuery is the builder for querying TACode entities.
 type TACodeQuery struct {
 	config
-	ctx        *QueryContext
-	order      []tacode.OrderOption
-	inters     []Interceptor
-	predicates []predicate.TACode
-	withTa     *TAQuery
+	ctx         *QueryContext
+	order       []tacode.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.TACode
+	withTa      *TAQuery
+	withService *ServiceQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,6 +78,28 @@ func (tcq *TACodeQuery) QueryTa() *TAQuery {
 			sqlgraph.From(tacode.Table, tacode.FieldID, selector),
 			sqlgraph.To(ta.Table, ta.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, tacode.TaTable, tacode.TaColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tcq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryService chains the current query on the "service" edge.
+func (tcq *TACodeQuery) QueryService() *ServiceQuery {
+	query := (&ServiceClient{config: tcq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tcq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tcq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tacode.Table, tacode.FieldID, selector),
+			sqlgraph.To(service.Table, service.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, tacode.ServiceTable, tacode.ServiceColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tcq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,12 +294,13 @@ func (tcq *TACodeQuery) Clone() *TACodeQuery {
 		return nil
 	}
 	return &TACodeQuery{
-		config:     tcq.config,
-		ctx:        tcq.ctx.Clone(),
-		order:      append([]tacode.OrderOption{}, tcq.order...),
-		inters:     append([]Interceptor{}, tcq.inters...),
-		predicates: append([]predicate.TACode{}, tcq.predicates...),
-		withTa:     tcq.withTa.Clone(),
+		config:      tcq.config,
+		ctx:         tcq.ctx.Clone(),
+		order:       append([]tacode.OrderOption{}, tcq.order...),
+		inters:      append([]Interceptor{}, tcq.inters...),
+		predicates:  append([]predicate.TACode{}, tcq.predicates...),
+		withTa:      tcq.withTa.Clone(),
+		withService: tcq.withService.Clone(),
 		// clone intermediate query.
 		sql:  tcq.sql.Clone(),
 		path: tcq.path,
@@ -289,6 +315,17 @@ func (tcq *TACodeQuery) WithTa(opts ...func(*TAQuery)) *TACodeQuery {
 		opt(query)
 	}
 	tcq.withTa = query
+	return tcq
+}
+
+// WithService tells the query-builder to eager-load the nodes that are connected to
+// the "service" edge. The optional arguments are used to configure the query builder of the edge.
+func (tcq *TACodeQuery) WithService(opts ...func(*ServiceQuery)) *TACodeQuery {
+	query := (&ServiceClient{config: tcq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tcq.withService = query
 	return tcq
 }
 
@@ -369,11 +406,19 @@ func (tcq *TACodeQuery) prepareQuery(ctx context.Context) error {
 func (tcq *TACodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TACode, error) {
 	var (
 		nodes       = []*TACode{}
+		withFKs     = tcq.withFKs
 		_spec       = tcq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			tcq.withTa != nil,
+			tcq.withService != nil,
 		}
 	)
+	if tcq.withService != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, tacode.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*TACode).scanValues(nil, columns)
 	}
@@ -396,6 +441,12 @@ func (tcq *TACodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TACo
 		if err := tcq.loadTa(ctx, query, nodes,
 			func(n *TACode) { n.Edges.Ta = []*TA{} },
 			func(n *TACode, e *TA) { n.Edges.Ta = append(n.Edges.Ta, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := tcq.withService; query != nil {
+		if err := tcq.loadService(ctx, query, nodes, nil,
+			func(n *TACode, e *Service) { n.Edges.Service = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -430,6 +481,38 @@ func (tcq *TACodeQuery) loadTa(ctx context.Context, query *TAQuery, nodes []*TAC
 			return fmt.Errorf(`unexpected referenced foreign-key "ta_code" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
+	}
+	return nil
+}
+func (tcq *TACodeQuery) loadService(ctx context.Context, query *ServiceQuery, nodes []*TACode, init func(*TACode), assign func(*TACode, *Service)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TACode)
+	for i := range nodes {
+		if nodes[i].ta_code_service == nil {
+			continue
+		}
+		fk := *nodes[i].ta_code_service
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(service.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "ta_code_service" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }

@@ -18,10 +18,12 @@ const (
 	FieldCommitID = "commit_id"
 	// FieldUniqueID holds the string denoting the unique_id field in the database.
 	FieldUniqueID = "unique_id"
-	// FieldActivate holds the string denoting the activate field in the database.
-	FieldActivate = "activate"
+	// FieldHasActivated holds the string denoting the has_activated field in the database.
+	FieldHasActivated = "has_activated"
 	// EdgeTa holds the string denoting the ta edge name in mutations.
 	EdgeTa = "ta"
+	// EdgeService holds the string denoting the service edge name in mutations.
+	EdgeService = "service"
 	// Table holds the table name of the tacode in the database.
 	Table = "ta_codes"
 	// TaTable is the table that holds the ta relation/edge.
@@ -31,6 +33,13 @@ const (
 	TaInverseTable = "tas"
 	// TaColumn is the table column denoting the ta relation/edge.
 	TaColumn = "ta_code"
+	// ServiceTable is the table that holds the service relation/edge.
+	ServiceTable = "ta_codes"
+	// ServiceInverseTable is the table name for the Service entity.
+	// It exists in this package in order to avoid circular dependency with the "service" package.
+	ServiceInverseTable = "services"
+	// ServiceColumn is the table column denoting the service relation/edge.
+	ServiceColumn = "ta_code_service"
 )
 
 // Columns holds all SQL columns for tacode fields.
@@ -39,7 +48,13 @@ var Columns = []string{
 	FieldRepository,
 	FieldCommitID,
 	FieldUniqueID,
-	FieldActivate,
+	FieldHasActivated,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "ta_codes"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"ta_code_service",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -49,12 +64,17 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
 
 var (
-	// DefaultActivate holds the default value on creation for the "activate" field.
-	DefaultActivate bool
+	// DefaultHasActivated holds the default value on creation for the "has_activated" field.
+	DefaultHasActivated bool
 )
 
 // OrderOption defines the ordering options for the TACode queries.
@@ -75,9 +95,9 @@ func ByCommitID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCommitID, opts...).ToFunc()
 }
 
-// ByActivate orders the results by the activate field.
-func ByActivate(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldActivate, opts...).ToFunc()
+// ByHasActivated orders the results by the has_activated field.
+func ByHasActivated(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHasActivated, opts...).ToFunc()
 }
 
 // ByTaCount orders the results by ta count.
@@ -93,10 +113,24 @@ func ByTa(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTaStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByServiceField orders the results by service field.
+func ByServiceField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newServiceStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newTaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TaInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, TaTable, TaColumn),
+	)
+}
+func newServiceStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ServiceInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, ServiceTable, ServiceColumn),
 	)
 }

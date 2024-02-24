@@ -17,7 +17,7 @@ func (TACode) Fields() []ent.Field {
 		field.String("repository"),
 		field.String("commit_id"),
 		field.Bytes("unique_id"),
-		field.Bool("activate").Default(false),
+		field.Bool("has_activated").Default(false),
 	}
 }
 
@@ -25,5 +25,6 @@ func (TACode) Fields() []ent.Field {
 func (TACode) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("ta", TA.Type).Ref("code"),
+		edge.To("service", Service.Type).Unique(),
 	}
 }
