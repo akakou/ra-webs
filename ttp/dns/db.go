@@ -9,7 +9,8 @@ func (s *Server) LoadDatabase(db *core.DB) error {
 	}
 
 	for _, ta := range tas {
-		err := s.AddHost(ta.Edges.Server.Domain, ta.Edges.Server.IP)
+		fqdn := s.ToFqdn(ta.Edges.Server.Domain)
+		err := s.AddHost(fqdn, ta.Edges.Server.IP)
 		if err != nil {
 			return err
 		}
