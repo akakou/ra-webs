@@ -43,6 +43,8 @@ func DefaultAuditor() (*Auditor, error) {
 		return nil, fmt.Errorf("failed to generate admin token: %w", err)
 	}
 
+	fmt.Printf("Admin token generated: %s\n", adminToken)
+
 	caTempl := simplecertify.CATemplate()
 
 	dbc := DBConfig{
