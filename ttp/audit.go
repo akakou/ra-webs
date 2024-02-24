@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	goutils "github.com/akakou/go-utils"
 	golangutils "github.com/akakou/golang-utils"
 	metact "github.com/akakou/meta-ct"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
@@ -14,16 +15,18 @@ import (
 var ISSUER_NAME = "Let's Encrypt"
 
 type Auditor struct {
-	db *DB
-	ca *simplecertify.Certifier
-	ct *metact.MetaCT
+	db         *DB
+	ca         *simplecertify.Certifier
+	ct         *metact.MetaCT
+	adminToken string
 }
 
-func NewAuditor(db *DB, ca *simplecertify.Certifier, ct *metact.MetaCT) (*Auditor, error) {
+func NewAuditor(db *DB, ca *simplecertify.Certifier, ct *metact.MetaCT, adminToken string) (*Auditor, error) {
 	return &Auditor{
-		db: db,
-		ca: ca,
-		ct: ct,
+		db:         db,
+		ca:         ca,
+		ct:         ct,
+		adminToken: adminToken,
 	}, nil
 }
 
@@ -34,6 +37,11 @@ func DefaultAuditor() (*Auditor, error) {
 
 	metaAppId := os.Getenv("META_APP_ID")
 	metaAccessToken := os.Getenv("META_ACCESS_TOKEN")
+
+	adminToken, err := goutils.RandomHex(32)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate admin token: %w", err)
+	}
 
 	caTempl := simplecertify.CATemplate()
 
@@ -56,7 +64,7 @@ func DefaultAuditor() (*Auditor, error) {
 
 	}
 
-	return NewAuditor(db, ca, ct)
+	return NewAuditor(db, ca, ct, adminToken)
 
 }
 
