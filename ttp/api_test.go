@@ -27,46 +27,59 @@ func TestAPI(t *testing.T) {
 
 	publicKeyBuf := x509.MarshalPKCS1PublicKey(&publicKey)
 
-	t.Run("TestRegisterTAApi", func(t *testing.T) {
-		body := `{"domain":"example.com","public_key":"public_key", "ip":"0.0.0.0", "git":"github.com/ra-webs/ra_webs"}`
+	t.Run("TestPostTACode", func(t *testing.T) {
+		body := `{"repository":"github.com/ra-webs/ra_webs", "commit_id": "1111111111", "unique_id": "aGVsbG8K"}`
 
-		req := httptest.NewRequest(http.MethodPost, registerTAApi.path, strings.NewReader(body))
+		req := httptest.NewRequest(http.MethodPost, postCodeApi.path, strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 		rec := httptest.NewRecorder()
 
 		c := e.NewContext(req, rec)
-		err = registerTAApi.f(auditor)(c)
+		err = postCodeApi.f(auditor)(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
 
 		assert.Equal(t, "1", rec.Body.String())
 	})
 
-	t.Run("TestUpdateTAApi", func(t *testing.T) {
-		body, err := json.Marshal(map[string]interface{}{"public_key": publicKeyBuf})
+	t.Run("TestPostTAServer", func(t *testing.T) {
+		body := `{"ip":"0.0.0.0", "domain": "example.com"}`
+
+		req := httptest.NewRequest(http.MethodPost, postServerApi.path, strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+		rec := httptest.NewRecorder()
+
+		c := e.NewContext(req, rec)
+		err = postServerApi.f(auditor)(c)
+		assert.NoError(t, err)
+		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
+
+		assert.Equal(t, "1", rec.Body.String())
+	})
+
+	t.Run("TestPostTA", func(t *testing.T) {
+		body, err := json.Marshal(map[string]interface{}{
+			"public_key": publicKeyBuf,
+			"code_id":    1,
+			"server_id":  1,
+		})
 		assert.NoError(t, err)
 
-		path := fmt.Sprintf("/ta/%d/update", 1)
-		fmt.Printf("path: %v\n", path)
-
-		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(string(body)))
+		req := httptest.NewRequest(http.MethodPost, postTAApi.path, strings.NewReader(string(body)))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 		rec := httptest.NewRecorder()
 
 		c := e.NewContext(req, rec)
 
-		c.SetPath(path)
-		c.SetParamNames("id")
-		c.SetParamValues("1")
-
-		err = updateTAApi.f(auditor)(c)
+		c.SetPath(postTAApi.path)
+		err = postTAApi.f(auditor)(c)
 		assert.NoError(t, err)
 
-		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
+		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
 		fmt.Printf("%v", rec.Body.String())
-
 	})
 
 }
