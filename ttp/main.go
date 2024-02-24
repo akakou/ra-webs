@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"io"
 
+	"github.com/akakou/ra_webs/ttp/core"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,23 +17,23 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-func NewTTPServer(auditor *Auditor, templatePath string) *echo.Echo {
+func NewTTPServer(ttp *core.TTP, templatePath string) *echo.Echo {
 	e := echo.New()
 
 	e.Renderer = &Template{
 		templates: template.Must(template.ParseGlob(templatePath)),
 	}
 
-	Route(e, auditor)
+	Route(e, ttp)
 
 	return e
 }
 
 func DefaultTTPServer(templatePath string) (*echo.Echo, error) {
-	auditor, err := DefaultAuditor()
+	ttp, err := core.DefaultTTP()
 	if err != nil {
-		return nil, fmt.Errorf("failed to init auditor: %w", err)
+		return nil, fmt.Errorf("failed to init ttp: %w", err)
 	}
 
-	return NewTTPServer(auditor, templatePath), nil
+	return NewTTPServer(ttp, templatePath), nil
 }

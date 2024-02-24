@@ -1,22 +1,47 @@
-package ttp
+package api
 
 import (
 	"crypto/x509/pkix"
+	"fmt"
 	"net/http"
 
+	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/core"
+	ttpcore "github.com/akakou/ra_webs/ttp/core"
+
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	simplecertify "github.com/akakou/simple-certify"
 	"github.com/labstack/echo/v4"
 )
 
-var postTAApi = echoRoute{
-	method: POST,
-	path:   "/ta",
-	f: func(auditor *Auditor) echoRouteFunc {
+func Route(e *echo.Echo, ttp *ttpcore.TTP) {
+	e.GET("/", func(c echo.Context) error {
+		r := fmt.Sprintf("%v", e.Routers())
+		return c.String(http.StatusOK, r)
+	})
+
+	postCodeApi.Set(e, ttp)
+	postServerApi.Set(e, ttp)
+	postTAApi.Set(e, ttp)
+	certApi.Set(e, ttp)
+
+	getCodeApi.Set(e, ttp)
+	getServerApi.Set(e, ttp)
+	getTAApi.Set(e, ttp)
+
+	postActivateServerApi.Set(e, ttp)
+	postActivateCodeApi.Set(e, ttp)
+
+	postServiceByAdmin.Set(e, ttp)
+}
+
+var postTAApi = goutils.EchoRoute[ttpcore.TTP]{
+	Method: goutils.POST,
+	Path:   "/ta",
+	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			service, err := authenticateService(auditor.db, c)
+			service, err := authenticateService(ttp, c)
 
 			if err != nil {
 				return c.String(http.StatusUnauthorized, "token is invalid")
@@ -34,7 +59,7 @@ var postTAApi = echoRoute{
 				return err
 			}
 
-			serv, err := auditor.db.Client.TAServer.Query().WithService().Where(taserver.ID(req.ServerId)).Only(*auditor.db.Ctx)
+			serv, err := ttp.DB.Client.TAServer.Query().WithService().Where(taserver.ID(req.ServerId)).Only(*ttp.DB.Ctx)
 
 			if err != nil {
 				c.Error(err)
@@ -49,7 +74,7 @@ var postTAApi = echoRoute{
 				return c.String(http.StatusUnauthorized, "server is not authorized")
 			}
 
-			code, err := auditor.db.Client.TACode.Get(*auditor.db.Ctx, req.CodeId)
+			code, err := ttp.DB.Client.TACode.Get(*ttp.DB.Ctx, req.CodeId)
 			if err != nil {
 				c.Error(err)
 				return err
@@ -69,7 +94,7 @@ var postTAApi = echoRoute{
 				CommonName:   serv.Domain,
 			}
 
-			templ.Issuer = auditor.ca.Certificate.Subject
+			templ.Issuer = ttp.CA.Certificate.Subject
 			templ.Extensions = []pkix.Extension{
 				{
 					Id:    core.X509_EXTENSION_LABEL,
@@ -77,13 +102,13 @@ var postTAApi = echoRoute{
 				},
 			}
 
-			cert, err := auditor.ca.Certify(&templ)
+			cert, err := ttp.CA.Certify(&templ)
 			if err != nil {
 				c.Error(err)
 				return err
 			}
 
-			// err = auditor.ct.Subscribe(serv.Domain)
+			// err = ttp.ct.Subscribe(serv.Domain)
 			// if err != nil {
 			// 	c.Error(err)
 			// 	return err
@@ -94,14 +119,14 @@ var postTAApi = echoRoute{
 	},
 }
 
-var getTAApi = echoRoute{
-	method: GET,
-	path:   "/ta",
-	f: func(auditor *Auditor) echoRouteFunc {
+var getTAApi = goutils.EchoRoute[ttpcore.TTP]{
+	Method: goutils.GET,
+	Path:   "/ta",
+	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			valid := c.QueryParam("valid") != "false"
 
-			ta, err := auditor.db.Client.TA.Query().Where(ta.IsValid(valid)).All(*auditor.db.Ctx)
+			ta, err := ttp.DB.Client.TA.Query().Where(ta.IsValid(valid)).All(*ttp.DB.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err
@@ -112,12 +137,12 @@ var getTAApi = echoRoute{
 	},
 }
 
-var certApi = echoRoute{
-	method: GET,
-	path:   "/cert",
-	f: func(auditor *Auditor) echoRouteFunc {
+var certApi = goutils.EchoRoute[ttpcore.TTP]{
+	Method: goutils.GET,
+	Path:   "/cert",
+	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			cert := auditor.ca.Certificate.Raw
+			cert := ttp.CA.Certificate.Raw
 			return c.Blob(http.StatusOK, "application/x-x509-ca-cert", cert)
 		}
 	},

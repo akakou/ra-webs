@@ -1,4 +1,4 @@
-package ttp
+package ct
 
 import (
 	"encoding/hex"

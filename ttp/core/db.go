@@ -1,4 +1,4 @@
-package ttp
+package core
 
 import (
 	"context"
@@ -36,6 +36,6 @@ func NewDB(dbConfig *DBConfig) (*DB, error) {
 	}, nil
 }
 
-func (db *DB) close() {
+func (db *DB) Close() {
 	db.Client.Close()
 }

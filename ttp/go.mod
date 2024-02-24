@@ -4,7 +4,7 @@ go 1.21.4
 
 require (
 	entgo.io/ent v0.12.5
-	github.com/akakou/go-utils v0.0.2
+	github.com/akakou/go-utils v0.0.3
 	github.com/akakou/golang-utils v0.0.1
 	github.com/akakou/meta-ct v0.0.2
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
