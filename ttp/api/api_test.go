@@ -1,4 +1,4 @@
-package ttp
+package api
 
 import (
 	"crypto/rand"
@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/akakou/ra_webs/ttp/core"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -18,7 +19,7 @@ import (
 func TestAPI(t *testing.T) {
 	e := echo.New()
 	e.Debug = true
-	auditor, err := DefaultAuditor()
+	ttp, err := core.DefaultTTP()
 	assert.NoError(t, err)
 
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
@@ -30,14 +31,14 @@ func TestAPI(t *testing.T) {
 	token := ""
 
 	t.Run("TestPostServiceByAdmin", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodPost, postServiceByAdmin.path, strings.NewReader(""))
-		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", auditor.adminToken))
+		req := httptest.NewRequest(http.MethodPost, postServiceByAdmin.Path, strings.NewReader(""))
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", ttp.AdminToken))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 		rec := httptest.NewRecorder()
 
 		c := e.NewContext(req, rec)
-		err = postServiceByAdmin.f(auditor)(c)
+		err = postServiceByAdmin.F(ttp)(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
 
@@ -47,14 +48,14 @@ func TestAPI(t *testing.T) {
 	t.Run("TestPostTACode", func(t *testing.T) {
 		body := `{"repository":"github.com/ra-webs/ra_webs", "commit_id": "1111111111", "unique_id": "aGVsbG8K"}`
 
-		req := httptest.NewRequest(http.MethodPost, postCodeApi.path, strings.NewReader(body))
+		req := httptest.NewRequest(http.MethodPost, postCodeApi.Path, strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
 
 		rec := httptest.NewRecorder()
 
 		c := e.NewContext(req, rec)
-		err = postCodeApi.f(auditor)(c)
+		err = postCodeApi.F(ttp)(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
 
@@ -64,14 +65,14 @@ func TestAPI(t *testing.T) {
 	t.Run("TestPostTAServer", func(t *testing.T) {
 		body := `{"ip":"0.0.0.0", "domain": "example.com"}`
 
-		req := httptest.NewRequest(http.MethodPost, postServerApi.path, strings.NewReader(body))
+		req := httptest.NewRequest(http.MethodPost, postServerApi.Path, strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
 
 		rec := httptest.NewRecorder()
 
 		c := e.NewContext(req, rec)
-		err = postServerApi.f(auditor)(c)
+		err = postServerApi.F(ttp)(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
 
@@ -84,7 +85,7 @@ func TestAPI(t *testing.T) {
 		path := "/code/1/activate"
 
 		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(""))
-		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", auditor.adminToken))
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", ttp.AdminToken))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 		rec := httptest.NewRecorder()
@@ -93,7 +94,7 @@ func TestAPI(t *testing.T) {
 		c.SetPath(path)
 		c.SetParamNames("id")
 		c.SetParamValues("1")
-		err = postActivateCodeApi.f(auditor)(c)
+		err = postActivateCodeApi.F(ttp)(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
 
@@ -104,7 +105,7 @@ func TestAPI(t *testing.T) {
 		path := "/server/1/activate"
 
 		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(""))
-		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", auditor.adminToken))
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", ttp.AdminToken))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 		rec := httptest.NewRecorder()
@@ -113,7 +114,7 @@ func TestAPI(t *testing.T) {
 		c.SetPath(path)
 		c.SetParamNames("id")
 		c.SetParamValues("1")
-		err = postActivateServerApi.f(auditor)(c)
+		err = postActivateServerApi.F(ttp)(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
 
@@ -128,7 +129,7 @@ func TestAPI(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		req := httptest.NewRequest(http.MethodPost, postTAApi.path, strings.NewReader(string(body)))
+		req := httptest.NewRequest(http.MethodPost, postTAApi.Path, strings.NewReader(string(body)))
 		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
@@ -136,8 +137,8 @@ func TestAPI(t *testing.T) {
 
 		c := e.NewContext(req, rec)
 
-		c.SetPath(postTAApi.path)
-		err = postTAApi.f(auditor)(c)
+		c.SetPath(postTAApi.Path)
+		err = postTAApi.F(ttp)(c)
 		assert.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)

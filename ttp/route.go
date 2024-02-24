@@ -4,58 +4,20 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/akakou/ra_webs/ttp/api"
+	"github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/ct"
+	"github.com/akakou/ra_webs/ttp/web"
 	"github.com/labstack/echo/v4"
 )
 
-var RANDOM_SIZE = 32
-
-type echoRouteFunc = func(c echo.Context) error
-
-type echoRoute struct {
-	method int
-	path   string
-	f      func(*Auditor) echoRouteFunc
-}
-
-const (
-	ANY = iota
-	GET
-	POST
-)
-
-func (er echoRoute) set(e *echo.Echo, auditor *Auditor) {
-	if er.method == ANY {
-		e.Any(er.path, er.f(auditor))
-	}
-	if er.method == GET {
-		e.GET(er.path, er.f(auditor))
-	}
-	if er.method == POST {
-		e.POST(er.path, er.f(auditor))
-	}
-}
-
-func Route(e *echo.Echo, auditor *Auditor) {
+func Route(e *echo.Echo, auditor *core.TTP) {
 	e.GET("/", func(c echo.Context) error {
 		r := fmt.Sprintf("%v", e.Routers())
 		return c.String(http.StatusOK, r)
 	})
 
-	postCodeApi.set(e, auditor)
-	postServerApi.set(e, auditor)
-	postTAApi.set(e, auditor)
-	certApi.set(e, auditor)
-
-	getCodeApi.set(e, auditor)
-	getServerApi.set(e, auditor)
-	getTAApi.set(e, auditor)
-
-	postActivateServerApi.set(e, auditor)
-	postActivateCodeApi.set(e, auditor)
-
-	postServiceByAdmin.set(e, auditor)
-
-	webhook().set(e, auditor)
-
-	redirectWebPage.set(e, auditor)
+	api.Route(e, auditor)
+	ct.Route(e, auditor)
+	web.Route(e, auditor)
 }

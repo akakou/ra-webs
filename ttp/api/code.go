@@ -1,17 +1,19 @@
-package ttp
+package api
 
 import (
 	"net/http"
 	"strconv"
 
+	goutils "github.com/akakou/go-utils"
+	ttpcore "github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/labstack/echo/v4"
 )
 
-var postCodeApi = echoRoute{
-	method: POST,
-	path:   "/code",
-	f: func(auditor *Auditor) echoRouteFunc {
+var postCodeApi = goutils.EchoRoute[ttpcore.TTP]{
+	Method: goutils.POST,
+	Path:   "/code",
+	F: func(auditor *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			req := new(struct {
 				Repository string `json:"repository"`
@@ -23,13 +25,13 @@ var postCodeApi = echoRoute{
 				return c.String(http.StatusBadRequest, "bad attestation")
 			}
 
-			codeCreate := auditor.db.Client.TACode.
+			codeCreate := auditor.DB.Client.TACode.
 				Create().
 				SetRepository(req.Repository).
 				SetCommitID(req.CommitId).
 				SetUniqueID(req.UniqueID)
 
-			code, err := codeCreate.Save(*auditor.db.Ctx)
+			code, err := codeCreate.Save(*auditor.DB.Ctx)
 
 			if err != nil {
 				c.Error(err)
@@ -40,10 +42,10 @@ var postCodeApi = echoRoute{
 	},
 }
 
-var postActivateCodeApi = echoRoute{
-	method: POST,
-	path:   "/code/:id/activate",
-	f: func(auditor *Auditor) echoRouteFunc {
+var postActivateCodeApi = goutils.EchoRoute[ttpcore.TTP]{
+	Method: goutils.POST,
+	Path:   "/code/:id/activate",
+	F: func(auditor *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			paramId := c.Param("id")
 
@@ -58,13 +60,13 @@ var postActivateCodeApi = echoRoute{
 				return c.String(http.StatusUnauthorized, "token is invalid")
 			}
 
-			code, err := auditor.db.Client.TACode.Get(*auditor.db.Ctx, codeId)
+			code, err := auditor.DB.Client.TACode.Get(*auditor.DB.Ctx, codeId)
 			if err != nil {
 				c.Error(err)
 				return err
 			}
 
-			_, err = code.Update().SetHasActivated(true).Save(*auditor.db.Ctx)
+			_, err = code.Update().SetHasActivated(true).Save(*auditor.DB.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err
@@ -75,14 +77,14 @@ var postActivateCodeApi = echoRoute{
 	},
 }
 
-var getCodeApi = echoRoute{
-	method: GET,
-	path:   "/code",
-	f: func(auditor *Auditor) echoRouteFunc {
+var getCodeApi = goutils.EchoRoute[ttpcore.TTP]{
+	Method: goutils.GET,
+	Path:   "/code",
+	F: func(auditor *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			activate := c.QueryParam("activate") != "false"
 
-			code, err := auditor.db.Client.TACode.Query().Where(tacode.HasActivated(activate)).All(*auditor.db.Ctx)
+			code, err := auditor.DB.Client.TACode.Query().Where(tacode.HasActivated(activate)).All(*auditor.DB.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err

@@ -1,18 +1,19 @@
-package ttp
+package api
 
 import (
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
+	ttpcore "github.com/akakou/ra_webs/ttp/core"
 	"github.com/labstack/echo/v4"
 )
 
-var postServiceByAdmin = echoRoute{
-	method: POST,
-	path:   "/service",
-	f: func(auditor *Auditor) echoRouteFunc {
+var postServiceByAdmin = goutils.EchoRoute[ttpcore.TTP]{
+	Method: goutils.POST,
+	Path:   "/service",
+	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			err := authenticateAdmin(auditor, c)
+			err := authenticateAdmin(ttp, c)
 
 			if err != nil {
 				return c.String(http.StatusUnauthorized, "token is invalid")
@@ -25,7 +26,7 @@ var postServiceByAdmin = echoRoute{
 				return err
 			}
 
-			service, err := auditor.db.Client.Service.Create().SetName("").SetToken(token).SetHasActivated(true).Save(*auditor.db.Ctx)
+			service, err := ttp.DB.Client.Service.Create().SetName("").SetToken(token).SetHasActivated(true).Save(*ttp.DB.Ctx)
 
 			if err != nil {
 				c.Error(err)
