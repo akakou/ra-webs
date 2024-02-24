@@ -11,13 +11,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Route(e *echo.Echo, auditor *core.TTP) {
+func Route(e *echo.Echo, ttp *core.TTP) {
 	e.GET("/", func(c echo.Context) error {
 		r := fmt.Sprintf("%v", e.Routers())
 		return c.String(http.StatusOK, r)
 	})
 
-	api.Route(e, auditor)
-	ct.Route(e, auditor)
-	web.Route(e, auditor)
+	api.Route(e, ttp)
+	ct.Route(e, ttp)
+	web.Route(e, ttp)
 }

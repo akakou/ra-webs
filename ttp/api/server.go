@@ -13,9 +13,9 @@ import (
 var postServerApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.POST,
 	Path:   "/server",
-	F: func(auditor *ttpcore.TTP) goutils.EchoRouteFunc {
+	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			service, err := authenticateService(auditor, c)
+			service, err := authenticateService(ttp, c)
 			if err != nil {
 				return c.String(http.StatusUnauthorized, "token is invalid")
 			}
@@ -25,13 +25,13 @@ var postServerApi = goutils.EchoRoute[ttpcore.TTP]{
 				Domain string `json:"domain"`
 			})
 
-			taServerCreate := auditor.DB.Client.TAServer.
+			taServerCreate := ttp.DB.Client.TAServer.
 				Create().
 				SetIP(req.IP).
 				SetDomain(req.Domain).
 				SetService(service)
 
-			taServer, err := taServerCreate.Save(*auditor.DB.Ctx)
+			taServer, err := taServerCreate.Save(*ttp.DB.Ctx)
 			if err != nil {
 				c.Error(err)
 			}
@@ -44,7 +44,7 @@ var postServerApi = goutils.EchoRoute[ttpcore.TTP]{
 var postActivateServerApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.POST,
 	Path:   "/server/:id/activate",
-	F: func(auditor *ttpcore.TTP) goutils.EchoRouteFunc {
+	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			paramId := c.Param("id")
 			codeId, err := strconv.Atoi(paramId)
@@ -53,18 +53,18 @@ var postActivateServerApi = goutils.EchoRoute[ttpcore.TTP]{
 				return err
 			}
 
-			err = authenticateAdmin(auditor, c)
+			err = authenticateAdmin(ttp, c)
 			if err != nil {
 				return c.String(http.StatusUnauthorized, "token is invalid")
 			}
 
-			server, err := auditor.DB.Client.TAServer.Get(*auditor.DB.Ctx, codeId)
+			server, err := ttp.DB.Client.TAServer.Get(*ttp.DB.Ctx, codeId)
 			if err != nil {
 				c.Error(err)
 				return err
 			}
 
-			_, err = server.Update().SetHasActivated(true).Save(*auditor.DB.Ctx)
+			_, err = server.Update().SetHasActivated(true).Save(*ttp.DB.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err
@@ -78,11 +78,11 @@ var postActivateServerApi = goutils.EchoRoute[ttpcore.TTP]{
 var getServerApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.GET,
 	Path:   "/server",
-	F: func(auditor *ttpcore.TTP) goutils.EchoRouteFunc {
+	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			activate := c.QueryParam("activate") != "false"
 
-			code, err := auditor.DB.Client.TAServer.Query().Where(taserver.HasActivated(activate)).All(*auditor.DB.Ctx)
+			code, err := ttp.DB.Client.TAServer.Query().Where(taserver.HasActivated(activate)).All(*ttp.DB.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err

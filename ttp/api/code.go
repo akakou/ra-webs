@@ -13,7 +13,7 @@ import (
 var postCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.POST,
 	Path:   "/code",
-	F: func(auditor *ttpcore.TTP) goutils.EchoRouteFunc {
+	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			req := new(struct {
 				Repository string `json:"repository"`
@@ -25,13 +25,13 @@ var postCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 				return c.String(http.StatusBadRequest, "bad attestation")
 			}
 
-			codeCreate := auditor.DB.Client.TACode.
+			codeCreate := ttp.DB.Client.TACode.
 				Create().
 				SetRepository(req.Repository).
 				SetCommitID(req.CommitId).
 				SetUniqueID(req.UniqueID)
 
-			code, err := codeCreate.Save(*auditor.DB.Ctx)
+			code, err := codeCreate.Save(*ttp.DB.Ctx)
 
 			if err != nil {
 				c.Error(err)
@@ -45,7 +45,7 @@ var postCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 var postActivateCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.POST,
 	Path:   "/code/:id/activate",
-	F: func(auditor *ttpcore.TTP) goutils.EchoRouteFunc {
+	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			paramId := c.Param("id")
 
@@ -55,18 +55,18 @@ var postActivateCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 				return err
 			}
 
-			err = authenticateAdmin(auditor, c)
+			err = authenticateAdmin(ttp, c)
 			if err != nil {
 				return c.String(http.StatusUnauthorized, "token is invalid")
 			}
 
-			code, err := auditor.DB.Client.TACode.Get(*auditor.DB.Ctx, codeId)
+			code, err := ttp.DB.Client.TACode.Get(*ttp.DB.Ctx, codeId)
 			if err != nil {
 				c.Error(err)
 				return err
 			}
 
-			_, err = code.Update().SetHasActivated(true).Save(*auditor.DB.Ctx)
+			_, err = code.Update().SetHasActivated(true).Save(*ttp.DB.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err
@@ -80,11 +80,11 @@ var postActivateCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 var getCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.GET,
 	Path:   "/code",
-	F: func(auditor *ttpcore.TTP) goutils.EchoRouteFunc {
+	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			activate := c.QueryParam("activate") != "false"
 
-			code, err := auditor.DB.Client.TACode.Query().Where(tacode.HasActivated(activate)).All(*auditor.DB.Ctx)
+			code, err := ttp.DB.Client.TACode.Query().Where(tacode.HasActivated(activate)).All(*ttp.DB.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err

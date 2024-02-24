@@ -11,19 +11,19 @@ import (
 
 var ISSUER_NAME = "Let's Encrypt"
 
-func AuditOne(auditor *core.TTP, cert *metact.Certificate) error {
+func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
 	domain, violatingDomains, err := validateDomains(cert.Domains)
 
 	if err != nil || cert.IssuerName != ISSUER_NAME {
-		revokeByDomain(auditor.DB, violatingDomains)
+		revokeByDomain(ttp.DB, violatingDomains)
 		return fmt.Errorf("domain violation: %w", err)
 	}
 
-	taServ, err := auditor.DB.Client.TAServer.
+	taServ, err := ttp.DB.Client.TAServer.
 		Query().
 		Where(taserver.DomainEQ(domain)).
 		WithTa().
-		Only(*auditor.DB.Ctx)
+		Only(*ttp.DB.Ctx)
 
 	if err != nil {
 		return fmt.Errorf("failed to get ta info: %w", err)
@@ -38,19 +38,19 @@ func AuditOne(auditor *core.TTP, cert *metact.Certificate) error {
 
 	if validateAttestation(cert, taCode.UniqueID) != nil {
 		ta.IsValid = false
-		ta.Update().Save(*auditor.DB.Ctx)
+		ta.Update().Save(*ttp.DB.Ctx)
 		return fmt.Errorf("failed to check ct logs: %w", err)
 	}
 
 	ta.LastCt = cert.Id
-	ta.Update().Save(*auditor.DB.Ctx)
+	ta.Update().Save(*ttp.DB.Ctx)
 
 	return nil
 }
 
-func AuditAll(auditor *core.TTP, cert []metact.Certificate) error {
+func AuditAll(ttp *core.TTP, cert []metact.Certificate) error {
 	for _, c := range cert {
-		err := AuditOne(auditor, &c)
+		err := AuditOne(ttp, &c)
 		if err != nil {
 			return fmt.Errorf("failed to audit: %w", err)
 		}

@@ -32,7 +32,7 @@ func NewTTPServer(ttp *core.TTP, templatePath string) *echo.Echo {
 func DefaultTTPServer(templatePath string) (*echo.Echo, error) {
 	ttp, err := core.DefaultTTP()
 	if err != nil {
-		return nil, fmt.Errorf("failed to init auditor: %w", err)
+		return nil, fmt.Errorf("failed to init ttp: %w", err)
 	}
 
 	return NewTTPServer(ttp, templatePath), nil

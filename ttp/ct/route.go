@@ -5,6 +5,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Route(e *echo.Echo, auditor *core.TTP) {
-	webhook().Set(e, auditor)
+func Route(e *echo.Echo, ttp *core.TTP) {
+	webhook().Set(e, ttp)
 }

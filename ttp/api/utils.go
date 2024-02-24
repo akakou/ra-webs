@@ -10,11 +10,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func authenticateService(auditor *ttpcore.TTP, c echo.Context) (*ent.Service, error) {
+func authenticateService(ttp *ttpcore.TTP, c echo.Context) (*ent.Service, error) {
 	authorization := c.Request().Header["Authorization"][0]
 	token := authorization[len("Bearer "):]
 
-	service, err := auditor.DB.Client.Service.Query().Where(service.TokenEQ(token)).First(*auditor.DB.Ctx)
+	service, err := ttp.DB.Client.Service.Query().Where(service.TokenEQ(token)).First(*ttp.DB.Ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to authenticate service: %w", err)
 	}
@@ -22,11 +22,11 @@ func authenticateService(auditor *ttpcore.TTP, c echo.Context) (*ent.Service, er
 	return service, nil
 }
 
-func authenticateAdmin(auditor *ttpcore.TTP, c echo.Context) error {
+func authenticateAdmin(ttp *ttpcore.TTP, c echo.Context) error {
 	authorization := c.Request().Header["Authorization"][0]
 	token := authorization[len("Bearer "):]
 
-	if token != auditor.AdminToken {
+	if token != ttp.AdminToken {
 		return c.String(http.StatusUnauthorized, "token is invalid")
 	}
 

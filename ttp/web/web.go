@@ -12,11 +12,11 @@ import (
 var redirectWebPage = goutils.EchoRoute[core.TTP]{
 	Method: goutils.GET,
 	Path:   "/redirect",
-	F: func(auditor *core.TTP) goutils.EchoRouteFunc {
+	F: func(ttp *core.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			back := c.Request().Header.Get("Referer")
 
-			server, err := auditor.DB.Client.TAServer.Query().Where(taserver.DomainEQ(back)).WithTa().First(*auditor.DB.Ctx)
+			server, err := ttp.DB.Client.TAServer.Query().Where(taserver.DomainEQ(back)).WithTa().First(*ttp.DB.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err
@@ -35,6 +35,6 @@ var redirectWebPage = goutils.EchoRoute[core.TTP]{
 	},
 }
 
-func Route(e *echo.Echo, auditor *core.TTP) {
-	redirectWebPage.Set(e, auditor)
+func Route(e *echo.Echo, ttp *core.TTP) {
+	redirectWebPage.Set(e, ttp)
 }
