@@ -110,12 +110,6 @@ var getTACertApi = goutils.EchoRoute[ttpcore.TTP]{
 				return err
 			}
 
-			_, err = core.VerifyByAzure(req.Quote, ta.PublicKey, ttpcore.ATTEST_PROXY_UNIQUE_ID)
-			if err != nil {
-				c.Error(err)
-				return err
-			}
-
 			serv, err := ta.QueryServer().WithService().First(*ttp.DB.Ctx)
 			if err != nil {
 				c.Error(err)
@@ -127,6 +121,12 @@ var getTACertApi = goutils.EchoRoute[ttpcore.TTP]{
 			}
 
 			code, err := ta.QueryCode().First(*ttp.DB.Ctx)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			_, err = core.VerifyByAzure(req.Quote, ta.PublicKey, code.UniqueID)
 			if err != nil {
 				c.Error(err)
 				return err
