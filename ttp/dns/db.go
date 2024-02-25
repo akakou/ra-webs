@@ -1,8 +1,8 @@
 package dns
 
-import "github.com/akakou/ra_webs/ttp/core"
+import "github.com/akakou/ra_webs/ttp/db"
 
-func (s *Server) LoadDatabase(db *core.DB) error {
+func (s *Server) LoadDatabase(db *db.DB) error {
 	tas, err := db.Client.TA.Query().WithServer().All(*db.Ctx)
 	if err != nil {
 		return err

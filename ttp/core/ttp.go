@@ -7,19 +7,20 @@ import (
 	goutils "github.com/akakou/go-utils"
 	golangutils "github.com/akakou/golang-utils"
 	metact "github.com/akakou/meta-ct"
+	"github.com/akakou/ra_webs/ttp/db"
 	simplecertify "github.com/akakou/simple-certify"
 )
 
 var ATTEST_PROXY_UNIQUE_ID = []byte{}
 
 type TTP struct {
-	DB         *DB
+	DB         *db.DB
 	CA         *simplecertify.Certifier
 	CT         *metact.MetaCT
 	AdminToken string
 }
 
-func NewTTP(db *DB, ca *simplecertify.Certifier, ct *metact.MetaCT, adminToken string) (*TTP, error) {
+func NewTTP(db *db.DB, ca *simplecertify.Certifier, ct *metact.MetaCT, adminToken string) (*TTP, error) {
 	return &TTP{
 		DB:         db,
 		CA:         ca,
@@ -45,12 +46,12 @@ func DefaultTTP() (*TTP, error) {
 
 	caTempl := simplecertify.CATemplate()
 
-	dbc := DBConfig{
+	dbc := db.DBConfig{
 		Type:   dbType,
 		Config: dbConfig,
 	}
 
-	db, err := NewDB(&dbc)
+	db, err := db.NewDB(&dbc)
 	if err != nil {
 		return nil, fmt.Errorf("failed to init db: %w", err)
 	}
