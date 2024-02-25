@@ -1,7 +1,6 @@
 package ta
 
 import (
-	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
@@ -13,9 +12,14 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 )
 
-func (ap *AttestProxy) IssueAcmeCert(taId int, privKey *rsa.PrivateKey, quote string, e *echo.Echo) {
+func (ap *TA) IssueAcmeCert(e *echo.Echo) error {
+	quote, err := attestPublicKey(ap)
+	if err != nil {
+		return fmt.Errorf("failed to attest public key: %w", err)
+	}
+
 	acmeClient := acme.Client{DirectoryURL: autocert.DefaultACMEDirectory}
-	acmeClient.Key = privKey
+	acmeClient.Key = ap.PrivateKey
 
 	e.AutoTLSManager = autocert.Manager{
 		Client: &acmeClient,
@@ -28,12 +32,23 @@ func (ap *AttestProxy) IssueAcmeCert(taId int, privKey *rsa.PrivateKey, quote st
 			},
 		},
 	}
+
+	return nil
 }
 
-func (ap *AttestProxy) IssueTTPCert(taId int, privKey *rsa.PrivateKey, quote string, e *echo.Echo) error {
+func (ap *TA) IssueTTPCert(taId int, e *echo.Echo) error {
+	quote, err := attestPublicKey(ap)
+	if err != nil {
+		return fmt.Errorf("failed to attest public key: %w", err)
+	}
+
 	issueCertUrl := fmt.Sprintf(TTP_ISSUE_CERT, taId)
 
-	resp, err := ap.requestToTTP(issueCertUrl, string(""))
+	body := map[string]any{
+		"quote": quote,
+	}
+
+	resp, err := ap.requestToTTP(issueCertUrl, body)
 	if err != nil {
 		return fmt.Errorf("failed to register: %w", err)
 	}
@@ -47,7 +62,7 @@ func (ap *AttestProxy) IssueTTPCert(taId int, privKey *rsa.PrivateKey, quote str
 		Certificates: []tls.Certificate{
 			{
 				Certificate: [][]byte{cert.Raw},
-				PrivateKey:  privKey,
+				PrivateKey:  ap.PrivateKey,
 			},
 		},
 	}

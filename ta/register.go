@@ -3,7 +3,6 @@ package ta
 import (
 	"crypto/rsa"
 	"crypto/x509"
-	"encoding/json"
 	"fmt"
 	"strconv"
 )
@@ -12,20 +11,17 @@ var TTP_URL = ""
 var TTP_REGISTER_TA = TTP_URL + "ta/"
 var TTP_ISSUE_CERT = TTP_URL + "ta/%d/cert"
 
-func (ap *AttestProxy) Register(publicKey *rsa.PublicKey) (int, error) {
-	publicKeyBuf := x509.MarshalPKCS1PublicKey(publicKey)
+func (ap *TA) Register() (int, error) {
+	publicKey := ap.PrivateKey.Public()
+	publicKeyBuf := x509.MarshalPKCS1PublicKey(publicKey.(*rsa.PublicKey))
 
-	body, err := json.Marshal(map[string]interface{}{
+	body := map[string]any{
 		"public_key": publicKeyBuf,
 		"code_id":    ap.Config.CodeId,
 		"server_id":  ap.Config.ServerId,
-	})
-
-	if err != nil {
-		return 0, fmt.Errorf("failed to marshal public key: %w", err)
 	}
 
-	resp, err := ap.requestToTTP(TTP_REGISTER_TA, string(body))
+	resp, err := ap.requestToTTP(TTP_REGISTER_TA, body)
 	if err != nil {
 		return 0, fmt.Errorf("failed to register: %w", err)
 	}

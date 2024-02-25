@@ -4,34 +4,29 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"fmt"
-
-	"github.com/labstack/echo/v4"
 )
 
-type AttestProxyConfig struct {
+type TAConfig struct {
 	ServerId int
 	CodeId   int
 	Token    string
+	Type     REGISTER_TYPE
 }
 
-type AttestProxy struct {
-	Config     AttestProxyConfig
-	Echo       *echo.Echo
+type TA struct {
+	Config     TAConfig
 	PrivateKey *rsa.PrivateKey
 }
 
-func DefaultAttestProxy(config AttestProxyConfig) (*AttestProxy, error) {
-	echo := echo.New()
-
+func DefaultTA(config TAConfig) (*TA, error) {
 	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate rsa key: %w", err)
 	}
 
-	return &AttestProxy{
+	return &TA{
 		Config:     config,
 		PrivateKey: privKey,
-		Echo:       echo,
 	}, nil
 }
