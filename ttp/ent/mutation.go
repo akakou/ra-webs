@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/akakou/ra_webs/ttp/ent/ctaudit"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
 	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
@@ -26,11 +27,485 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeCTAudit  = "CTAudit"
 	TypeService  = "Service"
 	TypeTA       = "TA"
 	TypeTACode   = "TACode"
 	TypeTAServer = "TAServer"
 )
+
+// CTAuditMutation represents an operation that mutates the CTAudit nodes in the graph.
+type CTAuditMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	ct_valid      *bool
+	last_ct       *string
+	clearedFields map[string]struct{}
+	ta            map[int]struct{}
+	removedta     map[int]struct{}
+	clearedta     bool
+	done          bool
+	oldValue      func(context.Context) (*CTAudit, error)
+	predicates    []predicate.CTAudit
+}
+
+var _ ent.Mutation = (*CTAuditMutation)(nil)
+
+// ctauditOption allows management of the mutation configuration using functional options.
+type ctauditOption func(*CTAuditMutation)
+
+// newCTAuditMutation creates new mutation for the CTAudit entity.
+func newCTAuditMutation(c config, op Op, opts ...ctauditOption) *CTAuditMutation {
+	m := &CTAuditMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCTAudit,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCTAuditID sets the ID field of the mutation.
+func withCTAuditID(id int) ctauditOption {
+	return func(m *CTAuditMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CTAudit
+		)
+		m.oldValue = func(ctx context.Context) (*CTAudit, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CTAudit.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCTAudit sets the old CTAudit of the mutation.
+func withCTAudit(node *CTAudit) ctauditOption {
+	return func(m *CTAuditMutation) {
+		m.oldValue = func(context.Context) (*CTAudit, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CTAuditMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CTAuditMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CTAuditMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CTAuditMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CTAudit.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCtValid sets the "ct_valid" field.
+func (m *CTAuditMutation) SetCtValid(b bool) {
+	m.ct_valid = &b
+}
+
+// CtValid returns the value of the "ct_valid" field in the mutation.
+func (m *CTAuditMutation) CtValid() (r bool, exists bool) {
+	v := m.ct_valid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCtValid returns the old "ct_valid" field's value of the CTAudit entity.
+// If the CTAudit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CTAuditMutation) OldCtValid(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCtValid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCtValid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCtValid: %w", err)
+	}
+	return oldValue.CtValid, nil
+}
+
+// ResetCtValid resets all changes to the "ct_valid" field.
+func (m *CTAuditMutation) ResetCtValid() {
+	m.ct_valid = nil
+}
+
+// SetLastCt sets the "last_ct" field.
+func (m *CTAuditMutation) SetLastCt(s string) {
+	m.last_ct = &s
+}
+
+// LastCt returns the value of the "last_ct" field in the mutation.
+func (m *CTAuditMutation) LastCt() (r string, exists bool) {
+	v := m.last_ct
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastCt returns the old "last_ct" field's value of the CTAudit entity.
+// If the CTAudit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CTAuditMutation) OldLastCt(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastCt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastCt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastCt: %w", err)
+	}
+	return oldValue.LastCt, nil
+}
+
+// ResetLastCt resets all changes to the "last_ct" field.
+func (m *CTAuditMutation) ResetLastCt() {
+	m.last_ct = nil
+}
+
+// AddTumIDs adds the "ta" edge to the TA entity by ids.
+func (m *CTAuditMutation) AddTumIDs(ids ...int) {
+	if m.ta == nil {
+		m.ta = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.ta[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTa clears the "ta" edge to the TA entity.
+func (m *CTAuditMutation) ClearTa() {
+	m.clearedta = true
+}
+
+// TaCleared reports if the "ta" edge to the TA entity was cleared.
+func (m *CTAuditMutation) TaCleared() bool {
+	return m.clearedta
+}
+
+// RemoveTumIDs removes the "ta" edge to the TA entity by IDs.
+func (m *CTAuditMutation) RemoveTumIDs(ids ...int) {
+	if m.removedta == nil {
+		m.removedta = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.ta, ids[i])
+		m.removedta[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTa returns the removed IDs of the "ta" edge to the TA entity.
+func (m *CTAuditMutation) RemovedTaIDs() (ids []int) {
+	for id := range m.removedta {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TaIDs returns the "ta" edge IDs in the mutation.
+func (m *CTAuditMutation) TaIDs() (ids []int) {
+	for id := range m.ta {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTa resets all changes to the "ta" edge.
+func (m *CTAuditMutation) ResetTa() {
+	m.ta = nil
+	m.clearedta = false
+	m.removedta = nil
+}
+
+// Where appends a list predicates to the CTAuditMutation builder.
+func (m *CTAuditMutation) Where(ps ...predicate.CTAudit) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CTAuditMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CTAuditMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CTAudit, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CTAuditMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CTAuditMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CTAudit).
+func (m *CTAuditMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CTAuditMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.ct_valid != nil {
+		fields = append(fields, ctaudit.FieldCtValid)
+	}
+	if m.last_ct != nil {
+		fields = append(fields, ctaudit.FieldLastCt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CTAuditMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case ctaudit.FieldCtValid:
+		return m.CtValid()
+	case ctaudit.FieldLastCt:
+		return m.LastCt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CTAuditMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case ctaudit.FieldCtValid:
+		return m.OldCtValid(ctx)
+	case ctaudit.FieldLastCt:
+		return m.OldLastCt(ctx)
+	}
+	return nil, fmt.Errorf("unknown CTAudit field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CTAuditMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case ctaudit.FieldCtValid:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCtValid(v)
+		return nil
+	case ctaudit.FieldLastCt:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastCt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CTAudit field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CTAuditMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CTAuditMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CTAuditMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown CTAudit numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CTAuditMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CTAuditMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CTAuditMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown CTAudit nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CTAuditMutation) ResetField(name string) error {
+	switch name {
+	case ctaudit.FieldCtValid:
+		m.ResetCtValid()
+		return nil
+	case ctaudit.FieldLastCt:
+		m.ResetLastCt()
+		return nil
+	}
+	return fmt.Errorf("unknown CTAudit field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CTAuditMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.ta != nil {
+		edges = append(edges, ctaudit.EdgeTa)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CTAuditMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case ctaudit.EdgeTa:
+		ids := make([]ent.Value, 0, len(m.ta))
+		for id := range m.ta {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CTAuditMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedta != nil {
+		edges = append(edges, ctaudit.EdgeTa)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CTAuditMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case ctaudit.EdgeTa:
+		ids := make([]ent.Value, 0, len(m.removedta))
+		for id := range m.removedta {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CTAuditMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedta {
+		edges = append(edges, ctaudit.EdgeTa)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CTAuditMutation) EdgeCleared(name string) bool {
+	switch name {
+	case ctaudit.EdgeTa:
+		return m.clearedta
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CTAuditMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown CTAudit unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CTAuditMutation) ResetEdge(name string) error {
+	switch name {
+	case ctaudit.EdgeTa:
+		m.ResetTa()
+		return nil
+	}
+	return fmt.Errorf("unknown CTAudit edge %s", name)
+}
 
 // ServiceMutation represents an operation that mutates the Service nodes in the graph.
 type ServiceMutation struct {
@@ -645,20 +1120,21 @@ func (m *ServiceMutation) ResetEdge(name string) error {
 // TAMutation represents an operation that mutates the TA nodes in the graph.
 type TAMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	public_key    *[]byte
-	is_valid      *bool
-	last_ct       *string
-	clearedFields map[string]struct{}
-	code          *int
-	clearedcode   bool
-	server        *int
-	clearedserver bool
-	done          bool
-	oldValue      func(context.Context) (*TA, error)
-	predicates    []predicate.TA
+	op              Op
+	typ             string
+	id              *int
+	public_key      *[]byte
+	is_valid        *bool
+	clearedFields   map[string]struct{}
+	code            *int
+	clearedcode     bool
+	server          *int
+	clearedserver   bool
+	ct_audit        *int
+	clearedct_audit bool
+	done            bool
+	oldValue        func(context.Context) (*TA, error)
+	predicates      []predicate.TA
 }
 
 var _ ent.Mutation = (*TAMutation)(nil)
@@ -831,42 +1307,6 @@ func (m *TAMutation) ResetIsValid() {
 	m.is_valid = nil
 }
 
-// SetLastCt sets the "last_ct" field.
-func (m *TAMutation) SetLastCt(s string) {
-	m.last_ct = &s
-}
-
-// LastCt returns the value of the "last_ct" field in the mutation.
-func (m *TAMutation) LastCt() (r string, exists bool) {
-	v := m.last_ct
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLastCt returns the old "last_ct" field's value of the TA entity.
-// If the TA object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAMutation) OldLastCt(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLastCt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLastCt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLastCt: %w", err)
-	}
-	return oldValue.LastCt, nil
-}
-
-// ResetLastCt resets all changes to the "last_ct" field.
-func (m *TAMutation) ResetLastCt() {
-	m.last_ct = nil
-}
-
 // SetCodeID sets the "code" edge to the TACode entity by id.
 func (m *TAMutation) SetCodeID(id int) {
 	m.code = &id
@@ -945,6 +1385,45 @@ func (m *TAMutation) ResetServer() {
 	m.clearedserver = false
 }
 
+// SetCtAuditID sets the "ct_audit" edge to the CTAudit entity by id.
+func (m *TAMutation) SetCtAuditID(id int) {
+	m.ct_audit = &id
+}
+
+// ClearCtAudit clears the "ct_audit" edge to the CTAudit entity.
+func (m *TAMutation) ClearCtAudit() {
+	m.clearedct_audit = true
+}
+
+// CtAuditCleared reports if the "ct_audit" edge to the CTAudit entity was cleared.
+func (m *TAMutation) CtAuditCleared() bool {
+	return m.clearedct_audit
+}
+
+// CtAuditID returns the "ct_audit" edge ID in the mutation.
+func (m *TAMutation) CtAuditID() (id int, exists bool) {
+	if m.ct_audit != nil {
+		return *m.ct_audit, true
+	}
+	return
+}
+
+// CtAuditIDs returns the "ct_audit" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CtAuditID instead. It exists only for internal usage by the builders.
+func (m *TAMutation) CtAuditIDs() (ids []int) {
+	if id := m.ct_audit; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetCtAudit resets all changes to the "ct_audit" edge.
+func (m *TAMutation) ResetCtAudit() {
+	m.ct_audit = nil
+	m.clearedct_audit = false
+}
+
 // Where appends a list predicates to the TAMutation builder.
 func (m *TAMutation) Where(ps ...predicate.TA) {
 	m.predicates = append(m.predicates, ps...)
@@ -979,15 +1458,12 @@ func (m *TAMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TAMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 2)
 	if m.public_key != nil {
 		fields = append(fields, ta.FieldPublicKey)
 	}
 	if m.is_valid != nil {
 		fields = append(fields, ta.FieldIsValid)
-	}
-	if m.last_ct != nil {
-		fields = append(fields, ta.FieldLastCt)
 	}
 	return fields
 }
@@ -1001,8 +1477,6 @@ func (m *TAMutation) Field(name string) (ent.Value, bool) {
 		return m.PublicKey()
 	case ta.FieldIsValid:
 		return m.IsValid()
-	case ta.FieldLastCt:
-		return m.LastCt()
 	}
 	return nil, false
 }
@@ -1016,8 +1490,6 @@ func (m *TAMutation) OldField(ctx context.Context, name string) (ent.Value, erro
 		return m.OldPublicKey(ctx)
 	case ta.FieldIsValid:
 		return m.OldIsValid(ctx)
-	case ta.FieldLastCt:
-		return m.OldLastCt(ctx)
 	}
 	return nil, fmt.Errorf("unknown TA field %s", name)
 }
@@ -1040,13 +1512,6 @@ func (m *TAMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetIsValid(v)
-		return nil
-	case ta.FieldLastCt:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLastCt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown TA field %s", name)
@@ -1103,21 +1568,21 @@ func (m *TAMutation) ResetField(name string) error {
 	case ta.FieldIsValid:
 		m.ResetIsValid()
 		return nil
-	case ta.FieldLastCt:
-		m.ResetLastCt()
-		return nil
 	}
 	return fmt.Errorf("unknown TA field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TAMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.code != nil {
 		edges = append(edges, ta.EdgeCode)
 	}
 	if m.server != nil {
 		edges = append(edges, ta.EdgeServer)
+	}
+	if m.ct_audit != nil {
+		edges = append(edges, ta.EdgeCtAudit)
 	}
 	return edges
 }
@@ -1134,13 +1599,17 @@ func (m *TAMutation) AddedIDs(name string) []ent.Value {
 		if id := m.server; id != nil {
 			return []ent.Value{*id}
 		}
+	case ta.EdgeCtAudit:
+		if id := m.ct_audit; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TAMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	return edges
 }
 
@@ -1152,12 +1621,15 @@ func (m *TAMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TAMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedcode {
 		edges = append(edges, ta.EdgeCode)
 	}
 	if m.clearedserver {
 		edges = append(edges, ta.EdgeServer)
+	}
+	if m.clearedct_audit {
+		edges = append(edges, ta.EdgeCtAudit)
 	}
 	return edges
 }
@@ -1170,6 +1642,8 @@ func (m *TAMutation) EdgeCleared(name string) bool {
 		return m.clearedcode
 	case ta.EdgeServer:
 		return m.clearedserver
+	case ta.EdgeCtAudit:
+		return m.clearedct_audit
 	}
 	return false
 }
@@ -1184,6 +1658,9 @@ func (m *TAMutation) ClearEdge(name string) error {
 	case ta.EdgeServer:
 		m.ClearServer()
 		return nil
+	case ta.EdgeCtAudit:
+		m.ClearCtAudit()
+		return nil
 	}
 	return fmt.Errorf("unknown TA unique edge %s", name)
 }
@@ -1197,6 +1674,9 @@ func (m *TAMutation) ResetEdge(name string) error {
 		return nil
 	case ta.EdgeServer:
 		m.ResetServer()
+		return nil
+	case ta.EdgeCtAudit:
+		m.ResetCtAudit()
 		return nil
 	}
 	return fmt.Errorf("unknown TA edge %s", name)

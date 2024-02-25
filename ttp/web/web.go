@@ -16,17 +16,20 @@ var redirectWebPage = goutils.EchoRoute[core.TTP]{
 		return func(c echo.Context) error {
 			back := c.Request().Header.Get("Referer")
 
-			server, err := ttp.DB.Client.TAServer.Query().Where(taserver.DomainEQ(back)).WithTa().First(*ttp.DB.Ctx)
+			server, err := ttp.DB.Client.TAServer.Query().Where(taserver.DomainEQ(back)).First(*ttp.DB.Ctx)
+
 			if err != nil {
 				c.Error(err)
 				return err
 			}
 
-			if server.Edges.Ta == nil {
-				return c.String(http.StatusUnauthorized, "ta is not found")
+			ta, err := server.QueryTa().WithCtAudit().First(*ttp.DB.Ctx)
+			if err != nil {
+				c.Error(err)
+				return err
 			}
 
-			if !server.Edges.Ta.IsValid {
+			if !ta.IsValid || !ta.Edges.CtAudit.CtValid {
 				return c.String(http.StatusUnauthorized, "server is not valid")
 			}
 

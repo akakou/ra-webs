@@ -63,11 +63,6 @@ func IsValid(v bool) predicate.TA {
 	return predicate.TA(sql.FieldEQ(FieldIsValid, v))
 }
 
-// LastCt applies equality check predicate on the "last_ct" field. It's identical to LastCtEQ.
-func LastCt(v string) predicate.TA {
-	return predicate.TA(sql.FieldEQ(FieldLastCt, v))
-}
-
 // PublicKeyEQ applies the EQ predicate on the "public_key" field.
 func PublicKeyEQ(v []byte) predicate.TA {
 	return predicate.TA(sql.FieldEQ(FieldPublicKey, v))
@@ -118,71 +113,6 @@ func IsValidNEQ(v bool) predicate.TA {
 	return predicate.TA(sql.FieldNEQ(FieldIsValid, v))
 }
 
-// LastCtEQ applies the EQ predicate on the "last_ct" field.
-func LastCtEQ(v string) predicate.TA {
-	return predicate.TA(sql.FieldEQ(FieldLastCt, v))
-}
-
-// LastCtNEQ applies the NEQ predicate on the "last_ct" field.
-func LastCtNEQ(v string) predicate.TA {
-	return predicate.TA(sql.FieldNEQ(FieldLastCt, v))
-}
-
-// LastCtIn applies the In predicate on the "last_ct" field.
-func LastCtIn(vs ...string) predicate.TA {
-	return predicate.TA(sql.FieldIn(FieldLastCt, vs...))
-}
-
-// LastCtNotIn applies the NotIn predicate on the "last_ct" field.
-func LastCtNotIn(vs ...string) predicate.TA {
-	return predicate.TA(sql.FieldNotIn(FieldLastCt, vs...))
-}
-
-// LastCtGT applies the GT predicate on the "last_ct" field.
-func LastCtGT(v string) predicate.TA {
-	return predicate.TA(sql.FieldGT(FieldLastCt, v))
-}
-
-// LastCtGTE applies the GTE predicate on the "last_ct" field.
-func LastCtGTE(v string) predicate.TA {
-	return predicate.TA(sql.FieldGTE(FieldLastCt, v))
-}
-
-// LastCtLT applies the LT predicate on the "last_ct" field.
-func LastCtLT(v string) predicate.TA {
-	return predicate.TA(sql.FieldLT(FieldLastCt, v))
-}
-
-// LastCtLTE applies the LTE predicate on the "last_ct" field.
-func LastCtLTE(v string) predicate.TA {
-	return predicate.TA(sql.FieldLTE(FieldLastCt, v))
-}
-
-// LastCtContains applies the Contains predicate on the "last_ct" field.
-func LastCtContains(v string) predicate.TA {
-	return predicate.TA(sql.FieldContains(FieldLastCt, v))
-}
-
-// LastCtHasPrefix applies the HasPrefix predicate on the "last_ct" field.
-func LastCtHasPrefix(v string) predicate.TA {
-	return predicate.TA(sql.FieldHasPrefix(FieldLastCt, v))
-}
-
-// LastCtHasSuffix applies the HasSuffix predicate on the "last_ct" field.
-func LastCtHasSuffix(v string) predicate.TA {
-	return predicate.TA(sql.FieldHasSuffix(FieldLastCt, v))
-}
-
-// LastCtEqualFold applies the EqualFold predicate on the "last_ct" field.
-func LastCtEqualFold(v string) predicate.TA {
-	return predicate.TA(sql.FieldEqualFold(FieldLastCt, v))
-}
-
-// LastCtContainsFold applies the ContainsFold predicate on the "last_ct" field.
-func LastCtContainsFold(v string) predicate.TA {
-	return predicate.TA(sql.FieldContainsFold(FieldLastCt, v))
-}
-
 // HasCode applies the HasEdge predicate on the "code" edge.
 func HasCode() predicate.TA {
 	return predicate.TA(func(s *sql.Selector) {
@@ -221,6 +151,29 @@ func HasServer() predicate.TA {
 func HasServerWith(preds ...predicate.TAServer) predicate.TA {
 	return predicate.TA(func(s *sql.Selector) {
 		step := newServerStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCtAudit applies the HasEdge predicate on the "ct_audit" edge.
+func HasCtAudit() predicate.TA {
+	return predicate.TA(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, CtAuditTable, CtAuditColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCtAuditWith applies the HasEdge predicate on the "ct_audit" edge with a given conditions (other predicates).
+func HasCtAuditWith(preds ...predicate.CTAudit) predicate.TA {
+	return predicate.TA(func(s *sql.Selector) {
+		step := newCtAuditStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
