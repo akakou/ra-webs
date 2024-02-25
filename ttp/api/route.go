@@ -22,6 +22,7 @@ func Route(e *echo.Echo, ttp *ttpcore.TTP) {
 	getCodeApi.Set(e, ttp)
 	getServerApi.Set(e, ttp)
 	getTAApi.Set(e, ttp)
+	getTACertApi.Set(e, ttp)
 
 	postActivateServerApi.Set(e, ttp)
 	postActivateCodeApi.Set(e, ttp)

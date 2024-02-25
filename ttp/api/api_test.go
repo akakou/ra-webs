@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/akakou/ra_webs/ttp/core"
+	ttpcore "github.com/akakou/ra_webs/ttp/core"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -19,7 +19,7 @@ import (
 func TestAPI(t *testing.T) {
 	e := echo.New()
 	e.Debug = true
-	ttp, err := core.DefaultTTP()
+	ttp, err := ttpcore.DefaultTTP()
 	assert.NoError(t, err)
 
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
@@ -142,7 +142,27 @@ func TestAPI(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
-		fmt.Printf("%v", rec.Body.String())
+		assert.Equal(t, "1", rec.Body.String())
 	})
 
+	t.Run("TestGetTAStart", func(t *testing.T) {
+		path := "/ta/1/start"
+		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(""))
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+		rec := httptest.NewRecorder()
+
+		c := e.NewContext(req, rec)
+
+		c.SetPath(path)
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+
+		err = getTACertApi.F(ttp)(c)
+		assert.NoError(t, err)
+
+		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+		fmt.Printf("%v", rec.Body.String())
+	})
 }

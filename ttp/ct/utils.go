@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	metact "github.com/akakou/meta-ct"
-	"github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/db"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
@@ -36,13 +36,13 @@ func extractDomainLast(domain string) string {
 	return lastDomain
 }
 
-func revokeByDomain(db *core.DB, domains []string) {
+func revokeByDomain(db *db.DB, domains []string) {
 	for _, violatingDomain := range domains {
 		taServer, err := db.Client.TAServer.
 			Query().
 			WithTa().
 			Where(taserver.DomainEQ(violatingDomain)).
-			First(*db.Ctx)
+			Only(*db.Ctx)
 
 		if err != nil {
 			continue

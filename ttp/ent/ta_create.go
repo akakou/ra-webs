@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/akakou/ra_webs/ttp/ent/ctaudit"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
@@ -38,12 +39,6 @@ func (tc *TACreate) SetNillableIsValid(b *bool) *TACreate {
 	if b != nil {
 		tc.SetIsValid(*b)
 	}
-	return tc
-}
-
-// SetLastCt sets the "last_ct" field.
-func (tc *TACreate) SetLastCt(s string) *TACreate {
-	tc.mutation.SetLastCt(s)
 	return tc
 }
 
@@ -83,6 +78,25 @@ func (tc *TACreate) SetNillableServerID(id *int) *TACreate {
 // SetServer sets the "server" edge to the TAServer entity.
 func (tc *TACreate) SetServer(t *TAServer) *TACreate {
 	return tc.SetServerID(t.ID)
+}
+
+// SetCtAuditID sets the "ct_audit" edge to the CTAudit entity by ID.
+func (tc *TACreate) SetCtAuditID(id int) *TACreate {
+	tc.mutation.SetCtAuditID(id)
+	return tc
+}
+
+// SetNillableCtAuditID sets the "ct_audit" edge to the CTAudit entity by ID if the given value is not nil.
+func (tc *TACreate) SetNillableCtAuditID(id *int) *TACreate {
+	if id != nil {
+		tc = tc.SetCtAuditID(*id)
+	}
+	return tc
+}
+
+// SetCtAudit sets the "ct_audit" edge to the CTAudit entity.
+func (tc *TACreate) SetCtAudit(c *CTAudit) *TACreate {
+	return tc.SetCtAuditID(c.ID)
 }
 
 // Mutation returns the TAMutation object of the builder.
@@ -134,9 +148,6 @@ func (tc *TACreate) check() error {
 	if _, ok := tc.mutation.IsValid(); !ok {
 		return &ValidationError{Name: "is_valid", err: errors.New(`ent: missing required field "TA.is_valid"`)}
 	}
-	if _, ok := tc.mutation.LastCt(); !ok {
-		return &ValidationError{Name: "last_ct", err: errors.New(`ent: missing required field "TA.last_ct"`)}
-	}
 	return nil
 }
 
@@ -171,10 +182,6 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 		_spec.SetField(ta.FieldIsValid, field.TypeBool, value)
 		_node.IsValid = value
 	}
-	if value, ok := tc.mutation.LastCt(); ok {
-		_spec.SetField(ta.FieldLastCt, field.TypeString, value)
-		_node.LastCt = value
-	}
 	if nodes := tc.mutation.CodeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -206,6 +213,23 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.CtAuditIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   ta.CtAuditTable,
+			Columns: []string{ta.CtAuditColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ctaudit.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ta_ct_audit = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

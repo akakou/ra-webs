@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"github.com/akakou/ra_webs/ttp/ent/ctaudit"
 	"github.com/akakou/ra_webs/ttp/ent/schema"
 	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
@@ -14,6 +15,12 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	ctauditFields := schema.CTAudit{}.Fields()
+	_ = ctauditFields
+	// ctauditDescIsValid is the schema descriptor for is_valid field.
+	ctauditDescIsValid := ctauditFields[0].Descriptor()
+	// ctaudit.DefaultIsValid holds the default value on creation for the is_valid field.
+	ctaudit.DefaultIsValid = ctauditDescIsValid.Default.(bool)
 	serviceFields := schema.Service{}.Fields()
 	_ = serviceFields
 	// serviceDescHasActivated is the schema descriptor for has_activated field.

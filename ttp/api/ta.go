@@ -1,15 +1,14 @@
 package api
 
 import (
-	"crypto/x509/pkix"
 	"net/http"
+	"strconv"
 
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/core"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
-	simplecertify "github.com/akakou/simple-certify"
 	"github.com/labstack/echo/v4"
 )
 
@@ -61,25 +60,7 @@ var postTAApi = goutils.EchoRoute[ttpcore.TTP]{
 				return c.String(http.StatusUnauthorized, "code is not activated")
 			}
 
-			templ := simplecertify.ServerTemplate()
-			templ.PublicKey = req.PublicKey
-			templ.Subject = pkix.Name{
-				Country:      []string{"Japan"},
-				Organization: []string{"ra-webs"},
-				Locality:     []string{"Kanagawa"},
-				Province:     []string{"Yokohama"},
-				CommonName:   serv.Domain,
-			}
-
-			templ.Issuer = ttp.CA.Certificate.Subject
-			templ.Extensions = []pkix.Extension{
-				{
-					Id:    core.X509_EXTENSION_LABEL,
-					Value: code.UniqueID,
-				},
-			}
-
-			cert, err := ttp.CA.Certify(&templ)
+			ta, err := ttp.DB.Client.TA.Create().SetPublicKey(req.PublicKey).SetCode(code).SetIsValid(false).SetServer(serv).Save(*ttp.DB.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err
@@ -91,7 +72,80 @@ var postTAApi = goutils.EchoRoute[ttpcore.TTP]{
 			// 	return err
 			// }
 
-			return c.Blob(http.StatusOK, "application/x-x509-cert", cert.Raw)
+			return c.String(http.StatusOK, strconv.Itoa(ta.ID))
+		}
+	},
+}
+
+var getTACertApi = goutils.EchoRoute[ttpcore.TTP]{
+	Method: goutils.GET,
+	Path:   "/ta/:id/start",
+	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
+		return func(c echo.Context) error {
+			paramId := c.Param("id")
+			taId, err := strconv.Atoi(paramId)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			service, err := authenticateService(ttp, c)
+			if err != nil {
+				return c.String(http.StatusUnauthorized, "token is invalid")
+			}
+
+			ta, err := ttp.DB.Client.TA.Get(*ttp.DB.Ctx, taId)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			req := new(struct {
+				Quote string `json:"quote"`
+			})
+
+			err = c.Bind(req)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			serv, err := ta.QueryServer().WithService().Only(*ttp.DB.Ctx)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			if serv.Edges.Service.ID != service.ID {
+				return c.String(http.StatusUnauthorized, "ta is not authorized")
+			}
+
+			code, err := ta.QueryCode().Only(*ttp.DB.Ctx)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			_, err = core.VerifyByAzure(req.Quote, ta.PublicKey, code.UniqueID)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			cert, err := issueCertificate(serv.Domain, code.UniqueID, ttp.CA)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			ta.Update().SetIsValid(true).Save(*ttp.DB.Ctx)
+
+			resp := map[string]interface{}{
+				"cert":      cert,
+				"unique_id": code.UniqueID,
+			}
+
+			return c.JSON(http.StatusOK, resp)
 		}
 	},
 }
