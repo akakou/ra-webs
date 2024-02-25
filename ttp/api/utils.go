@@ -19,7 +19,7 @@ func authenticateService(ttp *ttpcore.TTP, c echo.Context) (*ent.Service, error)
 	authorization := c.Request().Header["Authorization"][0]
 	token := authorization[len("Bearer "):]
 
-	service, err := ttp.DB.Client.Service.Query().Where(service.TokenEQ(token)).First(*ttp.DB.Ctx)
+	service, err := ttp.DB.Client.Service.Query().Where(service.TokenEQ(token)).Only(*ttp.DB.Ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to authenticate service: %w", err)
 	}

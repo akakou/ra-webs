@@ -110,7 +110,7 @@ var getTACertApi = goutils.EchoRoute[ttpcore.TTP]{
 				return err
 			}
 
-			serv, err := ta.QueryServer().WithService().First(*ttp.DB.Ctx)
+			serv, err := ta.QueryServer().WithService().Only(*ttp.DB.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err
@@ -120,7 +120,7 @@ var getTACertApi = goutils.EchoRoute[ttpcore.TTP]{
 				return c.String(http.StatusUnauthorized, "ta is not authorized")
 			}
 
-			code, err := ta.QueryCode().First(*ttp.DB.Ctx)
+			code, err := ta.QueryCode().Only(*ttp.DB.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err

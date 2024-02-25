@@ -6,10 +6,10 @@ import (
 )
 
 func SelectTAByDomain(domain string, db *DB) (*ent.TA, error) {
-	serv, err := db.Client.TAServer.Query().Where(taserver.DomainEQ(domain)).First(*db.Ctx)
+	serv, err := db.Client.TAServer.Query().Where(taserver.DomainEQ(domain)).Only(*db.Ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return serv.QueryTa().WithCode().WithCtAudit().WithServer().First(*db.Ctx)
+	return serv.QueryTa().WithCode().WithCtAudit().WithServer().Only(*db.Ctx)
 }

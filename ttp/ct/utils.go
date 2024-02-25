@@ -42,7 +42,7 @@ func revokeByDomain(db *db.DB, domains []string) {
 			Query().
 			WithTa().
 			Where(taserver.DomainEQ(violatingDomain)).
-			First(*db.Ctx)
+			Only(*db.Ctx)
 
 		if err != nil {
 			continue
