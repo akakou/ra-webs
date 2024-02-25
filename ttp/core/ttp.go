@@ -10,6 +10,8 @@ import (
 	simplecertify "github.com/akakou/simple-certify"
 )
 
+var ATTEST_PROXY_UNIQUE_ID = []byte{}
+
 type TTP struct {
 	DB         *DB
 	CA         *simplecertify.Certifier
