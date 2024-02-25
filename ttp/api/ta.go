@@ -3,6 +3,7 @@ package api
 import (
 	"crypto/x509/pkix"
 	"net/http"
+	"strconv"
 
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/core"
@@ -61,8 +62,64 @@ var postTAApi = goutils.EchoRoute[ttpcore.TTP]{
 				return c.String(http.StatusUnauthorized, "code is not activated")
 			}
 
+			ta, err := ttp.DB.Client.TA.Create().SetPublicKey(req.PublicKey).SetCode(code).SetLastCt("").SetServer(serv).Save(*ttp.DB.Ctx)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			// err = ttp.ct.Subscribe(serv.Domain)
+			// if err != nil {
+			// 	c.Error(err)
+			// 	return err
+			// }
+
+			return c.String(http.StatusOK, strconv.Itoa(ta.ID))
+		}
+	},
+}
+
+var getTACertApi = goutils.EchoRoute[ttpcore.TTP]{
+	Method: goutils.GET,
+	Path:   "/ta/:id/cert",
+	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
+		return func(c echo.Context) error {
+			paramId := c.Param("id")
+			taId, err := strconv.Atoi(paramId)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			service, err := authenticateService(ttp, c)
+			if err != nil {
+				return c.String(http.StatusUnauthorized, "token is invalid")
+			}
+
+			ta, err := ttp.DB.Client.TA.Get(*ttp.DB.Ctx, taId)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			serv, err := ta.QueryServer().WithService().First(*ttp.DB.Ctx)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
+			if serv.Edges.Service.ID != service.ID {
+				return c.String(http.StatusUnauthorized, "ta is not authorized")
+			}
+
+			code, err := ta.QueryCode().First(*ttp.DB.Ctx)
+			if err != nil {
+				c.Error(err)
+				return err
+			}
+
 			templ := simplecertify.ServerTemplate()
-			templ.PublicKey = req.PublicKey
+			templ.PublicKey = ta.PublicKey
 			templ.Subject = pkix.Name{
 				Country:      []string{"Japan"},
 				Organization: []string{"ra-webs"},
@@ -84,12 +141,6 @@ var postTAApi = goutils.EchoRoute[ttpcore.TTP]{
 				c.Error(err)
 				return err
 			}
-
-			// err = ttp.ct.Subscribe(serv.Domain)
-			// if err != nil {
-			// 	c.Error(err)
-			// 	return err
-			// }
 
 			return c.Blob(http.StatusOK, "application/x-x509-cert", cert.Raw)
 		}

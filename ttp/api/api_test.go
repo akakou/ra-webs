@@ -142,7 +142,27 @@ func TestAPI(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
-		fmt.Printf("%v", rec.Body.String())
+		assert.Equal(t, "1", rec.Body.String())
 	})
 
+	t.Run("TestGetTACert", func(t *testing.T) {
+		path := "/ta/1/cert"
+		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(""))
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+		rec := httptest.NewRecorder()
+
+		c := e.NewContext(req, rec)
+
+		c.SetPath(path)
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+
+		err = getTACertApi.F(ttp)(c)
+		assert.NoError(t, err)
+
+		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+		fmt.Printf("%v", rec.Body.String())
+	})
 }
