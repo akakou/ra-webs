@@ -53,89 +53,89 @@ func IDLTE(id int) predicate.CTAudit {
 	return predicate.CTAudit(sql.FieldLTE(FieldID, id))
 }
 
-// CtValid applies equality check predicate on the "ct_valid" field. It's identical to CtValidEQ.
-func CtValid(v bool) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldEQ(FieldCtValid, v))
+// IsValid applies equality check predicate on the "is_valid" field. It's identical to IsValidEQ.
+func IsValid(v bool) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldEQ(FieldIsValid, v))
 }
 
-// LastCt applies equality check predicate on the "last_ct" field. It's identical to LastCtEQ.
-func LastCt(v string) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldEQ(FieldLastCt, v))
+// Last applies equality check predicate on the "last" field. It's identical to LastEQ.
+func Last(v string) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldEQ(FieldLast, v))
 }
 
-// CtValidEQ applies the EQ predicate on the "ct_valid" field.
-func CtValidEQ(v bool) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldEQ(FieldCtValid, v))
+// IsValidEQ applies the EQ predicate on the "is_valid" field.
+func IsValidEQ(v bool) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldEQ(FieldIsValid, v))
 }
 
-// CtValidNEQ applies the NEQ predicate on the "ct_valid" field.
-func CtValidNEQ(v bool) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldNEQ(FieldCtValid, v))
+// IsValidNEQ applies the NEQ predicate on the "is_valid" field.
+func IsValidNEQ(v bool) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldNEQ(FieldIsValid, v))
 }
 
-// LastCtEQ applies the EQ predicate on the "last_ct" field.
-func LastCtEQ(v string) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldEQ(FieldLastCt, v))
+// LastEQ applies the EQ predicate on the "last" field.
+func LastEQ(v string) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldEQ(FieldLast, v))
 }
 
-// LastCtNEQ applies the NEQ predicate on the "last_ct" field.
-func LastCtNEQ(v string) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldNEQ(FieldLastCt, v))
+// LastNEQ applies the NEQ predicate on the "last" field.
+func LastNEQ(v string) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldNEQ(FieldLast, v))
 }
 
-// LastCtIn applies the In predicate on the "last_ct" field.
-func LastCtIn(vs ...string) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldIn(FieldLastCt, vs...))
+// LastIn applies the In predicate on the "last" field.
+func LastIn(vs ...string) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldIn(FieldLast, vs...))
 }
 
-// LastCtNotIn applies the NotIn predicate on the "last_ct" field.
-func LastCtNotIn(vs ...string) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldNotIn(FieldLastCt, vs...))
+// LastNotIn applies the NotIn predicate on the "last" field.
+func LastNotIn(vs ...string) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldNotIn(FieldLast, vs...))
 }
 
-// LastCtGT applies the GT predicate on the "last_ct" field.
-func LastCtGT(v string) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldGT(FieldLastCt, v))
+// LastGT applies the GT predicate on the "last" field.
+func LastGT(v string) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldGT(FieldLast, v))
 }
 
-// LastCtGTE applies the GTE predicate on the "last_ct" field.
-func LastCtGTE(v string) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldGTE(FieldLastCt, v))
+// LastGTE applies the GTE predicate on the "last" field.
+func LastGTE(v string) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldGTE(FieldLast, v))
 }
 
-// LastCtLT applies the LT predicate on the "last_ct" field.
-func LastCtLT(v string) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldLT(FieldLastCt, v))
+// LastLT applies the LT predicate on the "last" field.
+func LastLT(v string) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldLT(FieldLast, v))
 }
 
-// LastCtLTE applies the LTE predicate on the "last_ct" field.
-func LastCtLTE(v string) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldLTE(FieldLastCt, v))
+// LastLTE applies the LTE predicate on the "last" field.
+func LastLTE(v string) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldLTE(FieldLast, v))
 }
 
-// LastCtContains applies the Contains predicate on the "last_ct" field.
-func LastCtContains(v string) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldContains(FieldLastCt, v))
+// LastContains applies the Contains predicate on the "last" field.
+func LastContains(v string) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldContains(FieldLast, v))
 }
 
-// LastCtHasPrefix applies the HasPrefix predicate on the "last_ct" field.
-func LastCtHasPrefix(v string) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldHasPrefix(FieldLastCt, v))
+// LastHasPrefix applies the HasPrefix predicate on the "last" field.
+func LastHasPrefix(v string) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldHasPrefix(FieldLast, v))
 }
 
-// LastCtHasSuffix applies the HasSuffix predicate on the "last_ct" field.
-func LastCtHasSuffix(v string) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldHasSuffix(FieldLastCt, v))
+// LastHasSuffix applies the HasSuffix predicate on the "last" field.
+func LastHasSuffix(v string) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldHasSuffix(FieldLast, v))
 }
 
-// LastCtEqualFold applies the EqualFold predicate on the "last_ct" field.
-func LastCtEqualFold(v string) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldEqualFold(FieldLastCt, v))
+// LastEqualFold applies the EqualFold predicate on the "last" field.
+func LastEqualFold(v string) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldEqualFold(FieldLast, v))
 }
 
-// LastCtContainsFold applies the ContainsFold predicate on the "last_ct" field.
-func LastCtContainsFold(v string) predicate.CTAudit {
-	return predicate.CTAudit(sql.FieldContainsFold(FieldLastCt, v))
+// LastContainsFold applies the ContainsFold predicate on the "last" field.
+func LastContainsFold(v string) predicate.CTAudit {
+	return predicate.CTAudit(sql.FieldContainsFold(FieldLast, v))
 }
 
 // HasTa applies the HasEdge predicate on the "ta" edge.

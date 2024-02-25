@@ -40,8 +40,8 @@ type CTAuditMutation struct {
 	op            Op
 	typ           string
 	id            *int
-	ct_valid      *bool
-	last_ct       *string
+	is_valid      *bool
+	last          *string
 	clearedFields map[string]struct{}
 	ta            map[int]struct{}
 	removedta     map[int]struct{}
@@ -149,76 +149,76 @@ func (m *CTAuditMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetCtValid sets the "ct_valid" field.
-func (m *CTAuditMutation) SetCtValid(b bool) {
-	m.ct_valid = &b
+// SetIsValid sets the "is_valid" field.
+func (m *CTAuditMutation) SetIsValid(b bool) {
+	m.is_valid = &b
 }
 
-// CtValid returns the value of the "ct_valid" field in the mutation.
-func (m *CTAuditMutation) CtValid() (r bool, exists bool) {
-	v := m.ct_valid
+// IsValid returns the value of the "is_valid" field in the mutation.
+func (m *CTAuditMutation) IsValid() (r bool, exists bool) {
+	v := m.is_valid
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldCtValid returns the old "ct_valid" field's value of the CTAudit entity.
+// OldIsValid returns the old "is_valid" field's value of the CTAudit entity.
 // If the CTAudit object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CTAuditMutation) OldCtValid(ctx context.Context) (v bool, err error) {
+func (m *CTAuditMutation) OldIsValid(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCtValid is only allowed on UpdateOne operations")
+		return v, errors.New("OldIsValid is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCtValid requires an ID field in the mutation")
+		return v, errors.New("OldIsValid requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCtValid: %w", err)
+		return v, fmt.Errorf("querying old value for OldIsValid: %w", err)
 	}
-	return oldValue.CtValid, nil
+	return oldValue.IsValid, nil
 }
 
-// ResetCtValid resets all changes to the "ct_valid" field.
-func (m *CTAuditMutation) ResetCtValid() {
-	m.ct_valid = nil
+// ResetIsValid resets all changes to the "is_valid" field.
+func (m *CTAuditMutation) ResetIsValid() {
+	m.is_valid = nil
 }
 
-// SetLastCt sets the "last_ct" field.
-func (m *CTAuditMutation) SetLastCt(s string) {
-	m.last_ct = &s
+// SetLast sets the "last" field.
+func (m *CTAuditMutation) SetLast(s string) {
+	m.last = &s
 }
 
-// LastCt returns the value of the "last_ct" field in the mutation.
-func (m *CTAuditMutation) LastCt() (r string, exists bool) {
-	v := m.last_ct
+// Last returns the value of the "last" field in the mutation.
+func (m *CTAuditMutation) Last() (r string, exists bool) {
+	v := m.last
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldLastCt returns the old "last_ct" field's value of the CTAudit entity.
+// OldLast returns the old "last" field's value of the CTAudit entity.
 // If the CTAudit object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CTAuditMutation) OldLastCt(ctx context.Context) (v string, err error) {
+func (m *CTAuditMutation) OldLast(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLastCt is only allowed on UpdateOne operations")
+		return v, errors.New("OldLast is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLastCt requires an ID field in the mutation")
+		return v, errors.New("OldLast requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLastCt: %w", err)
+		return v, fmt.Errorf("querying old value for OldLast: %w", err)
 	}
-	return oldValue.LastCt, nil
+	return oldValue.Last, nil
 }
 
-// ResetLastCt resets all changes to the "last_ct" field.
-func (m *CTAuditMutation) ResetLastCt() {
-	m.last_ct = nil
+// ResetLast resets all changes to the "last" field.
+func (m *CTAuditMutation) ResetLast() {
+	m.last = nil
 }
 
 // AddTumIDs adds the "ta" edge to the TA entity by ids.
@@ -310,11 +310,11 @@ func (m *CTAuditMutation) Type() string {
 // AddedFields().
 func (m *CTAuditMutation) Fields() []string {
 	fields := make([]string, 0, 2)
-	if m.ct_valid != nil {
-		fields = append(fields, ctaudit.FieldCtValid)
+	if m.is_valid != nil {
+		fields = append(fields, ctaudit.FieldIsValid)
 	}
-	if m.last_ct != nil {
-		fields = append(fields, ctaudit.FieldLastCt)
+	if m.last != nil {
+		fields = append(fields, ctaudit.FieldLast)
 	}
 	return fields
 }
@@ -324,10 +324,10 @@ func (m *CTAuditMutation) Fields() []string {
 // schema.
 func (m *CTAuditMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case ctaudit.FieldCtValid:
-		return m.CtValid()
-	case ctaudit.FieldLastCt:
-		return m.LastCt()
+	case ctaudit.FieldIsValid:
+		return m.IsValid()
+	case ctaudit.FieldLast:
+		return m.Last()
 	}
 	return nil, false
 }
@@ -337,10 +337,10 @@ func (m *CTAuditMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *CTAuditMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case ctaudit.FieldCtValid:
-		return m.OldCtValid(ctx)
-	case ctaudit.FieldLastCt:
-		return m.OldLastCt(ctx)
+	case ctaudit.FieldIsValid:
+		return m.OldIsValid(ctx)
+	case ctaudit.FieldLast:
+		return m.OldLast(ctx)
 	}
 	return nil, fmt.Errorf("unknown CTAudit field %s", name)
 }
@@ -350,19 +350,19 @@ func (m *CTAuditMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *CTAuditMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case ctaudit.FieldCtValid:
+	case ctaudit.FieldIsValid:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetCtValid(v)
+		m.SetIsValid(v)
 		return nil
-	case ctaudit.FieldLastCt:
+	case ctaudit.FieldLast:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetLastCt(v)
+		m.SetLast(v)
 		return nil
 	}
 	return fmt.Errorf("unknown CTAudit field %s", name)
@@ -413,11 +413,11 @@ func (m *CTAuditMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *CTAuditMutation) ResetField(name string) error {
 	switch name {
-	case ctaudit.FieldCtValid:
-		m.ResetCtValid()
+	case ctaudit.FieldIsValid:
+		m.ResetIsValid()
 		return nil
-	case ctaudit.FieldLastCt:
-		m.ResetLastCt()
+	case ctaudit.FieldLast:
+		m.ResetLast()
 		return nil
 	}
 	return fmt.Errorf("unknown CTAudit field %s", name)

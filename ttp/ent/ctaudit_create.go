@@ -20,23 +20,23 @@ type CTAuditCreate struct {
 	hooks    []Hook
 }
 
-// SetCtValid sets the "ct_valid" field.
-func (cac *CTAuditCreate) SetCtValid(b bool) *CTAuditCreate {
-	cac.mutation.SetCtValid(b)
+// SetIsValid sets the "is_valid" field.
+func (cac *CTAuditCreate) SetIsValid(b bool) *CTAuditCreate {
+	cac.mutation.SetIsValid(b)
 	return cac
 }
 
-// SetNillableCtValid sets the "ct_valid" field if the given value is not nil.
-func (cac *CTAuditCreate) SetNillableCtValid(b *bool) *CTAuditCreate {
+// SetNillableIsValid sets the "is_valid" field if the given value is not nil.
+func (cac *CTAuditCreate) SetNillableIsValid(b *bool) *CTAuditCreate {
 	if b != nil {
-		cac.SetCtValid(*b)
+		cac.SetIsValid(*b)
 	}
 	return cac
 }
 
-// SetLastCt sets the "last_ct" field.
-func (cac *CTAuditCreate) SetLastCt(s string) *CTAuditCreate {
-	cac.mutation.SetLastCt(s)
+// SetLast sets the "last" field.
+func (cac *CTAuditCreate) SetLast(s string) *CTAuditCreate {
+	cac.mutation.SetLast(s)
 	return cac
 }
 
@@ -90,19 +90,19 @@ func (cac *CTAuditCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (cac *CTAuditCreate) defaults() {
-	if _, ok := cac.mutation.CtValid(); !ok {
-		v := ctaudit.DefaultCtValid
-		cac.mutation.SetCtValid(v)
+	if _, ok := cac.mutation.IsValid(); !ok {
+		v := ctaudit.DefaultIsValid
+		cac.mutation.SetIsValid(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (cac *CTAuditCreate) check() error {
-	if _, ok := cac.mutation.CtValid(); !ok {
-		return &ValidationError{Name: "ct_valid", err: errors.New(`ent: missing required field "CTAudit.ct_valid"`)}
+	if _, ok := cac.mutation.IsValid(); !ok {
+		return &ValidationError{Name: "is_valid", err: errors.New(`ent: missing required field "CTAudit.is_valid"`)}
 	}
-	if _, ok := cac.mutation.LastCt(); !ok {
-		return &ValidationError{Name: "last_ct", err: errors.New(`ent: missing required field "CTAudit.last_ct"`)}
+	if _, ok := cac.mutation.Last(); !ok {
+		return &ValidationError{Name: "last", err: errors.New(`ent: missing required field "CTAudit.last"`)}
 	}
 	return nil
 }
@@ -130,13 +130,13 @@ func (cac *CTAuditCreate) createSpec() (*CTAudit, *sqlgraph.CreateSpec) {
 		_node = &CTAudit{config: cac.config}
 		_spec = sqlgraph.NewCreateSpec(ctaudit.Table, sqlgraph.NewFieldSpec(ctaudit.FieldID, field.TypeInt))
 	)
-	if value, ok := cac.mutation.CtValid(); ok {
-		_spec.SetField(ctaudit.FieldCtValid, field.TypeBool, value)
-		_node.CtValid = value
+	if value, ok := cac.mutation.IsValid(); ok {
+		_spec.SetField(ctaudit.FieldIsValid, field.TypeBool, value)
+		_node.IsValid = value
 	}
-	if value, ok := cac.mutation.LastCt(); ok {
-		_spec.SetField(ctaudit.FieldLastCt, field.TypeString, value)
-		_node.LastCt = value
+	if value, ok := cac.mutation.Last(); ok {
+		_spec.SetField(ctaudit.FieldLast, field.TypeString, value)
+		_node.Last = value
 	}
 	if nodes := cac.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -29,7 +29,7 @@ var redirectWebPage = goutils.EchoRoute[core.TTP]{
 				return err
 			}
 
-			if !ta.IsValid || !ta.Edges.CtAudit.CtValid {
+			if !ta.IsValid || !ta.Edges.CtAudit.IsValid {
 				return c.String(http.StatusUnauthorized, "server is not valid")
 			}
 

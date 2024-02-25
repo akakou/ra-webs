@@ -16,10 +16,10 @@ type CTAudit struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// CtValid holds the value of the "ct_valid" field.
-	CtValid bool `json:"ct_valid,omitempty"`
-	// LastCt holds the value of the "last_ct" field.
-	LastCt string `json:"last_ct,omitempty"`
+	// IsValid holds the value of the "is_valid" field.
+	IsValid bool `json:"is_valid,omitempty"`
+	// Last holds the value of the "last" field.
+	Last string `json:"last,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CTAuditQuery when eager-loading is set.
 	Edges        CTAuditEdges `json:"edges"`
@@ -49,11 +49,11 @@ func (*CTAudit) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case ctaudit.FieldCtValid:
+		case ctaudit.FieldIsValid:
 			values[i] = new(sql.NullBool)
 		case ctaudit.FieldID:
 			values[i] = new(sql.NullInt64)
-		case ctaudit.FieldLastCt:
+		case ctaudit.FieldLast:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -76,17 +76,17 @@ func (ca *CTAudit) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			ca.ID = int(value.Int64)
-		case ctaudit.FieldCtValid:
+		case ctaudit.FieldIsValid:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field ct_valid", values[i])
+				return fmt.Errorf("unexpected type %T for field is_valid", values[i])
 			} else if value.Valid {
-				ca.CtValid = value.Bool
+				ca.IsValid = value.Bool
 			}
-		case ctaudit.FieldLastCt:
+		case ctaudit.FieldLast:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field last_ct", values[i])
+				return fmt.Errorf("unexpected type %T for field last", values[i])
 			} else if value.Valid {
-				ca.LastCt = value.String
+				ca.Last = value.String
 			}
 		default:
 			ca.selectValues.Set(columns[i], values[i])
@@ -129,11 +129,11 @@ func (ca *CTAudit) String() string {
 	var builder strings.Builder
 	builder.WriteString("CTAudit(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ca.ID))
-	builder.WriteString("ct_valid=")
-	builder.WriteString(fmt.Sprintf("%v", ca.CtValid))
+	builder.WriteString("is_valid=")
+	builder.WriteString(fmt.Sprintf("%v", ca.IsValid))
 	builder.WriteString(", ")
-	builder.WriteString("last_ct=")
-	builder.WriteString(ca.LastCt)
+	builder.WriteString("last=")
+	builder.WriteString(ca.Last)
 	builder.WriteByte(')')
 	return builder.String()
 }

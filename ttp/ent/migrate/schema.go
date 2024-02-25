@@ -11,8 +11,8 @@ var (
 	// CtAuditsColumns holds the columns for the "ct_audits" table.
 	CtAuditsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "ct_valid", Type: field.TypeBool, Default: true},
-		{Name: "last_ct", Type: field.TypeString},
+		{Name: "is_valid", Type: field.TypeBool, Default: true},
+		{Name: "last", Type: field.TypeString},
 	}
 	// CtAuditsTable holds the schema information for the "ct_audits" table.
 	CtAuditsTable = &schema.Table{

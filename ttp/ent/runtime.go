@@ -17,10 +17,10 @@ import (
 func init() {
 	ctauditFields := schema.CTAudit{}.Fields()
 	_ = ctauditFields
-	// ctauditDescCtValid is the schema descriptor for ct_valid field.
-	ctauditDescCtValid := ctauditFields[0].Descriptor()
-	// ctaudit.DefaultCtValid holds the default value on creation for the ct_valid field.
-	ctaudit.DefaultCtValid = ctauditDescCtValid.Default.(bool)
+	// ctauditDescIsValid is the schema descriptor for is_valid field.
+	ctauditDescIsValid := ctauditFields[0].Descriptor()
+	// ctaudit.DefaultIsValid holds the default value on creation for the is_valid field.
+	ctaudit.DefaultIsValid = ctauditDescIsValid.Default.(bool)
 	serviceFields := schema.Service{}.Fields()
 	_ = serviceFields
 	// serviceDescHasActivated is the schema descriptor for has_activated field.

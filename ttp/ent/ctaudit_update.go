@@ -28,30 +28,30 @@ func (cau *CTAuditUpdate) Where(ps ...predicate.CTAudit) *CTAuditUpdate {
 	return cau
 }
 
-// SetCtValid sets the "ct_valid" field.
-func (cau *CTAuditUpdate) SetCtValid(b bool) *CTAuditUpdate {
-	cau.mutation.SetCtValid(b)
+// SetIsValid sets the "is_valid" field.
+func (cau *CTAuditUpdate) SetIsValid(b bool) *CTAuditUpdate {
+	cau.mutation.SetIsValid(b)
 	return cau
 }
 
-// SetNillableCtValid sets the "ct_valid" field if the given value is not nil.
-func (cau *CTAuditUpdate) SetNillableCtValid(b *bool) *CTAuditUpdate {
+// SetNillableIsValid sets the "is_valid" field if the given value is not nil.
+func (cau *CTAuditUpdate) SetNillableIsValid(b *bool) *CTAuditUpdate {
 	if b != nil {
-		cau.SetCtValid(*b)
+		cau.SetIsValid(*b)
 	}
 	return cau
 }
 
-// SetLastCt sets the "last_ct" field.
-func (cau *CTAuditUpdate) SetLastCt(s string) *CTAuditUpdate {
-	cau.mutation.SetLastCt(s)
+// SetLast sets the "last" field.
+func (cau *CTAuditUpdate) SetLast(s string) *CTAuditUpdate {
+	cau.mutation.SetLast(s)
 	return cau
 }
 
-// SetNillableLastCt sets the "last_ct" field if the given value is not nil.
-func (cau *CTAuditUpdate) SetNillableLastCt(s *string) *CTAuditUpdate {
+// SetNillableLast sets the "last" field if the given value is not nil.
+func (cau *CTAuditUpdate) SetNillableLast(s *string) *CTAuditUpdate {
 	if s != nil {
-		cau.SetLastCt(*s)
+		cau.SetLast(*s)
 	}
 	return cau
 }
@@ -133,11 +133,11 @@ func (cau *CTAuditUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := cau.mutation.CtValid(); ok {
-		_spec.SetField(ctaudit.FieldCtValid, field.TypeBool, value)
+	if value, ok := cau.mutation.IsValid(); ok {
+		_spec.SetField(ctaudit.FieldIsValid, field.TypeBool, value)
 	}
-	if value, ok := cau.mutation.LastCt(); ok {
-		_spec.SetField(ctaudit.FieldLastCt, field.TypeString, value)
+	if value, ok := cau.mutation.Last(); ok {
+		_spec.SetField(ctaudit.FieldLast, field.TypeString, value)
 	}
 	if cau.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -204,30 +204,30 @@ type CTAuditUpdateOne struct {
 	mutation *CTAuditMutation
 }
 
-// SetCtValid sets the "ct_valid" field.
-func (cauo *CTAuditUpdateOne) SetCtValid(b bool) *CTAuditUpdateOne {
-	cauo.mutation.SetCtValid(b)
+// SetIsValid sets the "is_valid" field.
+func (cauo *CTAuditUpdateOne) SetIsValid(b bool) *CTAuditUpdateOne {
+	cauo.mutation.SetIsValid(b)
 	return cauo
 }
 
-// SetNillableCtValid sets the "ct_valid" field if the given value is not nil.
-func (cauo *CTAuditUpdateOne) SetNillableCtValid(b *bool) *CTAuditUpdateOne {
+// SetNillableIsValid sets the "is_valid" field if the given value is not nil.
+func (cauo *CTAuditUpdateOne) SetNillableIsValid(b *bool) *CTAuditUpdateOne {
 	if b != nil {
-		cauo.SetCtValid(*b)
+		cauo.SetIsValid(*b)
 	}
 	return cauo
 }
 
-// SetLastCt sets the "last_ct" field.
-func (cauo *CTAuditUpdateOne) SetLastCt(s string) *CTAuditUpdateOne {
-	cauo.mutation.SetLastCt(s)
+// SetLast sets the "last" field.
+func (cauo *CTAuditUpdateOne) SetLast(s string) *CTAuditUpdateOne {
+	cauo.mutation.SetLast(s)
 	return cauo
 }
 
-// SetNillableLastCt sets the "last_ct" field if the given value is not nil.
-func (cauo *CTAuditUpdateOne) SetNillableLastCt(s *string) *CTAuditUpdateOne {
+// SetNillableLast sets the "last" field if the given value is not nil.
+func (cauo *CTAuditUpdateOne) SetNillableLast(s *string) *CTAuditUpdateOne {
 	if s != nil {
-		cauo.SetLastCt(*s)
+		cauo.SetLast(*s)
 	}
 	return cauo
 }
@@ -339,11 +339,11 @@ func (cauo *CTAuditUpdateOne) sqlSave(ctx context.Context) (_node *CTAudit, err 
 			}
 		}
 	}
-	if value, ok := cauo.mutation.CtValid(); ok {
-		_spec.SetField(ctaudit.FieldCtValid, field.TypeBool, value)
+	if value, ok := cauo.mutation.IsValid(); ok {
+		_spec.SetField(ctaudit.FieldIsValid, field.TypeBool, value)
 	}
-	if value, ok := cauo.mutation.LastCt(); ok {
-		_spec.SetField(ctaudit.FieldLastCt, field.TypeString, value)
+	if value, ok := cauo.mutation.Last(); ok {
+		_spec.SetField(ctaudit.FieldLast, field.TypeString, value)
 	}
 	if cauo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{

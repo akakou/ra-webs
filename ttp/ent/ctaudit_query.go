@@ -298,12 +298,12 @@ func (caq *CTAuditQuery) WithTa(opts ...func(*TAQuery)) *CTAuditQuery {
 // Example:
 //
 //	var v []struct {
-//		CtValid bool `json:"ct_valid,omitempty"`
+//		IsValid bool `json:"is_valid,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.CTAudit.Query().
-//		GroupBy(ctaudit.FieldCtValid).
+//		GroupBy(ctaudit.FieldIsValid).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (caq *CTAuditQuery) GroupBy(field string, fields ...string) *CTAuditGroupBy {
@@ -321,11 +321,11 @@ func (caq *CTAuditQuery) GroupBy(field string, fields ...string) *CTAuditGroupBy
 // Example:
 //
 //	var v []struct {
-//		CtValid bool `json:"ct_valid,omitempty"`
+//		IsValid bool `json:"is_valid,omitempty"`
 //	}
 //
 //	client.CTAudit.Query().
-//		Select(ctaudit.FieldCtValid).
+//		Select(ctaudit.FieldIsValid).
 //		Scan(ctx, &v)
 func (caq *CTAuditQuery) Select(fields ...string) *CTAuditSelect {
 	caq.ctx.Fields = append(caq.ctx.Fields, fields...)

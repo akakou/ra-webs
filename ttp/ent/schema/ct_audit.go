@@ -14,8 +14,8 @@ type CTAudit struct {
 // Fields of the TACTAudit.
 func (CTAudit) Fields() []ent.Field {
 	return []ent.Field{
-		field.Bool("ct_valid").Default(true),
-		field.String("last_ct"),
+		field.Bool("is_valid").Default(true),
+		field.String("last"),
 	}
 }
 

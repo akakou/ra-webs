@@ -12,10 +12,10 @@ const (
 	Label = "ct_audit"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldCtValid holds the string denoting the ct_valid field in the database.
-	FieldCtValid = "ct_valid"
-	// FieldLastCt holds the string denoting the last_ct field in the database.
-	FieldLastCt = "last_ct"
+	// FieldIsValid holds the string denoting the is_valid field in the database.
+	FieldIsValid = "is_valid"
+	// FieldLast holds the string denoting the last field in the database.
+	FieldLast = "last"
 	// EdgeTa holds the string denoting the ta edge name in mutations.
 	EdgeTa = "ta"
 	// Table holds the table name of the ctaudit in the database.
@@ -32,8 +32,8 @@ const (
 // Columns holds all SQL columns for ctaudit fields.
 var Columns = []string{
 	FieldID,
-	FieldCtValid,
-	FieldLastCt,
+	FieldIsValid,
+	FieldLast,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -47,8 +47,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultCtValid holds the default value on creation for the "ct_valid" field.
-	DefaultCtValid bool
+	// DefaultIsValid holds the default value on creation for the "is_valid" field.
+	DefaultIsValid bool
 )
 
 // OrderOption defines the ordering options for the CTAudit queries.
@@ -59,14 +59,14 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByCtValid orders the results by the ct_valid field.
-func ByCtValid(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCtValid, opts...).ToFunc()
+// ByIsValid orders the results by the is_valid field.
+func ByIsValid(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsValid, opts...).ToFunc()
 }
 
-// ByLastCt orders the results by the last_ct field.
-func ByLastCt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLastCt, opts...).ToFunc()
+// ByLast orders the results by the last field.
+func ByLast(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLast, opts...).ToFunc()
 }
 
 // ByTaCount orders the results by ta count.

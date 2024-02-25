@@ -42,7 +42,7 @@ func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
 		return fmt.Errorf("failed to check ct logs: %w", err)
 	}
 
-	_, err = ta.Edges.CtAudit.Update().SetLastCt(cert.Id).Save(*ttp.DB.Ctx)
+	_, err = ta.Edges.CtAudit.Update().SetLast(cert.Id).Save(*ttp.DB.Ctx)
 	if err != nil {
 		return fmt.Errorf("failed to update ct audit: %w", err)
 	}
