@@ -94,7 +94,8 @@ var getTACertApi = goutils.EchoRoute[ttpcore.TTP]{
 				return c.String(http.StatusUnauthorized, "token is invalid")
 			}
 
-			ta, err := ttp.DB.Client.TA.Get(*ttp.DB.Ctx, taId)
+			ta, err := ttp.DB.SelectTA(taId)
+
 			if err != nil {
 				c.Error(err)
 				return err
@@ -116,23 +117,17 @@ var getTACertApi = goutils.EchoRoute[ttpcore.TTP]{
 				return err
 			}
 
-			serv, err := ta.QueryServer().WithService().First(*ttp.DB.Ctx)
+			taservice, err := ta.Edges.Server.QueryService().Only(*ttp.DB.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err
 			}
 
-			if serv.Edges.Service.ID != service.ID {
+			if taservice.ID != service.ID {
 				return c.String(http.StatusUnauthorized, "ta is not authorized")
 			}
 
-			code, err := ta.QueryCode().First(*ttp.DB.Ctx)
-			if err != nil {
-				c.Error(err)
-				return err
-			}
-
-			cert, err := issueCertificate(serv.Domain, code.UniqueID, ttp.CA)
+			cert, err := issueCertificate(ta.Edges.Server.Domain, ta.Edges.Code.UniqueID, ttp.CA)
 			if err != nil {
 				c.Error(err)
 				return err
@@ -142,7 +137,7 @@ var getTACertApi = goutils.EchoRoute[ttpcore.TTP]{
 
 			resp := map[string]interface{}{
 				"cert":      cert,
-				"unique_id": code.UniqueID,
+				"unique_id": ta.Edges.Code.UniqueID,
 			}
 
 			return c.JSON(http.StatusOK, resp)
