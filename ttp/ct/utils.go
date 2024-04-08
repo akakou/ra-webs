@@ -36,20 +36,31 @@ func extractDomainLast(domain string) string {
 	return lastDomain
 }
 
-func revokeByDomain(db *db.DB, domains []string) {
-	for _, violatingDomain := range domains {
-		taServer, err := db.Client.TAServer.
-			Query().
-			WithTa().
-			Where(taserver.DomainEQ(violatingDomain)).
-			Only(*db.Ctx)
+func revokeTAbyDomain(domain string, db *db.DB) error {
+	taServer, err := db.Client.TAServer.
+		Query().
+		WithTa().
+		Where(taserver.DomainEQ(domain)).
+		Only(*db.Ctx)
+
+	if err != nil {
+		return nil
+	}
+
+	for _, ta := range taServer.Edges.Ta {
+		ta.IsValid = false
+		_, err := ta.Update().Save(*db.Ctx)
 
 		if err != nil {
-			continue
+			return err
 		}
+	}
 
-		ta := taServer.Edges.Ta
-		ta.IsValid = false
-		ta.Update().Save(*db.Ctx)
+	return nil
+}
+
+func revokeTAByDomains(db *db.DB, domains []string) {
+	for _, domain := range domains {
+		revokeTAbyDomain(domain, db)
 	}
 }
