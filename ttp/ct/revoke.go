@@ -29,7 +29,7 @@ func revokeTAbyDomain(domain string, db *db.DB) error {
 	return nil
 }
 
-func revokeTAByDomains(db *db.DB, domains []string) {
+func revokeTAByDomains(domains []string, db *db.DB) {
 	for _, domain := range domains {
 		revokeTAbyDomain(domain, db)
 	}

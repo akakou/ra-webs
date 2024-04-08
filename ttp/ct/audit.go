@@ -12,14 +12,9 @@ import (
 )
 
 func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
-	_ta := ttp.DB.Client.TA.Create()
-
-	// validate the domain
 	domain, err := validateDomains(cert.Domains)
-
 	if err != nil {
-		revokeTAByDomains(ttp.DB, cert.Domains)
-		return fmt.Errorf("domain violation: %w", err)
+		revokeTAByDomains(cert.Domains, ttp.DB)
 	}
 
 	// get the last ta from ta server
@@ -33,18 +28,25 @@ func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
 	}
 
 	// fetch and check the status of last ta
-	lastTA, _ := taServ.QueryTa().Order(ent.Desc(ta.FieldID)).First(*ttp.DB.Ctx)
+	lastTA, err := taServ.QueryTa().Order(ent.Desc(ta.FieldID)).First(*ttp.DB.Ctx)
 
-	if lastTA != nil && !lastTA.IsValid {
-		return fmt.Errorf("server is not valid")
+	if err != nil && !ent.IsNotFound(err) {
+		return fmt.Errorf("failed to check ct logs: %w", err)
 	}
 
-	// validate quotes
-	report, err := validateAttestation(cert)
+	if lastTA != nil && !lastTA.IsValid {
+		return fmt.Errorf("last TA is invalid: %w", err)
+	}
 
+	_ta := ttp.DB.Client.TA.Create().
+		SetServer(taServ).
+		SetPublicKey([]byte{}).
+		SetIsValid(false).
+		SaveX(*ttp.DB.Ctx)
+
+	report, err := validateAttestation(cert)
 	if err != nil {
-		revokeTA(lastTA, ttp.DB)
-		return fmt.Errorf("failed to check ct logs: %w", err)
+		return fmt.Errorf("failed to get validate quote: %w", err)
 	}
 
 	// check if the ta code has been registered
@@ -54,21 +56,14 @@ func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
 		Only(*ttp.DB.Ctx)
 
 	if err != nil {
-		revokeTA(lastTA, ttp.DB)
 		return fmt.Errorf("failed to get ta code: %w", err)
 	}
 
-	// save ta
-	_, err = _ta.SetCode(taCode).
-		SetServer(taServ).
-		SetPublicKey(report.Data).
+	_ta.Update().
+		SetCode(taCode).
+		SetPublicKey([]byte(cert.PublicKeyHashSha256)).
 		SetIsValid(true).
-		Save(*ttp.DB.Ctx)
-
-	if err != nil {
-		revokeTA(lastTA, ttp.DB)
-		return fmt.Errorf("failed to create ta: %w", err)
-	}
+		SaveX(*ttp.DB.Ctx)
 
 	return nil
 }
