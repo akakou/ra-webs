@@ -5,6 +5,8 @@ import (
 
 	metact "github.com/akakou/meta-ct"
 	"github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/ent"
+	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
@@ -12,29 +14,34 @@ import (
 var ISSUER_NAME = "Let's Encrypt"
 
 func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
-	ta := ttp.DB.Client.TA.Create()
+	_ta := ttp.DB.Client.TA.Create()
 	domain, violatingDomains, err := validateDomains(cert.Domains)
 
-	if err != nil || cert.IssuerName != ISSUER_NAME {
-		revokeByDomain(ttp.DB, violatingDomains)
+	if err != nil {
+		revokeTAByDomains(ttp.DB, violatingDomains)
 		return fmt.Errorf("domain violation: %w", err)
 	}
 
 	taServ, err := ttp.DB.Client.TAServer.
 		Query().
 		Where(taserver.DomainEQ(domain)).
-		WithTa().
 		Only(*ttp.DB.Ctx)
 
 	if err != nil {
 		return fmt.Errorf("failed to get ta info: %w", err)
 	}
 
+	lastTA, _ := taServ.QueryTa().Order(ent.Desc(ta.FieldID)).First(*ttp.DB.Ctx)
+
+	if lastTA != nil && !lastTA.IsValid {
+		return fmt.Errorf("server is not valid")
+	}
+
 	report, err := validateAttestation(cert)
 
 	if err != nil {
-		ta.SetIsValid(false)
-		ta.Save(*ttp.DB.Ctx)
+		_ta.SetIsValid(false)
+		_ta.Save(*ttp.DB.Ctx)
 		return fmt.Errorf("failed to check ct logs: %w", err)
 	}
 
@@ -44,11 +51,11 @@ func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
 		Only(*ttp.DB.Ctx)
 
 	if err != nil {
-		ta.SetIsValid(false)
+		_ta.SetIsValid(false)
 		return fmt.Errorf("failed to get ta code: %w", err)
 	}
 
-	ta.SetCode(taCode).
+	_, err = _ta.SetCode(taCode).
 		SetServer(taServ).
 		SetPublicKey(report.Data).
 		SetIsValid(true).
