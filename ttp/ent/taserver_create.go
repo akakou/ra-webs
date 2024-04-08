@@ -27,12 +27,6 @@ func (tsc *TAServerCreate) SetDomain(s string) *TAServerCreate {
 	return tsc
 }
 
-// SetIP sets the "ip" field.
-func (tsc *TAServerCreate) SetIP(s string) *TAServerCreate {
-	tsc.mutation.SetIP(s)
-	return tsc
-}
-
 // SetHasActivated sets the "has_activated" field.
 func (tsc *TAServerCreate) SetHasActivated(b bool) *TAServerCreate {
 	tsc.mutation.SetHasActivated(b)
@@ -131,9 +125,6 @@ func (tsc *TAServerCreate) check() error {
 	if _, ok := tsc.mutation.Domain(); !ok {
 		return &ValidationError{Name: "domain", err: errors.New(`ent: missing required field "TAServer.domain"`)}
 	}
-	if _, ok := tsc.mutation.IP(); !ok {
-		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "TAServer.ip"`)}
-	}
 	if _, ok := tsc.mutation.HasActivated(); !ok {
 		return &ValidationError{Name: "has_activated", err: errors.New(`ent: missing required field "TAServer.has_activated"`)}
 	}
@@ -166,10 +157,6 @@ func (tsc *TAServerCreate) createSpec() (*TAServer, *sqlgraph.CreateSpec) {
 	if value, ok := tsc.mutation.Domain(); ok {
 		_spec.SetField(taserver.FieldDomain, field.TypeString, value)
 		_node.Domain = value
-	}
-	if value, ok := tsc.mutation.IP(); ok {
-		_spec.SetField(taserver.FieldIP, field.TypeString, value)
-		_node.IP = value
 	}
 	if value, ok := tsc.mutation.HasActivated(); ok {
 		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)

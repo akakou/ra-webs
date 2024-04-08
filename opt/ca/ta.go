@@ -1,15 +1,11 @@
-package api
+package ca
 
 import (
 	"net/http"
 	"strconv"
 
 	goutils "github.com/akakou/go-utils"
-	"github.com/akakou/ra_webs/core"
-	ttpcore "github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/ent/ta"
-	"github.com/akakou/ra_webs/ttp/ent/taserver"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 )
 
 var postTAApi = goutils.EchoRoute[ttpcore.TTP]{

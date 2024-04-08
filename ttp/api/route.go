@@ -16,13 +16,9 @@ func Route(e *echo.Echo, ttp *ttpcore.TTP) {
 
 	postCodeApi.Set(e, ttp)
 	postServerApi.Set(e, ttp)
-	postTAApi.Set(e, ttp)
-	certApi.Set(e, ttp)
 
 	getCodeApi.Set(e, ttp)
 	getServerApi.Set(e, ttp)
-	getTAApi.Set(e, ttp)
-	getTACertApi.Set(e, ttp)
 
 	postActivateServerApi.Set(e, ttp)
 	postActivateCodeApi.Set(e, ttp)

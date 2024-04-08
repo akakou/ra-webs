@@ -2329,7 +2329,6 @@ type TAServerMutation struct {
 	typ            string
 	id             *int
 	domain         *string
-	ip             *string
 	has_activated  *bool
 	clearedFields  map[string]struct{}
 	ta             *int
@@ -2473,42 +2472,6 @@ func (m *TAServerMutation) OldDomain(ctx context.Context) (v string, err error) 
 // ResetDomain resets all changes to the "domain" field.
 func (m *TAServerMutation) ResetDomain() {
 	m.domain = nil
-}
-
-// SetIP sets the "ip" field.
-func (m *TAServerMutation) SetIP(s string) {
-	m.ip = &s
-}
-
-// IP returns the value of the "ip" field in the mutation.
-func (m *TAServerMutation) IP() (r string, exists bool) {
-	v := m.ip
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIP returns the old "ip" field's value of the TAServer entity.
-// If the TAServer object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAServerMutation) OldIP(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIP is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIP requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIP: %w", err)
-	}
-	return oldValue.IP, nil
-}
-
-// ResetIP resets all changes to the "ip" field.
-func (m *TAServerMutation) ResetIP() {
-	m.ip = nil
 }
 
 // SetHasActivated sets the "has_activated" field.
@@ -2659,12 +2622,9 @@ func (m *TAServerMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TAServerMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 2)
 	if m.domain != nil {
 		fields = append(fields, taserver.FieldDomain)
-	}
-	if m.ip != nil {
-		fields = append(fields, taserver.FieldIP)
 	}
 	if m.has_activated != nil {
 		fields = append(fields, taserver.FieldHasActivated)
@@ -2679,8 +2639,6 @@ func (m *TAServerMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case taserver.FieldDomain:
 		return m.Domain()
-	case taserver.FieldIP:
-		return m.IP()
 	case taserver.FieldHasActivated:
 		return m.HasActivated()
 	}
@@ -2694,8 +2652,6 @@ func (m *TAServerMutation) OldField(ctx context.Context, name string) (ent.Value
 	switch name {
 	case taserver.FieldDomain:
 		return m.OldDomain(ctx)
-	case taserver.FieldIP:
-		return m.OldIP(ctx)
 	case taserver.FieldHasActivated:
 		return m.OldHasActivated(ctx)
 	}
@@ -2713,13 +2669,6 @@ func (m *TAServerMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDomain(v)
-		return nil
-	case taserver.FieldIP:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIP(v)
 		return nil
 	case taserver.FieldHasActivated:
 		v, ok := value.(bool)
@@ -2779,9 +2728,6 @@ func (m *TAServerMutation) ResetField(name string) error {
 	switch name {
 	case taserver.FieldDomain:
 		m.ResetDomain()
-		return nil
-	case taserver.FieldIP:
-		m.ResetIP()
 		return nil
 	case taserver.FieldHasActivated:
 		m.ResetHasActivated()

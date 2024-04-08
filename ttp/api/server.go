@@ -21,13 +21,11 @@ var postServerApi = goutils.EchoRoute[ttpcore.TTP]{
 			}
 
 			req := new(struct {
-				IP     string `json:"ip"`
 				Domain string `json:"domain"`
 			})
 
 			taServerCreate := ttp.DB.Client.TAServer.
 				Create().
-				SetIP(req.IP).
 				SetDomain(req.Domain).
 				SetService(service)
 

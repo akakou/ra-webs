@@ -20,8 +20,6 @@ type TAServer struct {
 	ID int `json:"id,omitempty"`
 	// Domain holds the value of the "domain" field.
 	Domain string `json:"domain,omitempty"`
-	// IP holds the value of the "ip" field.
-	IP string `json:"ip,omitempty"`
 	// HasActivated holds the value of the "has_activated" field.
 	HasActivated bool `json:"has_activated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -78,7 +76,7 @@ func (*TAServer) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case taserver.FieldID:
 			values[i] = new(sql.NullInt64)
-		case taserver.FieldDomain, taserver.FieldIP:
+		case taserver.FieldDomain:
 			values[i] = new(sql.NullString)
 		case taserver.ForeignKeys[0]: // ta_server
 			values[i] = new(sql.NullInt64)
@@ -110,12 +108,6 @@ func (ts *TAServer) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field domain", values[i])
 			} else if value.Valid {
 				ts.Domain = value.String
-			}
-		case taserver.FieldIP:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field ip", values[i])
-			} else if value.Valid {
-				ts.IP = value.String
 			}
 		case taserver.FieldHasActivated:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -185,9 +177,6 @@ func (ts *TAServer) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", ts.ID))
 	builder.WriteString("domain=")
 	builder.WriteString(ts.Domain)
-	builder.WriteString(", ")
-	builder.WriteString("ip=")
-	builder.WriteString(ts.IP)
 	builder.WriteString(", ")
 	builder.WriteString("has_activated=")
 	builder.WriteString(fmt.Sprintf("%v", ts.HasActivated))

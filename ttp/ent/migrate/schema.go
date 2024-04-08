@@ -88,7 +88,6 @@ var (
 	TaServersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "domain", Type: field.TypeString, Unique: true},
-		{Name: "ip", Type: field.TypeString, Unique: true},
 		{Name: "has_activated", Type: field.TypeBool, Default: false},
 		{Name: "ta_server", Type: field.TypeInt, Unique: true, Nullable: true},
 		{Name: "ta_server_service", Type: field.TypeInt, Nullable: true},
@@ -101,13 +100,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ta_servers_tas_server",
-				Columns:    []*schema.Column{TaServersColumns[4]},
+				Columns:    []*schema.Column{TaServersColumns[3]},
 				RefColumns: []*schema.Column{TasColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "ta_servers_services_service",
-				Columns:    []*schema.Column{TaServersColumns[5]},
+				Columns:    []*schema.Column{TaServersColumns[4]},
 				RefColumns: []*schema.Column{ServicesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

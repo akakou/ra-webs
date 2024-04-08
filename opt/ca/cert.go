@@ -1,12 +1,10 @@
-package api
+package ca
 
 import (
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
-	ttpcore "github.com/akakou/ra_webs/ttp/core"
-
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 )
 
 var certApi = goutils.EchoRoute[ttpcore.TTP]{

@@ -42,7 +42,7 @@ func init() {
 	taserverFields := schema.TAServer{}.Fields()
 	_ = taserverFields
 	// taserverDescHasActivated is the schema descriptor for has_activated field.
-	taserverDescHasActivated := taserverFields[2].Descriptor()
+	taserverDescHasActivated := taserverFields[1].Descriptor()
 	// taserver.DefaultHasActivated holds the default value on creation for the has_activated field.
 	taserver.DefaultHasActivated = taserverDescHasActivated.Default.(bool)
 }

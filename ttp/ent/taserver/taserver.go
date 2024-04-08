@@ -14,8 +14,6 @@ const (
 	FieldID = "id"
 	// FieldDomain holds the string denoting the domain field in the database.
 	FieldDomain = "domain"
-	// FieldIP holds the string denoting the ip field in the database.
-	FieldIP = "ip"
 	// FieldHasActivated holds the string denoting the has_activated field in the database.
 	FieldHasActivated = "has_activated"
 	// EdgeTa holds the string denoting the ta edge name in mutations.
@@ -44,7 +42,6 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldDomain,
-	FieldIP,
 	FieldHasActivated,
 }
 
@@ -86,11 +83,6 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByDomain orders the results by the domain field.
 func ByDomain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDomain, opts...).ToFunc()
-}
-
-// ByIP orders the results by the ip field.
-func ByIP(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIP, opts...).ToFunc()
 }
 
 // ByHasActivated orders the results by the has_activated field.
