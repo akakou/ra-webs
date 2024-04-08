@@ -177,7 +177,7 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ta.ServerTable,
 			Columns: []string{ta.ServerColumn},
@@ -190,7 +190,7 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tu.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ta.ServerTable,
 			Columns: []string{ta.ServerColumn},
@@ -402,7 +402,7 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 	}
 	if tuo.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ta.ServerTable,
 			Columns: []string{ta.ServerColumn},
@@ -415,7 +415,7 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 	}
 	if nodes := tuo.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ta.ServerTable,
 			Columns: []string{ta.ServerColumn},

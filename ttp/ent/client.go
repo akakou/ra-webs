@@ -524,7 +524,7 @@ func (c *TAClient) QueryServer(t *TA) *TAServerQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ta.Table, ta.FieldID, id),
 			sqlgraph.To(taserver.Table, taserver.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, ta.ServerTable, ta.ServerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, ta.ServerTable, ta.ServerColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -838,7 +838,7 @@ func (c *TAServerClient) QueryTa(ts *TAServer) *TAQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(taserver.Table, taserver.FieldID, id),
 			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, taserver.TaTable, taserver.TaColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, taserver.TaTable, taserver.TaColumn),
 		)
 		fromV = sqlgraph.Neighbors(ts.driver.Dialect(), step)
 		return fromV, nil

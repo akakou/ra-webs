@@ -26,6 +26,7 @@ type TA struct {
 	// The values are being populated by the TAQuery when eager-loading is set.
 	Edges        TAEdges `json:"edges"`
 	ta_code      *int
+	ta_server    *int
 	selectValues sql.SelectValues
 }
 
@@ -79,6 +80,8 @@ func (*TA) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case ta.ForeignKeys[0]: // ta_code
 			values[i] = new(sql.NullInt64)
+		case ta.ForeignKeys[1]: // ta_server
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -118,6 +121,13 @@ func (t *TA) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				t.ta_code = new(int)
 				*t.ta_code = int(value.Int64)
+			}
+		case ta.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field ta_server", value)
+			} else if value.Valid {
+				t.ta_server = new(int)
+				*t.ta_server = int(value.Int64)
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])

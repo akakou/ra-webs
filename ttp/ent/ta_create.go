@@ -181,7 +181,7 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 	}
 	if nodes := tc.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ta.ServerTable,
 			Columns: []string{ta.ServerColumn},
@@ -193,6 +193,7 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.ta_server = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

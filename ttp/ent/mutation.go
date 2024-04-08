@@ -1797,7 +1797,8 @@ type TAServerMutation struct {
 	domain         *string
 	has_activated  *bool
 	clearedFields  map[string]struct{}
-	ta             *int
+	ta             map[int]struct{}
+	removedta      map[int]struct{}
 	clearedta      bool
 	service        *int
 	clearedservice bool
@@ -1976,9 +1977,14 @@ func (m *TAServerMutation) ResetHasActivated() {
 	m.has_activated = nil
 }
 
-// SetTaID sets the "ta" edge to the TA entity by id.
-func (m *TAServerMutation) SetTaID(id int) {
-	m.ta = &id
+// AddTumIDs adds the "ta" edge to the TA entity by ids.
+func (m *TAServerMutation) AddTumIDs(ids ...int) {
+	if m.ta == nil {
+		m.ta = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.ta[ids[i]] = struct{}{}
+	}
 }
 
 // ClearTa clears the "ta" edge to the TA entity.
@@ -1991,20 +1997,29 @@ func (m *TAServerMutation) TaCleared() bool {
 	return m.clearedta
 }
 
-// TaID returns the "ta" edge ID in the mutation.
-func (m *TAServerMutation) TaID() (id int, exists bool) {
-	if m.ta != nil {
-		return *m.ta, true
+// RemoveTumIDs removes the "ta" edge to the TA entity by IDs.
+func (m *TAServerMutation) RemoveTumIDs(ids ...int) {
+	if m.removedta == nil {
+		m.removedta = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.ta, ids[i])
+		m.removedta[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTa returns the removed IDs of the "ta" edge to the TA entity.
+func (m *TAServerMutation) RemovedTaIDs() (ids []int) {
+	for id := range m.removedta {
+		ids = append(ids, id)
 	}
 	return
 }
 
 // TaIDs returns the "ta" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TaID instead. It exists only for internal usage by the builders.
 func (m *TAServerMutation) TaIDs() (ids []int) {
-	if id := m.ta; id != nil {
-		ids = append(ids, *id)
+	for id := range m.ta {
+		ids = append(ids, id)
 	}
 	return
 }
@@ -2013,6 +2028,7 @@ func (m *TAServerMutation) TaIDs() (ids []int) {
 func (m *TAServerMutation) ResetTa() {
 	m.ta = nil
 	m.clearedta = false
+	m.removedta = nil
 }
 
 // SetServiceID sets the "service" edge to the Service entity by id.
@@ -2219,9 +2235,11 @@ func (m *TAServerMutation) AddedEdges() []string {
 func (m *TAServerMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case taserver.EdgeTa:
-		if id := m.ta; id != nil {
-			return []ent.Value{*id}
+		ids := make([]ent.Value, 0, len(m.ta))
+		for id := range m.ta {
+			ids = append(ids, id)
 		}
+		return ids
 	case taserver.EdgeService:
 		if id := m.service; id != nil {
 			return []ent.Value{*id}
@@ -2233,12 +2251,23 @@ func (m *TAServerMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TAServerMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
+	if m.removedta != nil {
+		edges = append(edges, taserver.EdgeTa)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *TAServerMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case taserver.EdgeTa:
+		ids := make([]ent.Value, 0, len(m.removedta))
+		for id := range m.removedta {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
@@ -2270,9 +2299,6 @@ func (m *TAServerMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *TAServerMutation) ClearEdge(name string) error {
 	switch name {
-	case taserver.EdgeTa:
-		m.ClearTa()
-		return nil
 	case taserver.EdgeService:
 		m.ClearService()
 		return nil

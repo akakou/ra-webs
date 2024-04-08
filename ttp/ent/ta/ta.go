@@ -30,7 +30,7 @@ const (
 	// CodeColumn is the table column denoting the code relation/edge.
 	CodeColumn = "ta_code"
 	// ServerTable is the table that holds the server relation/edge.
-	ServerTable = "ta_servers"
+	ServerTable = "tas"
 	// ServerInverseTable is the table name for the TAServer entity.
 	// It exists in this package in order to avoid circular dependency with the "taserver" package.
 	ServerInverseTable = "ta_servers"
@@ -49,6 +49,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"ta_code",
+	"ta_server",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -108,6 +109,6 @@ func newServerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ServerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, ServerTable, ServerColumn),
+		sqlgraph.Edge(sqlgraph.M2O, false, ServerTable, ServerColumn),
 	)
 }

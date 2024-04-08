@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -99,7 +98,7 @@ func (tq *TAQuery) QueryServer() *TAServerQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ta.Table, ta.FieldID, selector),
 			sqlgraph.To(taserver.Table, taserver.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, ta.ServerTable, ta.ServerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, ta.ServerTable, ta.ServerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -413,7 +412,7 @@ func (tq *TAQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA, error
 			tq.withServer != nil,
 		}
 	)
-	if tq.withCode != nil {
+	if tq.withCode != nil || tq.withServer != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -485,30 +484,34 @@ func (tq *TAQuery) loadCode(ctx context.Context, query *TACodeQuery, nodes []*TA
 	return nil
 }
 func (tq *TAQuery) loadServer(ctx context.Context, query *TAServerQuery, nodes []*TA, init func(*TA), assign func(*TA, *TAServer)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*TA)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TA)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
+		if nodes[i].ta_server == nil {
+			continue
+		}
+		fk := *nodes[i].ta_server
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.withFKs = true
-	query.Where(predicate.TAServer(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(ta.ServerColumn), fks...))
-	}))
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(taserver.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.ta_server
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "ta_server" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "ta_server" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "ta_server" returned %v`, n.ID)
 		}
-		assign(node, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }

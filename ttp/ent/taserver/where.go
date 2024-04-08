@@ -143,7 +143,7 @@ func HasTa() predicate.TAServer {
 	return predicate.TAServer(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, TaTable, TaColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, TaTable, TaColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
