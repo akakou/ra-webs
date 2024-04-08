@@ -9,7 +9,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/akakou/ra_webs/ttp/ent/service"
-	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
@@ -20,14 +19,11 @@ type TAServer struct {
 	ID int `json:"id,omitempty"`
 	// Domain holds the value of the "domain" field.
 	Domain string `json:"domain,omitempty"`
-	// IP holds the value of the "ip" field.
-	IP string `json:"ip,omitempty"`
 	// HasActivated holds the value of the "has_activated" field.
 	HasActivated bool `json:"has_activated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TAServerQuery when eager-loading is set.
 	Edges             TAServerEdges `json:"edges"`
-	ta_server         *int
 	ta_server_service *int
 	selectValues      sql.SelectValues
 }
@@ -35,7 +31,7 @@ type TAServer struct {
 // TAServerEdges holds the relations/edges for other nodes in the graph.
 type TAServerEdges struct {
 	// Ta holds the value of the ta edge.
-	Ta *TA `json:"ta,omitempty"`
+	Ta []*TA `json:"ta,omitempty"`
 	// Service holds the value of the service edge.
 	Service *Service `json:"service,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -44,13 +40,9 @@ type TAServerEdges struct {
 }
 
 // TaOrErr returns the Ta value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TAServerEdges) TaOrErr() (*TA, error) {
+// was not loaded in eager-loading.
+func (e TAServerEdges) TaOrErr() ([]*TA, error) {
 	if e.loadedTypes[0] {
-		if e.Ta == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: ta.Label}
-		}
 		return e.Ta, nil
 	}
 	return nil, &NotLoadedError{edge: "ta"}
@@ -78,11 +70,9 @@ func (*TAServer) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case taserver.FieldID:
 			values[i] = new(sql.NullInt64)
-		case taserver.FieldDomain, taserver.FieldIP:
+		case taserver.FieldDomain:
 			values[i] = new(sql.NullString)
-		case taserver.ForeignKeys[0]: // ta_server
-			values[i] = new(sql.NullInt64)
-		case taserver.ForeignKeys[1]: // ta_server_service
+		case taserver.ForeignKeys[0]: // ta_server_service
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -111,12 +101,6 @@ func (ts *TAServer) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ts.Domain = value.String
 			}
-		case taserver.FieldIP:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field ip", values[i])
-			} else if value.Valid {
-				ts.IP = value.String
-			}
 		case taserver.FieldHasActivated:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field has_activated", values[i])
@@ -124,13 +108,6 @@ func (ts *TAServer) assignValues(columns []string, values []any) error {
 				ts.HasActivated = value.Bool
 			}
 		case taserver.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field ta_server", value)
-			} else if value.Valid {
-				ts.ta_server = new(int)
-				*ts.ta_server = int(value.Int64)
-			}
-		case taserver.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field ta_server_service", value)
 			} else if value.Valid {
@@ -185,9 +162,6 @@ func (ts *TAServer) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", ts.ID))
 	builder.WriteString("domain=")
 	builder.WriteString(ts.Domain)
-	builder.WriteString(", ")
-	builder.WriteString("ip=")
-	builder.WriteString(ts.IP)
 	builder.WriteString(", ")
 	builder.WriteString("has_activated=")
 	builder.WriteString(fmt.Sprintf("%v", ts.HasActivated))

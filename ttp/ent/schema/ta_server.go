@@ -15,7 +15,6 @@ type TAServer struct {
 func (TAServer) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("domain").Unique(),
-		field.String("ip").Unique(),
 		field.Bool("has_activated").Default(false),
 	}
 }
@@ -23,7 +22,7 @@ func (TAServer) Fields() []ent.Field {
 // Edges of the TA.
 func (TAServer) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("ta", TA.Type).Ref("server").Unique(),
+		edge.From("ta", TA.Type).Ref("server"),
 		edge.To("service", Service.Type).Unique(),
 	}
 }

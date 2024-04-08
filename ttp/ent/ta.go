@@ -8,7 +8,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra_webs/ttp/ent/ctaudit"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
@@ -27,7 +26,7 @@ type TA struct {
 	// The values are being populated by the TAQuery when eager-loading is set.
 	Edges        TAEdges `json:"edges"`
 	ta_code      *int
-	ta_ct_audit  *int
+	ta_server    *int
 	selectValues sql.SelectValues
 }
 
@@ -37,11 +36,9 @@ type TAEdges struct {
 	Code *TACode `json:"code,omitempty"`
 	// Server holds the value of the server edge.
 	Server *TAServer `json:"server,omitempty"`
-	// CtAudit holds the value of the ct_audit edge.
-	CtAudit *CTAudit `json:"ct_audit,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [2]bool
 }
 
 // CodeOrErr returns the Code value or an error if the edge
@@ -70,19 +67,6 @@ func (e TAEdges) ServerOrErr() (*TAServer, error) {
 	return nil, &NotLoadedError{edge: "server"}
 }
 
-// CtAuditOrErr returns the CtAudit value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TAEdges) CtAuditOrErr() (*CTAudit, error) {
-	if e.loadedTypes[2] {
-		if e.CtAudit == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: ctaudit.Label}
-		}
-		return e.CtAudit, nil
-	}
-	return nil, &NotLoadedError{edge: "ct_audit"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*TA) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -96,7 +80,7 @@ func (*TA) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case ta.ForeignKeys[0]: // ta_code
 			values[i] = new(sql.NullInt64)
-		case ta.ForeignKeys[1]: // ta_ct_audit
+		case ta.ForeignKeys[1]: // ta_server
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -140,10 +124,10 @@ func (t *TA) assignValues(columns []string, values []any) error {
 			}
 		case ta.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field ta_ct_audit", value)
+				return fmt.Errorf("unexpected type %T for edge-field ta_server", value)
 			} else if value.Valid {
-				t.ta_ct_audit = new(int)
-				*t.ta_ct_audit = int(value.Int64)
+				t.ta_server = new(int)
+				*t.ta_server = int(value.Int64)
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -166,11 +150,6 @@ func (t *TA) QueryCode() *TACodeQuery {
 // QueryServer queries the "server" edge of the TA entity.
 func (t *TA) QueryServer() *TAServerQuery {
 	return NewTAClient(t.config).QueryServer(t)
-}
-
-// QueryCtAudit queries the "ct_audit" edge of the TA entity.
-func (t *TA) QueryCtAudit() *CTAuditQuery {
-	return NewTAClient(t.config).QueryCtAudit(t)
 }
 
 // Update returns a builder for updating this TA.

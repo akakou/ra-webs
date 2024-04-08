@@ -4,14 +4,12 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra_webs/ttp/ent/ctaudit"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
@@ -21,14 +19,13 @@ import (
 // TAQuery is the builder for querying TA entities.
 type TAQuery struct {
 	config
-	ctx         *QueryContext
-	order       []ta.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.TA
-	withCode    *TACodeQuery
-	withServer  *TAServerQuery
-	withCtAudit *CTAuditQuery
-	withFKs     bool
+	ctx        *QueryContext
+	order      []ta.OrderOption
+	inters     []Interceptor
+	predicates []predicate.TA
+	withCode   *TACodeQuery
+	withServer *TAServerQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -101,29 +98,7 @@ func (tq *TAQuery) QueryServer() *TAServerQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ta.Table, ta.FieldID, selector),
 			sqlgraph.To(taserver.Table, taserver.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, ta.ServerTable, ta.ServerColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryCtAudit chains the current query on the "ct_audit" edge.
-func (tq *TAQuery) QueryCtAudit() *CTAuditQuery {
-	query := (&CTAuditClient{config: tq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := tq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ta.Table, ta.FieldID, selector),
-			sqlgraph.To(ctaudit.Table, ctaudit.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, ta.CtAuditTable, ta.CtAuditColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, ta.ServerTable, ta.ServerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,14 +293,13 @@ func (tq *TAQuery) Clone() *TAQuery {
 		return nil
 	}
 	return &TAQuery{
-		config:      tq.config,
-		ctx:         tq.ctx.Clone(),
-		order:       append([]ta.OrderOption{}, tq.order...),
-		inters:      append([]Interceptor{}, tq.inters...),
-		predicates:  append([]predicate.TA{}, tq.predicates...),
-		withCode:    tq.withCode.Clone(),
-		withServer:  tq.withServer.Clone(),
-		withCtAudit: tq.withCtAudit.Clone(),
+		config:     tq.config,
+		ctx:        tq.ctx.Clone(),
+		order:      append([]ta.OrderOption{}, tq.order...),
+		inters:     append([]Interceptor{}, tq.inters...),
+		predicates: append([]predicate.TA{}, tq.predicates...),
+		withCode:   tq.withCode.Clone(),
+		withServer: tq.withServer.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
@@ -351,17 +325,6 @@ func (tq *TAQuery) WithServer(opts ...func(*TAServerQuery)) *TAQuery {
 		opt(query)
 	}
 	tq.withServer = query
-	return tq
-}
-
-// WithCtAudit tells the query-builder to eager-load the nodes that are connected to
-// the "ct_audit" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TAQuery) WithCtAudit(opts ...func(*CTAuditQuery)) *TAQuery {
-	query := (&CTAuditClient{config: tq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	tq.withCtAudit = query
 	return tq
 }
 
@@ -444,13 +407,12 @@ func (tq *TAQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA, error
 		nodes       = []*TA{}
 		withFKs     = tq.withFKs
 		_spec       = tq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [2]bool{
 			tq.withCode != nil,
 			tq.withServer != nil,
-			tq.withCtAudit != nil,
 		}
 	)
-	if tq.withCode != nil || tq.withCtAudit != nil {
+	if tq.withCode != nil || tq.withServer != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -483,12 +445,6 @@ func (tq *TAQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA, error
 	if query := tq.withServer; query != nil {
 		if err := tq.loadServer(ctx, query, nodes, nil,
 			func(n *TA, e *TAServer) { n.Edges.Server = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := tq.withCtAudit; query != nil {
-		if err := tq.loadCtAudit(ctx, query, nodes, nil,
-			func(n *TA, e *CTAudit) { n.Edges.CtAudit = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -528,41 +484,13 @@ func (tq *TAQuery) loadCode(ctx context.Context, query *TACodeQuery, nodes []*TA
 	return nil
 }
 func (tq *TAQuery) loadServer(ctx context.Context, query *TAServerQuery, nodes []*TA, init func(*TA), assign func(*TA, *TAServer)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*TA)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.withFKs = true
-	query.Where(predicate.TAServer(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(ta.ServerColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.ta_server
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "ta_server" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "ta_server" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-func (tq *TAQuery) loadCtAudit(ctx context.Context, query *CTAuditQuery, nodes []*TA, init func(*TA), assign func(*TA, *CTAudit)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*TA)
 	for i := range nodes {
-		if nodes[i].ta_ct_audit == nil {
+		if nodes[i].ta_server == nil {
 			continue
 		}
-		fk := *nodes[i].ta_ct_audit
+		fk := *nodes[i].ta_server
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -571,7 +499,7 @@ func (tq *TAQuery) loadCtAudit(ctx context.Context, query *CTAuditQuery, nodes [
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(ctaudit.IDIn(ids...))
+	query.Where(taserver.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -579,7 +507,7 @@ func (tq *TAQuery) loadCtAudit(ctx context.Context, query *CTAuditQuery, nodes [
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "ta_ct_audit" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "ta_server" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

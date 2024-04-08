@@ -6,9 +6,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// CTAudit is the predicate function for ctaudit builders.
-type CTAudit func(*sql.Selector)
-
 // Service is the predicate function for service builders.
 type Service func(*sql.Selector)
 

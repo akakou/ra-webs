@@ -31,14 +31,10 @@ func AttestByAzure(data []byte) (string, error) {
 	return token, nil
 }
 
-func VerifyByAzure(token string, data []byte, uniqueId []byte) (*attestation.Report, error) {
+func VerifyByAzure(token string, data []byte) (*attestation.Report, error) {
 	report, err := attestation.VerifyAzureAttestationToken(token, ATTEST_PROVIDER_URL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify attestation token: %w", err)
-	}
-
-	if !bytes.Equal(report.UniqueID, uniqueId) {
-		return nil, errors.New("token contains invalid product id")
 	}
 
 	if report.SecurityVersion < SECURITY_VERSION {

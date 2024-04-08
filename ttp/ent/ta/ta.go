@@ -20,8 +20,6 @@ const (
 	EdgeCode = "code"
 	// EdgeServer holds the string denoting the server edge name in mutations.
 	EdgeServer = "server"
-	// EdgeCtAudit holds the string denoting the ct_audit edge name in mutations.
-	EdgeCtAudit = "ct_audit"
 	// Table holds the table name of the ta in the database.
 	Table = "tas"
 	// CodeTable is the table that holds the code relation/edge.
@@ -32,19 +30,12 @@ const (
 	// CodeColumn is the table column denoting the code relation/edge.
 	CodeColumn = "ta_code"
 	// ServerTable is the table that holds the server relation/edge.
-	ServerTable = "ta_servers"
+	ServerTable = "tas"
 	// ServerInverseTable is the table name for the TAServer entity.
 	// It exists in this package in order to avoid circular dependency with the "taserver" package.
 	ServerInverseTable = "ta_servers"
 	// ServerColumn is the table column denoting the server relation/edge.
 	ServerColumn = "ta_server"
-	// CtAuditTable is the table that holds the ct_audit relation/edge.
-	CtAuditTable = "tas"
-	// CtAuditInverseTable is the table name for the CTAudit entity.
-	// It exists in this package in order to avoid circular dependency with the "ctaudit" package.
-	CtAuditInverseTable = "ct_audits"
-	// CtAuditColumn is the table column denoting the ct_audit relation/edge.
-	CtAuditColumn = "ta_ct_audit"
 )
 
 // Columns holds all SQL columns for ta fields.
@@ -58,7 +49,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"ta_code",
-	"ta_ct_audit",
+	"ta_server",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -107,13 +98,6 @@ func ByServerField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newServerStep(), sql.OrderByField(field, opts...))
 	}
 }
-
-// ByCtAuditField orders the results by ct_audit field.
-func ByCtAuditField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newCtAuditStep(), sql.OrderByField(field, opts...))
-	}
-}
 func newCodeStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -125,13 +109,6 @@ func newServerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ServerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, ServerTable, ServerColumn),
-	)
-}
-func newCtAuditStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(CtAuditInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, CtAuditTable, CtAuditColumn),
+		sqlgraph.Edge(sqlgraph.M2O, false, ServerTable, ServerColumn),
 	)
 }

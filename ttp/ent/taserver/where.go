@@ -58,11 +58,6 @@ func Domain(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldEQ(FieldDomain, v))
 }
 
-// IP applies equality check predicate on the "ip" field. It's identical to IPEQ.
-func IP(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldIP, v))
-}
-
 // HasActivated applies equality check predicate on the "has_activated" field. It's identical to HasActivatedEQ.
 func HasActivated(v bool) predicate.TAServer {
 	return predicate.TAServer(sql.FieldEQ(FieldHasActivated, v))
@@ -133,71 +128,6 @@ func DomainContainsFold(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldContainsFold(FieldDomain, v))
 }
 
-// IPEQ applies the EQ predicate on the "ip" field.
-func IPEQ(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldIP, v))
-}
-
-// IPNEQ applies the NEQ predicate on the "ip" field.
-func IPNEQ(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldNEQ(FieldIP, v))
-}
-
-// IPIn applies the In predicate on the "ip" field.
-func IPIn(vs ...string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldIn(FieldIP, vs...))
-}
-
-// IPNotIn applies the NotIn predicate on the "ip" field.
-func IPNotIn(vs ...string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldNotIn(FieldIP, vs...))
-}
-
-// IPGT applies the GT predicate on the "ip" field.
-func IPGT(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldGT(FieldIP, v))
-}
-
-// IPGTE applies the GTE predicate on the "ip" field.
-func IPGTE(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldGTE(FieldIP, v))
-}
-
-// IPLT applies the LT predicate on the "ip" field.
-func IPLT(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldLT(FieldIP, v))
-}
-
-// IPLTE applies the LTE predicate on the "ip" field.
-func IPLTE(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldLTE(FieldIP, v))
-}
-
-// IPContains applies the Contains predicate on the "ip" field.
-func IPContains(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldContains(FieldIP, v))
-}
-
-// IPHasPrefix applies the HasPrefix predicate on the "ip" field.
-func IPHasPrefix(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldHasPrefix(FieldIP, v))
-}
-
-// IPHasSuffix applies the HasSuffix predicate on the "ip" field.
-func IPHasSuffix(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldHasSuffix(FieldIP, v))
-}
-
-// IPEqualFold applies the EqualFold predicate on the "ip" field.
-func IPEqualFold(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEqualFold(FieldIP, v))
-}
-
-// IPContainsFold applies the ContainsFold predicate on the "ip" field.
-func IPContainsFold(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldContainsFold(FieldIP, v))
-}
-
 // HasActivatedEQ applies the EQ predicate on the "has_activated" field.
 func HasActivatedEQ(v bool) predicate.TAServer {
 	return predicate.TAServer(sql.FieldEQ(FieldHasActivated, v))
@@ -213,7 +143,7 @@ func HasTa() predicate.TAServer {
 	return predicate.TAServer(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, TaTable, TaColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, TaTable, TaColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

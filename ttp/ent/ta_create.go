@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra_webs/ttp/ent/ctaudit"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
@@ -78,25 +77,6 @@ func (tc *TACreate) SetNillableServerID(id *int) *TACreate {
 // SetServer sets the "server" edge to the TAServer entity.
 func (tc *TACreate) SetServer(t *TAServer) *TACreate {
 	return tc.SetServerID(t.ID)
-}
-
-// SetCtAuditID sets the "ct_audit" edge to the CTAudit entity by ID.
-func (tc *TACreate) SetCtAuditID(id int) *TACreate {
-	tc.mutation.SetCtAuditID(id)
-	return tc
-}
-
-// SetNillableCtAuditID sets the "ct_audit" edge to the CTAudit entity by ID if the given value is not nil.
-func (tc *TACreate) SetNillableCtAuditID(id *int) *TACreate {
-	if id != nil {
-		tc = tc.SetCtAuditID(*id)
-	}
-	return tc
-}
-
-// SetCtAudit sets the "ct_audit" edge to the CTAudit entity.
-func (tc *TACreate) SetCtAudit(c *CTAudit) *TACreate {
-	return tc.SetCtAuditID(c.ID)
 }
 
 // Mutation returns the TAMutation object of the builder.
@@ -201,7 +181,7 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 	}
 	if nodes := tc.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ta.ServerTable,
 			Columns: []string{ta.ServerColumn},
@@ -213,23 +193,7 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := tc.mutation.CtAuditIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   ta.CtAuditTable,
-			Columns: []string{ta.CtAuditColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctaudit.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.ta_ct_audit = &nodes[0]
+		_node.ta_server = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -15,7 +15,6 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/akakou/ra_webs/ttp/ent/ctaudit"
 	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
@@ -27,8 +26,6 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// CTAudit is the client for interacting with the CTAudit builders.
-	CTAudit *CTAuditClient
 	// Service is the client for interacting with the Service builders.
 	Service *ServiceClient
 	// TA is the client for interacting with the TA builders.
@@ -48,7 +45,6 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.CTAudit = NewCTAuditClient(c.config)
 	c.Service = NewServiceClient(c.config)
 	c.TA = NewTAClient(c.config)
 	c.TACode = NewTACodeClient(c.config)
@@ -145,7 +141,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:      ctx,
 		config:   cfg,
-		CTAudit:  NewCTAuditClient(cfg),
 		Service:  NewServiceClient(cfg),
 		TA:       NewTAClient(cfg),
 		TACode:   NewTACodeClient(cfg),
@@ -169,7 +164,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:      ctx,
 		config:   cfg,
-		CTAudit:  NewCTAuditClient(cfg),
 		Service:  NewServiceClient(cfg),
 		TA:       NewTAClient(cfg),
 		TACode:   NewTACodeClient(cfg),
@@ -180,7 +174,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		CTAudit.
+//		Service.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -202,7 +196,6 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.CTAudit.Use(hooks...)
 	c.Service.Use(hooks...)
 	c.TA.Use(hooks...)
 	c.TACode.Use(hooks...)
@@ -212,7 +205,6 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.CTAudit.Intercept(interceptors...)
 	c.Service.Intercept(interceptors...)
 	c.TA.Intercept(interceptors...)
 	c.TACode.Intercept(interceptors...)
@@ -222,8 +214,6 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
-	case *CTAuditMutation:
-		return c.CTAudit.mutate(ctx, m)
 	case *ServiceMutation:
 		return c.Service.mutate(ctx, m)
 	case *TAMutation:
@@ -234,155 +224,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.TAServer.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
-	}
-}
-
-// CTAuditClient is a client for the CTAudit schema.
-type CTAuditClient struct {
-	config
-}
-
-// NewCTAuditClient returns a client for the CTAudit from the given config.
-func NewCTAuditClient(c config) *CTAuditClient {
-	return &CTAuditClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `ctaudit.Hooks(f(g(h())))`.
-func (c *CTAuditClient) Use(hooks ...Hook) {
-	c.hooks.CTAudit = append(c.hooks.CTAudit, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `ctaudit.Intercept(f(g(h())))`.
-func (c *CTAuditClient) Intercept(interceptors ...Interceptor) {
-	c.inters.CTAudit = append(c.inters.CTAudit, interceptors...)
-}
-
-// Create returns a builder for creating a CTAudit entity.
-func (c *CTAuditClient) Create() *CTAuditCreate {
-	mutation := newCTAuditMutation(c.config, OpCreate)
-	return &CTAuditCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of CTAudit entities.
-func (c *CTAuditClient) CreateBulk(builders ...*CTAuditCreate) *CTAuditCreateBulk {
-	return &CTAuditCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *CTAuditClient) MapCreateBulk(slice any, setFunc func(*CTAuditCreate, int)) *CTAuditCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &CTAuditCreateBulk{err: fmt.Errorf("calling to CTAuditClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*CTAuditCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &CTAuditCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for CTAudit.
-func (c *CTAuditClient) Update() *CTAuditUpdate {
-	mutation := newCTAuditMutation(c.config, OpUpdate)
-	return &CTAuditUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *CTAuditClient) UpdateOne(ca *CTAudit) *CTAuditUpdateOne {
-	mutation := newCTAuditMutation(c.config, OpUpdateOne, withCTAudit(ca))
-	return &CTAuditUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *CTAuditClient) UpdateOneID(id int) *CTAuditUpdateOne {
-	mutation := newCTAuditMutation(c.config, OpUpdateOne, withCTAuditID(id))
-	return &CTAuditUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for CTAudit.
-func (c *CTAuditClient) Delete() *CTAuditDelete {
-	mutation := newCTAuditMutation(c.config, OpDelete)
-	return &CTAuditDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *CTAuditClient) DeleteOne(ca *CTAudit) *CTAuditDeleteOne {
-	return c.DeleteOneID(ca.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *CTAuditClient) DeleteOneID(id int) *CTAuditDeleteOne {
-	builder := c.Delete().Where(ctaudit.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &CTAuditDeleteOne{builder}
-}
-
-// Query returns a query builder for CTAudit.
-func (c *CTAuditClient) Query() *CTAuditQuery {
-	return &CTAuditQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeCTAudit},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a CTAudit entity by its id.
-func (c *CTAuditClient) Get(ctx context.Context, id int) (*CTAudit, error) {
-	return c.Query().Where(ctaudit.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *CTAuditClient) GetX(ctx context.Context, id int) *CTAudit {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryTa queries the ta edge of a CTAudit.
-func (c *CTAuditClient) QueryTa(ca *CTAudit) *TAQuery {
-	query := (&TAClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ca.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ctaudit.Table, ctaudit.FieldID, id),
-			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, ctaudit.TaTable, ctaudit.TaColumn),
-		)
-		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *CTAuditClient) Hooks() []Hook {
-	return c.hooks.CTAudit
-}
-
-// Interceptors returns the client interceptors.
-func (c *CTAuditClient) Interceptors() []Interceptor {
-	return c.inters.CTAudit
-}
-
-func (c *CTAuditClient) mutate(ctx context.Context, m *CTAuditMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&CTAuditCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&CTAuditUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&CTAuditUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&CTAuditDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown CTAudit mutation op: %q", m.Op())
 	}
 }
 
@@ -683,23 +524,7 @@ func (c *TAClient) QueryServer(t *TA) *TAServerQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ta.Table, ta.FieldID, id),
 			sqlgraph.To(taserver.Table, taserver.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, ta.ServerTable, ta.ServerColumn),
-		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryCtAudit queries the ct_audit edge of a TA.
-func (c *TAClient) QueryCtAudit(t *TA) *CTAuditQuery {
-	query := (&CTAuditClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ta.Table, ta.FieldID, id),
-			sqlgraph.To(ctaudit.Table, ctaudit.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, ta.CtAuditTable, ta.CtAuditColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, ta.ServerTable, ta.ServerColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -1013,7 +838,7 @@ func (c *TAServerClient) QueryTa(ts *TAServer) *TAQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(taserver.Table, taserver.FieldID, id),
 			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, taserver.TaTable, taserver.TaColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, taserver.TaTable, taserver.TaColumn),
 		)
 		fromV = sqlgraph.Neighbors(ts.driver.Dialect(), step)
 		return fromV, nil
@@ -1065,9 +890,9 @@ func (c *TAServerClient) mutate(ctx context.Context, m *TAServerMutation) (Value
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		CTAudit, Service, TA, TACode, TAServer []ent.Hook
+		Service, TA, TACode, TAServer []ent.Hook
 	}
 	inters struct {
-		CTAudit, Service, TA, TACode, TAServer []ent.Interceptor
+		Service, TA, TACode, TAServer []ent.Interceptor
 	}
 )

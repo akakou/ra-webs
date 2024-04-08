@@ -8,20 +8,17 @@ import (
 	golangutils "github.com/akakou/golang-utils"
 	metact "github.com/akakou/meta-ct"
 	"github.com/akakou/ra_webs/ttp/db"
-	simplecertify "github.com/akakou/simple-certify"
 )
 
 type TTP struct {
 	DB         *db.DB
-	CA         *simplecertify.Certifier
 	CT         *metact.MetaCT
 	AdminToken string
 }
 
-func NewTTP(db *db.DB, ca *simplecertify.Certifier, ct *metact.MetaCT, adminToken string) (*TTP, error) {
+func NewTTP(db *db.DB, ct *metact.MetaCT, adminToken string) (*TTP, error) {
 	return &TTP{
 		DB:         db,
-		CA:         ca,
 		CT:         ct,
 		AdminToken: adminToken,
 	}, nil
@@ -42,8 +39,6 @@ func DefaultTTP() (*TTP, error) {
 
 	fmt.Printf("Admin token generated: %s\n", adminToken)
 
-	caTempl := simplecertify.CATemplate()
-
 	dbc := db.DBConfig{
 		Type:   dbType,
 		Config: dbConfig,
@@ -56,13 +51,11 @@ func DefaultTTP() (*TTP, error) {
 
 	ct := metact.NewCT(metaAppId, metaAccessToken)
 
-	ca, err := simplecertify.LoadOrInit(&caTempl, &caTempl)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to init ca: %w", err)
 
 	}
 
-	return NewTTP(db, ca, ct, adminToken)
+	return NewTTP(db, ct, adminToken)
 
 }

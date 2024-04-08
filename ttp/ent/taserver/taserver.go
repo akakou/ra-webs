@@ -14,8 +14,6 @@ const (
 	FieldID = "id"
 	// FieldDomain holds the string denoting the domain field in the database.
 	FieldDomain = "domain"
-	// FieldIP holds the string denoting the ip field in the database.
-	FieldIP = "ip"
 	// FieldHasActivated holds the string denoting the has_activated field in the database.
 	FieldHasActivated = "has_activated"
 	// EdgeTa holds the string denoting the ta edge name in mutations.
@@ -25,7 +23,7 @@ const (
 	// Table holds the table name of the taserver in the database.
 	Table = "ta_servers"
 	// TaTable is the table that holds the ta relation/edge.
-	TaTable = "ta_servers"
+	TaTable = "tas"
 	// TaInverseTable is the table name for the TA entity.
 	// It exists in this package in order to avoid circular dependency with the "ta" package.
 	TaInverseTable = "tas"
@@ -44,14 +42,12 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldDomain,
-	FieldIP,
 	FieldHasActivated,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "ta_servers"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"ta_server",
 	"ta_server_service",
 }
 
@@ -88,20 +84,22 @@ func ByDomain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDomain, opts...).ToFunc()
 }
 
-// ByIP orders the results by the ip field.
-func ByIP(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIP, opts...).ToFunc()
-}
-
 // ByHasActivated orders the results by the has_activated field.
 func ByHasActivated(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHasActivated, opts...).ToFunc()
 }
 
-// ByTaField orders the results by ta field.
-func ByTaField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByTaCount orders the results by ta count.
+func ByTaCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTaStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborsCount(s, newTaStep(), opts...)
+	}
+}
+
+// ByTa orders the results by ta terms.
+func ByTa(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTaStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -115,7 +113,7 @@ func newTaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TaInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, TaTable, TaColumn),
+		sqlgraph.Edge(sqlgraph.O2M, true, TaTable, TaColumn),
 	)
 }
 func newServiceStep() *sqlgraph.Step {

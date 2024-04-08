@@ -9,18 +9,6 @@ import (
 	"github.com/akakou/ra_webs/ttp/ent"
 )
 
-// The CTAuditFunc type is an adapter to allow the use of ordinary
-// function as CTAudit mutator.
-type CTAuditFunc func(context.Context, *ent.CTAuditMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f CTAuditFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.CTAuditMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CTAuditMutation", m)
-}
-
 // The ServiceFunc type is an adapter to allow the use of ordinary
 // function as Service mutator.
 type ServiceFunc func(context.Context, *ent.ServiceMutation) (ent.Value, error)

@@ -1,56 +1,74 @@
 package ct
 
 import (
-	"errors"
 	"fmt"
 
 	metact "github.com/akakou/meta-ct"
 	"github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/ent"
+	"github.com/akakou/ra_webs/ttp/ent/ta"
+	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
-var ISSUER_NAME = "Let's Encrypt"
-
 func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
-	domain, violatingDomains, err := validateDomains(cert.Domains)
-
-	if err != nil || cert.IssuerName != ISSUER_NAME {
-		revokeByDomain(ttp.DB, violatingDomains)
-		return fmt.Errorf("domain violation: %w", err)
+	domain, err := validateDomains(cert.Domains)
+	if err != nil {
+		revokeTAByDomains(cert.Domains, ttp.DB)
 	}
 
+	// get the last ta from ta server
 	taServ, err := ttp.DB.Client.TAServer.
 		Query().
 		Where(taserver.DomainEQ(domain)).
-		WithTa().
 		Only(*ttp.DB.Ctx)
 
 	if err != nil {
 		return fmt.Errorf("failed to get ta info: %w", err)
 	}
 
-	ta := taServ.Edges.Ta
-	if !ta.IsValid {
-		return errors.New("ct log is not valid")
-	}
+	// fetch and check the status of last ta
+	lastTA, err := taServ.QueryTa().Order(ent.Desc(ta.FieldID)).First(*ttp.DB.Ctx)
 
-	taCode := ta.Edges.Code
-
-	if validateAttestation(cert, taCode.UniqueID) != nil {
-		ta.IsValid = false
-		ta.Update().Save(*ttp.DB.Ctx)
+	if err != nil && !ent.IsNotFound(err) {
 		return fmt.Errorf("failed to check ct logs: %w", err)
 	}
 
-	_, err = ta.Edges.CtAudit.Update().SetLast(cert.Id).Save(*ttp.DB.Ctx)
-	if err != nil {
-		return fmt.Errorf("failed to update ct audit: %w", err)
+	if lastTA != nil && !lastTA.IsValid {
+		return fmt.Errorf("last TA is invalid: %w", err)
 	}
 
-	_, err = ta.Update().Save(*ttp.DB.Ctx)
+	_ta := ttp.DB.Client.TA.Create().
+		SetServer(taServ).
+		SetPublicKey([]byte{}).
+		SetIsValid(false).
+		SaveX(*ttp.DB.Ctx)
+
+	err = validatePublicKey(cert)
 	if err != nil {
-		return fmt.Errorf("failed to update ta: %w", err)
+		return fmt.Errorf("failed to get validate public key: %w", err)
 	}
+
+	report, err := validateAttestation(cert)
+	if err != nil {
+		return fmt.Errorf("failed to get validate quote: %w", err)
+	}
+
+	// check if the ta code has been registered
+	taCode, err := ttp.DB.Client.TACode.
+		Query().
+		Where(tacode.UniqueID(report.UniqueID)).
+		Only(*ttp.DB.Ctx)
+
+	if err != nil {
+		return fmt.Errorf("failed to get ta code: %w", err)
+	}
+
+	_ta.Update().
+		SetCode(taCode).
+		SetPublicKey([]byte(cert.PublicKeyHashSha256)).
+		SetIsValid(true).
+		SaveX(*ttp.DB.Ctx)
 
 	return nil
 }

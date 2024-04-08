@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra_webs/ttp/ent/ctaudit"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
@@ -88,25 +87,6 @@ func (tu *TAUpdate) SetServer(t *TAServer) *TAUpdate {
 	return tu.SetServerID(t.ID)
 }
 
-// SetCtAuditID sets the "ct_audit" edge to the CTAudit entity by ID.
-func (tu *TAUpdate) SetCtAuditID(id int) *TAUpdate {
-	tu.mutation.SetCtAuditID(id)
-	return tu
-}
-
-// SetNillableCtAuditID sets the "ct_audit" edge to the CTAudit entity by ID if the given value is not nil.
-func (tu *TAUpdate) SetNillableCtAuditID(id *int) *TAUpdate {
-	if id != nil {
-		tu = tu.SetCtAuditID(*id)
-	}
-	return tu
-}
-
-// SetCtAudit sets the "ct_audit" edge to the CTAudit entity.
-func (tu *TAUpdate) SetCtAudit(c *CTAudit) *TAUpdate {
-	return tu.SetCtAuditID(c.ID)
-}
-
 // Mutation returns the TAMutation object of the builder.
 func (tu *TAUpdate) Mutation() *TAMutation {
 	return tu.mutation
@@ -121,12 +101,6 @@ func (tu *TAUpdate) ClearCode() *TAUpdate {
 // ClearServer clears the "server" edge to the TAServer entity.
 func (tu *TAUpdate) ClearServer() *TAUpdate {
 	tu.mutation.ClearServer()
-	return tu
-}
-
-// ClearCtAudit clears the "ct_audit" edge to the CTAudit entity.
-func (tu *TAUpdate) ClearCtAudit() *TAUpdate {
-	tu.mutation.ClearCtAudit()
 	return tu
 }
 
@@ -203,7 +177,7 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ta.ServerTable,
 			Columns: []string{ta.ServerColumn},
@@ -216,42 +190,13 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tu.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ta.ServerTable,
 			Columns: []string{ta.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if tu.mutation.CtAuditCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   ta.CtAuditTable,
-			Columns: []string{ta.CtAuditColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctaudit.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tu.mutation.CtAuditIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   ta.CtAuditTable,
-			Columns: []string{ta.CtAuditColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctaudit.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -337,25 +282,6 @@ func (tuo *TAUpdateOne) SetServer(t *TAServer) *TAUpdateOne {
 	return tuo.SetServerID(t.ID)
 }
 
-// SetCtAuditID sets the "ct_audit" edge to the CTAudit entity by ID.
-func (tuo *TAUpdateOne) SetCtAuditID(id int) *TAUpdateOne {
-	tuo.mutation.SetCtAuditID(id)
-	return tuo
-}
-
-// SetNillableCtAuditID sets the "ct_audit" edge to the CTAudit entity by ID if the given value is not nil.
-func (tuo *TAUpdateOne) SetNillableCtAuditID(id *int) *TAUpdateOne {
-	if id != nil {
-		tuo = tuo.SetCtAuditID(*id)
-	}
-	return tuo
-}
-
-// SetCtAudit sets the "ct_audit" edge to the CTAudit entity.
-func (tuo *TAUpdateOne) SetCtAudit(c *CTAudit) *TAUpdateOne {
-	return tuo.SetCtAuditID(c.ID)
-}
-
 // Mutation returns the TAMutation object of the builder.
 func (tuo *TAUpdateOne) Mutation() *TAMutation {
 	return tuo.mutation
@@ -370,12 +296,6 @@ func (tuo *TAUpdateOne) ClearCode() *TAUpdateOne {
 // ClearServer clears the "server" edge to the TAServer entity.
 func (tuo *TAUpdateOne) ClearServer() *TAUpdateOne {
 	tuo.mutation.ClearServer()
-	return tuo
-}
-
-// ClearCtAudit clears the "ct_audit" edge to the CTAudit entity.
-func (tuo *TAUpdateOne) ClearCtAudit() *TAUpdateOne {
-	tuo.mutation.ClearCtAudit()
 	return tuo
 }
 
@@ -482,7 +402,7 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 	}
 	if tuo.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ta.ServerTable,
 			Columns: []string{ta.ServerColumn},
@@ -495,42 +415,13 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 	}
 	if nodes := tuo.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ta.ServerTable,
 			Columns: []string{ta.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if tuo.mutation.CtAuditCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   ta.CtAuditTable,
-			Columns: []string{ta.CtAuditColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctaudit.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tuo.mutation.CtAuditIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   ta.CtAuditTable,
-			Columns: []string{ta.CtAuditColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctaudit.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

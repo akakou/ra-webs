@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -76,7 +77,7 @@ func (tsq *TAServerQuery) QueryTa() *TAQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(taserver.Table, taserver.FieldID, selector),
 			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, taserver.TaTable, taserver.TaColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, taserver.TaTable, taserver.TaColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tsq.driver.Dialect(), step)
 		return fromU, nil
@@ -412,7 +413,7 @@ func (tsq *TAServerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA
 			tsq.withService != nil,
 		}
 	)
-	if tsq.withTa != nil || tsq.withService != nil {
+	if tsq.withService != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -437,8 +438,9 @@ func (tsq *TAServerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA
 		return nodes, nil
 	}
 	if query := tsq.withTa; query != nil {
-		if err := tsq.loadTa(ctx, query, nodes, nil,
-			func(n *TAServer, e *TA) { n.Edges.Ta = e }); err != nil {
+		if err := tsq.loadTa(ctx, query, nodes,
+			func(n *TAServer) { n.Edges.Ta = []*TA{} },
+			func(n *TAServer, e *TA) { n.Edges.Ta = append(n.Edges.Ta, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -452,34 +454,33 @@ func (tsq *TAServerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA
 }
 
 func (tsq *TAServerQuery) loadTa(ctx context.Context, query *TAQuery, nodes []*TAServer, init func(*TAServer), assign func(*TAServer, *TA)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*TAServer)
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*TAServer)
 	for i := range nodes {
-		if nodes[i].ta_server == nil {
-			continue
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
 		}
-		fk := *nodes[i].ta_server
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(ta.IDIn(ids...))
+	query.withFKs = true
+	query.Where(predicate.TA(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(taserver.TaColumn), fks...))
+	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
+		fk := n.ta_server
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "ta_server" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "ta_server" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "ta_server" returned %v for node %v`, *fk, n.ID)
 		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
+		assign(node, n)
 	}
 	return nil
 }

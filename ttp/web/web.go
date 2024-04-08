@@ -23,13 +23,13 @@ var redirectWebPage = goutils.EchoRoute[core.TTP]{
 				return err
 			}
 
-			ta, err := server.QueryTa().WithCtAudit().First(*ttp.DB.Ctx)
+			ta, err := server.QueryTa().First(*ttp.DB.Ctx)
 			if err != nil {
 				c.Error(err)
 				return err
 			}
 
-			if !ta.IsValid || !ta.Edges.CtAudit.IsValid {
+			if !ta.IsValid {
 				return c.String(http.StatusUnauthorized, "server is not valid")
 			}
 

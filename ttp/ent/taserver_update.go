@@ -43,20 +43,6 @@ func (tsu *TAServerUpdate) SetNillableDomain(s *string) *TAServerUpdate {
 	return tsu
 }
 
-// SetIP sets the "ip" field.
-func (tsu *TAServerUpdate) SetIP(s string) *TAServerUpdate {
-	tsu.mutation.SetIP(s)
-	return tsu
-}
-
-// SetNillableIP sets the "ip" field if the given value is not nil.
-func (tsu *TAServerUpdate) SetNillableIP(s *string) *TAServerUpdate {
-	if s != nil {
-		tsu.SetIP(*s)
-	}
-	return tsu
-}
-
 // SetHasActivated sets the "has_activated" field.
 func (tsu *TAServerUpdate) SetHasActivated(b bool) *TAServerUpdate {
 	tsu.mutation.SetHasActivated(b)
@@ -71,23 +57,19 @@ func (tsu *TAServerUpdate) SetNillableHasActivated(b *bool) *TAServerUpdate {
 	return tsu
 }
 
-// SetTaID sets the "ta" edge to the TA entity by ID.
-func (tsu *TAServerUpdate) SetTaID(id int) *TAServerUpdate {
-	tsu.mutation.SetTaID(id)
+// AddTumIDs adds the "ta" edge to the TA entity by IDs.
+func (tsu *TAServerUpdate) AddTumIDs(ids ...int) *TAServerUpdate {
+	tsu.mutation.AddTumIDs(ids...)
 	return tsu
 }
 
-// SetNillableTaID sets the "ta" edge to the TA entity by ID if the given value is not nil.
-func (tsu *TAServerUpdate) SetNillableTaID(id *int) *TAServerUpdate {
-	if id != nil {
-		tsu = tsu.SetTaID(*id)
+// AddTa adds the "ta" edges to the TA entity.
+func (tsu *TAServerUpdate) AddTa(t ...*TA) *TAServerUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return tsu
-}
-
-// SetTa sets the "ta" edge to the TA entity.
-func (tsu *TAServerUpdate) SetTa(t *TA) *TAServerUpdate {
-	return tsu.SetTaID(t.ID)
+	return tsu.AddTumIDs(ids...)
 }
 
 // SetServiceID sets the "service" edge to the Service entity by ID.
@@ -114,10 +96,25 @@ func (tsu *TAServerUpdate) Mutation() *TAServerMutation {
 	return tsu.mutation
 }
 
-// ClearTa clears the "ta" edge to the TA entity.
+// ClearTa clears all "ta" edges to the TA entity.
 func (tsu *TAServerUpdate) ClearTa() *TAServerUpdate {
 	tsu.mutation.ClearTa()
 	return tsu
+}
+
+// RemoveTumIDs removes the "ta" edge to TA entities by IDs.
+func (tsu *TAServerUpdate) RemoveTumIDs(ids ...int) *TAServerUpdate {
+	tsu.mutation.RemoveTumIDs(ids...)
+	return tsu
+}
+
+// RemoveTa removes "ta" edges to TA entities.
+func (tsu *TAServerUpdate) RemoveTa(t ...*TA) *TAServerUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return tsu.RemoveTumIDs(ids...)
 }
 
 // ClearService clears the "service" edge to the Service entity.
@@ -165,15 +162,12 @@ func (tsu *TAServerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tsu.mutation.Domain(); ok {
 		_spec.SetField(taserver.FieldDomain, field.TypeString, value)
 	}
-	if value, ok := tsu.mutation.IP(); ok {
-		_spec.SetField(taserver.FieldIP, field.TypeString, value)
-	}
 	if value, ok := tsu.mutation.HasActivated(); ok {
 		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)
 	}
 	if tsu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   taserver.TaTable,
 			Columns: []string{taserver.TaColumn},
@@ -184,9 +178,25 @@ func (tsu *TAServerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := tsu.mutation.RemovedTaIDs(); len(nodes) > 0 && !tsu.mutation.TaCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   taserver.TaTable,
+			Columns: []string{taserver.TaColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := tsu.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   taserver.TaTable,
 			Columns: []string{taserver.TaColumn},
@@ -263,20 +273,6 @@ func (tsuo *TAServerUpdateOne) SetNillableDomain(s *string) *TAServerUpdateOne {
 	return tsuo
 }
 
-// SetIP sets the "ip" field.
-func (tsuo *TAServerUpdateOne) SetIP(s string) *TAServerUpdateOne {
-	tsuo.mutation.SetIP(s)
-	return tsuo
-}
-
-// SetNillableIP sets the "ip" field if the given value is not nil.
-func (tsuo *TAServerUpdateOne) SetNillableIP(s *string) *TAServerUpdateOne {
-	if s != nil {
-		tsuo.SetIP(*s)
-	}
-	return tsuo
-}
-
 // SetHasActivated sets the "has_activated" field.
 func (tsuo *TAServerUpdateOne) SetHasActivated(b bool) *TAServerUpdateOne {
 	tsuo.mutation.SetHasActivated(b)
@@ -291,23 +287,19 @@ func (tsuo *TAServerUpdateOne) SetNillableHasActivated(b *bool) *TAServerUpdateO
 	return tsuo
 }
 
-// SetTaID sets the "ta" edge to the TA entity by ID.
-func (tsuo *TAServerUpdateOne) SetTaID(id int) *TAServerUpdateOne {
-	tsuo.mutation.SetTaID(id)
+// AddTumIDs adds the "ta" edge to the TA entity by IDs.
+func (tsuo *TAServerUpdateOne) AddTumIDs(ids ...int) *TAServerUpdateOne {
+	tsuo.mutation.AddTumIDs(ids...)
 	return tsuo
 }
 
-// SetNillableTaID sets the "ta" edge to the TA entity by ID if the given value is not nil.
-func (tsuo *TAServerUpdateOne) SetNillableTaID(id *int) *TAServerUpdateOne {
-	if id != nil {
-		tsuo = tsuo.SetTaID(*id)
+// AddTa adds the "ta" edges to the TA entity.
+func (tsuo *TAServerUpdateOne) AddTa(t ...*TA) *TAServerUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return tsuo
-}
-
-// SetTa sets the "ta" edge to the TA entity.
-func (tsuo *TAServerUpdateOne) SetTa(t *TA) *TAServerUpdateOne {
-	return tsuo.SetTaID(t.ID)
+	return tsuo.AddTumIDs(ids...)
 }
 
 // SetServiceID sets the "service" edge to the Service entity by ID.
@@ -334,10 +326,25 @@ func (tsuo *TAServerUpdateOne) Mutation() *TAServerMutation {
 	return tsuo.mutation
 }
 
-// ClearTa clears the "ta" edge to the TA entity.
+// ClearTa clears all "ta" edges to the TA entity.
 func (tsuo *TAServerUpdateOne) ClearTa() *TAServerUpdateOne {
 	tsuo.mutation.ClearTa()
 	return tsuo
+}
+
+// RemoveTumIDs removes the "ta" edge to TA entities by IDs.
+func (tsuo *TAServerUpdateOne) RemoveTumIDs(ids ...int) *TAServerUpdateOne {
+	tsuo.mutation.RemoveTumIDs(ids...)
+	return tsuo
+}
+
+// RemoveTa removes "ta" edges to TA entities.
+func (tsuo *TAServerUpdateOne) RemoveTa(t ...*TA) *TAServerUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return tsuo.RemoveTumIDs(ids...)
 }
 
 // ClearService clears the "service" edge to the Service entity.
@@ -415,15 +422,12 @@ func (tsuo *TAServerUpdateOne) sqlSave(ctx context.Context) (_node *TAServer, er
 	if value, ok := tsuo.mutation.Domain(); ok {
 		_spec.SetField(taserver.FieldDomain, field.TypeString, value)
 	}
-	if value, ok := tsuo.mutation.IP(); ok {
-		_spec.SetField(taserver.FieldIP, field.TypeString, value)
-	}
 	if value, ok := tsuo.mutation.HasActivated(); ok {
 		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)
 	}
 	if tsuo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   taserver.TaTable,
 			Columns: []string{taserver.TaColumn},
@@ -434,9 +438,25 @@ func (tsuo *TAServerUpdateOne) sqlSave(ctx context.Context) (_node *TAServer, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := tsuo.mutation.RemovedTaIDs(); len(nodes) > 0 && !tsuo.mutation.TaCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   taserver.TaTable,
+			Columns: []string{taserver.TaColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := tsuo.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   taserver.TaTable,
 			Columns: []string{taserver.TaColumn},
