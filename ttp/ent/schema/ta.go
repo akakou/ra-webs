@@ -24,6 +24,5 @@ func (TA) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("code", TACode.Type).Unique(),
 		edge.To("server", TAServer.Type).Unique(),
-		edge.To("ct_audit", CTAudit.Type).Unique(),
 	}
 }

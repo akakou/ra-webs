@@ -8,18 +8,6 @@ import (
 )
 
 var (
-	// CtAuditsColumns holds the columns for the "ct_audits" table.
-	CtAuditsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "is_valid", Type: field.TypeBool, Default: true},
-		{Name: "last", Type: field.TypeString},
-	}
-	// CtAuditsTable holds the schema information for the "ct_audits" table.
-	CtAuditsTable = &schema.Table{
-		Name:       "ct_audits",
-		Columns:    CtAuditsColumns,
-		PrimaryKey: []*schema.Column{CtAuditsColumns[0]},
-	}
 	// ServicesColumns holds the columns for the "services" table.
 	ServicesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -39,7 +27,6 @@ var (
 		{Name: "public_key", Type: field.TypeBytes},
 		{Name: "is_valid", Type: field.TypeBool, Default: false},
 		{Name: "ta_code", Type: field.TypeInt, Nullable: true},
-		{Name: "ta_ct_audit", Type: field.TypeInt, Nullable: true},
 	}
 	// TasTable holds the schema information for the "tas" table.
 	TasTable = &schema.Table{
@@ -51,12 +38,6 @@ var (
 				Symbol:     "tas_ta_codes_code",
 				Columns:    []*schema.Column{TasColumns[3]},
 				RefColumns: []*schema.Column{TaCodesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "tas_ct_audits_ct_audit",
-				Columns:    []*schema.Column{TasColumns[4]},
-				RefColumns: []*schema.Column{CtAuditsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -114,7 +95,6 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		CtAuditsTable,
 		ServicesTable,
 		TasTable,
 		TaCodesTable,
@@ -124,7 +104,6 @@ var (
 
 func init() {
 	TasTable.ForeignKeys[0].RefTable = TaCodesTable
-	TasTable.ForeignKeys[1].RefTable = CtAuditsTable
 	TaCodesTable.ForeignKeys[0].RefTable = ServicesTable
 	TaServersTable.ForeignKeys[0].RefTable = TasTable
 	TaServersTable.ForeignKeys[1].RefTable = ServicesTable

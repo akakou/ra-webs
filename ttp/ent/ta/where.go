@@ -159,29 +159,6 @@ func HasServerWith(preds ...predicate.TAServer) predicate.TA {
 	})
 }
 
-// HasCtAudit applies the HasEdge predicate on the "ct_audit" edge.
-func HasCtAudit() predicate.TA {
-	return predicate.TA(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, CtAuditTable, CtAuditColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasCtAuditWith applies the HasEdge predicate on the "ct_audit" edge with a given conditions (other predicates).
-func HasCtAuditWith(preds ...predicate.CTAudit) predicate.TA {
-	return predicate.TA(func(s *sql.Selector) {
-		step := newCtAuditStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.TA) predicate.TA {
 	return predicate.TA(sql.AndPredicates(predicates...))
