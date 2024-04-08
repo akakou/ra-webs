@@ -1,17 +1,18 @@
 package ct
 
 import (
-	"errors"
 	"fmt"
 
 	metact "github.com/akakou/meta-ct"
 	"github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
 var ISSUER_NAME = "Let's Encrypt"
 
 func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
+	ta := ttp.DB.Client.TA.Create()
 	domain, violatingDomains, err := validateDomains(cert.Domains)
 
 	if err != nil || cert.IssuerName != ISSUER_NAME {
@@ -29,27 +30,32 @@ func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
 		return fmt.Errorf("failed to get ta info: %w", err)
 	}
 
-	ta := taServ.Edges.Ta
-	if !ta.IsValid {
-		return errors.New("ct log is not valid")
-	}
+	report, err := validateAttestation(cert)
 
-	taCode := ta.Edges.Code
-
-	if validateAttestation(cert, taCode.UniqueID) != nil {
-		ta.IsValid = false
-		ta.Update().Save(*ttp.DB.Ctx)
+	if err != nil {
+		ta.SetIsValid(false)
+		ta.Save(*ttp.DB.Ctx)
 		return fmt.Errorf("failed to check ct logs: %w", err)
 	}
 
-	_, err = ta.Edges.CtAudit.Update().SetLast(cert.Id).Save(*ttp.DB.Ctx)
+	taCode, err := ttp.DB.Client.TACode.
+		Query().
+		Where(tacode.UniqueID(report.UniqueID)).
+		Only(*ttp.DB.Ctx)
+
 	if err != nil {
-		return fmt.Errorf("failed to update ct audit: %w", err)
+		ta.SetIsValid(false)
+		return fmt.Errorf("failed to get ta code: %w", err)
 	}
 
-	_, err = ta.Update().Save(*ttp.DB.Ctx)
+	ta.SetCode(taCode).
+		SetServer(taServ).
+		SetPublicKey(report.Data).
+		SetIsValid(true).
+		Save(*ttp.DB.Ctx)
+
 	if err != nil {
-		return fmt.Errorf("failed to update ta: %w", err)
+		return fmt.Errorf("failed to create ta: %w", err)
 	}
 
 	return nil
