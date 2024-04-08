@@ -2,7 +2,6 @@ package ct
 
 import (
 	"errors"
-	"strings"
 
 	metact "github.com/akakou/meta-ct"
 	"github.com/akakou/ra_webs/ttp/db"
@@ -17,23 +16,6 @@ func findCertExtensions(extensions []metact.KeyValue, label string) (string, err
 	}
 
 	return "", errors.New("extension not found")
-}
-
-func extractDomainLast(domain string) string {
-	domain = strings.Replace(domain, "*", "", -1)
-	splited := strings.Split(domain, ".")
-
-	var indexInt int
-	if len(splited) >= 2 {
-		indexInt = 2
-	} else {
-		indexInt = 1
-	}
-
-	last := splited[len(splited)-indexInt:]
-	lastDomain := strings.Join(last, ".")
-
-	return lastDomain
 }
 
 func revokeTAbyDomain(domain string, db *db.DB) error {

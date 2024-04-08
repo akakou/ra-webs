@@ -11,14 +11,12 @@ import (
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
-var ISSUER_NAME = "Let's Encrypt"
-
 func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
 	_ta := ttp.DB.Client.TA.Create()
-	domain, violatingDomains, err := validateDomains(cert.Domains)
+	domain, err := validateDomains(cert.Domains)
 
 	if err != nil {
-		revokeTAByDomains(ttp.DB, violatingDomains)
+		revokeTAByDomains(ttp.DB, cert.Domains)
 		return fmt.Errorf("domain violation: %w", err)
 	}
 
@@ -52,6 +50,8 @@ func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
 
 	if err != nil {
 		_ta.SetIsValid(false)
+		_ta.Save(*ttp.DB.Ctx)
+
 		return fmt.Errorf("failed to get ta code: %w", err)
 	}
 

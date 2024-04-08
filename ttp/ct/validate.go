@@ -2,27 +2,28 @@ package ct
 
 import (
 	"encoding/hex"
-	"errors"
 	"fmt"
+	"strings"
 
 	metact "github.com/akakou/meta-ct"
 	"github.com/akakou/ra_webs/core"
 	"github.com/edgelesssys/ego/attestation"
+	"golang.org/x/exp/slices"
 )
 
-func validateDomains(domains []string) (string, []string, error) {
-	if len(domains) == 0 {
-		return domains[0], []string{}, nil
+func validateDomains(domains []string) (string, error) {
+	if len(domains) != 1 {
+		return "", fmt.Errorf("number of domain must be 1")
 	}
 
-	violatingDomains := []string{}
+	domain := domains[0]
 
-	for _, domain := range domains {
-		domain := extractDomainLast(domain)
-		violatingDomains = append(violatingDomains, domain)
+	chars := strings.Split(domain, "")
+	if slices.Contains(chars, "*") {
+		return "", fmt.Errorf("wildcard domain is not allowed")
 	}
 
-	return "", violatingDomains, errors.New("domain violation")
+	return domain, nil
 
 }
 
