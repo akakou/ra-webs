@@ -2,6 +2,7 @@ package ct
 
 import (
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -24,10 +25,20 @@ func validateDomains(domains []string) (string, error) {
 	}
 
 	return domain, nil
-
 }
 
-func validateAttestation(cert *metact.Certificate) (*attestation.Report, error) {
+func validatePublicKey(cert *metact.Certificate) error {
+	if len(cert.PublicKeyValues) == 1 {
+		return nil
+	} else {
+		return errors.New("multiple public key not supported")
+	}
+}
+
+// for debuggability
+var validateAttestation = _validateAttestation
+
+func _validateAttestation(cert *metact.Certificate) (*attestation.Report, error) {
 	token, err := findCertExtensions(cert.Extensions, "core.X509_EXTENSION_LABEL")
 	if err != nil {
 		return nil, fmt.Errorf("extension not found: %v", err)

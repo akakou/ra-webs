@@ -44,6 +44,11 @@ func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
 		SetIsValid(false).
 		SaveX(*ttp.DB.Ctx)
 
+	err = validatePublicKey(cert)
+	if err != nil {
+		return fmt.Errorf("failed to get validate public key: %w", err)
+	}
+
 	report, err := validateAttestation(cert)
 	if err != nil {
 		return fmt.Errorf("failed to get validate quote: %w", err)
