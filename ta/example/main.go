@@ -30,7 +30,5 @@ func main() {
 		panic(err)
 	}
 
-	e.StartAutoTLS(":443")
-
 	e.Logger.Fatal(e.StartAutoTLS(":443"))
 }
