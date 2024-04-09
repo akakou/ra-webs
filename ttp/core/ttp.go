@@ -50,11 +50,6 @@ func DefaultTTP() (*TTP, error) {
 
 	ct := metact.NewCT(metaAppId, metaAccessToken)
 
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", ERROR_INIT_CT, err)
-
-	}
-
 	return NewTTP(db, ct, adminToken)
 
 }
