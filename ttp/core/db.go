@@ -1,4 +1,4 @@
-package db
+package core
 
 import (
 	"context"
@@ -21,13 +21,13 @@ type DB struct {
 func NewDB(dbConfig *DBConfig) (*DB, error) {
 	client, err := ent.Open(dbConfig.Type, dbConfig.Config)
 	if err != nil {
-		return nil, fmt.Errorf("failed opening connection to sqlite: %w", err)
+		return nil, fmt.Errorf("%s: %w", ERROR_OPEN_DB, err)
 	}
 
 	ctx := context.Background()
 
 	if err := client.Schema.Create(ctx); err != nil {
-		return nil, fmt.Errorf("failed creating schema resources: %w", err)
+		return nil, fmt.Errorf("%v: %w", ERROR_CREATE_SCHEMA, err)
 	}
 
 	return &DB{

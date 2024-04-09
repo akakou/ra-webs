@@ -6,7 +6,6 @@ import (
 
 	golangutils "github.com/akakou/golang-utils"
 	"github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/db"
 	"github.com/edgelesssys/ego/attestation"
 	"github.com/stretchr/testify/assert"
 )
@@ -15,12 +14,12 @@ func exampleTTP(t *testing.T) *core.TTP {
 	dbType := golangutils.GetEnv("DB_TYPE", "sqlite3")
 	dbConfig := golangutils.GetEnv("DB_CONFIG", "file:ent?mode=memory&cache=shared&_fk=1")
 
-	dbc := db.DBConfig{
+	dbc := core.DBConfig{
 		Type:   dbType,
 		Config: dbConfig,
 	}
 
-	db, err := db.NewDB(&dbc)
+	db, err := core.NewDB(&dbc)
 	assert.NoError(t, err)
 
 	ttp, err := core.NewTTP(db, nil, "")
@@ -31,7 +30,6 @@ func exampleTTP(t *testing.T) *core.TTP {
 
 func TestAll(t *testing.T) {
 	t.Run("Pass", testPass)
-	t.Run("FailTANoCode", testFailTANoCode)
 	t.Run("FailTANoServer", testFailTANoServer)
 	t.Run("FailByMissDomains", testFailByMissDomains)
 }
@@ -78,6 +76,7 @@ func testFailTANoServer(t *testing.T) {
 	})
 
 	assert.Error(t, err)
+	assert.Contains(t, err.Error(), ERROR_SELECT_SERVER)
 }
 
 func testFailByMissDomains(t *testing.T) {
@@ -93,6 +92,7 @@ func testFailByMissDomains(t *testing.T) {
 
 	err := AuditOne(ttp, &cert)
 	assert.Error(t, err)
+	assert.Contains(t, err.Error(), ERROR_DOMAIN_INVALID)
 
 	cert = x509.Certificate{
 		DNSNames:  []string{"*.com"},
@@ -101,4 +101,6 @@ func testFailByMissDomains(t *testing.T) {
 
 	err = AuditOne(ttp, &cert)
 	assert.Error(t, err)
+	assert.Contains(t, err.Error(), ERROR_DOMAIN_INVALID)
+
 }

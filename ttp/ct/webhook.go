@@ -24,17 +24,17 @@ func webhook() goutils.EchoRoute[core.TTP] {
 			return func(c echo.Context) error {
 				cs, err := ttp.CT.WebHookCertificates(c)
 				if err != nil {
-					c.Error(err)
+					return err
 				}
 
 				certs, err := metaCertsToCerts(cs)
 				if err != nil {
-					c.Error(err)
+					return err
 				}
 
 				err = AuditAll(ttp, certs)
 				if err != nil {
-					c.Error(err)
+					return err
 				}
 
 				return c.String(http.StatusOK, "ok")

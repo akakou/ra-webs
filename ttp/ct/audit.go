@@ -15,6 +15,7 @@ func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
 	domain, err := validateDomains(cert.DNSNames)
 	if err != nil {
 		revokeTAByDomains(cert.DNSNames, ttp.DB)
+		return fmt.Errorf("%s: %w", ERROR_DOMAIN_INVALID, err)
 	}
 
 	// get the last ta from ta server
@@ -24,7 +25,7 @@ func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
 		Only(*ttp.DB.Ctx)
 
 	if err != nil {
-		return fmt.Errorf("failed to get ta info: %w", err)
+		return fmt.Errorf("%s: %w", ERROR_SELECT_SERVER, err)
 	}
 
 	// fetch and check the status of last ta
@@ -33,11 +34,11 @@ func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
 		First(*ttp.DB.Ctx)
 
 	if err != nil && !ent.IsNotFound(err) {
-		return fmt.Errorf("failed to check ct logs: %w", err)
+		return fmt.Errorf("%s: %w", ERROR_SELECT_LAST_LOG, err)
 	}
 
 	if lastTA != nil && !lastTA.IsValid {
-		return fmt.Errorf("last TA is invalid: %w", err)
+		return fmt.Errorf("%s: %w", ERROR_LAST_TA_INVALID, err)
 	}
 
 	_ta := ttp.DB.Client.TA.Create().
@@ -48,7 +49,7 @@ func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
 
 	report, err := validateAttestation(cert)
 	if err != nil {
-		return fmt.Errorf("failed to get validate quote: %w", err)
+		return fmt.Errorf("%s: %w", ERROR_QUOTE_INVALID, err)
 	}
 
 	// check if the ta code has been registered
@@ -58,7 +59,7 @@ func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
 		Only(*ttp.DB.Ctx)
 
 	if err != nil {
-		return fmt.Errorf("failed to get ta code: %w", err)
+		return fmt.Errorf("%s %w", ERROR_SELECT_TA_CODE, err)
 	}
 
 	_ta.Update().

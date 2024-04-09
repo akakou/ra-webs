@@ -15,7 +15,7 @@ const ATTEST_ENDPOINT = "/rawebs/attest"
 func (ap *TA) TLSConfig() (autocert.Manager, error) {
 	quote, err := attestPublicKey(ap)
 	if err != nil {
-		return autocert.Manager{}, fmt.Errorf("failed to attest public key: %w", err)
+		return autocert.Manager{}, fmt.Errorf("%s: %w", ERROR_ATTEST_PUBLIC_KEY, err)
 	}
 
 	acmeClient := acme.Client{DirectoryURL: ap.Config.ACMEUrl}

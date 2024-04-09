@@ -2,9 +2,6 @@ package core
 
 import (
 	"bytes"
-	"crypto/rsa"
-	"crypto/sha256"
-	"crypto/x509"
 	"errors"
 	"fmt"
 
@@ -14,18 +11,11 @@ import (
 
 const SECURITY_VERSION = 1
 
-func hashPublicKey(publicKey *rsa.PublicKey) []byte {
-	rawPubKey := x509.MarshalPKCS1PublicKey(publicKey)
-
-	publicKeyHashBytes := sha256.Sum256(rawPubKey)
-	return publicKeyHashBytes[:]
-}
-
 func AttestByAzure(data []byte) (string, error) {
 	// publicKeyHash := hashPublicKey(publicKey)
 	token, err := enclave.CreateAzureAttestationToken(data, ATTEST_PROVIDER_URL)
 	if err != nil {
-		return "", fmt.Errorf("failed to create attestation token: %w", err)
+		return "", fmt.Errorf("%s: %w", ERROR_CREATE_ATTESTATION, err)
 	}
 
 	return token, nil
@@ -34,15 +24,15 @@ func AttestByAzure(data []byte) (string, error) {
 func VerifyByAzure(token string, data []byte) (*attestation.Report, error) {
 	report, err := attestation.VerifyAzureAttestationToken(token, ATTEST_PROVIDER_URL)
 	if err != nil {
-		return nil, fmt.Errorf("failed to verify attestation token: %w", err)
+		return nil, fmt.Errorf("%s: %w", ERROR_VERIFY_ATTESTATION, err)
 	}
 
 	if report.SecurityVersion < SECURITY_VERSION {
-		return nil, errors.New("token contains invalid security version number")
+		return nil, errors.New(ERROR_INVALID_SECURITY_VERSION_IN_ATTESTATION)
 	}
 
 	if !bytes.Equal(report.Data, data) {
-		return nil, errors.New("token contains invalid public key hash")
+		return nil, errors.New(ERROR_INVALID_REPORT_DATA_IN_ATTESTATION)
 	}
 
 	return &report, nil

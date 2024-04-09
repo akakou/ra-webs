@@ -1,17 +1,17 @@
 package ct
 
 import (
-	"github.com/akakou/ra_webs/ttp/db"
+	"github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ent"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
-func revokeTA(t *ent.TA, db *db.DB) {
+func revokeTA(t *ent.TA, db *core.DB) {
 	t.IsValid = false
 	t.Update().SaveX(*db.Ctx)
 }
 
-func revokeTAbyDomain(domain string, db *db.DB) error {
+func revokeTAbyDomain(domain string, db *core.DB) error {
 	taServer, err := db.Client.TAServer.
 		Query().
 		WithTa().
@@ -29,7 +29,7 @@ func revokeTAbyDomain(domain string, db *db.DB) error {
 	return nil
 }
 
-func revokeTAByDomains(domains []string, db *db.DB) {
+func revokeTAByDomains(domains []string, db *core.DB) {
 	for _, domain := range domains {
 		revokeTAbyDomain(domain, db)
 	}

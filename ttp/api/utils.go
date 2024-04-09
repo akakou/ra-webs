@@ -10,13 +10,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const ERROR_AUTHENTICATE_SERVICE = "failed to authenticate service"
+
 func authenticateService(ttp *ttpcore.TTP, c echo.Context) (*ent.Service, error) {
 	authorization := c.Request().Header["Authorization"][0]
 	token := authorization[len("Bearer "):]
 
 	service, err := ttp.DB.Client.Service.Query().Where(service.TokenEQ(token)).Only(*ttp.DB.Ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to authenticate service: %w", err)
+		return nil, fmt.Errorf("%s: %w", ERROR_AUTHENTICATE_SERVICE, err)
 	}
 
 	return service, nil
