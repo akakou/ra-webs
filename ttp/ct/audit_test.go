@@ -58,28 +58,6 @@ func testPass(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func testFailTANoCode(t *testing.T) {
-	ttp := exampleTTP(t)
-	defer ttp.DB.Close()
-
-	ttp.DB.Client.TAServer.Create().SetDomain("example.com").SaveX(*ttp.DB.Ctx)
-	ttp.DB.Client.TACode.Create().SetUniqueID([]byte{7, 8, 9}).SetRepository("").SetCommitID("").SaveX(*ttp.DB.Ctx)
-
-	validateAttestation = func(_ *x509.Certificate) (*attestation.Report, error) {
-		return &attestation.Report{
-			UniqueID: []byte{1, 2, 3},
-			Data:     []byte{4, 5, 6},
-		}, nil
-	}
-
-	err := AuditOne(ttp, &x509.Certificate{
-		DNSNames:  []string{"example.com"},
-		PublicKey: []byte{7, 8, 9},
-	})
-
-	assert.Error(t, err)
-}
-
 func testFailTANoServer(t *testing.T) {
 	ttp := exampleTTP(t)
 	defer ttp.DB.Close()
