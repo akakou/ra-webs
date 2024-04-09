@@ -15,6 +15,7 @@ type TA struct {
 func (TA) Fields() []ent.Field {
 	return []ent.Field{
 		field.Bytes("public_key"),
+		field.Bytes("quote"),
 		field.Bool("is_valid").Default(false),
 	}
 }

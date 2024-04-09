@@ -27,6 +27,12 @@ func (tc *TACreate) SetPublicKey(b []byte) *TACreate {
 	return tc
 }
 
+// SetQuote sets the "quote" field.
+func (tc *TACreate) SetQuote(b []byte) *TACreate {
+	tc.mutation.SetQuote(b)
+	return tc
+}
+
 // SetIsValid sets the "is_valid" field.
 func (tc *TACreate) SetIsValid(b bool) *TACreate {
 	tc.mutation.SetIsValid(b)
@@ -125,6 +131,9 @@ func (tc *TACreate) check() error {
 	if _, ok := tc.mutation.PublicKey(); !ok {
 		return &ValidationError{Name: "public_key", err: errors.New(`ent: missing required field "TA.public_key"`)}
 	}
+	if _, ok := tc.mutation.Quote(); !ok {
+		return &ValidationError{Name: "quote", err: errors.New(`ent: missing required field "TA.quote"`)}
+	}
 	if _, ok := tc.mutation.IsValid(); !ok {
 		return &ValidationError{Name: "is_valid", err: errors.New(`ent: missing required field "TA.is_valid"`)}
 	}
@@ -157,6 +166,10 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.PublicKey(); ok {
 		_spec.SetField(ta.FieldPublicKey, field.TypeBytes, value)
 		_node.PublicKey = value
+	}
+	if value, ok := tc.mutation.Quote(); ok {
+		_spec.SetField(ta.FieldQuote, field.TypeBytes, value)
+		_node.Quote = value
 	}
 	if value, ok := tc.mutation.IsValid(); ok {
 		_spec.SetField(ta.FieldIsValid, field.TypeBool, value)

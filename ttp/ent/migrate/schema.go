@@ -25,6 +25,7 @@ var (
 	TasColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "public_key", Type: field.TypeBytes},
+		{Name: "quote", Type: field.TypeBytes},
 		{Name: "is_valid", Type: field.TypeBool, Default: false},
 		{Name: "ta_code", Type: field.TypeInt, Nullable: true},
 		{Name: "ta_server", Type: field.TypeInt, Nullable: true},
@@ -37,13 +38,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "tas_ta_codes_code",
-				Columns:    []*schema.Column{TasColumns[3]},
+				Columns:    []*schema.Column{TasColumns[4]},
 				RefColumns: []*schema.Column{TaCodesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "tas_ta_servers_server",
-				Columns:    []*schema.Column{TasColumns[4]},
+				Columns:    []*schema.Column{TasColumns[5]},
 				RefColumns: []*schema.Column{TaServersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

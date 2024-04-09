@@ -649,6 +649,7 @@ type TAMutation struct {
 	typ           string
 	id            *int
 	public_key    *[]byte
+	quote         *[]byte
 	is_valid      *bool
 	clearedFields map[string]struct{}
 	code          *int
@@ -792,6 +793,42 @@ func (m *TAMutation) OldPublicKey(ctx context.Context) (v []byte, err error) {
 // ResetPublicKey resets all changes to the "public_key" field.
 func (m *TAMutation) ResetPublicKey() {
 	m.public_key = nil
+}
+
+// SetQuote sets the "quote" field.
+func (m *TAMutation) SetQuote(b []byte) {
+	m.quote = &b
+}
+
+// Quote returns the value of the "quote" field in the mutation.
+func (m *TAMutation) Quote() (r []byte, exists bool) {
+	v := m.quote
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQuote returns the old "quote" field's value of the TA entity.
+// If the TA object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TAMutation) OldQuote(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQuote is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQuote requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQuote: %w", err)
+	}
+	return oldValue.Quote, nil
+}
+
+// ResetQuote resets all changes to the "quote" field.
+func (m *TAMutation) ResetQuote() {
+	m.quote = nil
 }
 
 // SetIsValid sets the "is_valid" field.
@@ -942,9 +979,12 @@ func (m *TAMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TAMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.public_key != nil {
 		fields = append(fields, ta.FieldPublicKey)
+	}
+	if m.quote != nil {
+		fields = append(fields, ta.FieldQuote)
 	}
 	if m.is_valid != nil {
 		fields = append(fields, ta.FieldIsValid)
@@ -959,6 +999,8 @@ func (m *TAMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case ta.FieldPublicKey:
 		return m.PublicKey()
+	case ta.FieldQuote:
+		return m.Quote()
 	case ta.FieldIsValid:
 		return m.IsValid()
 	}
@@ -972,6 +1014,8 @@ func (m *TAMutation) OldField(ctx context.Context, name string) (ent.Value, erro
 	switch name {
 	case ta.FieldPublicKey:
 		return m.OldPublicKey(ctx)
+	case ta.FieldQuote:
+		return m.OldQuote(ctx)
 	case ta.FieldIsValid:
 		return m.OldIsValid(ctx)
 	}
@@ -989,6 +1033,13 @@ func (m *TAMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPublicKey(v)
+		return nil
+	case ta.FieldQuote:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQuote(v)
 		return nil
 	case ta.FieldIsValid:
 		v, ok := value.(bool)
@@ -1048,6 +1099,9 @@ func (m *TAMutation) ResetField(name string) error {
 	switch name {
 	case ta.FieldPublicKey:
 		m.ResetPublicKey()
+		return nil
+	case ta.FieldQuote:
+		m.ResetQuote()
 		return nil
 	case ta.FieldIsValid:
 		m.ResetIsValid()

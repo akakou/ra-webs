@@ -14,6 +14,8 @@ const (
 	FieldID = "id"
 	// FieldPublicKey holds the string denoting the public_key field in the database.
 	FieldPublicKey = "public_key"
+	// FieldQuote holds the string denoting the quote field in the database.
+	FieldQuote = "quote"
 	// FieldIsValid holds the string denoting the is_valid field in the database.
 	FieldIsValid = "is_valid"
 	// EdgeCode holds the string denoting the code edge name in mutations.
@@ -42,6 +44,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldPublicKey,
+	FieldQuote,
 	FieldIsValid,
 }
 

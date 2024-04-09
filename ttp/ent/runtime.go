@@ -23,7 +23,7 @@ func init() {
 	taFields := schema.TA{}.Fields()
 	_ = taFields
 	// taDescIsValid is the schema descriptor for is_valid field.
-	taDescIsValid := taFields[1].Descriptor()
+	taDescIsValid := taFields[2].Descriptor()
 	// ta.DefaultIsValid holds the default value on creation for the is_valid field.
 	ta.DefaultIsValid = taDescIsValid.Default.(bool)
 	tacodeFields := schema.TACode{}.Fields()

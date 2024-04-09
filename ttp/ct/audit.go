@@ -4,6 +4,7 @@ import (
 	"crypto/x509"
 	"fmt"
 
+	rawebcore "github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ent"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
@@ -44,10 +45,16 @@ func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
 	_ta := ttp.DB.Client.TA.Create().
 		SetServer(taServ).
 		SetPublicKey([]byte{}).
+		SetQuote([]byte{}).
 		SetIsValid(false).
 		SaveX(*ttp.DB.Ctx)
 
-	report, err := validateAttestation(cert)
+	token, err := findCertExtensions(rawebcore.X509_EXTENSION_LABEL, cert)
+	if err != nil {
+		return fmt.Errorf("%v: %v", ERROR_EXTENSION_NOT_FOUND, err)
+	}
+
+	report, err := validateAttestation(token, cert.PublicKey)
 	if err != nil {
 		return fmt.Errorf("%s: %w", ERROR_QUOTE_INVALID, err)
 	}
@@ -65,6 +72,7 @@ func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
 	_ta.Update().
 		SetCode(taCode).
 		SetPublicKey(_ta.PublicKey).
+		SetQuote(token).
 		SetIsValid(true).
 		SaveX(*ttp.DB.Ctx)
 

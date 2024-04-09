@@ -20,6 +20,8 @@ type TA struct {
 	ID int `json:"id,omitempty"`
 	// PublicKey holds the value of the "public_key" field.
 	PublicKey []byte `json:"public_key,omitempty"`
+	// Quote holds the value of the "quote" field.
+	Quote []byte `json:"quote,omitempty"`
 	// IsValid holds the value of the "is_valid" field.
 	IsValid bool `json:"is_valid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -72,7 +74,7 @@ func (*TA) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case ta.FieldPublicKey:
+		case ta.FieldPublicKey, ta.FieldQuote:
 			values[i] = new([]byte)
 		case ta.FieldIsValid:
 			values[i] = new(sql.NullBool)
@@ -108,6 +110,12 @@ func (t *TA) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field public_key", values[i])
 			} else if value != nil {
 				t.PublicKey = *value
+			}
+		case ta.FieldQuote:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field quote", values[i])
+			} else if value != nil {
+				t.Quote = *value
 			}
 		case ta.FieldIsValid:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -177,6 +185,9 @@ func (t *TA) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("public_key=")
 	builder.WriteString(fmt.Sprintf("%v", t.PublicKey))
+	builder.WriteString(", ")
+	builder.WriteString("quote=")
+	builder.WriteString(fmt.Sprintf("%v", t.Quote))
 	builder.WriteString(", ")
 	builder.WriteString("is_valid=")
 	builder.WriteString(fmt.Sprintf("%v", t.IsValid))
