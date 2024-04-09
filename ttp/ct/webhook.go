@@ -22,7 +22,12 @@ func webhook() goutils.EchoRoute[core.TTP] {
 		Path:   path,
 		F: func(ttp *core.TTP) goutils.EchoRouteFunc {
 			return func(c echo.Context) error {
-				certs, err := ttp.CT.WebHookCertificates(c)
+				cs, err := ttp.CT.WebHookCertificates(c)
+				if err != nil {
+					c.Error(err)
+				}
+
+				certs, err := metaCertsToCerts(cs)
 				if err != nil {
 					c.Error(err)
 				}

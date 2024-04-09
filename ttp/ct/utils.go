@@ -5,6 +5,8 @@ import (
 	"encoding/asn1"
 	"errors"
 	"reflect"
+
+	metact "github.com/akakou/meta-ct"
 )
 
 func findCertExtensions(label asn1.ObjectIdentifier, cert *x509.Certificate) ([]byte, error) {
@@ -15,4 +17,20 @@ func findCertExtensions(label asn1.ObjectIdentifier, cert *x509.Certificate) ([]
 	}
 
 	return []byte{}, errors.New("extension not found")
+}
+
+func metaCertsToCerts(cs []metact.MetaCert) ([]x509.Certificate, error) {
+	certs := []x509.Certificate{}
+
+	for _, c := range cs {
+		cert, err := c.Certificate()
+
+		if err != nil {
+			return []x509.Certificate{}, err
+		}
+
+		certs = append(certs, *cert)
+	}
+
+	return certs, nil
 }

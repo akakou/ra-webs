@@ -1,9 +1,9 @@
 package ct
 
 import (
+	"crypto/x509"
 	"fmt"
 
-	metact "github.com/akakou/meta-ct"
 	"github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ent"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
@@ -11,13 +11,7 @@ import (
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
-func AuditOne(ttp *core.TTP, c *metact.MetaCert) error {
-	cert, err := c.Certificate()
-	if err != nil {
-		err = fmt.Errorf("failed to get certificate: %w", err)
-		panic(err)
-	}
-
+func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
 	domain, err := validateDomains(cert.DNSNames)
 	if err != nil {
 		revokeTAByDomains(cert.DNSNames, ttp.DB)
@@ -76,7 +70,7 @@ func AuditOne(ttp *core.TTP, c *metact.MetaCert) error {
 	return nil
 }
 
-func AuditAll(ttp *core.TTP, cert []metact.MetaCert) error {
+func AuditAll(ttp *core.TTP, cert []x509.Certificate) error {
 	for _, c := range cert {
 		err := AuditOne(ttp, &c)
 		if err != nil {
