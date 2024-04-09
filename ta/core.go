@@ -28,12 +28,12 @@ func DefaultConfig() (*Config, error) {
 func DefaultTA() (*TA, error) {
 	config, err := DefaultConfig()
 	if err != nil {
-		return nil, fmt.Errorf("failed to read config: %w", err)
+		return nil, fmt.Errorf("%s: %w", ERROR_DEFAULT_CONFIG, err)
 	}
 
 	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate rsa key: %w", err)
+		return nil, fmt.Errorf("%s: %w", ERROR_GENERATE_RSA_KEY, err)
 	}
 
 	return &TA{
