@@ -2,9 +2,11 @@ package ct
 
 import (
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"testing"
 
 	golangutils "github.com/akakou/golang-utils"
+	rawebscore "github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp/core"
 	"github.com/edgelesssys/ego/attestation"
 	"github.com/stretchr/testify/assert"
@@ -41,7 +43,7 @@ func testPass(t *testing.T) {
 	ttp.DB.Client.TAServer.Create().SetDomain("example.com").SaveX(*ttp.DB.Ctx)
 	ttp.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*ttp.DB.Ctx)
 
-	validateAttestation = func(_ *x509.Certificate) (*attestation.Report, error) {
+	validateAttestation = func(_ []byte, _ any) (*attestation.Report, error) {
 		return &attestation.Report{
 			UniqueID: []byte{1, 2, 3},
 			Data:     []byte{4, 5, 6},
@@ -51,7 +53,15 @@ func testPass(t *testing.T) {
 	err := AuditOne(ttp, &x509.Certificate{
 		DNSNames:  []string{"example.com"},
 		PublicKey: []byte{7, 8, 9},
-	})
+		Extensions: []pkix.Extension{
+			{
+				Id:       rawebscore.X509_EXTENSION_LABEL,
+				Critical: false,
+				Value:    []byte{},
+			},
+		},
+	},
+	)
 
 	assert.NoError(t, err)
 }
@@ -63,7 +73,7 @@ func testFailTANoServer(t *testing.T) {
 	ttp.DB.Client.TAServer.Create().SetDomain("example.com").SaveX(*ttp.DB.Ctx)
 	ttp.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*ttp.DB.Ctx)
 
-	validateAttestation = func(_ *x509.Certificate) (*attestation.Report, error) {
+	validateAttestation = func(_ []byte, _ any) (*attestation.Report, error) {
 		return &attestation.Report{
 			UniqueID: []byte{1, 2, 3},
 			Data:     []byte{4, 5, 6},
@@ -73,6 +83,13 @@ func testFailTANoServer(t *testing.T) {
 	err := AuditOne(ttp, &x509.Certificate{
 		DNSNames:  []string{"hoge.example.com"},
 		PublicKey: []byte{7, 8, 9},
+		Extensions: []pkix.Extension{
+			{
+				Id:       rawebscore.X509_EXTENSION_LABEL,
+				Critical: false,
+				Value:    []byte{},
+			},
+		},
 	})
 
 	assert.Error(t, err)
@@ -87,7 +104,15 @@ func testFailByMissDomains(t *testing.T) {
 	defer ttp.DB.Close()
 
 	cert := x509.Certificate{
-		DNSNames: []string{"example.com", "example.org"},
+		DNSNames:  []string{"example.com", "example.org"},
+		PublicKey: []byte{7, 8, 9},
+		Extensions: []pkix.Extension{
+			{
+				Id:       rawebscore.X509_EXTENSION_LABEL,
+				Critical: false,
+				Value:    []byte{},
+			},
+		},
 	}
 
 	err := AuditOne(ttp, &cert)
@@ -97,6 +122,13 @@ func testFailByMissDomains(t *testing.T) {
 	cert = x509.Certificate{
 		DNSNames:  []string{"*.com"},
 		PublicKey: []byte{7, 8, 9},
+		Extensions: []pkix.Extension{
+			{
+				Id:       rawebscore.X509_EXTENSION_LABEL,
+				Critical: false,
+				Value:    []byte{},
+			},
+		},
 	}
 
 	err = AuditOne(ttp, &cert)

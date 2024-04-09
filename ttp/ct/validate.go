@@ -30,13 +30,7 @@ func validateDomains(domains []string) (string, error) {
 // for debuggability
 var validateAttestation = _validateAttestation
 
-func _validateAttestation(cert *x509.Certificate) (*attestation.Report, error) {
-	token, err := findCertExtensions(core.X509_EXTENSION_LABEL, cert)
-	if err != nil {
-		return nil, fmt.Errorf("%v: %v", ERROR_EXTENSION_NOT_FOUND, err)
-	}
-
-	publicKey := cert.PublicKey
+func _validateAttestation(token []byte, publicKey any) (*attestation.Report, error) {
 	publicKeyBuf := x509.MarshalPKCS1PublicKey(publicKey.(*rsa.PublicKey))
 
 	report, err := core.VerifyByAzure(string(token), publicKeyBuf)
