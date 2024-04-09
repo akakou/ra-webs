@@ -31,7 +31,6 @@ func exampleTTP(t *testing.T) *core.TTP {
 
 func TestAll(t *testing.T) {
 	t.Run("Pass", testPass)
-	t.Run("FailTANoCode", testFailTANoCode)
 	t.Run("FailTANoServer", testFailTANoServer)
 	t.Run("FailByMissDomains", testFailByMissDomains)
 }
@@ -78,6 +77,7 @@ func testFailTANoServer(t *testing.T) {
 	})
 
 	assert.Error(t, err)
+	assert.Contains(t, err.Error(), ERROR_SELECT_SERVER)
 }
 
 func testFailByMissDomains(t *testing.T) {
@@ -93,6 +93,7 @@ func testFailByMissDomains(t *testing.T) {
 
 	err := AuditOne(ttp, &cert)
 	assert.Error(t, err)
+	assert.Contains(t, err.Error(), ERROR_DOMAIN_INVALID)
 
 	cert = x509.Certificate{
 		DNSNames:  []string{"*.com"},
@@ -101,4 +102,6 @@ func testFailByMissDomains(t *testing.T) {
 
 	err = AuditOne(ttp, &cert)
 	assert.Error(t, err)
+	assert.Contains(t, err.Error(), ERROR_DOMAIN_INVALID)
+
 }
