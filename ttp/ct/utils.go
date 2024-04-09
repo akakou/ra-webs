@@ -16,7 +16,7 @@ func findCertExtensions(label asn1.ObjectIdentifier, cert *x509.Certificate) ([]
 		}
 	}
 
-	return []byte{}, errors.New("extension not found")
+	return []byte{}, errors.New(ERROR_EXTENSION_NOT_FOUND)
 }
 
 func metaCertsToCerts(cs []metact.MetaCert) ([]x509.Certificate, error) {
