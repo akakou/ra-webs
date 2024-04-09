@@ -15,6 +15,9 @@ const (
 
 const BASE_PATH = "./repo"
 
+const COMMIT_ID_INDEX = 0
+const UNIQUE_ID_INDEX = 3
+
 func docker_run(name string, arguments ...string) ([]byte, error) {
 	directory := fmt.Sprintf("%s/%s", BASE_PATH, name)
 	os.Mkdir(directory, 0600)
@@ -61,5 +64,5 @@ func Build(name string, repo string) (string, string, error) {
 	}
 
 	lines := strings.Split(string(output), "\n")
-	return lines[0], lines[3], nil
+	return lines[COMMIT_ID_INDEX], lines[UNIQUE_ID_INDEX], nil
 }
