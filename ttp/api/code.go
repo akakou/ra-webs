@@ -14,6 +14,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+var BUILD_DOCKER_PATH = "./builder"
+
 var postCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.POST,
 	Path:   "/code",
@@ -30,7 +32,7 @@ var postCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 			rawSha256 := sha256.Sum256([]byte(req.Repository))
 			sha256 := fmt.Sprintf("%x", rawSha256)
 
-			commitId, uniqueIdString, err := builder.Build(sha256, req.Repository)
+			commitId, uniqueIdString, err := builder.Build(sha256, req.Repository, BUILD_DOCKER_PATH)
 			if err != nil {
 				return err
 			}
