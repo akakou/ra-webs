@@ -1,35 +1,35 @@
 package ta
 
 import (
+	"crypto/x509/pkix"
 	"fmt"
 
-	"github.com/labstack/echo/v4"
+	"github.com/akakou/ra_webs/core"
+	"golang.org/x/crypto/acme"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 const CERT_DIER_CACHE = "/var/www/.cache"
 const ATTEST_ENDPOINT = "/rawebs/attest"
 
-type REGISTER_TYPE int
-
-const (
-	TTP REGISTER_TYPE = iota + 1
-	ACME
-)
-
-func (ap *TA) TLSConfig(e *echo.Echo) error {
-	taId, err := ap.Register()
+func (ap *TA) TLSConfig() (autocert.Manager, error) {
+	quote, err := attestPublicKey(ap)
 	if err != nil {
-		return err
+		return autocert.Manager{}, fmt.Errorf("failed to attest public key: %w", err)
 	}
 
-	switch ap.Config.Type {
-	case TTP:
-		err = ap.IssueTTPCert(taId, e)
-	case ACME:
-		err = ap.IssueAcmeCert(e)
-	default:
-		err = fmt.Errorf("unknown register type: %d", ap.Config.Type)
-	}
+	acmeClient := acme.Client{DirectoryURL: ap.Config.ACMEUrl}
+	acmeClient.Key = ap.PrivateKey
 
-	return err
+	return autocert.Manager{
+		Client: &acmeClient,
+		Cache:  autocert.DirCache(CERT_DIER_CACHE),
+		ExtraExtensions: []pkix.Extension{
+			{
+				Id:       core.X509_EXTENSION_LABEL,
+				Critical: false,
+				Value:    []byte(quote),
+			},
+		},
+	}, nil
 }
