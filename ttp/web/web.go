@@ -19,13 +19,11 @@ var redirectWebPage = goutils.EchoRoute[core.TTP]{
 			server, err := ttp.DB.Client.TAServer.Query().Where(taserver.DomainEQ(back)).First(*ttp.DB.Ctx)
 
 			if err != nil {
-				c.Error(err)
 				return err
 			}
 
 			ta, err := server.QueryTa().First(*ttp.DB.Ctx)
 			if err != nil {
-				c.Error(err)
 				return err
 			}
 

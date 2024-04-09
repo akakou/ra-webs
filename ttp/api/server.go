@@ -31,7 +31,7 @@ var postServerApi = goutils.EchoRoute[ttpcore.TTP]{
 
 			taServer, err := taServerCreate.Save(*ttp.DB.Ctx)
 			if err != nil {
-				c.Error(err)
+				return err
 			}
 
 			return c.String(http.StatusOK, strconv.Itoa(taServer.ID))
@@ -47,7 +47,6 @@ var postActivateServerApi = goutils.EchoRoute[ttpcore.TTP]{
 			paramId := c.Param("id")
 			codeId, err := strconv.Atoi(paramId)
 			if err != nil {
-				c.Error(err)
 				return err
 			}
 
@@ -58,13 +57,11 @@ var postActivateServerApi = goutils.EchoRoute[ttpcore.TTP]{
 
 			server, err := ttp.DB.Client.TAServer.Get(*ttp.DB.Ctx, codeId)
 			if err != nil {
-				c.Error(err)
 				return err
 			}
 
 			_, err = server.Update().SetHasActivated(true).Save(*ttp.DB.Ctx)
 			if err != nil {
-				c.Error(err)
 				return err
 			}
 
@@ -82,7 +79,6 @@ var getServerApi = goutils.EchoRoute[ttpcore.TTP]{
 
 			code, err := ttp.DB.Client.TAServer.Query().Where(taserver.HasActivated(activate)).All(*ttp.DB.Ctx)
 			if err != nil {
-				c.Error(err)
 				return err
 			}
 

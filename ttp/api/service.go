@@ -22,14 +22,12 @@ var postServiceByAdmin = goutils.EchoRoute[ttpcore.TTP]{
 			token, err := goutils.RandomHex(32)
 
 			if err != nil {
-				c.Error(err)
 				return err
 			}
 
 			service, err := ttp.DB.Client.Service.Create().SetName("").SetToken(token).SetHasActivated(true).Save(*ttp.DB.Ctx)
 
 			if err != nil {
-				c.Error(err)
 				return err
 			}
 
