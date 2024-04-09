@@ -58,6 +58,11 @@ func PublicKey(v []byte) predicate.TA {
 	return predicate.TA(sql.FieldEQ(FieldPublicKey, v))
 }
 
+// Quote applies equality check predicate on the "quote" field. It's identical to QuoteEQ.
+func Quote(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldEQ(FieldQuote, v))
+}
+
 // IsValid applies equality check predicate on the "is_valid" field. It's identical to IsValidEQ.
 func IsValid(v bool) predicate.TA {
 	return predicate.TA(sql.FieldEQ(FieldIsValid, v))
@@ -101,6 +106,46 @@ func PublicKeyLT(v []byte) predicate.TA {
 // PublicKeyLTE applies the LTE predicate on the "public_key" field.
 func PublicKeyLTE(v []byte) predicate.TA {
 	return predicate.TA(sql.FieldLTE(FieldPublicKey, v))
+}
+
+// QuoteEQ applies the EQ predicate on the "quote" field.
+func QuoteEQ(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldEQ(FieldQuote, v))
+}
+
+// QuoteNEQ applies the NEQ predicate on the "quote" field.
+func QuoteNEQ(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldNEQ(FieldQuote, v))
+}
+
+// QuoteIn applies the In predicate on the "quote" field.
+func QuoteIn(vs ...[]byte) predicate.TA {
+	return predicate.TA(sql.FieldIn(FieldQuote, vs...))
+}
+
+// QuoteNotIn applies the NotIn predicate on the "quote" field.
+func QuoteNotIn(vs ...[]byte) predicate.TA {
+	return predicate.TA(sql.FieldNotIn(FieldQuote, vs...))
+}
+
+// QuoteGT applies the GT predicate on the "quote" field.
+func QuoteGT(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldGT(FieldQuote, v))
+}
+
+// QuoteGTE applies the GTE predicate on the "quote" field.
+func QuoteGTE(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldGTE(FieldQuote, v))
+}
+
+// QuoteLT applies the LT predicate on the "quote" field.
+func QuoteLT(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldLT(FieldQuote, v))
+}
+
+// QuoteLTE applies the LTE predicate on the "quote" field.
+func QuoteLTE(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldLTE(FieldQuote, v))
 }
 
 // IsValidEQ applies the EQ predicate on the "is_valid" field.

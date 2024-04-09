@@ -35,6 +35,12 @@ func (tu *TAUpdate) SetPublicKey(b []byte) *TAUpdate {
 	return tu
 }
 
+// SetQuote sets the "quote" field.
+func (tu *TAUpdate) SetQuote(b []byte) *TAUpdate {
+	tu.mutation.SetQuote(b)
+	return tu
+}
+
 // SetIsValid sets the "is_valid" field.
 func (tu *TAUpdate) SetIsValid(b bool) *TAUpdate {
 	tu.mutation.SetIsValid(b)
@@ -143,6 +149,9 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tu.mutation.PublicKey(); ok {
 		_spec.SetField(ta.FieldPublicKey, field.TypeBytes, value)
 	}
+	if value, ok := tu.mutation.Quote(); ok {
+		_spec.SetField(ta.FieldQuote, field.TypeBytes, value)
+	}
 	if value, ok := tu.mutation.IsValid(); ok {
 		_spec.SetField(ta.FieldIsValid, field.TypeBool, value)
 	}
@@ -227,6 +236,12 @@ type TAUpdateOne struct {
 // SetPublicKey sets the "public_key" field.
 func (tuo *TAUpdateOne) SetPublicKey(b []byte) *TAUpdateOne {
 	tuo.mutation.SetPublicKey(b)
+	return tuo
+}
+
+// SetQuote sets the "quote" field.
+func (tuo *TAUpdateOne) SetQuote(b []byte) *TAUpdateOne {
+	tuo.mutation.SetQuote(b)
 	return tuo
 }
 
@@ -367,6 +382,9 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 	}
 	if value, ok := tuo.mutation.PublicKey(); ok {
 		_spec.SetField(ta.FieldPublicKey, field.TypeBytes, value)
+	}
+	if value, ok := tuo.mutation.Quote(); ok {
+		_spec.SetField(ta.FieldQuote, field.TypeBytes, value)
 	}
 	if value, ok := tuo.mutation.IsValid(); ok {
 		_spec.SetField(ta.FieldIsValid, field.TypeBool, value)
