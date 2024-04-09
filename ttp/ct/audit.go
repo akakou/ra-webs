@@ -11,10 +11,16 @@ import (
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
-func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
-	domain, err := validateDomains(cert.Domains)
+func AuditOne(ttp *core.TTP, c *metact.MetaCert) error {
+	cert, err := c.Certificate()
 	if err != nil {
-		revokeTAByDomains(cert.Domains, ttp.DB)
+		err = fmt.Errorf("failed to get certificate: %w", err)
+		panic(err)
+	}
+
+	domain, err := validateDomains(cert.DNSNames)
+	if err != nil {
+		revokeTAByDomains(cert.DNSNames, ttp.DB)
 	}
 
 	// get the last ta from ta server
@@ -28,7 +34,9 @@ func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
 	}
 
 	// fetch and check the status of last ta
-	lastTA, err := taServ.QueryTa().Order(ent.Desc(ta.FieldID)).First(*ttp.DB.Ctx)
+	lastTA, err := taServ.QueryTa().
+		Order(ent.Desc(ta.FieldID)).
+		First(*ttp.DB.Ctx)
 
 	if err != nil && !ent.IsNotFound(err) {
 		return fmt.Errorf("failed to check ct logs: %w", err)
@@ -43,11 +51,6 @@ func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
 		SetPublicKey([]byte{}).
 		SetIsValid(false).
 		SaveX(*ttp.DB.Ctx)
-
-	err = validatePublicKey(cert)
-	if err != nil {
-		return fmt.Errorf("failed to get validate public key: %w", err)
-	}
 
 	report, err := validateAttestation(cert)
 	if err != nil {
@@ -66,14 +69,14 @@ func AuditOne(ttp *core.TTP, cert *metact.Certificate) error {
 
 	_ta.Update().
 		SetCode(taCode).
-		SetPublicKey([]byte(cert.PublicKeyHashSha256)).
+		SetPublicKey(_ta.PublicKey).
 		SetIsValid(true).
 		SaveX(*ttp.DB.Ctx)
 
 	return nil
 }
 
-func AuditAll(ttp *core.TTP, cert []metact.Certificate) error {
+func AuditAll(ttp *core.TTP, cert []metact.MetaCert) error {
 	for _, c := range cert {
 		err := AuditOne(ttp, &c)
 		if err != nil {

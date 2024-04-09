@@ -1,17 +1,18 @@
 package ct
 
 import (
+	"crypto/x509"
+	"encoding/asn1"
 	"errors"
-
-	metact "github.com/akakou/meta-ct"
+	"reflect"
 )
 
-func findCertExtensions(extensions []metact.KeyValue, label string) (string, error) {
-	for _, ext := range extensions {
-		if ext.Key == label {
+func findCertExtensions(label asn1.ObjectIdentifier, cert *x509.Certificate) ([]byte, error) {
+	for _, ext := range cert.Extensions {
+		if reflect.DeepEqual(ext.Id, label) {
 			return ext.Value, nil
 		}
 	}
 
-	return "", errors.New("extension not found")
+	return []byte{}, errors.New("extension not found")
 }
