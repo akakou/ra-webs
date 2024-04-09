@@ -18,7 +18,18 @@ func main() {
 		return c.String(http.StatusOK, "Hello")
 	})
 
-	ta.SetRaWebs(e)
+	ta, err := ta.DefaultTA()
+
+	if err != nil {
+		panic(err)
+	}
+
+	e.AutoTLSManager, err = ta.TLSConfig()
+
+	if err != nil {
+		panic(err)
+	}
+
 	e.StartAutoTLS(":443")
 
 	e.Logger.Fatal(e.StartAutoTLS(":443"))
