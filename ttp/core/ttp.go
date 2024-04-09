@@ -34,7 +34,7 @@ func DefaultTTP() (*TTP, error) {
 
 	adminToken, err := goutils.RandomHex(32)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate admin token: %w", err)
+		return nil, fmt.Errorf("%s: %w", ERROR_RANDOM_GENERATE, err)
 	}
 
 	fmt.Printf("Admin token generated: %s\n", adminToken)
@@ -46,13 +46,13 @@ func DefaultTTP() (*TTP, error) {
 
 	db, err := db.NewDB(&dbc)
 	if err != nil {
-		return nil, fmt.Errorf("failed to init db: %w", err)
+		return nil, fmt.Errorf("%s: %w", ERROR_INIT_DB, err)
 	}
 
 	ct := metact.NewCT(metaAppId, metaAccessToken)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to init ca: %w", err)
+		return nil, fmt.Errorf("%s: %w", ERROR_INIT_CT, err)
 
 	}
 
