@@ -40,9 +40,34 @@ func docker_run(name string, arguments ...string) ([]byte, error) {
 	return exec.Command("docker", args...).CombinedOutput()
 }
 
-func Build(name string, repo string) (string, string, error) {
+func Build(name, repo, path string) (string, string, error) {
+	current, err := os.Getwd()
+	if err != nil {
+		return "", "", err
+	}
+
+	err = os.Chdir(path)
+	if err != nil {
+		return "", "", err
+	}
+
+	commitId, uniqueId, err := build(name, repo)
+
+	if err != nil {
+		return "", "", err
+	}
+
+	err = os.Chdir(current)
+	if err != nil {
+		return "", "", err
+	}
+
+	return commitId, uniqueId, nil
+}
+
+func build(name, repo string) (string, string, error) {
 	cmd := exec.Command("docker", "build", "-t", "ra-webs-builder", ".")
-	output, err := cmd.Output()
+	output, err := cmd.CombinedOutput()
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "stdout: %s\nerr: %s", output, err)

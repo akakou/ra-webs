@@ -36,7 +36,7 @@ func TestAPI(t *testing.T) {
 	})
 
 	t.Run("TestPostTACode", func(t *testing.T) {
-		body := `{"repository":"github.com/ra-webs/ra_webs", "commit_id": "1111111111", "unique_id": "aGVsbG8K"}`
+		body := `{"repository":"https://github.com/akakou-docs/ego-statistical-analysis"}`
 
 		req := httptest.NewRequest(http.MethodPost, postCodeApi.Path, strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -67,26 +67,6 @@ func TestAPI(t *testing.T) {
 		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
 
 		assert.NoError(t, err)
-
-		assert.Equal(t, "1", rec.Body.String())
-	})
-
-	t.Run("TestActivateCode", func(t *testing.T) {
-		path := "/code/1/activate"
-
-		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(""))
-		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", ttp.AdminToken))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
-		rec := httptest.NewRecorder()
-
-		c := e.NewContext(req, rec)
-		c.SetPath(path)
-		c.SetParamNames("id")
-		c.SetParamValues("1")
-		err = postActivateCodeApi.F(ttp)(c)
-		assert.NoError(t, err)
-		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
 
 		assert.Equal(t, "1", rec.Body.String())
 	})
