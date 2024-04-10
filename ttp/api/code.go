@@ -20,6 +20,11 @@ var postCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 	Path:   "/code",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
+			service, err := authenticateService(ttp, c)
+			if err != nil {
+				return c.String(http.StatusUnauthorized, "token is invalid")
+			}
+
 			req := new(struct {
 				Repository string `json:"repository"`
 			})
@@ -42,7 +47,8 @@ var postCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 				Create().
 				SetRepository(req.Repository).
 				SetCommitID(commitId).
-				SetUniqueID(uniqueId)
+				SetUniqueID(uniqueId).
+				SetService(service)
 
 			_, err = codeCreate.Save(*ttp.DB.Ctx)
 
