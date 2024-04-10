@@ -54,7 +54,7 @@ func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
 		return fmt.Errorf("%v: %v", ERROR_EXTENSION_NOT_FOUND, err)
 	}
 
-	report, err := validateAttestation(token, cert.PublicKey)
+	report, err := ValidateAttestation(token, cert.PublicKey)
 	if err != nil {
 		return fmt.Errorf("%s: %w", ERROR_QUOTE_INVALID, err)
 	}

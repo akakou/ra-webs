@@ -27,8 +27,8 @@ func validateDomains(domains []string) (string, error) {
 	return domain, nil
 }
 
-// for debuggability
-var validateAttestation = _validateAttestation
+// for testability
+var ValidateAttestation = _validateAttestation
 
 func _validateAttestation(token []byte, publicKey any) (*attestation.Report, error) {
 	publicKeyBuf := x509.MarshalPKCS1PublicKey(publicKey.(*rsa.PublicKey))
