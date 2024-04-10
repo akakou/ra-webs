@@ -71,10 +71,11 @@ func authenticateDomain(domain, serviceToken, nonce string) error {
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return errors.New(ERROR_ACCESS_DOMAIN_AUTH_TARGET)
 	}
 
 	if string(b) != expected {
+		fmt.Printf("expected: %v, got: %v", expected, string(b))
 		return errors.New(ERROR_DOMAIN_AUTH_TOKEN_INVALID)
 	}
 
