@@ -1,14 +1,13 @@
 package test
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"strings"
 	"testing"
+
+	"service"
 
 	"github.com/akakou/ra_webs/ttp/api"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
@@ -16,21 +15,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setupMockServer(handler http.HandlerFunc, t *testing.T) (*httptest.Server, *url.URL) {
-	h := http.HandlerFunc(handler)
-
-	ts := httptest.NewServer(h)
-	u, err := url.Parse(ts.URL)
-	assert.NoError(t, err)
-
-	return ts, u
-}
+var PORT = ":11111"
 
 func TestAPI(t *testing.T) {
 	e := echo.New()
 	e.Debug = true
 	ttp, err := ttpcore.DefaultTTP()
 	assert.NoError(t, err)
+
+	api.Route(e, ttp)
+
+	go e.Start(PORT)
 
 	token := ""
 
@@ -49,56 +44,22 @@ func TestAPI(t *testing.T) {
 		token = rec.Body.String()
 	})
 
+	svc := service.NewService(token, "http://localhost"+PORT+"/")
+	api.SCHEME = "http"
+
 	t.Run("TestPostTACode", func(t *testing.T) {
-		body := `{"repository":"https://github.com/akakou-docs/ego-statistical-analysis"}`
-
-		req := httptest.NewRequest(http.MethodPost, api.PostCodeApi.Path, strings.NewReader(body))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
-
-		rec := httptest.NewRecorder()
-
-		c := e.NewContext(req, rec)
-		err = api.PostCodeApi.F(ttp)(c)
+		repo := "https://github.com/akakou-docs/ego-statistical-analysis"
+		uniqueId, err := svc.PostCode(repo)
 		assert.NoError(t, err)
-		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
-
-		assert.Equal(t, "c585bdc800065a3de7c372c8fc6f1259154a85ef9d76b671caf80551082679ba", rec.Body.String())
+		assert.Equal(t, "c585bdc800065a3de7c372c8fc6f1259154a85ef9d76b671caf80551082679ba", uniqueId)
 	})
 
 	t.Run("TestPostTAServer", func(t *testing.T) {
-		nonce := []byte("aaaaa")
-		api.SCHEME = "http"
+		e := echo.New()
+		e.Debug = true
 
-		hashSource := []byte{}
-		hashSource = append(hashSource, []byte(token)...)
-		hashSource = append(hashSource, []byte(nonce)...)
-
-		hash := sha256.Sum256(hashSource)
-		serverToken := hex.EncodeToString(hash[:])
-
-		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprint(w, serverToken)
-		})
-
-		_, u := setupMockServer(handler, t)
-
-		body := fmt.Sprintf(`{"domain": "%s", "nonce": "aaaaa"}`, u.Host)
-
-		req := httptest.NewRequest(http.MethodPost, api.PostServerApi.Path, strings.NewReader(body))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
-
-		rec := httptest.NewRecorder()
-
-		c := e.NewContext(req, rec)
-		err = api.PostServerApi.F(ttp)(c)
+		res, err := svc.PostServer(e, "localhost", ":8080")
 		assert.NoError(t, err)
-		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
-
-		assert.NoError(t, err)
-
-		assert.Equal(t, "1", rec.Body.String())
+		assert.Equal(t, "1", res)
 	})
-
 }
