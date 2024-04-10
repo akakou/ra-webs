@@ -25,3 +25,5 @@ ta/certificate.pem
 ta/private.key
 ta/example/example
 ttp/ca_test.json
+
+**/repo
