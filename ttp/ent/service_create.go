@@ -33,6 +33,20 @@ func (sc *ServiceCreate) SetToken(s string) *ServiceCreate {
 	return sc
 }
 
+// SetHasActivated sets the "has_activated" field.
+func (sc *ServiceCreate) SetHasActivated(b bool) *ServiceCreate {
+	sc.mutation.SetHasActivated(b)
+	return sc
+}
+
+// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
+func (sc *ServiceCreate) SetNillableHasActivated(b *bool) *ServiceCreate {
+	if b != nil {
+		sc.SetHasActivated(*b)
+	}
+	return sc
+}
+
 // AddTaserverIDs adds the "taserver" edge to the TAServer entity by IDs.
 func (sc *ServiceCreate) AddTaserverIDs(ids ...int) *ServiceCreate {
 	sc.mutation.AddTaserverIDs(ids...)
@@ -70,6 +84,7 @@ func (sc *ServiceCreate) Mutation() *ServiceMutation {
 
 // Save creates the Service in the database.
 func (sc *ServiceCreate) Save(ctx context.Context) (*Service, error) {
+	sc.defaults()
 	return withHooks(ctx, sc.sqlSave, sc.mutation, sc.hooks)
 }
 
@@ -95,6 +110,14 @@ func (sc *ServiceCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (sc *ServiceCreate) defaults() {
+	if _, ok := sc.mutation.HasActivated(); !ok {
+		v := service.DefaultHasActivated
+		sc.mutation.SetHasActivated(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (sc *ServiceCreate) check() error {
 	if _, ok := sc.mutation.Name(); !ok {
@@ -102,6 +125,9 @@ func (sc *ServiceCreate) check() error {
 	}
 	if _, ok := sc.mutation.Token(); !ok {
 		return &ValidationError{Name: "token", err: errors.New(`ent: missing required field "Service.token"`)}
+	}
+	if _, ok := sc.mutation.HasActivated(); !ok {
+		return &ValidationError{Name: "has_activated", err: errors.New(`ent: missing required field "Service.has_activated"`)}
 	}
 	return nil
 }
@@ -136,6 +162,10 @@ func (sc *ServiceCreate) createSpec() (*Service, *sqlgraph.CreateSpec) {
 	if value, ok := sc.mutation.Token(); ok {
 		_spec.SetField(service.FieldToken, field.TypeString, value)
 		_node.Token = value
+	}
+	if value, ok := sc.mutation.HasActivated(); ok {
+		_spec.SetField(service.FieldHasActivated, field.TypeBool, value)
+		_node.HasActivated = value
 	}
 	if nodes := sc.mutation.TaserverIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -190,6 +220,7 @@ func (scb *ServiceCreateBulk) Save(ctx context.Context) ([]*Service, error) {
 	for i := range scb.builders {
 		func(i int, root context.Context) {
 			builder := scb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ServiceMutation)
 				if !ok {

@@ -39,6 +39,20 @@ func (tcc *TACodeCreate) SetUniqueID(b []byte) *TACodeCreate {
 	return tcc
 }
 
+// SetHasActivated sets the "has_activated" field.
+func (tcc *TACodeCreate) SetHasActivated(b bool) *TACodeCreate {
+	tcc.mutation.SetHasActivated(b)
+	return tcc
+}
+
+// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
+func (tcc *TACodeCreate) SetNillableHasActivated(b *bool) *TACodeCreate {
+	if b != nil {
+		tcc.SetHasActivated(*b)
+	}
+	return tcc
+}
+
 // AddTumIDs adds the "ta" edge to the TA entity by IDs.
 func (tcc *TACodeCreate) AddTumIDs(ids ...int) *TACodeCreate {
 	tcc.mutation.AddTumIDs(ids...)
@@ -80,6 +94,7 @@ func (tcc *TACodeCreate) Mutation() *TACodeMutation {
 
 // Save creates the TACode in the database.
 func (tcc *TACodeCreate) Save(ctx context.Context) (*TACode, error) {
+	tcc.defaults()
 	return withHooks(ctx, tcc.sqlSave, tcc.mutation, tcc.hooks)
 }
 
@@ -105,6 +120,14 @@ func (tcc *TACodeCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tcc *TACodeCreate) defaults() {
+	if _, ok := tcc.mutation.HasActivated(); !ok {
+		v := tacode.DefaultHasActivated
+		tcc.mutation.SetHasActivated(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (tcc *TACodeCreate) check() error {
 	if _, ok := tcc.mutation.Repository(); !ok {
@@ -115,6 +138,9 @@ func (tcc *TACodeCreate) check() error {
 	}
 	if _, ok := tcc.mutation.UniqueID(); !ok {
 		return &ValidationError{Name: "unique_id", err: errors.New(`ent: missing required field "TACode.unique_id"`)}
+	}
+	if _, ok := tcc.mutation.HasActivated(); !ok {
+		return &ValidationError{Name: "has_activated", err: errors.New(`ent: missing required field "TACode.has_activated"`)}
 	}
 	return nil
 }
@@ -153,6 +179,10 @@ func (tcc *TACodeCreate) createSpec() (*TACode, *sqlgraph.CreateSpec) {
 	if value, ok := tcc.mutation.UniqueID(); ok {
 		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
 		_node.UniqueID = value
+	}
+	if value, ok := tcc.mutation.HasActivated(); ok {
+		_spec.SetField(tacode.FieldHasActivated, field.TypeBool, value)
+		_node.HasActivated = value
 	}
 	if nodes := tcc.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -208,6 +238,7 @@ func (tccb *TACodeCreateBulk) Save(ctx context.Context) ([]*TACode, error) {
 	for i := range tccb.builders {
 		func(i int, root context.Context) {
 			builder := tccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TACodeMutation)
 				if !ok {

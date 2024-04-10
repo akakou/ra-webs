@@ -68,6 +68,11 @@ func UniqueID(v []byte) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldUniqueID, v))
 }
 
+// HasActivated applies equality check predicate on the "has_activated" field. It's identical to HasActivatedEQ.
+func HasActivated(v bool) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldHasActivated, v))
+}
+
 // RepositoryEQ applies the EQ predicate on the "repository" field.
 func RepositoryEQ(v string) predicate.TACode {
 	return predicate.TACode(sql.FieldEQ(FieldRepository, v))
@@ -236,6 +241,16 @@ func UniqueIDLT(v []byte) predicate.TACode {
 // UniqueIDLTE applies the LTE predicate on the "unique_id" field.
 func UniqueIDLTE(v []byte) predicate.TACode {
 	return predicate.TACode(sql.FieldLTE(FieldUniqueID, v))
+}
+
+// HasActivatedEQ applies the EQ predicate on the "has_activated" field.
+func HasActivatedEQ(v bool) predicate.TACode {
+	return predicate.TACode(sql.FieldEQ(FieldHasActivated, v))
+}
+
+// HasActivatedNEQ applies the NEQ predicate on the "has_activated" field.
+func HasActivatedNEQ(v bool) predicate.TACode {
+	return predicate.TACode(sql.FieldNEQ(FieldHasActivated, v))
 }
 
 // HasTa applies the HasEdge predicate on the "ta" edge.

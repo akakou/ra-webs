@@ -16,6 +16,8 @@ const (
 	FieldName = "name"
 	// FieldToken holds the string denoting the token field in the database.
 	FieldToken = "token"
+	// FieldHasActivated holds the string denoting the has_activated field in the database.
+	FieldHasActivated = "has_activated"
 	// EdgeTaserver holds the string denoting the taserver edge name in mutations.
 	EdgeTaserver = "taserver"
 	// EdgeTacode holds the string denoting the tacode edge name in mutations.
@@ -43,6 +45,7 @@ var Columns = []string{
 	FieldID,
 	FieldName,
 	FieldToken,
+	FieldHasActivated,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -54,6 +57,11 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultHasActivated holds the default value on creation for the "has_activated" field.
+	DefaultHasActivated bool
+)
 
 // OrderOption defines the ordering options for the Service queries.
 type OrderOption func(*sql.Selector)
@@ -71,6 +79,11 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 // ByToken orders the results by the token field.
 func ByToken(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldToken, opts...).ToFunc()
+}
+
+// ByHasActivated orders the results by the has_activated field.
+func ByHasActivated(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHasActivated, opts...).ToFunc()
 }
 
 // ByTaserverCount orders the results by taserver count.

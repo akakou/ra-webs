@@ -57,6 +57,20 @@ func (su *ServiceUpdate) SetNillableToken(s *string) *ServiceUpdate {
 	return su
 }
 
+// SetHasActivated sets the "has_activated" field.
+func (su *ServiceUpdate) SetHasActivated(b bool) *ServiceUpdate {
+	su.mutation.SetHasActivated(b)
+	return su
+}
+
+// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
+func (su *ServiceUpdate) SetNillableHasActivated(b *bool) *ServiceUpdate {
+	if b != nil {
+		su.SetHasActivated(*b)
+	}
+	return su
+}
+
 // AddTaserverIDs adds the "taserver" edge to the TAServer entity by IDs.
 func (su *ServiceUpdate) AddTaserverIDs(ids ...int) *ServiceUpdate {
 	su.mutation.AddTaserverIDs(ids...)
@@ -175,6 +189,9 @@ func (su *ServiceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := su.mutation.Token(); ok {
 		_spec.SetField(service.FieldToken, field.TypeString, value)
+	}
+	if value, ok := su.mutation.HasActivated(); ok {
+		_spec.SetField(service.FieldHasActivated, field.TypeBool, value)
 	}
 	if su.mutation.TaserverCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -310,6 +327,20 @@ func (suo *ServiceUpdateOne) SetToken(s string) *ServiceUpdateOne {
 func (suo *ServiceUpdateOne) SetNillableToken(s *string) *ServiceUpdateOne {
 	if s != nil {
 		suo.SetToken(*s)
+	}
+	return suo
+}
+
+// SetHasActivated sets the "has_activated" field.
+func (suo *ServiceUpdateOne) SetHasActivated(b bool) *ServiceUpdateOne {
+	suo.mutation.SetHasActivated(b)
+	return suo
+}
+
+// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
+func (suo *ServiceUpdateOne) SetNillableHasActivated(b *bool) *ServiceUpdateOne {
+	if b != nil {
+		suo.SetHasActivated(*b)
 	}
 	return suo
 }
@@ -462,6 +493,9 @@ func (suo *ServiceUpdateOne) sqlSave(ctx context.Context) (_node *Service, err e
 	}
 	if value, ok := suo.mutation.Token(); ok {
 		_spec.SetField(service.FieldToken, field.TypeString, value)
+	}
+	if value, ok := suo.mutation.HasActivated(); ok {
+		_spec.SetField(service.FieldHasActivated, field.TypeBool, value)
 	}
 	if suo.mutation.TaserverCleared() {
 		edge := &sqlgraph.EdgeSpec{

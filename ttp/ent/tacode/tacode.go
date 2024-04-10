@@ -18,6 +18,8 @@ const (
 	FieldCommitID = "commit_id"
 	// FieldUniqueID holds the string denoting the unique_id field in the database.
 	FieldUniqueID = "unique_id"
+	// FieldHasActivated holds the string denoting the has_activated field in the database.
+	FieldHasActivated = "has_activated"
 	// EdgeTa holds the string denoting the ta edge name in mutations.
 	EdgeTa = "ta"
 	// EdgeService holds the string denoting the service edge name in mutations.
@@ -46,6 +48,7 @@ var Columns = []string{
 	FieldRepository,
 	FieldCommitID,
 	FieldUniqueID,
+	FieldHasActivated,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "ta_codes"
@@ -69,6 +72,11 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultHasActivated holds the default value on creation for the "has_activated" field.
+	DefaultHasActivated bool
+)
+
 // OrderOption defines the ordering options for the TACode queries.
 type OrderOption func(*sql.Selector)
 
@@ -85,6 +93,11 @@ func ByRepository(opts ...sql.OrderTermOption) OrderOption {
 // ByCommitID orders the results by the commit_id field.
 func ByCommitID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCommitID, opts...).ToFunc()
+}
+
+// ByHasActivated orders the results by the has_activated field.
+func ByHasActivated(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHasActivated, opts...).ToFunc()
 }
 
 // ByTaCount orders the results by ta count.

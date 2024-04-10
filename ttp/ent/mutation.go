@@ -40,6 +40,7 @@ type ServiceMutation struct {
 	id              *int
 	name            *string
 	token           *string
+	has_activated   *bool
 	clearedFields   map[string]struct{}
 	taserver        map[int]struct{}
 	removedtaserver map[int]struct{}
@@ -222,6 +223,42 @@ func (m *ServiceMutation) ResetToken() {
 	m.token = nil
 }
 
+// SetHasActivated sets the "has_activated" field.
+func (m *ServiceMutation) SetHasActivated(b bool) {
+	m.has_activated = &b
+}
+
+// HasActivated returns the value of the "has_activated" field in the mutation.
+func (m *ServiceMutation) HasActivated() (r bool, exists bool) {
+	v := m.has_activated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHasActivated returns the old "has_activated" field's value of the Service entity.
+// If the Service object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ServiceMutation) OldHasActivated(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHasActivated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHasActivated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHasActivated: %w", err)
+	}
+	return oldValue.HasActivated, nil
+}
+
+// ResetHasActivated resets all changes to the "has_activated" field.
+func (m *ServiceMutation) ResetHasActivated() {
+	m.has_activated = nil
+}
+
 // AddTaserverIDs adds the "taserver" edge to the TAServer entity by ids.
 func (m *ServiceMutation) AddTaserverIDs(ids ...int) {
 	if m.taserver == nil {
@@ -364,12 +401,15 @@ func (m *ServiceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ServiceMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.name != nil {
 		fields = append(fields, service.FieldName)
 	}
 	if m.token != nil {
 		fields = append(fields, service.FieldToken)
+	}
+	if m.has_activated != nil {
+		fields = append(fields, service.FieldHasActivated)
 	}
 	return fields
 }
@@ -383,6 +423,8 @@ func (m *ServiceMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case service.FieldToken:
 		return m.Token()
+	case service.FieldHasActivated:
+		return m.HasActivated()
 	}
 	return nil, false
 }
@@ -396,6 +438,8 @@ func (m *ServiceMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldName(ctx)
 	case service.FieldToken:
 		return m.OldToken(ctx)
+	case service.FieldHasActivated:
+		return m.OldHasActivated(ctx)
 	}
 	return nil, fmt.Errorf("unknown Service field %s", name)
 }
@@ -418,6 +462,13 @@ func (m *ServiceMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetToken(v)
+		return nil
+	case service.FieldHasActivated:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHasActivated(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Service field %s", name)
@@ -473,6 +524,9 @@ func (m *ServiceMutation) ResetField(name string) error {
 		return nil
 	case service.FieldToken:
 		m.ResetToken()
+		return nil
+	case service.FieldHasActivated:
+		m.ResetHasActivated()
 		return nil
 	}
 	return fmt.Errorf("unknown Service field %s", name)
@@ -1157,6 +1211,7 @@ type TACodeMutation struct {
 	repository     *string
 	commit_id      *string
 	unique_id      *[]byte
+	has_activated  *bool
 	clearedFields  map[string]struct{}
 	ta             map[int]struct{}
 	removedta      map[int]struct{}
@@ -1374,6 +1429,42 @@ func (m *TACodeMutation) ResetUniqueID() {
 	m.unique_id = nil
 }
 
+// SetHasActivated sets the "has_activated" field.
+func (m *TACodeMutation) SetHasActivated(b bool) {
+	m.has_activated = &b
+}
+
+// HasActivated returns the value of the "has_activated" field in the mutation.
+func (m *TACodeMutation) HasActivated() (r bool, exists bool) {
+	v := m.has_activated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHasActivated returns the old "has_activated" field's value of the TACode entity.
+// If the TACode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TACodeMutation) OldHasActivated(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHasActivated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHasActivated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHasActivated: %w", err)
+	}
+	return oldValue.HasActivated, nil
+}
+
+// ResetHasActivated resets all changes to the "has_activated" field.
+func (m *TACodeMutation) ResetHasActivated() {
+	m.has_activated = nil
+}
+
 // AddTumIDs adds the "ta" edge to the TA entity by ids.
 func (m *TACodeMutation) AddTumIDs(ids ...int) {
 	if m.ta == nil {
@@ -1501,7 +1592,7 @@ func (m *TACodeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TACodeMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.repository != nil {
 		fields = append(fields, tacode.FieldRepository)
 	}
@@ -1510,6 +1601,9 @@ func (m *TACodeMutation) Fields() []string {
 	}
 	if m.unique_id != nil {
 		fields = append(fields, tacode.FieldUniqueID)
+	}
+	if m.has_activated != nil {
+		fields = append(fields, tacode.FieldHasActivated)
 	}
 	return fields
 }
@@ -1525,6 +1619,8 @@ func (m *TACodeMutation) Field(name string) (ent.Value, bool) {
 		return m.CommitID()
 	case tacode.FieldUniqueID:
 		return m.UniqueID()
+	case tacode.FieldHasActivated:
+		return m.HasActivated()
 	}
 	return nil, false
 }
@@ -1540,6 +1636,8 @@ func (m *TACodeMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldCommitID(ctx)
 	case tacode.FieldUniqueID:
 		return m.OldUniqueID(ctx)
+	case tacode.FieldHasActivated:
+		return m.OldHasActivated(ctx)
 	}
 	return nil, fmt.Errorf("unknown TACode field %s", name)
 }
@@ -1569,6 +1667,13 @@ func (m *TACodeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUniqueID(v)
+		return nil
+	case tacode.FieldHasActivated:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHasActivated(v)
 		return nil
 	}
 	return fmt.Errorf("unknown TACode field %s", name)
@@ -1627,6 +1732,9 @@ func (m *TACodeMutation) ResetField(name string) error {
 		return nil
 	case tacode.FieldUniqueID:
 		m.ResetUniqueID()
+		return nil
+	case tacode.FieldHasActivated:
+		m.ResetHasActivated()
 		return nil
 	}
 	return fmt.Errorf("unknown TACode field %s", name)

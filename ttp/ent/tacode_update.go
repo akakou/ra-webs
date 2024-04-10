@@ -63,6 +63,20 @@ func (tcu *TACodeUpdate) SetUniqueID(b []byte) *TACodeUpdate {
 	return tcu
 }
 
+// SetHasActivated sets the "has_activated" field.
+func (tcu *TACodeUpdate) SetHasActivated(b bool) *TACodeUpdate {
+	tcu.mutation.SetHasActivated(b)
+	return tcu
+}
+
+// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
+func (tcu *TACodeUpdate) SetNillableHasActivated(b *bool) *TACodeUpdate {
+	if b != nil {
+		tcu.SetHasActivated(*b)
+	}
+	return tcu
+}
+
 // AddTumIDs adds the "ta" edge to the TA entity by IDs.
 func (tcu *TACodeUpdate) AddTumIDs(ids ...int) *TACodeUpdate {
 	tcu.mutation.AddTumIDs(ids...)
@@ -173,6 +187,9 @@ func (tcu *TACodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tcu.mutation.UniqueID(); ok {
 		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
+	}
+	if value, ok := tcu.mutation.HasActivated(); ok {
+		_spec.SetField(tacode.FieldHasActivated, field.TypeBool, value)
 	}
 	if tcu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -299,6 +316,20 @@ func (tcuo *TACodeUpdateOne) SetNillableCommitID(s *string) *TACodeUpdateOne {
 // SetUniqueID sets the "unique_id" field.
 func (tcuo *TACodeUpdateOne) SetUniqueID(b []byte) *TACodeUpdateOne {
 	tcuo.mutation.SetUniqueID(b)
+	return tcuo
+}
+
+// SetHasActivated sets the "has_activated" field.
+func (tcuo *TACodeUpdateOne) SetHasActivated(b bool) *TACodeUpdateOne {
+	tcuo.mutation.SetHasActivated(b)
+	return tcuo
+}
+
+// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
+func (tcuo *TACodeUpdateOne) SetNillableHasActivated(b *bool) *TACodeUpdateOne {
+	if b != nil {
+		tcuo.SetHasActivated(*b)
+	}
 	return tcuo
 }
 
@@ -442,6 +473,9 @@ func (tcuo *TACodeUpdateOne) sqlSave(ctx context.Context) (_node *TACode, err er
 	}
 	if value, ok := tcuo.mutation.UniqueID(); ok {
 		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
+	}
+	if value, ok := tcuo.mutation.HasActivated(); ok {
+		_spec.SetField(tacode.FieldHasActivated, field.TypeBool, value)
 	}
 	if tcuo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
