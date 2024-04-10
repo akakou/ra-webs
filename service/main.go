@@ -7,14 +7,12 @@ import (
 )
 
 type Service struct {
-	Token    string
-	TTP_BASE string
+	Token   string
+	TTPBase string
 }
 
-var PORT = ":8080"
-
 func NewService(token, ttp string) *Service {
-	return &Service{Token: token, TTP_BASE: ttp}
+	return &Service{Token: token, TTPBase: ttp}
 }
 
 func DefaultService() *Service {
