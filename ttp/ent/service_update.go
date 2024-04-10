@@ -57,16 +57,16 @@ func (su *ServiceUpdate) SetNillableToken(s *string) *ServiceUpdate {
 	return su
 }
 
-// SetHasActivated sets the "has_activated" field.
-func (su *ServiceUpdate) SetHasActivated(b bool) *ServiceUpdate {
-	su.mutation.SetHasActivated(b)
+// SetIsActive sets the "is_active" field.
+func (su *ServiceUpdate) SetIsActive(b bool) *ServiceUpdate {
+	su.mutation.SetIsActive(b)
 	return su
 }
 
-// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
-func (su *ServiceUpdate) SetNillableHasActivated(b *bool) *ServiceUpdate {
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (su *ServiceUpdate) SetNillableIsActive(b *bool) *ServiceUpdate {
 	if b != nil {
-		su.SetHasActivated(*b)
+		su.SetIsActive(*b)
 	}
 	return su
 }
@@ -190,8 +190,8 @@ func (su *ServiceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := su.mutation.Token(); ok {
 		_spec.SetField(service.FieldToken, field.TypeString, value)
 	}
-	if value, ok := su.mutation.HasActivated(); ok {
-		_spec.SetField(service.FieldHasActivated, field.TypeBool, value)
+	if value, ok := su.mutation.IsActive(); ok {
+		_spec.SetField(service.FieldIsActive, field.TypeBool, value)
 	}
 	if su.mutation.TaserverCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -331,16 +331,16 @@ func (suo *ServiceUpdateOne) SetNillableToken(s *string) *ServiceUpdateOne {
 	return suo
 }
 
-// SetHasActivated sets the "has_activated" field.
-func (suo *ServiceUpdateOne) SetHasActivated(b bool) *ServiceUpdateOne {
-	suo.mutation.SetHasActivated(b)
+// SetIsActive sets the "is_active" field.
+func (suo *ServiceUpdateOne) SetIsActive(b bool) *ServiceUpdateOne {
+	suo.mutation.SetIsActive(b)
 	return suo
 }
 
-// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
-func (suo *ServiceUpdateOne) SetNillableHasActivated(b *bool) *ServiceUpdateOne {
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (suo *ServiceUpdateOne) SetNillableIsActive(b *bool) *ServiceUpdateOne {
 	if b != nil {
-		suo.SetHasActivated(*b)
+		suo.SetIsActive(*b)
 	}
 	return suo
 }
@@ -494,8 +494,8 @@ func (suo *ServiceUpdateOne) sqlSave(ctx context.Context) (_node *Service, err e
 	if value, ok := suo.mutation.Token(); ok {
 		_spec.SetField(service.FieldToken, field.TypeString, value)
 	}
-	if value, ok := suo.mutation.HasActivated(); ok {
-		_spec.SetField(service.FieldHasActivated, field.TypeBool, value)
+	if value, ok := suo.mutation.IsActive(); ok {
+		_spec.SetField(service.FieldIsActive, field.TypeBool, value)
 	}
 	if suo.mutation.TaserverCleared() {
 		edge := &sqlgraph.EdgeSpec{

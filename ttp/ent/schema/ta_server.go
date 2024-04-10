@@ -15,7 +15,7 @@ type TAServer struct {
 func (TAServer) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("domain").Unique(),
-		field.Bool("has_activated").Default(false),
+		field.Bool("is_active").Default(false),
 	}
 }
 

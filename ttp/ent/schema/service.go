@@ -16,7 +16,7 @@ func (Service) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
 		field.String("token"),
-		field.Bool("has_activated").Default(false),
+		field.Bool("is_active").Default(false),
 	}
 }
 

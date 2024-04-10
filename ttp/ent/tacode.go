@@ -23,8 +23,8 @@ type TACode struct {
 	CommitID string `json:"commit_id,omitempty"`
 	// UniqueID holds the value of the "unique_id" field.
 	UniqueID []byte `json:"unique_id,omitempty"`
-	// HasActivated holds the value of the "has_activated" field.
-	HasActivated bool `json:"has_activated,omitempty"`
+	// IsActive holds the value of the "is_active" field.
+	IsActive bool `json:"is_active,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TACodeQuery when eager-loading is set.
 	Edges           TACodeEdges `json:"edges"`
@@ -72,7 +72,7 @@ func (*TACode) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case tacode.FieldUniqueID:
 			values[i] = new([]byte)
-		case tacode.FieldHasActivated:
+		case tacode.FieldIsActive:
 			values[i] = new(sql.NullBool)
 		case tacode.FieldID:
 			values[i] = new(sql.NullInt64)
@@ -119,11 +119,11 @@ func (tc *TACode) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				tc.UniqueID = *value
 			}
-		case tacode.FieldHasActivated:
+		case tacode.FieldIsActive:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field has_activated", values[i])
+				return fmt.Errorf("unexpected type %T for field is_active", values[i])
 			} else if value.Valid {
-				tc.HasActivated = value.Bool
+				tc.IsActive = value.Bool
 			}
 		case tacode.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -187,8 +187,8 @@ func (tc *TACode) String() string {
 	builder.WriteString("unique_id=")
 	builder.WriteString(fmt.Sprintf("%v", tc.UniqueID))
 	builder.WriteString(", ")
-	builder.WriteString("has_activated=")
-	builder.WriteString(fmt.Sprintf("%v", tc.HasActivated))
+	builder.WriteString("is_active=")
+	builder.WriteString(fmt.Sprintf("%v", tc.IsActive))
 	builder.WriteByte(')')
 	return builder.String()
 }

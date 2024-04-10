@@ -27,16 +27,16 @@ func (tsc *TAServerCreate) SetDomain(s string) *TAServerCreate {
 	return tsc
 }
 
-// SetHasActivated sets the "has_activated" field.
-func (tsc *TAServerCreate) SetHasActivated(b bool) *TAServerCreate {
-	tsc.mutation.SetHasActivated(b)
+// SetIsActive sets the "is_active" field.
+func (tsc *TAServerCreate) SetIsActive(b bool) *TAServerCreate {
+	tsc.mutation.SetIsActive(b)
 	return tsc
 }
 
-// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
-func (tsc *TAServerCreate) SetNillableHasActivated(b *bool) *TAServerCreate {
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (tsc *TAServerCreate) SetNillableIsActive(b *bool) *TAServerCreate {
 	if b != nil {
-		tsc.SetHasActivated(*b)
+		tsc.SetIsActive(*b)
 	}
 	return tsc
 }
@@ -110,9 +110,9 @@ func (tsc *TAServerCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tsc *TAServerCreate) defaults() {
-	if _, ok := tsc.mutation.HasActivated(); !ok {
-		v := taserver.DefaultHasActivated
-		tsc.mutation.SetHasActivated(v)
+	if _, ok := tsc.mutation.IsActive(); !ok {
+		v := taserver.DefaultIsActive
+		tsc.mutation.SetIsActive(v)
 	}
 }
 
@@ -121,8 +121,8 @@ func (tsc *TAServerCreate) check() error {
 	if _, ok := tsc.mutation.Domain(); !ok {
 		return &ValidationError{Name: "domain", err: errors.New(`ent: missing required field "TAServer.domain"`)}
 	}
-	if _, ok := tsc.mutation.HasActivated(); !ok {
-		return &ValidationError{Name: "has_activated", err: errors.New(`ent: missing required field "TAServer.has_activated"`)}
+	if _, ok := tsc.mutation.IsActive(); !ok {
+		return &ValidationError{Name: "is_active", err: errors.New(`ent: missing required field "TAServer.is_active"`)}
 	}
 	return nil
 }
@@ -154,9 +154,9 @@ func (tsc *TAServerCreate) createSpec() (*TAServer, *sqlgraph.CreateSpec) {
 		_spec.SetField(taserver.FieldDomain, field.TypeString, value)
 		_node.Domain = value
 	}
-	if value, ok := tsc.mutation.HasActivated(); ok {
-		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)
-		_node.HasActivated = value
+	if value, ok := tsc.mutation.IsActive(); ok {
+		_spec.SetField(taserver.FieldIsActive, field.TypeBool, value)
+		_node.IsActive = value
 	}
 	if nodes := tsc.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

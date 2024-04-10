@@ -58,9 +58,9 @@ func Domain(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldEQ(FieldDomain, v))
 }
 
-// HasActivated applies equality check predicate on the "has_activated" field. It's identical to HasActivatedEQ.
-func HasActivated(v bool) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldHasActivated, v))
+// IsActive applies equality check predicate on the "is_active" field. It's identical to IsActiveEQ.
+func IsActive(v bool) predicate.TAServer {
+	return predicate.TAServer(sql.FieldEQ(FieldIsActive, v))
 }
 
 // DomainEQ applies the EQ predicate on the "domain" field.
@@ -128,14 +128,14 @@ func DomainContainsFold(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldContainsFold(FieldDomain, v))
 }
 
-// HasActivatedEQ applies the EQ predicate on the "has_activated" field.
-func HasActivatedEQ(v bool) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldHasActivated, v))
+// IsActiveEQ applies the EQ predicate on the "is_active" field.
+func IsActiveEQ(v bool) predicate.TAServer {
+	return predicate.TAServer(sql.FieldEQ(FieldIsActive, v))
 }
 
-// HasActivatedNEQ applies the NEQ predicate on the "has_activated" field.
-func HasActivatedNEQ(v bool) predicate.TAServer {
-	return predicate.TAServer(sql.FieldNEQ(FieldHasActivated, v))
+// IsActiveNEQ applies the NEQ predicate on the "is_active" field.
+func IsActiveNEQ(v bool) predicate.TAServer {
+	return predicate.TAServer(sql.FieldNEQ(FieldIsActive, v))
 }
 
 // HasTa applies the HasEdge predicate on the "ta" edge.

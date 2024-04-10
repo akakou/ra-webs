@@ -33,16 +33,16 @@ func (sc *ServiceCreate) SetToken(s string) *ServiceCreate {
 	return sc
 }
 
-// SetHasActivated sets the "has_activated" field.
-func (sc *ServiceCreate) SetHasActivated(b bool) *ServiceCreate {
-	sc.mutation.SetHasActivated(b)
+// SetIsActive sets the "is_active" field.
+func (sc *ServiceCreate) SetIsActive(b bool) *ServiceCreate {
+	sc.mutation.SetIsActive(b)
 	return sc
 }
 
-// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
-func (sc *ServiceCreate) SetNillableHasActivated(b *bool) *ServiceCreate {
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (sc *ServiceCreate) SetNillableIsActive(b *bool) *ServiceCreate {
 	if b != nil {
-		sc.SetHasActivated(*b)
+		sc.SetIsActive(*b)
 	}
 	return sc
 }
@@ -112,9 +112,9 @@ func (sc *ServiceCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (sc *ServiceCreate) defaults() {
-	if _, ok := sc.mutation.HasActivated(); !ok {
-		v := service.DefaultHasActivated
-		sc.mutation.SetHasActivated(v)
+	if _, ok := sc.mutation.IsActive(); !ok {
+		v := service.DefaultIsActive
+		sc.mutation.SetIsActive(v)
 	}
 }
 
@@ -126,8 +126,8 @@ func (sc *ServiceCreate) check() error {
 	if _, ok := sc.mutation.Token(); !ok {
 		return &ValidationError{Name: "token", err: errors.New(`ent: missing required field "Service.token"`)}
 	}
-	if _, ok := sc.mutation.HasActivated(); !ok {
-		return &ValidationError{Name: "has_activated", err: errors.New(`ent: missing required field "Service.has_activated"`)}
+	if _, ok := sc.mutation.IsActive(); !ok {
+		return &ValidationError{Name: "is_active", err: errors.New(`ent: missing required field "Service.is_active"`)}
 	}
 	return nil
 }
@@ -163,9 +163,9 @@ func (sc *ServiceCreate) createSpec() (*Service, *sqlgraph.CreateSpec) {
 		_spec.SetField(service.FieldToken, field.TypeString, value)
 		_node.Token = value
 	}
-	if value, ok := sc.mutation.HasActivated(); ok {
-		_spec.SetField(service.FieldHasActivated, field.TypeBool, value)
-		_node.HasActivated = value
+	if value, ok := sc.mutation.IsActive(); ok {
+		_spec.SetField(service.FieldIsActive, field.TypeBool, value)
+		_node.IsActive = value
 	}
 	if nodes := sc.mutation.TaserverIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
