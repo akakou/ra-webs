@@ -32,7 +32,7 @@ var postCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 			rawSha256 := sha256.Sum256([]byte(req.Repository))
 			sha256 := fmt.Sprintf("%x", rawSha256)
 
-			commitId, uniqueIdString, err := builder.Build(sha256, req.Repository, BUILD_DOCKER_PATH)
+			commitId, uniqueIdString, err := builder.Build(sha256, req.Repository)
 			if err != nil {
 				return err
 			}

@@ -1,9 +1,10 @@
 module github.com/akakou/ra_webs/ttp
 
-go 1.21.4
+go 1.21.5
 
 require (
 	entgo.io/ent v0.12.5
+	github.com/akakou/extract-embed v0.0.1
 	github.com/akakou/go-utils v0.0.3
 	github.com/akakou/golang-utils v0.0.1
 	github.com/akakou/meta-ct v0.0.4
@@ -11,7 +12,7 @@ require (
 	github.com/edgelesssys/ego v1.4.1
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/mattn/go-sqlite3 v1.14.18
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	golang.org/x/exp v0.0.0-20240404231335-c0f41cb1a7a0
 )
 
