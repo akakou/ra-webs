@@ -16,7 +16,7 @@ func NewService(token, ttp string) *Service {
 }
 
 func DefaultService() *Service {
-	ttpBase := goutils.GetEnv("RA_WEBS_TTP_BASE", "localhost:8081")
+	ttpBase := goutils.GetEnv("RA_WEBS_TTP_BASE", "http://localhost:8081")
 	token := os.Getenv("RA_WEBS_SERVICE_TOKEN")
 
 	if token == "" {
