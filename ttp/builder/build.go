@@ -1,11 +1,14 @@
 package builder
 
 import (
+	"embed"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
+
+	extractembed "github.com/akakou/extract-embed"
 )
 
 const (
@@ -17,6 +20,9 @@ const BASE_PATH = "./repo"
 
 const COMMIT_ID_INDEX = 0
 const UNIQUE_ID_INDEX = 3
+
+//go:embed *.sh Dockerfile
+var embedFiles embed.FS
 
 func docker_run(name string, arguments ...string) ([]byte, error) {
 	directory := fmt.Sprintf("%s/%s", BASE_PATH, name)
@@ -40,13 +46,15 @@ func docker_run(name string, arguments ...string) ([]byte, error) {
 	return exec.Command("docker", args...).CombinedOutput()
 }
 
-func Build(name, repo, path string) (string, string, error) {
+func Build(name, repo string) (string, string, error) {
+	extractembed.Extract(BASE_PATH, &embedFiles)
+
 	current, err := os.Getwd()
 	if err != nil {
 		return "", "", err
 	}
 
-	err = os.Chdir(path)
+	err = os.Chdir(BASE_PATH)
 	if err != nil {
 		return "", "", err
 	}
