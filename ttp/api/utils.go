@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"net/http"
 
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ent"
@@ -11,6 +10,7 @@ import (
 )
 
 const ERROR_AUTHENTICATE_SERVICE = "failed to authenticate service"
+const ERROR_AUTHENTICATE_ADMIN = "failed to authenticate admin"
 
 func authenticateService(ttp *ttpcore.TTP, c echo.Context) (*ent.Service, error) {
 	authorization := c.Request().Header["Authorization"][0]
@@ -29,7 +29,7 @@ func authenticateAdmin(ttp *ttpcore.TTP, c echo.Context) error {
 	token := authorization[len("Bearer "):]
 
 	if token != ttp.AdminToken {
-		return c.String(http.StatusUnauthorized, "token is invalid")
+		return fmt.Errorf(ERROR_AUTHENTICATE_ADMIN)
 	}
 
 	return nil
