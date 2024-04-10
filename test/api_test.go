@@ -58,7 +58,7 @@ func TestAPI(t *testing.T) {
 		e := echo.New()
 		e.Debug = true
 
-		res, err := svc.PostServer(e, "localhost", ":8080")
+		res, err := svc.PostServer("localhost", e)
 		assert.NoError(t, err)
 		assert.Equal(t, "1", res)
 	})

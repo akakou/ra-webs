@@ -27,7 +27,6 @@ func (service *Service) post(path string, reqBody any) (string, error) {
 	}
 
 	u.Path = path
-	fmt.Printf("url: %v", u.String())
 
 	req, err := http.NewRequest(http.MethodPost, u.String(), strings.NewReader(string(body)))
 	if err != nil {
@@ -61,20 +60,20 @@ func (service *Service) PostCode(repository string) (string, error) {
 	return service.post(api.PostCodeApi.Path, map[string]string{"repository": repository})
 }
 
-func (service *Service) PostServer(e *echo.Echo, domain, port string) (string, error) {
+func (service *Service) PostServer(domain string, e *echo.Echo) (string, error) {
 	nonce, _ := goutils.RandomHex(64)
 	token := core.DomainToken(service.Token, nonce)
 
-	service.DomainAuthServer(token, domain, port, e)
+	service.DomainAuthServer(token, domain, e)
 
-	return service.post(api.PostServerApi.Path, map[string]string{"domain": domain + port, "nonce": nonce})
+	return service.post(api.PostServerApi.Path, map[string]string{"domain": domain, "nonce": nonce})
 }
 
-func (service *Service) DomainAuthServer(token, domain, port string, e *echo.Echo) *echo.Echo {
+func (service *Service) DomainAuthServer(token, domain string, e *echo.Echo) *echo.Echo {
 	e.GET(api.DOMAIN_AUTH_PATH, func(c echo.Context) error {
 		return c.String(http.StatusOK, token)
 	})
 
-	go e.Start(port)
+	go e.Start(api.DOMAIN_AUTH_PORT)
 	return e
 }

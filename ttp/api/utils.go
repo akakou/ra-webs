@@ -22,8 +22,10 @@ const (
 	ERROR_DOMAIN_AUTH_TOKEN_INVALID = "domain auth token is invalid"
 )
 
-var SCHEME = "https"
+var SCHEME = "http"
 var DOMAIN_AUTH_PATH = "/ra-webs"
+
+const DOMAIN_AUTH_PORT = ":8082"
 
 func authenticateService(ttp *ttpcore.TTP, c echo.Context) (*ent.Service, error) {
 	authorization := c.Request().Header["Authorization"][0]
@@ -53,7 +55,7 @@ func authenticateDomain(domain, serviceToken, nonce string) error {
 
 	u := url.URL{
 		Scheme: SCHEME,
-		Host:   domain,
+		Host:   domain + DOMAIN_AUTH_PORT,
 		Path:   DOMAIN_AUTH_PATH,
 	}
 
