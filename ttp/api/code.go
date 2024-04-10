@@ -9,6 +9,7 @@ import (
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/ttp/builder"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/labstack/echo/v4"
 )
 
@@ -47,6 +48,7 @@ var postCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 				SetRepository(req.Repository).
 				SetCommitID(commitId).
 				SetUniqueID(uniqueId).
+				SetIsActive(true).
 				SetService(service)
 
 			_, err = codeCreate.Save(*ttp.DB.Ctx)
@@ -65,7 +67,9 @@ var getCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 	Path:   "/code",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			code, err := ttp.DB.Client.TACode.Query().All(*ttp.DB.Ctx)
+			code, err := ttp.DB.Client.TACode.Query().
+				Where(tacode.IsActive(true)).
+				All(*ttp.DB.Ctx)
 			if err != nil {
 				return err
 			}

@@ -27,7 +27,8 @@ var postServerApi = goutils.EchoRoute[ttpcore.TTP]{
 			taServerCreate := ttp.DB.Client.TAServer.
 				Create().
 				SetDomain(req.Domain).
-				SetService(service)
+				SetService(service).
+				SetIsActive(true)
 
 			taServer, err := taServerCreate.Save(*ttp.DB.Ctx)
 			if err != nil {
@@ -60,7 +61,10 @@ var postActivateServerApi = goutils.EchoRoute[ttpcore.TTP]{
 				return err
 			}
 
-			_, err = server.Update().SetHasActivated(true).Save(*ttp.DB.Ctx)
+			_, err = server.
+				Update().
+				SetIsActive(true).
+				Save(*ttp.DB.Ctx)
 			if err != nil {
 				return err
 			}
@@ -75,9 +79,7 @@ var getServerApi = goutils.EchoRoute[ttpcore.TTP]{
 	Path:   "/server",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			activate := c.QueryParam("activate") != "false"
-
-			code, err := ttp.DB.Client.TAServer.Query().Where(taserver.HasActivated(activate)).All(*ttp.DB.Ctx)
+			code, err := ttp.DB.Client.TAServer.Query().Where(taserver.IsActive(true)).All(*ttp.DB.Ctx)
 			if err != nil {
 				return err
 			}
