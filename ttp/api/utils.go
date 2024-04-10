@@ -1,8 +1,6 @@
 package api
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -10,6 +8,7 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/akakou/ra_webs/core"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ent"
 	"github.com/akakou/ra_webs/ttp/ent/service"
@@ -50,12 +49,7 @@ func authenticateAdmin(ttp *ttpcore.TTP, c echo.Context) error {
 }
 
 func authenticateDomain(domain, serviceToken, nonce string) error {
-	hashSource := []byte{}
-	hashSource = append(hashSource, serviceToken...)
-	hashSource = append(hashSource, nonce...)
-
-	hash := sha256.Sum256(hashSource)
-	expected := hex.EncodeToString(hash[:])
+	expected := core.DomainToken(serviceToken, nonce)
 
 	u := url.URL{
 		Scheme: SCHEME,
