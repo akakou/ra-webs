@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/ttp/builder"
@@ -45,13 +44,13 @@ var postCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 				SetCommitID(commitId).
 				SetUniqueID(uniqueId)
 
-			code, err := codeCreate.Save(*ttp.DB.Ctx)
+			_, err = codeCreate.Save(*ttp.DB.Ctx)
 
 			if err != nil {
 				return err
 			}
 
-			return c.String(http.StatusOK, strconv.Itoa(code.ID))
+			return c.String(http.StatusOK, uniqueIdString)
 		}
 	},
 }
