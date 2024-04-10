@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -15,6 +16,7 @@ var postServerApi = goutils.EchoRoute[ttpcore.TTP]{
 	Path:   "/server",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
+			fmt.Print("1\n")
 			service, err := authenticateService(ttp, c)
 			if err != nil {
 				return c.String(http.StatusUnauthorized, "token is invalid")
@@ -22,7 +24,17 @@ var postServerApi = goutils.EchoRoute[ttpcore.TTP]{
 
 			req := new(struct {
 				Domain string `json:"domain"`
+				Nonce  string `json:"nonce"`
 			})
+
+			if c.Bind(req) != nil {
+				return c.String(http.StatusBadRequest, "bad request")
+			}
+
+			err = authenticateDomain(req.Domain, service.Token, req.Nonce)
+			if err != nil {
+				return c.String(http.StatusUnauthorized, err.Error())
+			}
 
 			taServerCreate := ttp.DB.Client.TAServer.
 				Create().
@@ -32,7 +44,7 @@ var postServerApi = goutils.EchoRoute[ttpcore.TTP]{
 
 			taServer, err := taServerCreate.Save(*ttp.DB.Ctx)
 			if err != nil {
-				return err
+				return c.String(http.StatusInternalServerError, err.Error())
 			}
 
 			return c.String(http.StatusOK, strconv.Itoa(taServer.ID))

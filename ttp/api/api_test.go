@@ -1,9 +1,12 @@
 package api
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -11,6 +14,16 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
+
+func setupMockServer(handler http.HandlerFunc, t *testing.T) (*httptest.Server, *url.URL) {
+	h := http.HandlerFunc(handler)
+
+	ts := httptest.NewServer(h)
+	u, err := url.Parse(ts.URL)
+	assert.NoError(t, err)
+
+	return ts, u
+}
 
 func TestAPI(t *testing.T) {
 	e := echo.New()
@@ -53,7 +66,23 @@ func TestAPI(t *testing.T) {
 	})
 
 	t.Run("TestPostTAServer", func(t *testing.T) {
-		body := `{"ip":"0.0.0.0", "domain": "example.com"}`
+		nonce := []byte("aaaaa")
+		SCHEME = "http"
+
+		hashSource := []byte{}
+		hashSource = append(hashSource, []byte(token)...)
+		hashSource = append(hashSource, []byte(nonce)...)
+
+		hash := sha256.Sum256(hashSource)
+		serverToken := hex.EncodeToString(hash[:])
+
+		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprint(w, serverToken)
+		})
+
+		_, u := setupMockServer(handler, t)
+
+		body := fmt.Sprintf(`{"domain": "%s", "nonce": "aaaaa"}`, u.Host)
 
 		req := httptest.NewRequest(http.MethodPost, postServerApi.Path, strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
