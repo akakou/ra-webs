@@ -1,4 +1,4 @@
-package api
+package test
 
 import (
 	"crypto/sha256"
@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/akakou/ra_webs/ttp/api"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
@@ -34,14 +35,14 @@ func TestAPI(t *testing.T) {
 	token := ""
 
 	t.Run("TestPostServiceByAdmin", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodPost, postServiceByAdmin.Path, strings.NewReader(""))
+		req := httptest.NewRequest(http.MethodPost, api.PostServiceByAdmin.Path, strings.NewReader(""))
 		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", ttp.AdminToken))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 		rec := httptest.NewRecorder()
 
 		c := e.NewContext(req, rec)
-		err = postServiceByAdmin.F(ttp)(c)
+		err = api.PostServiceByAdmin.F(ttp)(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
 
@@ -51,14 +52,14 @@ func TestAPI(t *testing.T) {
 	t.Run("TestPostTACode", func(t *testing.T) {
 		body := `{"repository":"https://github.com/akakou-docs/ego-statistical-analysis"}`
 
-		req := httptest.NewRequest(http.MethodPost, postCodeApi.Path, strings.NewReader(body))
+		req := httptest.NewRequest(http.MethodPost, api.PostCodeApi.Path, strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
 
 		rec := httptest.NewRecorder()
 
 		c := e.NewContext(req, rec)
-		err = postCodeApi.F(ttp)(c)
+		err = api.PostCodeApi.F(ttp)(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
 
@@ -67,7 +68,7 @@ func TestAPI(t *testing.T) {
 
 	t.Run("TestPostTAServer", func(t *testing.T) {
 		nonce := []byte("aaaaa")
-		SCHEME = "http"
+		api.SCHEME = "http"
 
 		hashSource := []byte{}
 		hashSource = append(hashSource, []byte(token)...)
@@ -84,14 +85,14 @@ func TestAPI(t *testing.T) {
 
 		body := fmt.Sprintf(`{"domain": "%s", "nonce": "aaaaa"}`, u.Host)
 
-		req := httptest.NewRequest(http.MethodPost, postServerApi.Path, strings.NewReader(body))
+		req := httptest.NewRequest(http.MethodPost, api.PostServerApi.Path, strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
 
 		rec := httptest.NewRecorder()
 
 		c := e.NewContext(req, rec)
-		err = postServerApi.F(ttp)(c)
+		err = api.PostServerApi.F(ttp)(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
 

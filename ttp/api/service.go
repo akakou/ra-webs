@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var postServiceByAdmin = goutils.EchoRoute[ttpcore.TTP]{
+var PostServiceByAdmin = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.POST,
 	Path:   "/service",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {

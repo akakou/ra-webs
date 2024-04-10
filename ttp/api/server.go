@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var postServerApi = goutils.EchoRoute[ttpcore.TTP]{
+var PostServerApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.POST,
 	Path:   "/server",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
@@ -52,7 +52,7 @@ var postServerApi = goutils.EchoRoute[ttpcore.TTP]{
 	},
 }
 
-var getServerApi = goutils.EchoRoute[ttpcore.TTP]{
+var GetServerApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.GET,
 	Path:   "/server",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
