@@ -40,40 +40,6 @@ var postServerApi = goutils.EchoRoute[ttpcore.TTP]{
 	},
 }
 
-var postActivateServerApi = goutils.EchoRoute[ttpcore.TTP]{
-	Method: goutils.POST,
-	Path:   "/server/:id/activate",
-	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
-		return func(c echo.Context) error {
-			paramId := c.Param("id")
-			codeId, err := strconv.Atoi(paramId)
-			if err != nil {
-				return err
-			}
-
-			err = authenticateAdmin(ttp, c)
-			if err != nil {
-				return c.String(http.StatusUnauthorized, "token is invalid")
-			}
-
-			server, err := ttp.DB.Client.TAServer.Get(*ttp.DB.Ctx, codeId)
-			if err != nil {
-				return err
-			}
-
-			_, err = server.
-				Update().
-				SetIsActive(true).
-				Save(*ttp.DB.Ctx)
-			if err != nil {
-				return err
-			}
-
-			return c.String(http.StatusOK, strconv.Itoa(server.ID))
-		}
-	},
-}
-
 var getServerApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.GET,
 	Path:   "/server",

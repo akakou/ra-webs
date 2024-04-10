@@ -71,24 +71,4 @@ func TestAPI(t *testing.T) {
 		assert.Equal(t, "1", rec.Body.String())
 	})
 
-	t.Run("TestActivateServer", func(t *testing.T) {
-		path := "/server/1/activate"
-
-		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(""))
-		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", ttp.AdminToken))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
-		rec := httptest.NewRecorder()
-
-		c := e.NewContext(req, rec)
-		c.SetPath(path)
-		c.SetParamNames("id")
-		c.SetParamValues("1")
-		err = postActivateServerApi.F(ttp)(c)
-		assert.NoError(t, err)
-		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
-
-		assert.Equal(t, "1", rec.Body.String())
-	})
-
 }
