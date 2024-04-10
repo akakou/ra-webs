@@ -49,7 +49,7 @@ func TestAPI(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Result().StatusCode, http.StatusOK)
 
-		assert.Equal(t, "1", rec.Body.String())
+		assert.Equal(t, "c585bdc800065a3de7c372c8fc6f1259154a85ef9d76b671caf80551082679ba", rec.Body.String())
 	})
 
 	t.Run("TestPostTAServer", func(t *testing.T) {
