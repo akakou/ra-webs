@@ -19,8 +19,8 @@ type TAServer struct {
 	ID int `json:"id,omitempty"`
 	// Domain holds the value of the "domain" field.
 	Domain string `json:"domain,omitempty"`
-	// HasActivated holds the value of the "has_activated" field.
-	HasActivated bool `json:"has_activated,omitempty"`
+	// IsActive holds the value of the "is_active" field.
+	IsActive bool `json:"is_active,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TAServerQuery when eager-loading is set.
 	Edges             TAServerEdges `json:"edges"`
@@ -66,7 +66,7 @@ func (*TAServer) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case taserver.FieldHasActivated:
+		case taserver.FieldIsActive:
 			values[i] = new(sql.NullBool)
 		case taserver.FieldID:
 			values[i] = new(sql.NullInt64)
@@ -101,11 +101,11 @@ func (ts *TAServer) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ts.Domain = value.String
 			}
-		case taserver.FieldHasActivated:
+		case taserver.FieldIsActive:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field has_activated", values[i])
+				return fmt.Errorf("unexpected type %T for field is_active", values[i])
 			} else if value.Valid {
-				ts.HasActivated = value.Bool
+				ts.IsActive = value.Bool
 			}
 		case taserver.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -163,8 +163,8 @@ func (ts *TAServer) String() string {
 	builder.WriteString("domain=")
 	builder.WriteString(ts.Domain)
 	builder.WriteString(", ")
-	builder.WriteString("has_activated=")
-	builder.WriteString(fmt.Sprintf("%v", ts.HasActivated))
+	builder.WriteString("is_active=")
+	builder.WriteString(fmt.Sprintf("%v", ts.IsActive))
 	builder.WriteByte(')')
 	return builder.String()
 }

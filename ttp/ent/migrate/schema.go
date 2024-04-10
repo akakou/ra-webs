@@ -13,7 +13,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "token", Type: field.TypeString},
-		{Name: "has_activated", Type: field.TypeBool, Default: false},
+		{Name: "is_active", Type: field.TypeBool, Default: false},
 	}
 	// ServicesTable holds the schema information for the "services" table.
 	ServicesTable = &schema.Table{
@@ -56,7 +56,7 @@ var (
 		{Name: "repository", Type: field.TypeString},
 		{Name: "commit_id", Type: field.TypeString},
 		{Name: "unique_id", Type: field.TypeBytes},
-		{Name: "has_activated", Type: field.TypeBool, Default: false},
+		{Name: "is_active", Type: field.TypeBool, Default: false},
 		{Name: "ta_code_service", Type: field.TypeInt, Nullable: true},
 	}
 	// TaCodesTable holds the schema information for the "ta_codes" table.
@@ -77,7 +77,7 @@ var (
 	TaServersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "domain", Type: field.TypeString, Unique: true},
-		{Name: "has_activated", Type: field.TypeBool, Default: false},
+		{Name: "is_active", Type: field.TypeBool, Default: false},
 		{Name: "ta_server_service", Type: field.TypeInt, Nullable: true},
 	}
 	// TaServersTable holds the schema information for the "ta_servers" table.

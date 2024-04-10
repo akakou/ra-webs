@@ -39,16 +39,16 @@ func (tcc *TACodeCreate) SetUniqueID(b []byte) *TACodeCreate {
 	return tcc
 }
 
-// SetHasActivated sets the "has_activated" field.
-func (tcc *TACodeCreate) SetHasActivated(b bool) *TACodeCreate {
-	tcc.mutation.SetHasActivated(b)
+// SetIsActive sets the "is_active" field.
+func (tcc *TACodeCreate) SetIsActive(b bool) *TACodeCreate {
+	tcc.mutation.SetIsActive(b)
 	return tcc
 }
 
-// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
-func (tcc *TACodeCreate) SetNillableHasActivated(b *bool) *TACodeCreate {
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (tcc *TACodeCreate) SetNillableIsActive(b *bool) *TACodeCreate {
 	if b != nil {
-		tcc.SetHasActivated(*b)
+		tcc.SetIsActive(*b)
 	}
 	return tcc
 }
@@ -122,9 +122,9 @@ func (tcc *TACodeCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tcc *TACodeCreate) defaults() {
-	if _, ok := tcc.mutation.HasActivated(); !ok {
-		v := tacode.DefaultHasActivated
-		tcc.mutation.SetHasActivated(v)
+	if _, ok := tcc.mutation.IsActive(); !ok {
+		v := tacode.DefaultIsActive
+		tcc.mutation.SetIsActive(v)
 	}
 }
 
@@ -139,8 +139,8 @@ func (tcc *TACodeCreate) check() error {
 	if _, ok := tcc.mutation.UniqueID(); !ok {
 		return &ValidationError{Name: "unique_id", err: errors.New(`ent: missing required field "TACode.unique_id"`)}
 	}
-	if _, ok := tcc.mutation.HasActivated(); !ok {
-		return &ValidationError{Name: "has_activated", err: errors.New(`ent: missing required field "TACode.has_activated"`)}
+	if _, ok := tcc.mutation.IsActive(); !ok {
+		return &ValidationError{Name: "is_active", err: errors.New(`ent: missing required field "TACode.is_active"`)}
 	}
 	return nil
 }
@@ -180,9 +180,9 @@ func (tcc *TACodeCreate) createSpec() (*TACode, *sqlgraph.CreateSpec) {
 		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
 		_node.UniqueID = value
 	}
-	if value, ok := tcc.mutation.HasActivated(); ok {
-		_spec.SetField(tacode.FieldHasActivated, field.TypeBool, value)
-		_node.HasActivated = value
+	if value, ok := tcc.mutation.IsActive(); ok {
+		_spec.SetField(tacode.FieldIsActive, field.TypeBool, value)
+		_node.IsActive = value
 	}
 	if nodes := tcc.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

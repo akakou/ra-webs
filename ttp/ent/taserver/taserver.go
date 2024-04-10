@@ -14,8 +14,8 @@ const (
 	FieldID = "id"
 	// FieldDomain holds the string denoting the domain field in the database.
 	FieldDomain = "domain"
-	// FieldHasActivated holds the string denoting the has_activated field in the database.
-	FieldHasActivated = "has_activated"
+	// FieldIsActive holds the string denoting the is_active field in the database.
+	FieldIsActive = "is_active"
 	// EdgeTa holds the string denoting the ta edge name in mutations.
 	EdgeTa = "ta"
 	// EdgeService holds the string denoting the service edge name in mutations.
@@ -42,7 +42,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldDomain,
-	FieldHasActivated,
+	FieldIsActive,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "ta_servers"
@@ -67,8 +67,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultHasActivated holds the default value on creation for the "has_activated" field.
-	DefaultHasActivated bool
+	// DefaultIsActive holds the default value on creation for the "is_active" field.
+	DefaultIsActive bool
 )
 
 // OrderOption defines the ordering options for the TAServer queries.
@@ -84,9 +84,9 @@ func ByDomain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDomain, opts...).ToFunc()
 }
 
-// ByHasActivated orders the results by the has_activated field.
-func ByHasActivated(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldHasActivated, opts...).ToFunc()
+// ByIsActive orders the results by the is_active field.
+func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsActive, opts...).ToFunc()
 }
 
 // ByTaCount orders the results by ta count.

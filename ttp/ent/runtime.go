@@ -16,10 +16,10 @@ import (
 func init() {
 	serviceFields := schema.Service{}.Fields()
 	_ = serviceFields
-	// serviceDescHasActivated is the schema descriptor for has_activated field.
-	serviceDescHasActivated := serviceFields[2].Descriptor()
-	// service.DefaultHasActivated holds the default value on creation for the has_activated field.
-	service.DefaultHasActivated = serviceDescHasActivated.Default.(bool)
+	// serviceDescIsActive is the schema descriptor for is_active field.
+	serviceDescIsActive := serviceFields[2].Descriptor()
+	// service.DefaultIsActive holds the default value on creation for the is_active field.
+	service.DefaultIsActive = serviceDescIsActive.Default.(bool)
 	taFields := schema.TA{}.Fields()
 	_ = taFields
 	// taDescIsValid is the schema descriptor for is_valid field.
@@ -28,14 +28,14 @@ func init() {
 	ta.DefaultIsValid = taDescIsValid.Default.(bool)
 	tacodeFields := schema.TACode{}.Fields()
 	_ = tacodeFields
-	// tacodeDescHasActivated is the schema descriptor for has_activated field.
-	tacodeDescHasActivated := tacodeFields[3].Descriptor()
-	// tacode.DefaultHasActivated holds the default value on creation for the has_activated field.
-	tacode.DefaultHasActivated = tacodeDescHasActivated.Default.(bool)
+	// tacodeDescIsActive is the schema descriptor for is_active field.
+	tacodeDescIsActive := tacodeFields[3].Descriptor()
+	// tacode.DefaultIsActive holds the default value on creation for the is_active field.
+	tacode.DefaultIsActive = tacodeDescIsActive.Default.(bool)
 	taserverFields := schema.TAServer{}.Fields()
 	_ = taserverFields
-	// taserverDescHasActivated is the schema descriptor for has_activated field.
-	taserverDescHasActivated := taserverFields[1].Descriptor()
-	// taserver.DefaultHasActivated holds the default value on creation for the has_activated field.
-	taserver.DefaultHasActivated = taserverDescHasActivated.Default.(bool)
+	// taserverDescIsActive is the schema descriptor for is_active field.
+	taserverDescIsActive := taserverFields[1].Descriptor()
+	// taserver.DefaultIsActive holds the default value on creation for the is_active field.
+	taserver.DefaultIsActive = taserverDescIsActive.Default.(bool)
 }

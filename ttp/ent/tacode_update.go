@@ -63,16 +63,16 @@ func (tcu *TACodeUpdate) SetUniqueID(b []byte) *TACodeUpdate {
 	return tcu
 }
 
-// SetHasActivated sets the "has_activated" field.
-func (tcu *TACodeUpdate) SetHasActivated(b bool) *TACodeUpdate {
-	tcu.mutation.SetHasActivated(b)
+// SetIsActive sets the "is_active" field.
+func (tcu *TACodeUpdate) SetIsActive(b bool) *TACodeUpdate {
+	tcu.mutation.SetIsActive(b)
 	return tcu
 }
 
-// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
-func (tcu *TACodeUpdate) SetNillableHasActivated(b *bool) *TACodeUpdate {
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (tcu *TACodeUpdate) SetNillableIsActive(b *bool) *TACodeUpdate {
 	if b != nil {
-		tcu.SetHasActivated(*b)
+		tcu.SetIsActive(*b)
 	}
 	return tcu
 }
@@ -188,8 +188,8 @@ func (tcu *TACodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tcu.mutation.UniqueID(); ok {
 		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
 	}
-	if value, ok := tcu.mutation.HasActivated(); ok {
-		_spec.SetField(tacode.FieldHasActivated, field.TypeBool, value)
+	if value, ok := tcu.mutation.IsActive(); ok {
+		_spec.SetField(tacode.FieldIsActive, field.TypeBool, value)
 	}
 	if tcu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -319,16 +319,16 @@ func (tcuo *TACodeUpdateOne) SetUniqueID(b []byte) *TACodeUpdateOne {
 	return tcuo
 }
 
-// SetHasActivated sets the "has_activated" field.
-func (tcuo *TACodeUpdateOne) SetHasActivated(b bool) *TACodeUpdateOne {
-	tcuo.mutation.SetHasActivated(b)
+// SetIsActive sets the "is_active" field.
+func (tcuo *TACodeUpdateOne) SetIsActive(b bool) *TACodeUpdateOne {
+	tcuo.mutation.SetIsActive(b)
 	return tcuo
 }
 
-// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
-func (tcuo *TACodeUpdateOne) SetNillableHasActivated(b *bool) *TACodeUpdateOne {
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (tcuo *TACodeUpdateOne) SetNillableIsActive(b *bool) *TACodeUpdateOne {
 	if b != nil {
-		tcuo.SetHasActivated(*b)
+		tcuo.SetIsActive(*b)
 	}
 	return tcuo
 }
@@ -474,8 +474,8 @@ func (tcuo *TACodeUpdateOne) sqlSave(ctx context.Context) (_node *TACode, err er
 	if value, ok := tcuo.mutation.UniqueID(); ok {
 		_spec.SetField(tacode.FieldUniqueID, field.TypeBytes, value)
 	}
-	if value, ok := tcuo.mutation.HasActivated(); ok {
-		_spec.SetField(tacode.FieldHasActivated, field.TypeBool, value)
+	if value, ok := tcuo.mutation.IsActive(); ok {
+		_spec.SetField(tacode.FieldIsActive, field.TypeBool, value)
 	}
 	if tcuo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
