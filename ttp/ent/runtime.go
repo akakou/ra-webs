@@ -4,9 +4,7 @@ package ent
 
 import (
 	"github.com/akakou/ra_webs/ttp/ent/schema"
-	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/ta"
-	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
@@ -14,24 +12,12 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	serviceFields := schema.Service{}.Fields()
-	_ = serviceFields
-	// serviceDescHasActivated is the schema descriptor for has_activated field.
-	serviceDescHasActivated := serviceFields[2].Descriptor()
-	// service.DefaultHasActivated holds the default value on creation for the has_activated field.
-	service.DefaultHasActivated = serviceDescHasActivated.Default.(bool)
 	taFields := schema.TA{}.Fields()
 	_ = taFields
 	// taDescIsValid is the schema descriptor for is_valid field.
 	taDescIsValid := taFields[2].Descriptor()
 	// ta.DefaultIsValid holds the default value on creation for the is_valid field.
 	ta.DefaultIsValid = taDescIsValid.Default.(bool)
-	tacodeFields := schema.TACode{}.Fields()
-	_ = tacodeFields
-	// tacodeDescHasActivated is the schema descriptor for has_activated field.
-	tacodeDescHasActivated := tacodeFields[3].Descriptor()
-	// tacode.DefaultHasActivated holds the default value on creation for the has_activated field.
-	tacode.DefaultHasActivated = tacodeDescHasActivated.Default.(bool)
 	taserverFields := schema.TAServer{}.Fields()
 	_ = taserverFields
 	// taserverDescHasActivated is the schema descriptor for has_activated field.

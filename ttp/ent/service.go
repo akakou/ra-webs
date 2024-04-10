@@ -20,8 +20,6 @@ type Service struct {
 	Name string `json:"name,omitempty"`
 	// Token holds the value of the "token" field.
 	Token string `json:"token,omitempty"`
-	// HasActivated holds the value of the "has_activated" field.
-	HasActivated bool `json:"has_activated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ServiceQuery when eager-loading is set.
 	Edges        ServiceEdges `json:"edges"`
@@ -62,8 +60,6 @@ func (*Service) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case service.FieldHasActivated:
-			values[i] = new(sql.NullBool)
 		case service.FieldID:
 			values[i] = new(sql.NullInt64)
 		case service.FieldName, service.FieldToken:
@@ -100,12 +96,6 @@ func (s *Service) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field token", values[i])
 			} else if value.Valid {
 				s.Token = value.String
-			}
-		case service.FieldHasActivated:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field has_activated", values[i])
-			} else if value.Valid {
-				s.HasActivated = value.Bool
 			}
 		default:
 			s.selectValues.Set(columns[i], values[i])
@@ -158,9 +148,6 @@ func (s *Service) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("token=")
 	builder.WriteString(s.Token)
-	builder.WriteString(", ")
-	builder.WriteString("has_activated=")
-	builder.WriteString(fmt.Sprintf("%v", s.HasActivated))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -63,11 +63,6 @@ func Token(v string) predicate.Service {
 	return predicate.Service(sql.FieldEQ(FieldToken, v))
 }
 
-// HasActivated applies equality check predicate on the "has_activated" field. It's identical to HasActivatedEQ.
-func HasActivated(v bool) predicate.Service {
-	return predicate.Service(sql.FieldEQ(FieldHasActivated, v))
-}
-
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Service {
 	return predicate.Service(sql.FieldEQ(FieldName, v))
@@ -196,16 +191,6 @@ func TokenEqualFold(v string) predicate.Service {
 // TokenContainsFold applies the ContainsFold predicate on the "token" field.
 func TokenContainsFold(v string) predicate.Service {
 	return predicate.Service(sql.FieldContainsFold(FieldToken, v))
-}
-
-// HasActivatedEQ applies the EQ predicate on the "has_activated" field.
-func HasActivatedEQ(v bool) predicate.Service {
-	return predicate.Service(sql.FieldEQ(FieldHasActivated, v))
-}
-
-// HasActivatedNEQ applies the NEQ predicate on the "has_activated" field.
-func HasActivatedNEQ(v bool) predicate.Service {
-	return predicate.Service(sql.FieldNEQ(FieldHasActivated, v))
 }
 
 // HasTaserver applies the HasEdge predicate on the "taserver" edge.

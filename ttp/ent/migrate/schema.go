@@ -13,7 +13,6 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "token", Type: field.TypeString},
-		{Name: "has_activated", Type: field.TypeBool, Default: false},
 	}
 	// ServicesTable holds the schema information for the "services" table.
 	ServicesTable = &schema.Table{
@@ -56,7 +55,6 @@ var (
 		{Name: "repository", Type: field.TypeString},
 		{Name: "commit_id", Type: field.TypeString},
 		{Name: "unique_id", Type: field.TypeBytes},
-		{Name: "has_activated", Type: field.TypeBool, Default: false},
 		{Name: "ta_code_service", Type: field.TypeInt, Nullable: true},
 	}
 	// TaCodesTable holds the schema information for the "ta_codes" table.
@@ -67,7 +65,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ta_codes_services_service",
-				Columns:    []*schema.Column{TaCodesColumns[5]},
+				Columns:    []*schema.Column{TaCodesColumns[4]},
 				RefColumns: []*schema.Column{ServicesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

@@ -17,7 +17,6 @@ func (TACode) Fields() []ent.Field {
 		field.String("repository"),
 		field.String("commit_id"),
 		field.Bytes("unique_id"),
-		field.Bool("has_activated").Default(false),
 	}
 }
 
