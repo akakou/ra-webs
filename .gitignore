@@ -27,3 +27,4 @@ ta/example/example
 ttp/ca_test.json
 
 **/repo
+service/cmd/cmd

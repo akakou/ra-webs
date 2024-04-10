@@ -14,11 +14,11 @@ func Route(e *echo.Echo, ttp *ttpcore.TTP) {
 		return c.String(http.StatusOK, r)
 	})
 
-	postCodeApi.Set(e, ttp)
-	postServerApi.Set(e, ttp)
+	PostCodeApi.Set(e, ttp)
+	PostServerApi.Set(e, ttp)
 
-	getCodeApi.Set(e, ttp)
-	getServerApi.Set(e, ttp)
+	GetCodeApi.Set(e, ttp)
+	GetServerApi.Set(e, ttp)
 
-	postServiceByAdmin.Set(e, ttp)
+	PostServiceByAdmin.Set(e, ttp)
 }

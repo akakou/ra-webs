@@ -31,7 +31,7 @@ func DefaultTTP() (*TTP, error) {
 	metaAppId := os.Getenv("META_APP_ID")
 	metaAccessToken := os.Getenv("META_ACCESS_TOKEN")
 
-	adminToken, err := goutils.RandomHex(32)
+	adminToken, err := goutils.RandomHex(RANDOM_SIZE)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", ERROR_RANDOM_GENERATE, err)
 	}

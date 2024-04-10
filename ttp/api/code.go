@@ -15,7 +15,7 @@ import (
 
 var BUILD_DOCKER_PATH = "./builder"
 
-var postCodeApi = goutils.EchoRoute[ttpcore.TTP]{
+var PostCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.POST,
 	Path:   "/code",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
@@ -62,7 +62,7 @@ var postCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 	},
 }
 
-var getCodeApi = goutils.EchoRoute[ttpcore.TTP]{
+var GetCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.GET,
 	Path:   "/code",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {

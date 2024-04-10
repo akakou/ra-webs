@@ -1,8 +1,6 @@
 package api
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -10,6 +8,7 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/akakou/ra_webs/core"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ent"
 	"github.com/akakou/ra_webs/ttp/ent/service"
@@ -23,8 +22,10 @@ const (
 	ERROR_DOMAIN_AUTH_TOKEN_INVALID = "domain auth token is invalid"
 )
 
-var SCHEME = "https"
+var SCHEME = "http"
 var DOMAIN_AUTH_PATH = "/ra-webs"
+
+const DOMAIN_AUTH_PORT = ":8082"
 
 func authenticateService(ttp *ttpcore.TTP, c echo.Context) (*ent.Service, error) {
 	authorization := c.Request().Header["Authorization"][0]
@@ -50,16 +51,11 @@ func authenticateAdmin(ttp *ttpcore.TTP, c echo.Context) error {
 }
 
 func authenticateDomain(domain, serviceToken, nonce string) error {
-	hashSource := []byte{}
-	hashSource = append(hashSource, serviceToken...)
-	hashSource = append(hashSource, nonce...)
-
-	hash := sha256.Sum256(hashSource)
-	expected := hex.EncodeToString(hash[:])
+	expected := core.DomainToken(serviceToken, nonce)
 
 	u := url.URL{
 		Scheme: SCHEME,
-		Host:   domain,
+		Host:   domain + DOMAIN_AUTH_PORT,
 		Path:   DOMAIN_AUTH_PATH,
 	}
 
@@ -77,10 +73,11 @@ func authenticateDomain(domain, serviceToken, nonce string) error {
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return errors.New(ERROR_ACCESS_DOMAIN_AUTH_TARGET)
 	}
 
 	if string(b) != expected {
+		fmt.Printf("expected: %v, got: %v", expected, string(b))
 		return errors.New(ERROR_DOMAIN_AUTH_TOKEN_INVALID)
 	}
 
