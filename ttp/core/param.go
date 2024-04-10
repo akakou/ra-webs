@@ -1,3 +1,3 @@
 package core
 
-var RANDOM_SIZE = 32
+var RANDOM_SIZE = 64

@@ -19,7 +19,7 @@ var PostServiceByAdmin = goutils.EchoRoute[ttpcore.TTP]{
 				return c.String(http.StatusUnauthorized, "token is invalid")
 			}
 
-			token, err := goutils.RandomHex(32)
+			token, err := goutils.RandomHex(ttpcore.RANDOM_SIZE)
 
 			if err != nil {
 				return err
