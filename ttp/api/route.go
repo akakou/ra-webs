@@ -23,4 +23,6 @@ func Route(e *echo.Echo, ttp *ttpcore.TTP) {
 	PostServiceByAdmin.Set(e, ttp)
 
 	GetTAFromDomainApi.Set(e, ttp)
+
+	WebhookApi().Set(e, ttp)
 }

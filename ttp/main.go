@@ -3,13 +3,14 @@ package ttp
 import (
 	"fmt"
 
+	"github.com/akakou/ra_webs/ttp/api"
 	"github.com/akakou/ra_webs/ttp/core"
 	"github.com/labstack/echo/v4"
 )
 
 func NewTTPServer(ttp *core.TTP) *echo.Echo {
 	e := echo.New()
-	Route(e, ttp)
+	api.Route(e, ttp)
 
 	return e
 }

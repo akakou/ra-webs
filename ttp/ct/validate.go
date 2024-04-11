@@ -5,11 +5,11 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/akakou/ra_webs/core"
 	"github.com/edgelesssys/ego/attestation"
-	"golang.org/x/exp/slices"
 )
 
 func validateDomains(domains []string) (string, error) {
