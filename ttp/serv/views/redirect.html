@@ -1,6 +1,36 @@
 :)
+<script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
+
 
 <script>
-    const a = document.referrer
-    alert(a)
+    const check_is_valid = x => x.is_valid && x.edges.code.is_active
+
+    const check_validity = (data) => {
+        const res = data.reduce((accumulator, current) => accumulator && check_is_valid(current), true)
+        return res
+    }
+
+    const main = async () => {
+        let is_valid = false
+
+        try {
+            var referrer = new URL(document.referrer);
+            const resp = await axios.get(`/ta/${referrer.hostname}`)
+            console.log(resp)
+            is_valid = check_validity(resp.data)
+        } catch (e) {
+            console.error(e)
+            is_valid = false
+        }
+
+        if (is_valid) {
+            alert('valid')
+            window.location = document.referrer
+        } else {
+            alert('invalid')
+        }
+    }
+
+    main()
+
 </script>
