@@ -23,6 +23,7 @@ var GetTAFromDomainApi = goutils.EchoRoute[ttpcore.TTP]{
 			serv, err := ttp.DB.Client.TAServer.
 				Query().
 				Where(taserver.Domain(domain)).
+				Where(taserver.IsActive(true)).
 				Only(*ttp.DB.Ctx)
 
 			if err != nil {
