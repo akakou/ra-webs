@@ -1,0 +1,53 @@
+<h3>Attestation Result</h3>
+It will be back...after 5 sec...<br>
+
+<h4>Result</h4>
+
+<div id="result"></div>
+
+<h4>Detail</h4>
+<div id="detail"></div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
+<script>
+    const resultTag = document.getElementById('result')
+    const detailTag = document.getElementById('detail')
+
+    const check_is_valid = x => x.is_valid && x.edges.code.is_active
+
+    const check_validity = (data) => {
+        const res = data.reduce((accumulator, current) => accumulator && check_is_valid(current), true)
+        return res
+    }
+
+    const main = async () => {
+        let is_valid = false
+        let resp = { data: null }
+
+        try {
+            var referrer = new URL(document.referrer);
+            resp = await axios.get(`/ta/${referrer.hostname}`)
+            console.log(resp)
+            is_valid = check_validity(resp.data)
+
+
+        } catch (e) {
+            console.error(e)
+            is_valid = false
+        }
+
+        resultTag.innerText = is_valid ? 'valid' : 'invalid'
+        detailTag.innerText = JSON.stringify(resp.data, null, 2)
+
+        if (is_valid) {
+            setTimeout(() => {
+                window.location = document.referrer
+            }, 5000)
+        }
+    }
+
+    main()
+
+</script>
