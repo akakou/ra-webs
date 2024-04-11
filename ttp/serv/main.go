@@ -52,6 +52,10 @@ func main() {
 		return c.Render(200, "redirect.html", nil)
 	})
 
+	e.GET("/example", func(c echo.Context) error {
+		return c.Render(200, "example.html", nil)
+	})
+
 	e.Debug = true
 	e.Logger.Fatal(e.Start(PORT))
 }
