@@ -19,7 +19,7 @@ func findCertExtensions(label asn1.ObjectIdentifier, cert *x509.Certificate) ([]
 	return []byte{}, errors.New(ERROR_EXTENSION_NOT_FOUND)
 }
 
-func metaCertsToCerts(cs []metact.MetaCert) ([]x509.Certificate, error) {
+func MetaCertsToCerts(cs []metact.MetaCert) ([]x509.Certificate, error) {
 	certs := []x509.Certificate{}
 
 	for _, c := range cs {

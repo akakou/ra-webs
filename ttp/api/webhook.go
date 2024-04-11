@@ -1,4 +1,4 @@
-package ct
+package api
 
 import (
 	"fmt"
@@ -6,10 +6,11 @@ import (
 
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/ct"
 	"github.com/labstack/echo/v4"
 )
 
-func webhook() goutils.EchoRoute[core.TTP] {
+func WebhookApi() goutils.EchoRoute[core.TTP] {
 	hex, err := goutils.RandomHex(core.RANDOM_SIZE)
 	if err != nil {
 		panic(err)
@@ -27,12 +28,12 @@ func webhook() goutils.EchoRoute[core.TTP] {
 					return err
 				}
 
-				certs, err := metaCertsToCerts(cs)
+				certs, err := ct.MetaCertsToCerts(cs)
 				if err != nil {
 					return err
 				}
 
-				err = AuditAll(ttp, certs)
+				err = ct.AuditAll(ttp, certs)
 				if err != nil {
 					return err
 				}
