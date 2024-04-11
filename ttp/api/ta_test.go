@@ -64,20 +64,20 @@ func TestTAFromDomainAPI(t *testing.T) {
 	bytes := rec.Body.Bytes()
 	assert.NoError(t, err)
 
-	respTa := ent.TA{}
+	respTa := []ent.TA{}
 	err = json.Unmarshal(bytes, &respTa)
 	assert.NoError(t, err)
 
-	assert.Equal(t, ta.ID, respTa.ID)
-	assert.Equal(t, ta.PublicKey, respTa.PublicKey)
-	assert.Equal(t, ta.Quote, respTa.Quote)
-	assert.Equal(t, ta.IsValid, respTa.IsValid)
+	assert.Equal(t, ta.ID, respTa[0].ID)
+	assert.Equal(t, ta.PublicKey, respTa[0].PublicKey)
+	assert.Equal(t, ta.Quote, respTa[0].Quote)
+	assert.Equal(t, ta.IsValid, respTa[0].IsValid)
 
-	assert.Equal(t, code.ID, respTa.Edges.Code.ID)
-	assert.Equal(t, code.UniqueID, respTa.Edges.Code.UniqueID)
-	assert.Equal(t, code.CommitID, respTa.Edges.Code.CommitID)
-	assert.Equal(t, code.Repository, respTa.Edges.Code.Repository)
-	assert.Equal(t, code.IsActive, respTa.Edges.Code.IsActive)
+	assert.Equal(t, code.ID, respTa[0].Edges.Code.ID)
+	assert.Equal(t, code.UniqueID, respTa[0].Edges.Code.UniqueID)
+	assert.Equal(t, code.CommitID, respTa[0].Edges.Code.CommitID)
+	assert.Equal(t, code.Repository, respTa[0].Edges.Code.Repository)
+	assert.Equal(t, code.IsActive, respTa[0].Edges.Code.IsActive)
 
 	t.Errorf("%v", string(bytes))
 

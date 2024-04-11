@@ -37,7 +37,7 @@ var GetTAFromDomainApi = goutils.EchoRoute[ttpcore.TTP]{
 					)),
 				).
 				WithCode().
-				Only(*ttp.DB.Ctx)
+				All(*ttp.DB.Ctx)
 
 			if err != nil {
 				return errors.New("ta is not found")
