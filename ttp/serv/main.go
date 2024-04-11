@@ -5,7 +5,7 @@ import "github.com/akakou/ra_webs/ttp"
 const PORT = ":8081"
 
 func main() {
-	e, err := ttp.DefaultTTPServer("../views/*.html")
+	e, err := ttp.DefaultTTPServer("./views/*.html")
 	if err != nil {
 		panic(err)
 	}
