@@ -21,4 +21,6 @@ func Route(e *echo.Echo, ttp *ttpcore.TTP) {
 	GetServerApi.Set(e, ttp)
 
 	PostServiceByAdmin.Set(e, ttp)
+
+	GetTAFromDomainApi.Set(e, ttp)
 }
