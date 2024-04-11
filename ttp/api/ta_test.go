@@ -79,6 +79,6 @@ func TestTAFromDomainAPI(t *testing.T) {
 	assert.Equal(t, code.Repository, respTa[0].Edges.Code.Repository)
 	assert.Equal(t, code.IsActive, respTa[0].Edges.Code.IsActive)
 
-	t.Errorf("%v", string(bytes))
+	//	t.Errorf("%v", string(bytes))
 
 }
