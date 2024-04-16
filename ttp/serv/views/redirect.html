@@ -1,5 +1,6 @@
 <h3>Attestation Result</h3>
-It will be back...after 5 sec...<br>
+<div id="message"></div>
+<br>
 
 <h4>Result</h4>
 
@@ -8,40 +9,44 @@ It will be back...after 5 sec...<br>
 <h4>Detail</h4>
 <div id="detail"></div>
 
-
-
 <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
 <script>
     const resultTag = document.getElementById('result')
     const detailTag = document.getElementById('detail')
+    const messageTag = document.getElementById('message')
 
-    const check_is_valid = x => x.is_valid && x.edges.code.is_active
+    const VALID_MESSAGE = "It will be back...after 5 sec..."
+    const INVALID_MESSAGE = "It is failed to veriy."
 
-    const check_validity = (data) => {
-        const res = data.reduce((accumulator, current) => accumulator && check_is_valid(current), true)
+    // NOTE: This is camel case because the names depends on server response.
+    const checkOneValidity = x => x.is_valid && x.edges.code.is_active
+
+    const checkAllValidity = (data) => {
+        const res = data.reduce((accumulator, current) => accumulator && checkOneValidity(current), true)
         return res
     }
 
+
     const main = async () => {
-        let is_valid = false
+        let isValid = false
         let resp = { data: null }
 
         try {
             var referrer = new URL(document.referrer);
             resp = await axios.get(`/ta/${referrer.hostname}`)
             console.log(resp)
-            is_valid = check_validity(resp.data)
-
+            isValid = checkAllValidity(resp.data)
 
         } catch (e) {
             console.error(e)
-            is_valid = false
+            isValid = false
         }
 
-        resultTag.innerText = is_valid ? 'valid' : 'invalid'
+        resultTag.innerText = isValid ? 'valid' : 'invalid'
+        messageTag.innerText = isValid ? VALID_MESSAGE : INVALID_MESSAGE
         detailTag.innerText = JSON.stringify(resp.data, null, 2)
 
-        if (is_valid) {
+        if (isValid) {
             setTimeout(() => {
                 window.location = document.referrer
             }, 5000)
