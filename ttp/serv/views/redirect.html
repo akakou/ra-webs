@@ -1,5 +1,6 @@
 <h3>Attestation Result</h3>
-It will be back...after 5 sec...<br>
+<div name="message"></div>
+<br>
 
 <h4>Result</h4>
 
@@ -9,11 +10,14 @@ It will be back...after 5 sec...<br>
 <div id="detail"></div>
 
 
-
 <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
 <script>
     const resultTag = document.getElementById('result')
     const detailTag = document.getElementById('detail')
+    const messageTag = document.getElementById('message')
+
+    const VALID_MESSAGE = "It will be back...after 5 sec..."
+    const INVALID_MESSAGE = "It is failed to veriy."
 
     const check_is_valid = x => x.is_valid && x.edges.code.is_active
 
@@ -21,6 +25,7 @@ It will be back...after 5 sec...<br>
         const res = data.reduce((accumulator, current) => accumulator && check_is_valid(current), true)
         return res
     }
+
 
     const main = async () => {
         let is_valid = false
@@ -32,13 +37,13 @@ It will be back...after 5 sec...<br>
             console.log(resp)
             is_valid = check_validity(resp.data)
 
-
         } catch (e) {
             console.error(e)
             is_valid = false
         }
 
         resultTag.innerText = is_valid ? 'valid' : 'invalid'
+        messageTag.innerText = is_valid ? VALID_MESSAGE : INVALID_MESSAGE
         detailTag.innerText = JSON.stringify(resp.data, null, 2)
 
         if (is_valid) {
