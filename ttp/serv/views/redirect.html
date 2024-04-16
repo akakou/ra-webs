@@ -9,7 +9,6 @@
 <h4>Detail</h4>
 <div id="detail"></div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
 <script>
     const resultTag = document.getElementById('result')
@@ -19,6 +18,7 @@
     const VALID_MESSAGE = "It will be back...after 5 sec..."
     const INVALID_MESSAGE = "It is failed to veriy."
 
+    // NOTE: This is camel case because the names depends on server response.
     const checkOneValidity = x => x.is_valid && x.edges.code.is_active
 
     const checkAllValidity = (data) => {
