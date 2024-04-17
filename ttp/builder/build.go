@@ -46,7 +46,9 @@ func docker_run(name string, arguments ...string) ([]byte, error) {
 	return exec.Command("docker", args...).CombinedOutput()
 }
 
-func Build(name, repo string) (string, string, error) {
+var Build = build
+
+func build(name, repo string) (string, string, error) {
 	extractembed.Extract(BASE_PATH, &embedFiles)
 
 	current, err := os.Getwd()
@@ -59,7 +61,7 @@ func Build(name, repo string) (string, string, error) {
 		return "", "", err
 	}
 
-	commitId, uniqueId, err := build(name, repo)
+	commitId, uniqueId, err := execBuild(name, repo)
 
 	if err != nil {
 		return "", "", err
@@ -73,7 +75,7 @@ func Build(name, repo string) (string, string, error) {
 	return commitId, uniqueId, nil
 }
 
-func build(name, repo string) (string, string, error) {
+func execBuild(name, repo string) (string, string, error) {
 	cmd := exec.Command("docker", "build", "-t", "ra-webs-builder", ".")
 	output, err := cmd.CombinedOutput()
 

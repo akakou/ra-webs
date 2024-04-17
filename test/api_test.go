@@ -9,8 +9,11 @@ import (
 
 	"service"
 
+	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp/api"
+	"github.com/akakou/ra_webs/ttp/builder"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/ct"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -18,6 +21,10 @@ import (
 var PORT = ":11111"
 
 func TestAPI(t *testing.T) {
+	core.EnableDebug()
+	ct.EnableDebug()
+	// builder.EnableDebug()
+
 	e := echo.New()
 	e.Debug = true
 	ttp, err := ttpcore.DefaultTTP()
@@ -30,6 +37,7 @@ func TestAPI(t *testing.T) {
 	token := ""
 
 	t.Run("TestPostServiceByAdmin", func(t *testing.T) {
+		fmt.Println("TestPostServiceByAdmin")
 		req := httptest.NewRequest(http.MethodPost, api.PostServiceByAdmin.Path, strings.NewReader(""))
 		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", ttp.AdminToken))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -48,13 +56,17 @@ func TestAPI(t *testing.T) {
 	api.SCHEME = "http"
 
 	t.Run("TestPostTACode", func(t *testing.T) {
+		fmt.Println("TestPostTACode")
+
 		repo := "https://github.com/akakou-docs/ego-statistical-analysis"
 		uniqueId, err := svc.PostCode(repo)
 		assert.NoError(t, err)
-		assert.Equal(t, "c585bdc800065a3de7c372c8fc6f1259154a85ef9d76b671caf80551082679ba", uniqueId)
+		assert.Equal(t, builder.DEBUG_UNIQUE, uniqueId)
 	})
 
 	t.Run("TestPostTAServer", func(t *testing.T) {
+		fmt.Println("TestPostTAServer")
+
 		e := echo.New()
 		e.Debug = true
 

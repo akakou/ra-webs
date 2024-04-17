@@ -34,3 +34,9 @@ func MetaCertsToCerts(cs []metact.MetaCert) ([]x509.Certificate, error) {
 
 	return certs, nil
 }
+
+func subscribeCT(domain string, ct *metact.MetaCT) error {
+	return ct.Subscribe(domain)
+}
+
+var SubscribeCT = subscribeCT

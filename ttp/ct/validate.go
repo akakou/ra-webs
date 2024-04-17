@@ -28,9 +28,7 @@ func validateDomains(domains []string) (string, error) {
 }
 
 // for testability
-var ValidateAttestation = _validateAttestation
-
-func _validateAttestation(token []byte, publicKey any) (*attestation.Report, error) {
+func ValidateAttestation(token []byte, publicKey any) (*attestation.Report, error) {
 	publicKeyBuf := x509.MarshalPKCS1PublicKey(publicKey.(*rsa.PublicKey))
 
 	report, err := core.VerifyByAzure(string(token), publicKeyBuf)

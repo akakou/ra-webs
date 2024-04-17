@@ -3,10 +3,12 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	goutils "github.com/akakou/go-utils"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/ct"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/labstack/echo/v4"
 )
@@ -33,6 +35,12 @@ var PostServerApi = goutils.EchoRoute[ttpcore.TTP]{
 
 			err = authenticateDomain(req.Domain, service.Token, req.Nonce)
 			if err != nil {
+				return c.String(http.StatusUnauthorized, err.Error())
+			}
+
+			err = ct.SubscribeCT(req.Domain, ttp.CT)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "failed to subscribe %s due to %v", req.Domain, err)
 				return c.String(http.StatusUnauthorized, err.Error())
 			}
 
