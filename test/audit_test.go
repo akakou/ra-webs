@@ -9,7 +9,6 @@ import (
 	rawebscore "github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ct"
-	"github.com/edgelesssys/ego/attestation"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,7 +31,7 @@ func exampleTTP(t *testing.T) *core.TTP {
 }
 
 func TestAudit(t *testing.T) {
-	rawebscore.DEBUG = true
+	rawebscore.EnableDebug()
 
 	t.Run("Pass", testPass)
 	t.Run("FailTANoServer", testFailTANoServer)
@@ -45,13 +44,6 @@ func testPass(t *testing.T) {
 
 	ttp.DB.Client.TAServer.Create().SetDomain("example.com").SaveX(*ttp.DB.Ctx)
 	ttp.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*ttp.DB.Ctx)
-
-	ct.ValidateAttestation = func(_ []byte, _ any) (*attestation.Report, error) {
-		return &attestation.Report{
-			UniqueID: []byte{1, 2, 3},
-			Data:     []byte{4, 5, 6},
-		}, nil
-	}
 
 	err := ct.AuditOne(ttp, &x509.Certificate{
 		DNSNames:  []string{"example.com"},
@@ -75,13 +67,6 @@ func testFailTANoServer(t *testing.T) {
 
 	ttp.DB.Client.TAServer.Create().SetDomain("example.com").SaveX(*ttp.DB.Ctx)
 	ttp.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*ttp.DB.Ctx)
-
-	ct.ValidateAttestation = func(_ []byte, _ any) (*attestation.Report, error) {
-		return &attestation.Report{
-			UniqueID: []byte{1, 2, 3},
-			Data:     []byte{4, 5, 6},
-		}, nil
-	}
 
 	err := ct.AuditOne(ttp, &x509.Certificate{
 		DNSNames:  []string{"hoge.example.com"},

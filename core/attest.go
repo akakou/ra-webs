@@ -11,7 +11,14 @@ import (
 
 const SECURITY_VERSION = 1
 
-func AttestByAzure(data []byte) (string, error) {
+var AttestByAzure = attestByAzure
+var VerifyByAzure = verifyByAzure
+
+func attestByAzure(data []byte) (string, error) {
+	if DEBUG {
+		return "", nil
+	}
+
 	// publicKeyHash := hashPublicKey(publicKey)
 	token, err := enclave.CreateAzureAttestationToken(data, ATTEST_PROVIDER_URL)
 	if err != nil {
@@ -21,7 +28,7 @@ func AttestByAzure(data []byte) (string, error) {
 	return token, nil
 }
 
-func VerifyByAzure(token string, data []byte) (*attestation.Report, error) {
+func verifyByAzure(token string, data []byte) (*attestation.Report, error) {
 	report, err := attestation.VerifyAzureAttestationToken(token, ATTEST_PROVIDER_URL)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", ERROR_VERIFY_ATTESTATION, err)
