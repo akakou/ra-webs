@@ -12,6 +12,7 @@ import (
 	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp/api"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/ct"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -19,7 +20,9 @@ import (
 var PORT = ":11111"
 
 func TestAPI(t *testing.T) {
-	core.DEBUG = true
+	core.EnableDebug()
+	ct.EnableDebug()
+	
 	e := echo.New()
 	e.Debug = true
 	ttp, err := ttpcore.DefaultTTP()

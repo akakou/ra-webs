@@ -1,6 +1,9 @@
 package test
 
 import (
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"testing"
@@ -30,9 +33,17 @@ func exampleTTP(t *testing.T) *core.TTP {
 	return ttp
 }
 
+func samplePublicKey() crypto.PublicKey {
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	pk := priv.Public()
+
+	return pk
+
+}
+
 func TestAudit(t *testing.T) {
 	rawebscore.EnableDebug()
-
+	ct.EnableDebug()
 	t.Run("Pass", testPass)
 	t.Run("FailTANoServer", testFailTANoServer)
 	t.Run("FailByMissDomains", testFailByMissDomains)
@@ -47,7 +58,7 @@ func testPass(t *testing.T) {
 
 	err := ct.AuditOne(ttp, &x509.Certificate{
 		DNSNames:  []string{"example.com"},
-		PublicKey: []byte{7, 8, 9},
+		PublicKey: samplePublicKey(),
 		Extensions: []pkix.Extension{
 			{
 				Id:       rawebscore.X509_EXTENSION_LABEL,
@@ -70,7 +81,7 @@ func testFailTANoServer(t *testing.T) {
 
 	err := ct.AuditOne(ttp, &x509.Certificate{
 		DNSNames:  []string{"hoge.example.com"},
-		PublicKey: []byte{7, 8, 9},
+		PublicKey: samplePublicKey(),
 		Extensions: []pkix.Extension{
 			{
 				Id:       rawebscore.X509_EXTENSION_LABEL,
@@ -93,7 +104,7 @@ func testFailByMissDomains(t *testing.T) {
 
 	cert := x509.Certificate{
 		DNSNames:  []string{"example.com", "example.org"},
-		PublicKey: []byte{7, 8, 9},
+		PublicKey: samplePublicKey(),
 		Extensions: []pkix.Extension{
 			{
 				Id:       rawebscore.X509_EXTENSION_LABEL,
@@ -109,7 +120,7 @@ func testFailByMissDomains(t *testing.T) {
 
 	cert = x509.Certificate{
 		DNSNames:  []string{"*.com"},
-		PublicKey: []byte{7, 8, 9},
+		PublicKey: samplePublicKey(),
 		Extensions: []pkix.Extension{
 			{
 				Id:       rawebscore.X509_EXTENSION_LABEL,

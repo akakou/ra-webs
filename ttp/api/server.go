@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	goutils "github.com/akakou/go-utils"
-	"github.com/akakou/ra_webs/core"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/ct"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/labstack/echo/v4"
 )
@@ -38,13 +38,10 @@ var PostServerApi = goutils.EchoRoute[ttpcore.TTP]{
 				return c.String(http.StatusUnauthorized, err.Error())
 			}
 
-			if !core.DEBUG {
-				err = ttp.CT.Subscribe(req.Domain)
-
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "failed to subscribe %s due to %v", req.Domain, err)
-					return c.String(http.StatusUnauthorized, err.Error())
-				}
+			err = ct.SubscribeCT(req.Domain, ttp.CT)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "failed to subscribe %s due to %v", req.Domain, err)
+				return c.String(http.StatusUnauthorized, err.Error())
 			}
 
 			taServerCreate := ttp.DB.Client.TAServer.
