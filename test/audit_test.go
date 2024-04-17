@@ -32,6 +32,8 @@ func exampleTTP(t *testing.T) *core.TTP {
 }
 
 func TestAudit(t *testing.T) {
+	rawebscore.DEBUG = true
+
 	t.Run("Pass", testPass)
 	t.Run("FailTANoServer", testFailTANoServer)
 	t.Run("FailByMissDomains", testFailByMissDomains)
