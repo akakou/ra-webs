@@ -26,7 +26,7 @@ require (
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/akakou/extract-embed v0.0.1 // indirect
 	github.com/akakou/go-utils v0.0.3 // indirect
-	github.com/akakou/meta-ct v0.0.4 // indirect
+	github.com/akakou/meta-ct v0.0.5 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
@@ -43,7 +43,6 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	golang.org/x/crypto v0.22.0 // indirect
-	golang.org/x/exp v0.0.0-20240404231335-c0f41cb1a7a0 // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
