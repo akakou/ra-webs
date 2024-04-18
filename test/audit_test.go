@@ -57,6 +57,9 @@ func testPass(t *testing.T) {
 	ttp.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*ttp.DB.Ctx)
 
 	err := ct.AuditOne(ttp, &x509.Certificate{
+		Subject: pkix.Name{
+			CommonName: "example.com",
+		},
 		DNSNames:  []string{"example.com"},
 		PublicKey: samplePublicKey(),
 		Extensions: []pkix.Extension{
@@ -80,7 +83,10 @@ func testFailTANoServer(t *testing.T) {
 	ttp.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*ttp.DB.Ctx)
 
 	err := ct.AuditOne(ttp, &x509.Certificate{
-		DNSNames:  []string{"hoge.example.com"},
+		DNSNames: []string{"hoge.example.com"},
+		Subject: pkix.Name{
+			CommonName: "hoge.example.com",
+		},
 		PublicKey: samplePublicKey(),
 		Extensions: []pkix.Extension{
 			{
@@ -103,6 +109,9 @@ func testFailByMissDomains(t *testing.T) {
 	defer ttp.DB.Close()
 
 	cert := x509.Certificate{
+		Subject: pkix.Name{
+			CommonName: "hoge.example.com",
+		},
 		DNSNames:  []string{"example.com", "example.org"},
 		PublicKey: samplePublicKey(),
 		Extensions: []pkix.Extension{
@@ -119,6 +128,9 @@ func testFailByMissDomains(t *testing.T) {
 	assert.Contains(t, err.Error(), ct.ERROR_DOMAIN_INVALID)
 
 	cert = x509.Certificate{
+		Subject: pkix.Name{
+			CommonName: "hoge.example.com",
+		},
 		DNSNames:  []string{"*.com"},
 		PublicKey: samplePublicKey(),
 		Extensions: []pkix.Extension{

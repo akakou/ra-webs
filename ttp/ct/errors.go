@@ -10,8 +10,9 @@ const (
 	ERROR_QUOTE_INVALID   = "quote is invalid"
 	ERROR_DOMAIN_INVALID  = "domain is invalid"
 
-	ERROR_DOMAIN_INVALID_BY_WILDCARD   = "wildcard domain is not allowed"
-	ERROR_DOMAIN_INVALID_BY_NUM_DOMAIN = "number of domain must be 1"
+	ERROR_DOMAIN_INVALID_BY_WILDCARD                  = "wildcard domain is not allowed"
+	ERROR_DOMAIN_INVALID_BY_NUM_DOMAIN                = "number of domain must be 1"
+	ERROR_DOMAIN_INVALID_NOT_MATCH_COMMONNAME_AND_SAT = "CN and SAT must be same"
 
 	ERROR_EXTENSION_NOT_FOUND = "extension not found"
 )

@@ -5,23 +5,22 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"slices"
-	"strings"
 
 	"github.com/akakou/ra_webs/core"
 	"github.com/edgelesssys/ego/attestation"
 )
 
-func validateDomains(domains []string) (string, error) {
+func validateDomains(cert *x509.Certificate) (string, error) {
+	domains := cert.DNSNames
+
 	if len(domains) != 1 {
 		return "", errors.New(ERROR_DOMAIN_INVALID_BY_NUM_DOMAIN)
 	}
 
 	domain := domains[0]
 
-	chars := strings.Split(domain, "")
-	if slices.Contains(chars, "*") {
-		return "", errors.New(ERROR_DOMAIN_INVALID_BY_WILDCARD)
+	if domain != cert.Subject.CommonName {
+		return "", errors.New(ERROR_DOMAIN_INVALID_NOT_MATCH_COMMONNAME_AND_SAT)
 	}
 
 	return domain, nil
