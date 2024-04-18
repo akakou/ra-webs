@@ -1,7 +1,5 @@
 package dns
 
-import "github.com/akakou/ra_webs/ttp/db"
-
 func (s *Server) LoadDatabase(db *db.DB) error {
 	tas, err := db.Client.TA.Query().WithServer().All(*db.Ctx)
 	if err != nil {
