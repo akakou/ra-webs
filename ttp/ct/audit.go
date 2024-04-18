@@ -13,7 +13,7 @@ import (
 )
 
 func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
-	domain, err := validateDomains(cert.DNSNames)
+	domain, err := validateDomains(cert)
 	if err != nil {
 		revokeTAByDomains(cert.DNSNames, ttp.DB)
 		return fmt.Errorf("%s: %w", ERROR_DOMAIN_INVALID, err)
