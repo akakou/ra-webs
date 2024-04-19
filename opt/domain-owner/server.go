@@ -1,49 +1,41 @@
-package dns
+package domainowner
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"os"
+	"strings"
 
 	"github.com/miekg/dns"
 )
 
-type Server struct {
+type DNSServer struct {
 	Zone    string
-	storage RecordHolder
+	Records *DNSRecords
 }
 
 var DefaultZone = os.Getenv("ZONE")
 var SelfIp = os.Getenv("SELF_IP")
 
-func New() (*Server, error) {
-	s := &Server{
+func NewDNSServer() (*DNSServer, error) {
+	s := &DNSServer{
 		Zone:    DefaultZone,
-		storage: NewInMemory(),
+		Records: NewDNSRecords(),
 	}
-	s.storage.Append(DefaultZone, SelfIp)
+
+	s.Records.AppendFQDN(DefaultZone, SelfIp)
 	return s, nil
 }
 
-func (s *Server) ToFqdn(hostname string) string {
-	return fmt.Sprintf("%v.%v", hostname, s.Zone)
-}
-
-func (s *Server) AddHost(fqdn string, ip string) error {
-	log.Printf("AddHost: Appending a host: %v => %v\n", fqdn, ip)
-	return s.storage.Append(fqdn, ip)
-}
-
-func (s *Server) Lookup(fqdn string) (string, error) {
+func (s *DNSServer) Lookup(fqdn string) (string, error) {
 	queries := []string{
 		fqdn,
-		TrimTrailingPeriod(fqdn),
+		trimTrailingPeriod(fqdn),
 	}
 
 	for _, q := range queries {
-		ip, err := s.storage.Query(q)
+		ip, err := s.Records.Query(q)
 
 		if err != nil {
 			continue
@@ -52,11 +44,11 @@ func (s *Server) Lookup(fqdn string) (string, error) {
 		return ip, nil
 	}
 
-	return "", ErrNotFound
+	return "", errors.New(ERROR_NOT_FOUND)
 
 }
 
-func (s *Server) Serve(w dns.ResponseWriter, req *dns.Msg) {
+func (s *DNSServer) Serve(w dns.ResponseWriter, req *dns.Msg) {
 	m := new(dns.Msg)
 	m.SetReply(req)
 	m.Authoritative = true
@@ -71,7 +63,7 @@ func (s *Server) Serve(w dns.ResponseWriter, req *dns.Msg) {
 
 	ipStr, err := s.Lookup(query.Name)
 
-	if errors.Is(err, ErrNotFound) || ipStr == "" {
+	if strings.Contains(err.Error(), ERROR_NOT_FOUND) || ipStr == "" {
 		// host not found
 		log.Printf("Lookup: host not found: %v\n", query.Name)
 		m.SetRcode(req, dns.RcodeNameError)
@@ -97,7 +89,7 @@ func (s *Server) Serve(w dns.ResponseWriter, req *dns.Msg) {
 	log.Printf("Lookup: served a query successfully: %v => %v\n", query.Name, ip)
 }
 
-func (s *Server) Start(addr string) error {
+func (s *DNSServer) Start(addr string) error {
 	dns.HandleFunc(s.Zone, s.Serve)
 
 	server := &dns.Server{
@@ -106,4 +98,8 @@ func (s *Server) Start(addr string) error {
 	}
 	log.Printf("Start: Serving DNS queries at %v...\n", addr)
 	return server.ListenAndServe()
+}
+
+func (s *DNSServer) AddHost(fqdn string, ip string) {
+	s.Records.AppendFQDN(fqdn, ip)
 }
