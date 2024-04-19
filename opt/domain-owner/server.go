@@ -17,6 +17,7 @@ type DNSServer struct {
 
 var DefaultZone = os.Getenv("ZONE")
 var SelfIp = os.Getenv("SELF_IP")
+var CaName = os.Getenv("CA_NAME")
 
 func NewDNSServer() (*DNSServer, error) {
 	s := &DNSServer{
@@ -78,12 +79,28 @@ func (s *DNSServer) Serve(w dns.ResponseWriter, req *dns.Msg) {
 
 	ip := net.ParseIP(ipStr)
 
-	rr := &dns.A{
+	aRecord := &dns.A{
 		Hdr: newRrHeader(query.Name),
 		A:   ip,
 	}
 
-	m.Answer = append(m.Answer, rr)
+	caaRecord1 := &dns.CAA{
+		Hdr:   newRrHeader(query.Name),
+		Flag:  128, // it mean ca must not issue certificate if CA does not understand CAA
+		Tag:   "issue",
+		Value: CaName,
+	}
+
+	caaRecord2 := &dns.CAA{
+		Hdr:   newRrHeader(query.Name),
+		Flag:  128, // it means that ca must not issue certificate if CA does not understand CAA
+		Tag:   "issuewild",
+		Value: ";", // it means no certificate having domain expressed by wild card not support
+	}
+
+	m.Answer = append(m.Answer, aRecord)
+	m.Answer = append(m.Answer, caaRecord1)
+	m.Answer = append(m.Answer, caaRecord2)
 	w.WriteMsg(m)
 
 	log.Printf("Lookup: served a query successfully: %v => %v\n", query.Name, ip)
