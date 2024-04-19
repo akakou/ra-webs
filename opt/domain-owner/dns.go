@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 
 	"github.com/miekg/dns"
 )
@@ -43,7 +44,7 @@ func (s *DNSServer) Lookup(fqdn string) (string, error) {
 		return ip, nil
 	}
 
-	return "", ErrNotFound
+	return "", errors.New(ERROR_NOT_FOUND)
 
 }
 
@@ -62,7 +63,7 @@ func (s *DNSServer) Serve(w dns.ResponseWriter, req *dns.Msg) {
 
 	ipStr, err := s.Lookup(query.Name)
 
-	if errors.Is(err, ErrNotFound) || ipStr == "" {
+	if strings.Contains(err.Error(), ERROR_NOT_FOUND) || ipStr == "" {
 		// host not found
 		log.Printf("Lookup: host not found: %v\n", query.Name)
 		m.SetRcode(req, dns.RcodeNameError)

@@ -16,12 +16,12 @@ func LoadRecordConfig(zone string) (*DNSRecords, error) {
 	b, err := os.ReadFile(CONFIG_PATH)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to read %s: %v", CONFIG_PATH, err)
+		return nil, fmt.Errorf("%s %s: %v", ERROR_READ_CONFIG, CONFIG_PATH, err)
 	}
 
 	err = yaml.Unmarshal(b, &recordList)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse config file: %v", err)
+		return nil, fmt.Errorf("%s: %v", ERROR_PARSE_CONFIG, err)
 	}
 
 	records.FromDomains(recordList, zone)

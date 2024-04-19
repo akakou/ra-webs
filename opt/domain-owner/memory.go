@@ -1,6 +1,7 @@
 package domainowner
 
 import (
+	"errors"
 	"log"
 	"strings"
 )
@@ -27,7 +28,7 @@ func (s DNSRecords) Query(fqdn string) (string, error) {
 	lower := strings.ToLower(fqdn)
 	ip, ok := s[lower]
 	if !ok {
-		return "", ErrNotFound
+		return "", errors.New(ERROR_NOT_FOUND)
 	}
 
 	return ip, nil
