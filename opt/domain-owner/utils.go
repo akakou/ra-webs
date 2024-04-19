@@ -1,10 +1,17 @@
 package domainowner
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
-func TrimTrailingPeriod(fqdn string) string {
+func trimTrailingPeriod(fqdn string) string {
 	s := fqdn
 	s = strings.TrimSuffix(s, ".")
 
 	return s
+}
+
+func toFqdn(hostname, zone string) string {
+	return fmt.Sprintf("%v.%v", hostname, zone)
 }

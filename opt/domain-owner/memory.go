@@ -1,25 +1,29 @@
 package domainowner
 
-import "strings"
+import (
+	"log"
+	"strings"
+)
 
-type RecordHolder interface {
-	Append(fqdn string, ip string) error
-	Query(fqdn string) (string, error)
+type DNSRecords map[string]string
+
+func NewDNSRecords() *DNSRecords {
+	return &DNSRecords{}
 }
 
-type InMemory map[string]string
+func (s DNSRecords) AppendFQDN(fqdn string, ip string) {
+	log.Printf("Append: Appending a host: %v => %v\n", fqdn, ip)
 
-func NewInMemory() InMemory {
-	return InMemory{}
-}
-
-func (s InMemory) Append(fqdn string, ip string) error {
 	lower := strings.ToLower(fqdn)
 	s[lower] = ip
-	return nil
 }
 
-func (s InMemory) Query(fqdn string) (string, error) {
+func (s DNSRecords) AppendDomain(domain string, ip string, zone string) {
+	fqdn := toFqdn(domain, zone)
+	s.AppendFQDN(fqdn, ip)
+}
+
+func (s DNSRecords) Query(fqdn string) (string, error) {
 	lower := strings.ToLower(fqdn)
 	ip, ok := s[lower]
 	if !ok {
@@ -27,4 +31,10 @@ func (s InMemory) Query(fqdn string) (string, error) {
 	}
 
 	return ip, nil
+}
+
+func (s DNSRecords) FromDomains(dict map[string]string, zone string) {
+	for domain, ip := range dict {
+		s.AppendDomain(domain, ip, zone)
+	}
 }
