@@ -29,7 +29,7 @@ func LoadRecordConfig(zone string) (*DNSRecords, error) {
 	return &records, nil
 }
 
-func (s DNSServer) LoadConfig() error {
+func (s *DNSServer) LoadConfig() error {
 	records, err := LoadRecordConfig(s.Zone)
 
 	if err != nil {
