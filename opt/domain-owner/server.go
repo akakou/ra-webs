@@ -17,6 +17,7 @@ type DNSServer struct {
 
 var DefaultZone = os.Getenv("ZONE")
 var SelfIp = os.Getenv("SELF_IP")
+var CaName = os.Getenv("CA_NAME")
 
 func NewDNSServer() (*DNSServer, error) {
 	s := &DNSServer{
@@ -58,12 +59,21 @@ func (s *DNSServer) Serve(w dns.ResponseWriter, req *dns.Msg) {
 		return
 	}
 
+	switch req.Question[0].Qtype {
+	case dns.TypeA:
+		s.ServeLookUpA(w, m, req)
+	case dns.TypeCAA:
+		s.ServLookUpCAA(w, m, req)
+	}
+}
+
+func (s *DNSServer) ServeLookUpA(w dns.ResponseWriter, m, req *dns.Msg) {
 	query := req.Question[0]
 	log.Printf("Lookup: query received: %#v\n", query)
 
 	ipStr, err := s.Lookup(query.Name)
 
-	if strings.Contains(err.Error(), ERROR_NOT_FOUND) || ipStr == "" {
+	if err != nil && strings.Contains(err.Error(), ERROR_NOT_FOUND) {
 		// host not found
 		log.Printf("Lookup: host not found: %v\n", query.Name)
 		m.SetRcode(req, dns.RcodeNameError)
@@ -78,15 +88,44 @@ func (s *DNSServer) Serve(w dns.ResponseWriter, req *dns.Msg) {
 
 	ip := net.ParseIP(ipStr)
 
-	rr := &dns.A{
-		Hdr: newRrHeader(query.Name),
+	aRecord := &dns.A{
+		Hdr: newAHeader(query.Name),
 		A:   ip,
 	}
 
-	m.Answer = append(m.Answer, rr)
+	m.Answer = append(m.Answer, aRecord)
 	w.WriteMsg(m)
 
-	log.Printf("Lookup: served a query successfully: %v => %v\n", query.Name, ip)
+	log.Printf("Lookup: served a query successfully: %v => %v\n\n", query.Name, ip)
+}
+
+func (s *DNSServer) ServLookUpCAA(w dns.ResponseWriter, m, req *dns.Msg) {
+	query := req.Question[0]
+
+	caaRecord1 := &dns.CAA{
+		Hdr:   newCAAHeader(query.Name),
+		Flag:  128, // it mean ca must not issue certificate if CA does not understand CAA
+		Tag:   "issue",
+		Value: CaName,
+	}
+
+	caaRecord2 := &dns.CAA{
+		Hdr:   newCAAHeader(query.Name),
+		Flag:  128, // it means that ca must not issue certificate if CA does not understand CAA
+		Tag:   "issuewild",
+		Value: ";", // it means no certificate having domain expressed by wild card not support
+	}
+
+	m.Answer = append(m.Answer, caaRecord1)
+	m.Answer = append(m.Answer, caaRecord2)
+	log.Printf("Lookup: served caa query successfully: %v => %v\n%v\n\n",
+		query.Name,
+		caaRecord1,
+		caaRecord2,
+	)
+
+	w.WriteMsg(m)
+
 }
 
 func (s *DNSServer) Start(addr string) error {

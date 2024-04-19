@@ -20,6 +20,8 @@ func main() {
 		panic(e)
 	}
 
+	fmt.Printf("Records: \n%v\n", dnsServer.Records)
+
 	err = dnsServer.Start("0.0.0.0:53")
 	panic(err)
 }
