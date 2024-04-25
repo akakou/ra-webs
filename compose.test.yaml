@@ -1,12 +1,15 @@
 version: '3'
 services:
   ta_example:
+    tty: true
     build: ./docker/ego
     ports:
       - "8443:8443"
     volumes:
       - ./ta:/ta
       - ./core:/core
+      - /dev:/dev
+    restart: unless-stopped
     working_dir: /ta/example
     command: bash -c 'go mod tidy && go run main.go'
 
