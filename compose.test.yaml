@@ -1,14 +1,14 @@
 version: '3'
 services:
-  ta:
-    image: golang:latest
+  ta_example:
+    build: ./docker/ego
     ports:
-      - "8080:8080"
+      - "8443:8443"
     volumes:
       - ./ta:/ta
       - ./core:/core
     working_dir: /ta/example
-    command: go run main.go
+    command: bash -c 'go mod tidy && go run main.go'
 
   ttp:
     image: golang:latest
@@ -18,4 +18,18 @@ services:
       - ./ttp:/ttp
       - ./core:/core
     working_dir: /ttp/serv
-    command: go run main.go
+    command: bash -c 'go mod tidy && go run main.go'
+
+  do:
+    image: golang:latest
+    ports:
+      - "53:53/udp"
+    volumes:
+      - ./opt/domain-owner:/serv/domain-owner # Avoid to use /opt
+      - ./core:/core
+    working_dir: /serv/domain-owner/example
+    command: bash -c 'go mod tidy && go run main.go'
+    environment:
+      - ZONE=test.ochano.co
+      - SELF_IP=127.0.0.1
+      - CA_NAME=letsencrypt.org
