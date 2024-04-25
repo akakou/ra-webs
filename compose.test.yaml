@@ -16,7 +16,7 @@ services:
   ttp:
     image: golang:latest
     ports:
-      - "8081:8081"
+      - "8000:8000"
     volumes:
       - ./ttp:/ttp
       - ./core:/core
