@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/akakou/go-utils v0.0.3 // indirect
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000 // indirect
 	github.com/edgelesssys/ego v1.4.1 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
