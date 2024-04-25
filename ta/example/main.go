@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var ttpRedirectUrl = golangutils.GetEnv("TTP_REDIRECT", "http://localhost:8080/redirect")
+var ttpRedirectUrl = golangutils.GetEnv("TTP_REDIRECT", "http://localhost:8000/redirect")
 
 func RedirectHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, ttpRedirectUrl, http.StatusTemporaryRedirect)
@@ -26,6 +26,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	ta.DomainAuthServer(e)
 
 	e.AutoTLSManager, err = ta.TLSConfig()
 
