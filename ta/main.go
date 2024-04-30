@@ -39,7 +39,7 @@ func (ap *TA) TLSConfig() (autocert.Manager, error) {
 
 func (ap *TA) DomainAuthServer(e *echo.Echo) {
 	e.GET(DOMAIN_AUTH_PATH, func(c echo.Context) error {
-		nonce := goutils.RandomHex(64)
+		nonce, _ := goutils.RandomHex(64)
 		h := core.DomainToken(ap.Config.Token, nonce)
 		return c.String(http.StatusOK, h)
 	})
