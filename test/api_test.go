@@ -23,7 +23,7 @@ var PORT = ":11111"
 func TestAPI(t *testing.T) {
 	core.EnableDebug()
 	ct.EnableDebug()
-	// builder.EnableDebug()
+	builder.EnableDebug()
 
 	e := echo.New()
 	e.Debug = true
