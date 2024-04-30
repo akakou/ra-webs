@@ -12,6 +12,7 @@ services:
     restart: unless-stopped
     working_dir: /ta/example
     command: bash -c 'go mod tidy && go run main.go'
+    network_mode: host
 
   ttp:
     image: golang:latest
@@ -22,6 +23,7 @@ services:
       - ./core:/core
     working_dir: /ttp/serv
     command: bash -c 'go mod tidy && go run main.go'
+    network_mode: host
 
   do:
     image: golang:latest
@@ -36,3 +38,4 @@ services:
       - ZONE=test.ochano.co
       - SELF_IP=127.0.0.1
       - CA_NAME=letsencrypt.org
+    network_mode: host
