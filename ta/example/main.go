@@ -22,14 +22,26 @@ func main() {
 		return c.String(http.StatusOK, "Hello")
 	})
 
-	//core.EnableDebug()
-	ta, err := ta.DefaultTA()
+	core.EnableDebug()
+
+	ta, err := ta.InitTA(
+		&ta.Config{
+			Token:      core.DEBUG_TOKEN,
+			Domain:     "localhost",
+			TTP:        "http://localhost" + core.TTPPort,
+			Repository: "https://github.com/akakou-docs/ego-statistical-analysis",
+		},
+	)
 
 	if err != nil {
 		panic(err)
 	}
 
-	ta.Config(e)
+	err = ta.Config(e)
+	if err != nil {
+		panic(err)
+	}
 
+	e.Debug = true
 	e.Logger.Fatal(e.StartAutoTLS(core.TAPort))
 }

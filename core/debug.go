@@ -13,6 +13,8 @@ func debugVerifyByAzure(token string, data []byte) (*attestation.Report, error) 
 	}, nil
 }
 
+const DEBUG_TOKEN = "this-is-ra-webs-debug-token-138484039348"
+
 func EnableDebug() {
 	DEBUG = true
 
