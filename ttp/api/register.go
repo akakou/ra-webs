@@ -72,6 +72,7 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 		SetService(service).
 		SetCode(code).
 		SetPublicKey(req.PublicKey).
+		SetQuote(req.Quote).
 		SetHasActivated(false)
 
 	_, err = taServerCreate.Save(*ttp.DB.Ctx)
