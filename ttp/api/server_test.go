@@ -43,6 +43,10 @@ func TestTAFromDomainAPI(t *testing.T) {
 		SetHasActivated(true).
 		SaveX(*ttp.DB.Ctx)
 
+	violation := ttp.DB.Client.TAViolation.Create().
+		SetServer(server).
+		SaveX(*ttp.DB.Ctx)
+
 	req := httptest.NewRequest(http.MethodGet, "/server/"+domain, strings.NewReader(""))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
@@ -73,6 +77,8 @@ func TestTAFromDomainAPI(t *testing.T) {
 	assert.Equal(t, code.Repository, respTa[0].Edges.Code.Repository)
 	assert.Equal(t, code.IsActive, respTa[0].Edges.Code.IsActive)
 
-	// t.Errorf("%v", string(bytes))
+	assert.Equal(t, violation.ID, respTa[0].Edges.Violation[0].ID)
+
+	t.Errorf("%v", string(bytes))
 
 }
