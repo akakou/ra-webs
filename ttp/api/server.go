@@ -7,7 +7,6 @@ import (
 
 	goutils "github.com/akakou/go-utils"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/ent"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/labstack/echo/v4"
 )
@@ -35,24 +34,19 @@ var GetServerFromDomainApi = goutils.EchoRoute[ttpcore.TTP]{
 			domain := c.Param("domain")
 
 			fmt.Printf("domain: %v\n", domain)
-			serv, err := ttp.DB.Client.TAServer.
+			servs, err := ttp.DB.Client.TAServer.
 				Query().
 				Where(taserver.Domain(domain)).
 				Where(taserver.HasActivated(true)).
-				Order(ent.Desc(taserver.FieldID)).
+				WithCode().
 				WithViolation().
-				First(*ttp.DB.Ctx)
+				All(*ttp.DB.Ctx)
 
 			if err != nil {
 				return errors.New("server is not found")
 			}
 
-			if len(serv.Edges.Violation) != 0 {
-				return errors.New("server violates")
-
-			}
-
-			return c.JSON(http.StatusOK, serv)
+			return c.JSON(http.StatusOK, servs)
 		}
 	},
 }
