@@ -35,7 +35,7 @@ services:
     ports:
       - "53:53/udp"
     volumes:
-      - ./opt/domain-owner:/serv/domain-owner # Avoid to use /opt
+      - ./domain-owner:/serv/domain-owner # Avoid to use /opt
       - ./core:/core
     working_dir: /serv/domain-owner/example
     command: bash -c 'go mod tidy && go run main.go'
@@ -44,3 +44,5 @@ services:
       - SELF_IP=127.0.0.1
       - CA_NAME=letsencrypt.org
     network_mode: host
+    profiles:
+      - strict
