@@ -64,13 +64,13 @@ func (service *Service) PostServer(domain string, e *echo.Echo) (string, error) 
 	nonce, _ := goutils.RandomHex(64)
 	token := core.DomainToken(service.Token, nonce)
 
-	service.DomainAuthServer(token, domain, e)
+	service.AuthDomain(token, domain, e)
 
 	return service.post(api.PostServerApi.Path, map[string]string{"domain": domain, "nonce": nonce})
 }
 
-func (service *Service) DomainAuthServer(token, domain string, e *echo.Echo) *echo.Echo {
-	e.GET(api.DOMAIN_AUTH_PATH, func(c echo.Context) error {
+func (service *Service) AuthDomain(token, domain string, e *echo.Echo) *echo.Echo {
+	e.GET(core.DOMAIN_AUTH_PATH, func(c echo.Context) error {
 		return c.String(http.StatusOK, token)
 	})
 

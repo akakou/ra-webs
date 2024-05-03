@@ -22,8 +22,7 @@ const (
 	ERROR_DOMAIN_AUTH_TOKEN_INVALID = "domain auth token is invalid"
 )
 
-var SCHEME = "http"
-var DOMAIN_AUTH_PATH = "/ra-webs"
+var SCHEME = "https"
 
 const DOMAIN_AUTH_PORT = ":8082"
 
@@ -55,24 +54,28 @@ func authenticateDomain(domain, serviceToken, nonce string) error {
 
 	u := url.URL{
 		Scheme: SCHEME,
-		Host:   domain + DOMAIN_AUTH_PORT,
-		Path:   DOMAIN_AUTH_PATH,
+		Host:   domain,
+		Path:   core.DOMAIN_AUTH_PATH,
 	}
 
 	resp, err := http.Get(u.String())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v", err)
+		fmt.Printf("%v: %v", ERROR_ACCESS_DOMAIN_AUTH_TARGET, err)
 		return errors.New(ERROR_ACCESS_DOMAIN_AUTH_TARGET)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		fmt.Fprintf(os.Stderr, "%v", err)
+		fmt.Printf("%v: %v", ERROR_ACCESS_DOMAIN_AUTH_TARGET, err)
+
 		return errors.New(ERROR_ACCESS_DOMAIN_AUTH_TARGET)
 	}
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
+		fmt.Printf("%v: %v", ERROR_ACCESS_DOMAIN_AUTH_TARGET, err)
 		return errors.New(ERROR_ACCESS_DOMAIN_AUTH_TARGET)
 	}
 
