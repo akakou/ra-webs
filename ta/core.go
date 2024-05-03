@@ -13,7 +13,6 @@ import (
 var AcmeURL = autocert.DefaultACMEDirectory
 
 type Config struct {
-	ServerId   int
 	TTP        string
 	Token      string
 	Repository string
@@ -52,6 +51,10 @@ func DefaultTA() (*TA, error) {
 		return nil, fmt.Errorf("%s: %w", ERROR_DEFAULT_CONFIG, err)
 	}
 
+	return InitTA(config)
+}
+
+func InitTA(config *Config) (*TA, error) {
 	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", ERROR_GENERATE_RSA_KEY, err)
