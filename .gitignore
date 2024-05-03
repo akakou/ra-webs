@@ -30,3 +30,4 @@ ttp/ca_test.json
 service/cmd/cmd
 opt/domain-owner/example/config.yaml
 opt/domain-owner/example/example
+**/*.env
