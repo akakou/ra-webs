@@ -7,7 +7,7 @@ ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 ENV TZ=Asia/Tokyo
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN apt-get update -y && apt-get install -y wget gnupg2
+RUN apt-get update -y && apt-get install -y wget gnupg2 docker docker.io
 
 RUN echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu focal main' | tee /etc/apt/sources.list.d/intel-sgx.list
 RUN wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add -
