@@ -24,8 +24,6 @@ const (
 
 var SCHEME = "http"
 
-const DOMAIN_AUTH_PORT = ":8082"
-
 func authenticateService(ttp *ttpcore.TTP, c echo.Context) (*ent.Service, error) {
 	authorization := c.Request().Header["Authorization"][0]
 	token := authorization[len("Bearer "):]
