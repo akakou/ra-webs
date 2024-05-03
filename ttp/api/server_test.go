@@ -27,12 +27,6 @@ func TestTAFromDomainAPI(t *testing.T) {
 		SetIsActive(true).
 		SaveX(*ttp.DB.Ctx)
 
-	server := ttp.DB.Client.TAServer.Create().
-		SetDomain(domain).
-		SetIsActive(true).
-		SetService(servicer).
-		SaveX(*ttp.DB.Ctx)
-
 	code := ttp.DB.Client.TACode.Create().
 		SetUniqueID([]byte("1234")).
 		SetCommitID("1234").
@@ -40,23 +34,28 @@ func TestTAFromDomainAPI(t *testing.T) {
 		SetIsActive(true).
 		SaveX(*ttp.DB.Ctx)
 
-	ta := ttp.DB.Client.TA.Create().
+	server := ttp.DB.Client.TAServer.Create().
+		SetDomain(domain).
+		SetService(servicer).
 		SetCode(code).
-		SetServer(server).
 		SetPublicKey([]byte("1234")).
-		SetQuote([]byte("1234")).
-		SetIsValid(true).
+		SetQuote("1234").
+		SetHasActivated(true).
 		SaveX(*ttp.DB.Ctx)
 
-	req := httptest.NewRequest(http.MethodGet, "/ta/"+domain, strings.NewReader(""))
+	violation := ttp.DB.Client.TAViolation.Create().
+		SetServer(server).
+		SaveX(*ttp.DB.Ctx)
+
+	req := httptest.NewRequest(http.MethodGet, "/server/"+domain, strings.NewReader(""))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetPath("/ta/:domain")
+	c.SetPath("/server/:domain")
 	c.SetParamNames("domain")
 	c.SetParamValues(domain)
 
-	err = GetTAFromDomainApi.F(ttp)(c)
+	err = GetServerFromDomainApi.F(ttp)(c)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 200, c.Response().Status)
@@ -64,14 +63,13 @@ func TestTAFromDomainAPI(t *testing.T) {
 	bytes := rec.Body.Bytes()
 	assert.NoError(t, err)
 
-	respTa := []ent.TA{}
+	respTa := []ent.TAServer{}
 	err = json.Unmarshal(bytes, &respTa)
 	assert.NoError(t, err)
 
-	assert.Equal(t, ta.ID, respTa[0].ID)
-	assert.Equal(t, ta.PublicKey, respTa[0].PublicKey)
-	assert.Equal(t, ta.Quote, respTa[0].Quote)
-	assert.Equal(t, ta.IsValid, respTa[0].IsValid)
+	assert.Equal(t, server.ID, respTa[0].ID)
+	assert.Equal(t, server.PublicKey, respTa[0].PublicKey)
+	assert.Equal(t, server.Quote, respTa[0].Quote)
 
 	assert.Equal(t, code.ID, respTa[0].Edges.Code.ID)
 	assert.Equal(t, code.UniqueID, respTa[0].Edges.Code.UniqueID)
@@ -79,6 +77,8 @@ func TestTAFromDomainAPI(t *testing.T) {
 	assert.Equal(t, code.Repository, respTa[0].Edges.Code.Repository)
 	assert.Equal(t, code.IsActive, respTa[0].Edges.Code.IsActive)
 
-	//	t.Errorf("%v", string(bytes))
+	assert.Equal(t, violation.ID, respTa[0].Edges.Violation[0].ID)
+
+	t.Errorf("%v", string(bytes))
 
 }

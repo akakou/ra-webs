@@ -26,7 +26,6 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 }
 
 func main() {
-
 	embeded, err := extractembed.ExtractFs(TMP_FOLDER_NAME, &embedFiles)
 	if err != nil {
 		panic(err)
@@ -38,7 +37,7 @@ func main() {
 
 	tmpPath := fmt.Sprintf("%s/%s", embeded.Path, "views/*.html")
 
-	e, err := ttp.DefaultTTPServer()
+	e, err := ttp.DebugTTPServer()
 	if err != nil {
 		panic(err)
 	}

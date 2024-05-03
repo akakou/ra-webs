@@ -24,7 +24,7 @@ func (TACode) Fields() []ent.Field {
 // Edges of the TA.
 func (TACode) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("ta", TA.Type).Ref("code"),
+		edge.From("server", TAServer.Type).Ref("code"),
 		edge.To("service", Service.Type).Unique(),
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/akakou/ra_webs/ttp/ent/service"
+	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
@@ -19,39 +20,59 @@ type TAServer struct {
 	ID int `json:"id,omitempty"`
 	// Domain holds the value of the "domain" field.
 	Domain string `json:"domain,omitempty"`
-	// IsActive holds the value of the "is_active" field.
-	IsActive bool `json:"is_active,omitempty"`
+	// PublicKey holds the value of the "public_key" field.
+	PublicKey []byte `json:"public_key,omitempty"`
+	// Quote holds the value of the "quote" field.
+	Quote string `json:"quote,omitempty"`
+	// HasActivated holds the value of the "has_activated" field.
+	HasActivated bool `json:"has_activated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TAServerQuery when eager-loading is set.
 	Edges             TAServerEdges `json:"edges"`
+	ta_server_code    *int
 	ta_server_service *int
 	selectValues      sql.SelectValues
 }
 
 // TAServerEdges holds the relations/edges for other nodes in the graph.
 type TAServerEdges struct {
-	// Ta holds the value of the ta edge.
-	Ta []*TA `json:"ta,omitempty"`
+	// Violation holds the value of the violation edge.
+	Violation []*TAViolation `json:"violation,omitempty"`
+	// Code holds the value of the code edge.
+	Code *TACode `json:"code,omitempty"`
 	// Service holds the value of the service edge.
 	Service *Service `json:"service,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
-// TaOrErr returns the Ta value or an error if the edge
+// ViolationOrErr returns the Violation value or an error if the edge
 // was not loaded in eager-loading.
-func (e TAServerEdges) TaOrErr() ([]*TA, error) {
+func (e TAServerEdges) ViolationOrErr() ([]*TAViolation, error) {
 	if e.loadedTypes[0] {
-		return e.Ta, nil
+		return e.Violation, nil
 	}
-	return nil, &NotLoadedError{edge: "ta"}
+	return nil, &NotLoadedError{edge: "violation"}
+}
+
+// CodeOrErr returns the Code value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TAServerEdges) CodeOrErr() (*TACode, error) {
+	if e.loadedTypes[1] {
+		if e.Code == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: tacode.Label}
+		}
+		return e.Code, nil
+	}
+	return nil, &NotLoadedError{edge: "code"}
 }
 
 // ServiceOrErr returns the Service value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TAServerEdges) ServiceOrErr() (*Service, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		if e.Service == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: service.Label}
@@ -66,13 +87,17 @@ func (*TAServer) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case taserver.FieldIsActive:
+		case taserver.FieldPublicKey:
+			values[i] = new([]byte)
+		case taserver.FieldHasActivated:
 			values[i] = new(sql.NullBool)
 		case taserver.FieldID:
 			values[i] = new(sql.NullInt64)
-		case taserver.FieldDomain:
+		case taserver.FieldDomain, taserver.FieldQuote:
 			values[i] = new(sql.NullString)
-		case taserver.ForeignKeys[0]: // ta_server_service
+		case taserver.ForeignKeys[0]: // ta_server_code
+			values[i] = new(sql.NullInt64)
+		case taserver.ForeignKeys[1]: // ta_server_service
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -101,13 +126,32 @@ func (ts *TAServer) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ts.Domain = value.String
 			}
-		case taserver.FieldIsActive:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field is_active", values[i])
+		case taserver.FieldPublicKey:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field public_key", values[i])
+			} else if value != nil {
+				ts.PublicKey = *value
+			}
+		case taserver.FieldQuote:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field quote", values[i])
 			} else if value.Valid {
-				ts.IsActive = value.Bool
+				ts.Quote = value.String
+			}
+		case taserver.FieldHasActivated:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field has_activated", values[i])
+			} else if value.Valid {
+				ts.HasActivated = value.Bool
 			}
 		case taserver.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field ta_server_code", value)
+			} else if value.Valid {
+				ts.ta_server_code = new(int)
+				*ts.ta_server_code = int(value.Int64)
+			}
+		case taserver.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field ta_server_service", value)
 			} else if value.Valid {
@@ -127,9 +171,14 @@ func (ts *TAServer) Value(name string) (ent.Value, error) {
 	return ts.selectValues.Get(name)
 }
 
-// QueryTa queries the "ta" edge of the TAServer entity.
-func (ts *TAServer) QueryTa() *TAQuery {
-	return NewTAServerClient(ts.config).QueryTa(ts)
+// QueryViolation queries the "violation" edge of the TAServer entity.
+func (ts *TAServer) QueryViolation() *TAViolationQuery {
+	return NewTAServerClient(ts.config).QueryViolation(ts)
+}
+
+// QueryCode queries the "code" edge of the TAServer entity.
+func (ts *TAServer) QueryCode() *TACodeQuery {
+	return NewTAServerClient(ts.config).QueryCode(ts)
 }
 
 // QueryService queries the "service" edge of the TAServer entity.
@@ -163,8 +212,14 @@ func (ts *TAServer) String() string {
 	builder.WriteString("domain=")
 	builder.WriteString(ts.Domain)
 	builder.WriteString(", ")
-	builder.WriteString("is_active=")
-	builder.WriteString(fmt.Sprintf("%v", ts.IsActive))
+	builder.WriteString("public_key=")
+	builder.WriteString(fmt.Sprintf("%v", ts.PublicKey))
+	builder.WriteString(", ")
+	builder.WriteString("quote=")
+	builder.WriteString(ts.Quote)
+	builder.WriteString(", ")
+	builder.WriteString("has_activated=")
+	builder.WriteString(fmt.Sprintf("%v", ts.HasActivated))
 	builder.WriteByte(')')
 	return builder.String()
 }

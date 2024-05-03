@@ -14,6 +14,18 @@ const SECURITY_VERSION = 1
 var AttestByAzure = attestByAzure
 var VerifyByAzure = verifyByAzure
 
+func AttestServer(publicKey []byte, token string) (string, error) {
+	buf := append([]byte(token), publicKey...)
+	quote, err := AttestByAzure(buf)
+	return quote, err
+}
+
+func VerifyServer(quote string, publicKey []byte, token string) (*attestation.Report, error) {
+	buf := append([]byte(token), publicKey...)
+	report, err := VerifyByAzure(quote, []byte(buf))
+	return report, err
+}
+
 func attestByAzure(data []byte) (string, error) {
 	if DEBUG {
 		return "", nil
@@ -28,8 +40,8 @@ func attestByAzure(data []byte) (string, error) {
 	return token, nil
 }
 
-func verifyByAzure(token string, data []byte) (*attestation.Report, error) {
-	report, err := attestation.VerifyAzureAttestationToken(token, ATTEST_PROVIDER_URL)
+func verifyByAzure(quote string, data []byte) (*attestation.Report, error) {
+	report, err := attestation.VerifyAzureAttestationToken(quote, ATTEST_PROVIDER_URL)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", ERROR_VERIFY_ATTESTATION, err)
 	}

@@ -1,76 +1,52 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
-	"os"
-	"strconv"
 
 	goutils "github.com/akakou/go-utils"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/ct"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/labstack/echo/v4"
 )
-
-var PostServerApi = goutils.EchoRoute[ttpcore.TTP]{
-	Method: goutils.POST,
-	Path:   "/server",
-	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
-		return func(c echo.Context) error {
-			fmt.Print("1\n")
-			service, err := authenticateService(ttp, c)
-			if err != nil {
-				return c.String(http.StatusUnauthorized, "token is invalid")
-			}
-
-			req := new(struct {
-				Domain string `json:"domain"`
-				Nonce  string `json:"nonce"`
-			})
-
-			if c.Bind(req) != nil {
-				return c.String(http.StatusBadRequest, "bad request")
-			}
-
-			err = authenticateDomain(req.Domain, service.Token, req.Nonce)
-			if err != nil {
-				return c.String(http.StatusUnauthorized, err.Error())
-			}
-
-			err = ct.SubscribeCT(req.Domain, ttp.CT)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "failed to subscribe %s due to %v", req.Domain, err)
-				return c.String(http.StatusUnauthorized, err.Error())
-			}
-
-			taServerCreate := ttp.DB.Client.TAServer.
-				Create().
-				SetDomain(req.Domain).
-				SetService(service).
-				SetIsActive(true)
-
-			taServer, err := taServerCreate.Save(*ttp.DB.Ctx)
-			if err != nil {
-				return c.String(http.StatusInternalServerError, err.Error())
-			}
-
-			return c.String(http.StatusOK, strconv.Itoa(taServer.ID))
-		}
-	},
-}
 
 var GetServerApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.GET,
 	Path:   "/server",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			code, err := ttp.DB.Client.TAServer.Query().Where(taserver.IsActive(true)).All(*ttp.DB.Ctx)
+			code, err := ttp.DB.Client.TAServer.Query().All(*ttp.DB.Ctx)
 			if err != nil {
 				return err
 			}
 
 			return c.JSON(http.StatusOK, code)
+		}
+	},
+}
+
+var GetServerFromDomainApi = goutils.EchoRoute[ttpcore.TTP]{
+	Method: goutils.GET,
+	Path:   "/server/:domain",
+	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
+		return func(c echo.Context) error {
+			domain := c.Param("domain")
+
+			fmt.Printf("domain: %v\n", domain)
+			servs, err := ttp.DB.Client.TAServer.
+				Query().
+				Where(taserver.Domain(domain)).
+				Where(taserver.HasActivated(true)).
+				WithCode().
+				WithViolation().
+				All(*ttp.DB.Ctx)
+
+			if err != nil {
+				return errors.New("server is not found")
+			}
+
+			return c.JSON(http.StatusOK, servs)
 		}
 	},
 }

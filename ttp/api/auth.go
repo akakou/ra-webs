@@ -1,14 +1,8 @@
 package api
 
 import (
-	"errors"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-	"os"
 
-	"github.com/akakou/ra_webs/core"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ent"
 	"github.com/akakou/ra_webs/ttp/ent/service"
@@ -19,10 +13,11 @@ const (
 	ERROR_AUTHENTICATE_SERVICE      = "failed to authenticate service"
 	ERROR_AUTHENTICATE_ADMIN        = "failed to authenticate admin"
 	ERROR_ACCESS_DOMAIN_AUTH_TARGET = "failed to access domain auth target"
-	ERROR_DOMAIN_AUTH_TOKEN_INVALID = "domain auth token is invalid"
+	ERROR_DOMAIN_AUTH_INVALID       = "domain auth token is invalid"
+	ERROR_QUOTE_INVALID             = "quote is invalid"
 )
 
-var SCHEME = "http"
+var SCHEME = "https"
 
 func authenticateService(ttp *ttpcore.TTP, c echo.Context) (*ent.Service, error) {
 	authorization := c.Request().Header["Authorization"][0]
@@ -42,44 +37,6 @@ func authenticateAdmin(ttp *ttpcore.TTP, c echo.Context) error {
 
 	if token != ttp.AdminToken {
 		return fmt.Errorf(ERROR_AUTHENTICATE_ADMIN)
-	}
-
-	return nil
-}
-
-func authenticateDomain(domain, serviceToken, nonce string) error {
-	expected := core.DomainToken(serviceToken, nonce)
-
-	u := url.URL{
-		Scheme: SCHEME,
-		Host:   domain + core.ServicePort,
-		Path:   core.DOMAIN_AUTH_PATH,
-	}
-
-	resp, err := http.Get(u.String())
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v", err)
-		fmt.Printf("%v: %v", ERROR_ACCESS_DOMAIN_AUTH_TARGET, err)
-		return errors.New(ERROR_ACCESS_DOMAIN_AUTH_TARGET)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		fmt.Fprintf(os.Stderr, "%v", err)
-		fmt.Printf("%v: %v", ERROR_ACCESS_DOMAIN_AUTH_TARGET, err)
-
-		return errors.New(ERROR_ACCESS_DOMAIN_AUTH_TARGET)
-	}
-
-	b, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Printf("%v: %v", ERROR_ACCESS_DOMAIN_AUTH_TARGET, err)
-		return errors.New(ERROR_ACCESS_DOMAIN_AUTH_TARGET)
-	}
-
-	if string(b) != expected {
-		fmt.Printf("expected: %v, got: %v", expected, string(b))
-		return errors.New(ERROR_DOMAIN_AUTH_TOKEN_INVALID)
 	}
 
 	return nil

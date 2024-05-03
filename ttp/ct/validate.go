@@ -1,13 +1,8 @@
 package ct
 
 import (
-	"crypto/rsa"
 	"crypto/x509"
 	"errors"
-	"fmt"
-
-	"github.com/akakou/ra_webs/core"
-	"github.com/edgelesssys/ego/attestation"
 )
 
 func validateDomains(cert *x509.Certificate) (string, error) {
@@ -24,15 +19,4 @@ func validateDomains(cert *x509.Certificate) (string, error) {
 	}
 
 	return domain, nil
-}
-
-// for testability
-func ValidateAttestation(token []byte, publicKey any) (*attestation.Report, error) {
-	publicKeyBuf := x509.MarshalPKCS1PublicKey(publicKey.(*rsa.PublicKey))
-
-	report, err := core.VerifyByAzure(string(token), publicKeyBuf)
-	if err != nil {
-		return nil, fmt.Errorf("%v: %v", ERROR_QUOTE_INVALID, err)
-	}
-	return report, nil
 }

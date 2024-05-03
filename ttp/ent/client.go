@@ -16,9 +16,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/akakou/ra_webs/ttp/ent/service"
-	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
+	"github.com/akakou/ra_webs/ttp/ent/taviolation"
 )
 
 // Client is the client that holds all ent builders.
@@ -28,12 +28,12 @@ type Client struct {
 	Schema *migrate.Schema
 	// Service is the client for interacting with the Service builders.
 	Service *ServiceClient
-	// TA is the client for interacting with the TA builders.
-	TA *TAClient
 	// TACode is the client for interacting with the TACode builders.
 	TACode *TACodeClient
 	// TAServer is the client for interacting with the TAServer builders.
 	TAServer *TAServerClient
+	// TAViolation is the client for interacting with the TAViolation builders.
+	TAViolation *TAViolationClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -46,9 +46,9 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Service = NewServiceClient(c.config)
-	c.TA = NewTAClient(c.config)
 	c.TACode = NewTACodeClient(c.config)
 	c.TAServer = NewTAServerClient(c.config)
+	c.TAViolation = NewTAViolationClient(c.config)
 }
 
 type (
@@ -139,12 +139,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Service:  NewServiceClient(cfg),
-		TA:       NewTAClient(cfg),
-		TACode:   NewTACodeClient(cfg),
-		TAServer: NewTAServerClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Service:     NewServiceClient(cfg),
+		TACode:      NewTACodeClient(cfg),
+		TAServer:    NewTAServerClient(cfg),
+		TAViolation: NewTAViolationClient(cfg),
 	}, nil
 }
 
@@ -162,12 +162,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Service:  NewServiceClient(cfg),
-		TA:       NewTAClient(cfg),
-		TACode:   NewTACodeClient(cfg),
-		TAServer: NewTAServerClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Service:     NewServiceClient(cfg),
+		TACode:      NewTACodeClient(cfg),
+		TAServer:    NewTAServerClient(cfg),
+		TAViolation: NewTAViolationClient(cfg),
 	}, nil
 }
 
@@ -197,18 +197,18 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Service.Use(hooks...)
-	c.TA.Use(hooks...)
 	c.TACode.Use(hooks...)
 	c.TAServer.Use(hooks...)
+	c.TAViolation.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Service.Intercept(interceptors...)
-	c.TA.Intercept(interceptors...)
 	c.TACode.Intercept(interceptors...)
 	c.TAServer.Intercept(interceptors...)
+	c.TAViolation.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -216,12 +216,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *ServiceMutation:
 		return c.Service.mutate(ctx, m)
-	case *TAMutation:
-		return c.TA.mutate(ctx, m)
 	case *TACodeMutation:
 		return c.TACode.mutate(ctx, m)
 	case *TAServerMutation:
 		return c.TAServer.mutate(ctx, m)
+	case *TAViolationMutation:
+		return c.TAViolation.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -392,171 +392,6 @@ func (c *ServiceClient) mutate(ctx context.Context, m *ServiceMutation) (Value, 
 	}
 }
 
-// TAClient is a client for the TA schema.
-type TAClient struct {
-	config
-}
-
-// NewTAClient returns a client for the TA from the given config.
-func NewTAClient(c config) *TAClient {
-	return &TAClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `ta.Hooks(f(g(h())))`.
-func (c *TAClient) Use(hooks ...Hook) {
-	c.hooks.TA = append(c.hooks.TA, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `ta.Intercept(f(g(h())))`.
-func (c *TAClient) Intercept(interceptors ...Interceptor) {
-	c.inters.TA = append(c.inters.TA, interceptors...)
-}
-
-// Create returns a builder for creating a TA entity.
-func (c *TAClient) Create() *TACreate {
-	mutation := newTAMutation(c.config, OpCreate)
-	return &TACreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of TA entities.
-func (c *TAClient) CreateBulk(builders ...*TACreate) *TACreateBulk {
-	return &TACreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *TAClient) MapCreateBulk(slice any, setFunc func(*TACreate, int)) *TACreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &TACreateBulk{err: fmt.Errorf("calling to TAClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*TACreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &TACreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for TA.
-func (c *TAClient) Update() *TAUpdate {
-	mutation := newTAMutation(c.config, OpUpdate)
-	return &TAUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *TAClient) UpdateOne(t *TA) *TAUpdateOne {
-	mutation := newTAMutation(c.config, OpUpdateOne, withTA(t))
-	return &TAUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *TAClient) UpdateOneID(id int) *TAUpdateOne {
-	mutation := newTAMutation(c.config, OpUpdateOne, withTAID(id))
-	return &TAUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for TA.
-func (c *TAClient) Delete() *TADelete {
-	mutation := newTAMutation(c.config, OpDelete)
-	return &TADelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *TAClient) DeleteOne(t *TA) *TADeleteOne {
-	return c.DeleteOneID(t.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *TAClient) DeleteOneID(id int) *TADeleteOne {
-	builder := c.Delete().Where(ta.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &TADeleteOne{builder}
-}
-
-// Query returns a query builder for TA.
-func (c *TAClient) Query() *TAQuery {
-	return &TAQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeTA},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a TA entity by its id.
-func (c *TAClient) Get(ctx context.Context, id int) (*TA, error) {
-	return c.Query().Where(ta.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *TAClient) GetX(ctx context.Context, id int) *TA {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryCode queries the code edge of a TA.
-func (c *TAClient) QueryCode(t *TA) *TACodeQuery {
-	query := (&TACodeClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ta.Table, ta.FieldID, id),
-			sqlgraph.To(tacode.Table, tacode.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, ta.CodeTable, ta.CodeColumn),
-		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryServer queries the server edge of a TA.
-func (c *TAClient) QueryServer(t *TA) *TAServerQuery {
-	query := (&TAServerClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ta.Table, ta.FieldID, id),
-			sqlgraph.To(taserver.Table, taserver.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, ta.ServerTable, ta.ServerColumn),
-		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *TAClient) Hooks() []Hook {
-	return c.hooks.TA
-}
-
-// Interceptors returns the client interceptors.
-func (c *TAClient) Interceptors() []Interceptor {
-	return c.inters.TA
-}
-
-func (c *TAClient) mutate(ctx context.Context, m *TAMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&TACreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&TAUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&TAUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&TADelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown TA mutation op: %q", m.Op())
-	}
-}
-
 // TACodeClient is a client for the TACode schema.
 type TACodeClient struct {
 	config
@@ -665,15 +500,15 @@ func (c *TACodeClient) GetX(ctx context.Context, id int) *TACode {
 	return obj
 }
 
-// QueryTa queries the ta edge of a TACode.
-func (c *TACodeClient) QueryTa(tc *TACode) *TAQuery {
-	query := (&TAClient{config: c.config}).Query()
+// QueryServer queries the server edge of a TACode.
+func (c *TACodeClient) QueryServer(tc *TACode) *TAServerQuery {
+	query := (&TAServerClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := tc.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tacode.Table, tacode.FieldID, id),
-			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, tacode.TaTable, tacode.TaColumn),
+			sqlgraph.To(taserver.Table, taserver.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, tacode.ServerTable, tacode.ServerColumn),
 		)
 		fromV = sqlgraph.Neighbors(tc.driver.Dialect(), step)
 		return fromV, nil
@@ -830,15 +665,31 @@ func (c *TAServerClient) GetX(ctx context.Context, id int) *TAServer {
 	return obj
 }
 
-// QueryTa queries the ta edge of a TAServer.
-func (c *TAServerClient) QueryTa(ts *TAServer) *TAQuery {
-	query := (&TAClient{config: c.config}).Query()
+// QueryViolation queries the violation edge of a TAServer.
+func (c *TAServerClient) QueryViolation(ts *TAServer) *TAViolationQuery {
+	query := (&TAViolationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ts.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(taserver.Table, taserver.FieldID, id),
-			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, taserver.TaTable, taserver.TaColumn),
+			sqlgraph.To(taviolation.Table, taviolation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, taserver.ViolationTable, taserver.ViolationColumn),
+		)
+		fromV = sqlgraph.Neighbors(ts.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCode queries the code edge of a TAServer.
+func (c *TAServerClient) QueryCode(ts *TAServer) *TACodeQuery {
+	query := (&TACodeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ts.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(taserver.Table, taserver.FieldID, id),
+			sqlgraph.To(tacode.Table, tacode.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, taserver.CodeTable, taserver.CodeColumn),
 		)
 		fromV = sqlgraph.Neighbors(ts.driver.Dialect(), step)
 		return fromV, nil
@@ -887,12 +738,177 @@ func (c *TAServerClient) mutate(ctx context.Context, m *TAServerMutation) (Value
 	}
 }
 
+// TAViolationClient is a client for the TAViolation schema.
+type TAViolationClient struct {
+	config
+}
+
+// NewTAViolationClient returns a client for the TAViolation from the given config.
+func NewTAViolationClient(c config) *TAViolationClient {
+	return &TAViolationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `taviolation.Hooks(f(g(h())))`.
+func (c *TAViolationClient) Use(hooks ...Hook) {
+	c.hooks.TAViolation = append(c.hooks.TAViolation, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `taviolation.Intercept(f(g(h())))`.
+func (c *TAViolationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TAViolation = append(c.inters.TAViolation, interceptors...)
+}
+
+// Create returns a builder for creating a TAViolation entity.
+func (c *TAViolationClient) Create() *TAViolationCreate {
+	mutation := newTAViolationMutation(c.config, OpCreate)
+	return &TAViolationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TAViolation entities.
+func (c *TAViolationClient) CreateBulk(builders ...*TAViolationCreate) *TAViolationCreateBulk {
+	return &TAViolationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TAViolationClient) MapCreateBulk(slice any, setFunc func(*TAViolationCreate, int)) *TAViolationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TAViolationCreateBulk{err: fmt.Errorf("calling to TAViolationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TAViolationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TAViolationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TAViolation.
+func (c *TAViolationClient) Update() *TAViolationUpdate {
+	mutation := newTAViolationMutation(c.config, OpUpdate)
+	return &TAViolationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TAViolationClient) UpdateOne(tv *TAViolation) *TAViolationUpdateOne {
+	mutation := newTAViolationMutation(c.config, OpUpdateOne, withTAViolation(tv))
+	return &TAViolationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TAViolationClient) UpdateOneID(id int) *TAViolationUpdateOne {
+	mutation := newTAViolationMutation(c.config, OpUpdateOne, withTAViolationID(id))
+	return &TAViolationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TAViolation.
+func (c *TAViolationClient) Delete() *TAViolationDelete {
+	mutation := newTAViolationMutation(c.config, OpDelete)
+	return &TAViolationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TAViolationClient) DeleteOne(tv *TAViolation) *TAViolationDeleteOne {
+	return c.DeleteOneID(tv.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TAViolationClient) DeleteOneID(id int) *TAViolationDeleteOne {
+	builder := c.Delete().Where(taviolation.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TAViolationDeleteOne{builder}
+}
+
+// Query returns a query builder for TAViolation.
+func (c *TAViolationClient) Query() *TAViolationQuery {
+	return &TAViolationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTAViolation},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TAViolation entity by its id.
+func (c *TAViolationClient) Get(ctx context.Context, id int) (*TAViolation, error) {
+	return c.Query().Where(taviolation.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TAViolationClient) GetX(ctx context.Context, id int) *TAViolation {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryServer queries the server edge of a TAViolation.
+func (c *TAViolationClient) QueryServer(tv *TAViolation) *TAServerQuery {
+	query := (&TAServerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(taviolation.Table, taviolation.FieldID, id),
+			sqlgraph.To(taserver.Table, taserver.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, taviolation.ServerTable, taviolation.ServerColumn),
+		)
+		fromV = sqlgraph.Neighbors(tv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryService queries the service edge of a TAViolation.
+func (c *TAViolationClient) QueryService(tv *TAViolation) *ServiceQuery {
+	query := (&ServiceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(taviolation.Table, taviolation.FieldID, id),
+			sqlgraph.To(service.Table, service.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, taviolation.ServiceTable, taviolation.ServiceColumn),
+		)
+		fromV = sqlgraph.Neighbors(tv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TAViolationClient) Hooks() []Hook {
+	return c.hooks.TAViolation
+}
+
+// Interceptors returns the client interceptors.
+func (c *TAViolationClient) Interceptors() []Interceptor {
+	return c.inters.TAViolation
+}
+
+func (c *TAViolationClient) mutate(ctx context.Context, m *TAViolationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TAViolationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TAViolationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TAViolationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TAViolationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TAViolation mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Service, TA, TACode, TAServer []ent.Hook
+		Service, TACode, TAServer, TAViolation []ent.Hook
 	}
 	inters struct {
-		Service, TA, TACode, TAServer []ent.Interceptor
+		Service, TACode, TAServer, TAViolation []ent.Interceptor
 	}
 )

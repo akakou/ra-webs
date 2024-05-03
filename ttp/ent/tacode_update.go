@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
 	"github.com/akakou/ra_webs/ttp/ent/service"
-	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
 // TACodeUpdate is the builder for updating TACode entities.
@@ -77,19 +77,19 @@ func (tcu *TACodeUpdate) SetNillableIsActive(b *bool) *TACodeUpdate {
 	return tcu
 }
 
-// AddTumIDs adds the "ta" edge to the TA entity by IDs.
-func (tcu *TACodeUpdate) AddTumIDs(ids ...int) *TACodeUpdate {
-	tcu.mutation.AddTumIDs(ids...)
+// AddServerIDs adds the "server" edge to the TAServer entity by IDs.
+func (tcu *TACodeUpdate) AddServerIDs(ids ...int) *TACodeUpdate {
+	tcu.mutation.AddServerIDs(ids...)
 	return tcu
 }
 
-// AddTa adds the "ta" edges to the TA entity.
-func (tcu *TACodeUpdate) AddTa(t ...*TA) *TACodeUpdate {
+// AddServer adds the "server" edges to the TAServer entity.
+func (tcu *TACodeUpdate) AddServer(t ...*TAServer) *TACodeUpdate {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return tcu.AddTumIDs(ids...)
+	return tcu.AddServerIDs(ids...)
 }
 
 // SetServiceID sets the "service" edge to the Service entity by ID.
@@ -116,25 +116,25 @@ func (tcu *TACodeUpdate) Mutation() *TACodeMutation {
 	return tcu.mutation
 }
 
-// ClearTa clears all "ta" edges to the TA entity.
-func (tcu *TACodeUpdate) ClearTa() *TACodeUpdate {
-	tcu.mutation.ClearTa()
+// ClearServer clears all "server" edges to the TAServer entity.
+func (tcu *TACodeUpdate) ClearServer() *TACodeUpdate {
+	tcu.mutation.ClearServer()
 	return tcu
 }
 
-// RemoveTumIDs removes the "ta" edge to TA entities by IDs.
-func (tcu *TACodeUpdate) RemoveTumIDs(ids ...int) *TACodeUpdate {
-	tcu.mutation.RemoveTumIDs(ids...)
+// RemoveServerIDs removes the "server" edge to TAServer entities by IDs.
+func (tcu *TACodeUpdate) RemoveServerIDs(ids ...int) *TACodeUpdate {
+	tcu.mutation.RemoveServerIDs(ids...)
 	return tcu
 }
 
-// RemoveTa removes "ta" edges to TA entities.
-func (tcu *TACodeUpdate) RemoveTa(t ...*TA) *TACodeUpdate {
+// RemoveServer removes "server" edges to TAServer entities.
+func (tcu *TACodeUpdate) RemoveServer(t ...*TAServer) *TACodeUpdate {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return tcu.RemoveTumIDs(ids...)
+	return tcu.RemoveServerIDs(ids...)
 }
 
 // ClearService clears the "service" edge to the Service entity.
@@ -191,28 +191,28 @@ func (tcu *TACodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tcu.mutation.IsActive(); ok {
 		_spec.SetField(tacode.FieldIsActive, field.TypeBool, value)
 	}
-	if tcu.mutation.TaCleared() {
+	if tcu.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   tacode.TaTable,
-			Columns: []string{tacode.TaColumn},
+			Table:   tacode.ServerTable,
+			Columns: []string{tacode.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tcu.mutation.RemovedTaIDs(); len(nodes) > 0 && !tcu.mutation.TaCleared() {
+	if nodes := tcu.mutation.RemovedServerIDs(); len(nodes) > 0 && !tcu.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   tacode.TaTable,
-			Columns: []string{tacode.TaColumn},
+			Table:   tacode.ServerTable,
+			Columns: []string{tacode.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -220,15 +220,15 @@ func (tcu *TACodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tcu.mutation.TaIDs(); len(nodes) > 0 {
+	if nodes := tcu.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   tacode.TaTable,
-			Columns: []string{tacode.TaColumn},
+			Table:   tacode.ServerTable,
+			Columns: []string{tacode.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -333,19 +333,19 @@ func (tcuo *TACodeUpdateOne) SetNillableIsActive(b *bool) *TACodeUpdateOne {
 	return tcuo
 }
 
-// AddTumIDs adds the "ta" edge to the TA entity by IDs.
-func (tcuo *TACodeUpdateOne) AddTumIDs(ids ...int) *TACodeUpdateOne {
-	tcuo.mutation.AddTumIDs(ids...)
+// AddServerIDs adds the "server" edge to the TAServer entity by IDs.
+func (tcuo *TACodeUpdateOne) AddServerIDs(ids ...int) *TACodeUpdateOne {
+	tcuo.mutation.AddServerIDs(ids...)
 	return tcuo
 }
 
-// AddTa adds the "ta" edges to the TA entity.
-func (tcuo *TACodeUpdateOne) AddTa(t ...*TA) *TACodeUpdateOne {
+// AddServer adds the "server" edges to the TAServer entity.
+func (tcuo *TACodeUpdateOne) AddServer(t ...*TAServer) *TACodeUpdateOne {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return tcuo.AddTumIDs(ids...)
+	return tcuo.AddServerIDs(ids...)
 }
 
 // SetServiceID sets the "service" edge to the Service entity by ID.
@@ -372,25 +372,25 @@ func (tcuo *TACodeUpdateOne) Mutation() *TACodeMutation {
 	return tcuo.mutation
 }
 
-// ClearTa clears all "ta" edges to the TA entity.
-func (tcuo *TACodeUpdateOne) ClearTa() *TACodeUpdateOne {
-	tcuo.mutation.ClearTa()
+// ClearServer clears all "server" edges to the TAServer entity.
+func (tcuo *TACodeUpdateOne) ClearServer() *TACodeUpdateOne {
+	tcuo.mutation.ClearServer()
 	return tcuo
 }
 
-// RemoveTumIDs removes the "ta" edge to TA entities by IDs.
-func (tcuo *TACodeUpdateOne) RemoveTumIDs(ids ...int) *TACodeUpdateOne {
-	tcuo.mutation.RemoveTumIDs(ids...)
+// RemoveServerIDs removes the "server" edge to TAServer entities by IDs.
+func (tcuo *TACodeUpdateOne) RemoveServerIDs(ids ...int) *TACodeUpdateOne {
+	tcuo.mutation.RemoveServerIDs(ids...)
 	return tcuo
 }
 
-// RemoveTa removes "ta" edges to TA entities.
-func (tcuo *TACodeUpdateOne) RemoveTa(t ...*TA) *TACodeUpdateOne {
+// RemoveServer removes "server" edges to TAServer entities.
+func (tcuo *TACodeUpdateOne) RemoveServer(t ...*TAServer) *TACodeUpdateOne {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return tcuo.RemoveTumIDs(ids...)
+	return tcuo.RemoveServerIDs(ids...)
 }
 
 // ClearService clears the "service" edge to the Service entity.
@@ -477,28 +477,28 @@ func (tcuo *TACodeUpdateOne) sqlSave(ctx context.Context) (_node *TACode, err er
 	if value, ok := tcuo.mutation.IsActive(); ok {
 		_spec.SetField(tacode.FieldIsActive, field.TypeBool, value)
 	}
-	if tcuo.mutation.TaCleared() {
+	if tcuo.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   tacode.TaTable,
-			Columns: []string{tacode.TaColumn},
+			Table:   tacode.ServerTable,
+			Columns: []string{tacode.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tcuo.mutation.RemovedTaIDs(); len(nodes) > 0 && !tcuo.mutation.TaCleared() {
+	if nodes := tcuo.mutation.RemovedServerIDs(); len(nodes) > 0 && !tcuo.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   tacode.TaTable,
-			Columns: []string{tacode.TaColumn},
+			Table:   tacode.ServerTable,
+			Columns: []string{tacode.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -506,15 +506,15 @@ func (tcuo *TACodeUpdateOne) sqlSave(ctx context.Context) (_node *TACode, err er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tcuo.mutation.TaIDs(); len(nodes) > 0 {
+	if nodes := tcuo.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   tacode.TaTable,
-			Columns: []string{tacode.TaColumn},
+			Table:   tacode.ServerTable,
+			Columns: []string{tacode.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

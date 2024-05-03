@@ -10,8 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/service"
-	"github.com/akakou/ra_webs/ttp/ent/ta"
+	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
+	"github.com/akakou/ra_webs/ttp/ent/taviolation"
 )
 
 // TAServerCreate is the builder for creating a TAServer entity.
@@ -27,33 +28,56 @@ func (tsc *TAServerCreate) SetDomain(s string) *TAServerCreate {
 	return tsc
 }
 
-// SetIsActive sets the "is_active" field.
-func (tsc *TAServerCreate) SetIsActive(b bool) *TAServerCreate {
-	tsc.mutation.SetIsActive(b)
+// SetPublicKey sets the "public_key" field.
+func (tsc *TAServerCreate) SetPublicKey(b []byte) *TAServerCreate {
+	tsc.mutation.SetPublicKey(b)
 	return tsc
 }
 
-// SetNillableIsActive sets the "is_active" field if the given value is not nil.
-func (tsc *TAServerCreate) SetNillableIsActive(b *bool) *TAServerCreate {
-	if b != nil {
-		tsc.SetIsActive(*b)
-	}
+// SetQuote sets the "quote" field.
+func (tsc *TAServerCreate) SetQuote(s string) *TAServerCreate {
+	tsc.mutation.SetQuote(s)
 	return tsc
 }
 
-// AddTumIDs adds the "ta" edge to the TA entity by IDs.
-func (tsc *TAServerCreate) AddTumIDs(ids ...int) *TAServerCreate {
-	tsc.mutation.AddTumIDs(ids...)
+// SetHasActivated sets the "has_activated" field.
+func (tsc *TAServerCreate) SetHasActivated(b bool) *TAServerCreate {
+	tsc.mutation.SetHasActivated(b)
 	return tsc
 }
 
-// AddTa adds the "ta" edges to the TA entity.
-func (tsc *TAServerCreate) AddTa(t ...*TA) *TAServerCreate {
+// AddViolationIDs adds the "violation" edge to the TAViolation entity by IDs.
+func (tsc *TAServerCreate) AddViolationIDs(ids ...int) *TAServerCreate {
+	tsc.mutation.AddViolationIDs(ids...)
+	return tsc
+}
+
+// AddViolation adds the "violation" edges to the TAViolation entity.
+func (tsc *TAServerCreate) AddViolation(t ...*TAViolation) *TAServerCreate {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return tsc.AddTumIDs(ids...)
+	return tsc.AddViolationIDs(ids...)
+}
+
+// SetCodeID sets the "code" edge to the TACode entity by ID.
+func (tsc *TAServerCreate) SetCodeID(id int) *TAServerCreate {
+	tsc.mutation.SetCodeID(id)
+	return tsc
+}
+
+// SetNillableCodeID sets the "code" edge to the TACode entity by ID if the given value is not nil.
+func (tsc *TAServerCreate) SetNillableCodeID(id *int) *TAServerCreate {
+	if id != nil {
+		tsc = tsc.SetCodeID(*id)
+	}
+	return tsc
+}
+
+// SetCode sets the "code" edge to the TACode entity.
+func (tsc *TAServerCreate) SetCode(t *TACode) *TAServerCreate {
+	return tsc.SetCodeID(t.ID)
 }
 
 // SetServiceID sets the "service" edge to the Service entity by ID.
@@ -82,7 +106,6 @@ func (tsc *TAServerCreate) Mutation() *TAServerMutation {
 
 // Save creates the TAServer in the database.
 func (tsc *TAServerCreate) Save(ctx context.Context) (*TAServer, error) {
-	tsc.defaults()
 	return withHooks(ctx, tsc.sqlSave, tsc.mutation, tsc.hooks)
 }
 
@@ -108,21 +131,19 @@ func (tsc *TAServerCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (tsc *TAServerCreate) defaults() {
-	if _, ok := tsc.mutation.IsActive(); !ok {
-		v := taserver.DefaultIsActive
-		tsc.mutation.SetIsActive(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (tsc *TAServerCreate) check() error {
 	if _, ok := tsc.mutation.Domain(); !ok {
 		return &ValidationError{Name: "domain", err: errors.New(`ent: missing required field "TAServer.domain"`)}
 	}
-	if _, ok := tsc.mutation.IsActive(); !ok {
-		return &ValidationError{Name: "is_active", err: errors.New(`ent: missing required field "TAServer.is_active"`)}
+	if _, ok := tsc.mutation.PublicKey(); !ok {
+		return &ValidationError{Name: "public_key", err: errors.New(`ent: missing required field "TAServer.public_key"`)}
+	}
+	if _, ok := tsc.mutation.Quote(); !ok {
+		return &ValidationError{Name: "quote", err: errors.New(`ent: missing required field "TAServer.quote"`)}
+	}
+	if _, ok := tsc.mutation.HasActivated(); !ok {
+		return &ValidationError{Name: "has_activated", err: errors.New(`ent: missing required field "TAServer.has_activated"`)}
 	}
 	return nil
 }
@@ -154,24 +175,49 @@ func (tsc *TAServerCreate) createSpec() (*TAServer, *sqlgraph.CreateSpec) {
 		_spec.SetField(taserver.FieldDomain, field.TypeString, value)
 		_node.Domain = value
 	}
-	if value, ok := tsc.mutation.IsActive(); ok {
-		_spec.SetField(taserver.FieldIsActive, field.TypeBool, value)
-		_node.IsActive = value
+	if value, ok := tsc.mutation.PublicKey(); ok {
+		_spec.SetField(taserver.FieldPublicKey, field.TypeBytes, value)
+		_node.PublicKey = value
 	}
-	if nodes := tsc.mutation.TaIDs(); len(nodes) > 0 {
+	if value, ok := tsc.mutation.Quote(); ok {
+		_spec.SetField(taserver.FieldQuote, field.TypeString, value)
+		_node.Quote = value
+	}
+	if value, ok := tsc.mutation.HasActivated(); ok {
+		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)
+		_node.HasActivated = value
+	}
+	if nodes := tsc.mutation.ViolationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   taserver.TaTable,
-			Columns: []string{taserver.TaColumn},
+			Table:   taserver.ViolationTable,
+			Columns: []string{taserver.ViolationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(taviolation.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tsc.mutation.CodeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   taserver.CodeTable,
+			Columns: []string{taserver.CodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tacode.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ta_server_code = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tsc.mutation.ServiceIDs(); len(nodes) > 0 {
@@ -212,7 +258,6 @@ func (tscb *TAServerCreateBulk) Save(ctx context.Context) ([]*TAServer, error) {
 	for i := range tscb.builders {
 		func(i int, root context.Context) {
 			builder := tscb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TAServerMutation)
 				if !ok {

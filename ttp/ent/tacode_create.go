@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/service"
-	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
 // TACodeCreate is the builder for creating a TACode entity.
@@ -53,19 +53,19 @@ func (tcc *TACodeCreate) SetNillableIsActive(b *bool) *TACodeCreate {
 	return tcc
 }
 
-// AddTumIDs adds the "ta" edge to the TA entity by IDs.
-func (tcc *TACodeCreate) AddTumIDs(ids ...int) *TACodeCreate {
-	tcc.mutation.AddTumIDs(ids...)
+// AddServerIDs adds the "server" edge to the TAServer entity by IDs.
+func (tcc *TACodeCreate) AddServerIDs(ids ...int) *TACodeCreate {
+	tcc.mutation.AddServerIDs(ids...)
 	return tcc
 }
 
-// AddTa adds the "ta" edges to the TA entity.
-func (tcc *TACodeCreate) AddTa(t ...*TA) *TACodeCreate {
+// AddServer adds the "server" edges to the TAServer entity.
+func (tcc *TACodeCreate) AddServer(t ...*TAServer) *TACodeCreate {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return tcc.AddTumIDs(ids...)
+	return tcc.AddServerIDs(ids...)
 }
 
 // SetServiceID sets the "service" edge to the Service entity by ID.
@@ -184,15 +184,15 @@ func (tcc *TACodeCreate) createSpec() (*TACode, *sqlgraph.CreateSpec) {
 		_spec.SetField(tacode.FieldIsActive, field.TypeBool, value)
 		_node.IsActive = value
 	}
-	if nodes := tcc.mutation.TaIDs(); len(nodes) > 0 {
+	if nodes := tcc.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   tacode.TaTable,
-			Columns: []string{tacode.TaColumn},
+			Table:   tacode.ServerTable,
+			Columns: []string{tacode.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

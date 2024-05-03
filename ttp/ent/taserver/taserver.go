@@ -14,21 +14,34 @@ const (
 	FieldID = "id"
 	// FieldDomain holds the string denoting the domain field in the database.
 	FieldDomain = "domain"
-	// FieldIsActive holds the string denoting the is_active field in the database.
-	FieldIsActive = "is_active"
-	// EdgeTa holds the string denoting the ta edge name in mutations.
-	EdgeTa = "ta"
+	// FieldPublicKey holds the string denoting the public_key field in the database.
+	FieldPublicKey = "public_key"
+	// FieldQuote holds the string denoting the quote field in the database.
+	FieldQuote = "quote"
+	// FieldHasActivated holds the string denoting the has_activated field in the database.
+	FieldHasActivated = "has_activated"
+	// EdgeViolation holds the string denoting the violation edge name in mutations.
+	EdgeViolation = "violation"
+	// EdgeCode holds the string denoting the code edge name in mutations.
+	EdgeCode = "code"
 	// EdgeService holds the string denoting the service edge name in mutations.
 	EdgeService = "service"
 	// Table holds the table name of the taserver in the database.
 	Table = "ta_servers"
-	// TaTable is the table that holds the ta relation/edge.
-	TaTable = "tas"
-	// TaInverseTable is the table name for the TA entity.
-	// It exists in this package in order to avoid circular dependency with the "ta" package.
-	TaInverseTable = "tas"
-	// TaColumn is the table column denoting the ta relation/edge.
-	TaColumn = "ta_server"
+	// ViolationTable is the table that holds the violation relation/edge.
+	ViolationTable = "ta_violations"
+	// ViolationInverseTable is the table name for the TAViolation entity.
+	// It exists in this package in order to avoid circular dependency with the "taviolation" package.
+	ViolationInverseTable = "ta_violations"
+	// ViolationColumn is the table column denoting the violation relation/edge.
+	ViolationColumn = "ta_violation_server"
+	// CodeTable is the table that holds the code relation/edge.
+	CodeTable = "ta_servers"
+	// CodeInverseTable is the table name for the TACode entity.
+	// It exists in this package in order to avoid circular dependency with the "tacode" package.
+	CodeInverseTable = "ta_codes"
+	// CodeColumn is the table column denoting the code relation/edge.
+	CodeColumn = "ta_server_code"
 	// ServiceTable is the table that holds the service relation/edge.
 	ServiceTable = "ta_servers"
 	// ServiceInverseTable is the table name for the Service entity.
@@ -42,12 +55,15 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldDomain,
-	FieldIsActive,
+	FieldPublicKey,
+	FieldQuote,
+	FieldHasActivated,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "ta_servers"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"ta_server_code",
 	"ta_server_service",
 }
 
@@ -66,11 +82,6 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-var (
-	// DefaultIsActive holds the default value on creation for the "is_active" field.
-	DefaultIsActive bool
-)
-
 // OrderOption defines the ordering options for the TAServer queries.
 type OrderOption func(*sql.Selector)
 
@@ -84,22 +95,34 @@ func ByDomain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDomain, opts...).ToFunc()
 }
 
-// ByIsActive orders the results by the is_active field.
-func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsActive, opts...).ToFunc()
+// ByQuote orders the results by the quote field.
+func ByQuote(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQuote, opts...).ToFunc()
 }
 
-// ByTaCount orders the results by ta count.
-func ByTaCount(opts ...sql.OrderTermOption) OrderOption {
+// ByHasActivated orders the results by the has_activated field.
+func ByHasActivated(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHasActivated, opts...).ToFunc()
+}
+
+// ByViolationCount orders the results by violation count.
+func ByViolationCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTaStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newViolationStep(), opts...)
 	}
 }
 
-// ByTa orders the results by ta terms.
-func ByTa(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByViolation orders the results by violation terms.
+func ByViolation(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTaStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newViolationStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCodeField orders the results by code field.
+func ByCodeField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCodeStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -109,11 +132,18 @@ func ByServiceField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newServiceStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newTaStep() *sqlgraph.Step {
+func newViolationStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TaInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, TaTable, TaColumn),
+		sqlgraph.To(ViolationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, ViolationTable, ViolationColumn),
+	)
+}
+func newCodeStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CodeInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, CodeTable, CodeColumn),
 	)
 }
 func newServiceStep() *sqlgraph.Step {

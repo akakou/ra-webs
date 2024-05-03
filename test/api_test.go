@@ -7,9 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"service"
+	"ta"
 
 	"github.com/akakou/ra_webs/core"
+
 	"github.com/akakou/ra_webs/ttp/api"
 	"github.com/akakou/ra_webs/ttp/builder"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
@@ -32,7 +33,7 @@ func TestAPI(t *testing.T) {
 
 	go e.Start(core.TTPPort)
 
-	token := ""
+	var token = ""
 
 	t.Run("TestPostServiceByAdmin", func(t *testing.T) {
 		fmt.Println("TestPostServiceByAdmin")
@@ -50,27 +51,17 @@ func TestAPI(t *testing.T) {
 		token = rec.Body.String()
 	})
 
-	svc := service.NewService(token, "http://localhost"+core.TTPPort+"/")
-	api.SCHEME = "http"
+	t.Run("TestRegister", func(t *testing.T) {
+		_ta, _ := ta.InitTA(
+			&ta.Config{
+				Token:      token,
+				Domain:     "localhost",
+				TTP:        "http://localhost" + core.TTPPort,
+				Repository: "https://github.com/akakou-docs/ego-statistical-analysis",
+			},
+		)
 
-	t.Run("TestPostTACode", func(t *testing.T) {
-		fmt.Println("TestPostTACode")
-
-		repo := "https://github.com/akakou-docs/ego-statistical-analysis"
-		uniqueId, err := svc.PostCode(repo)
+		_, err := _ta.Register()
 		assert.NoError(t, err)
-		assert.Equal(t, builder.DEBUG_UNIQUE, uniqueId)
 	})
-
-	t.Run("TestPostTAServer", func(t *testing.T) {
-		fmt.Println("TestPostTAServer")
-
-		e := echo.New()
-		e.Debug = true
-
-		res, err := svc.PostServer("localhost", e)
-		assert.NoError(t, err)
-		assert.Equal(t, "1", res)
-	})
-
 }

@@ -1,28 +1,52 @@
-package service
+package ta
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/akakou/ra_webs/core"
-	"github.com/akakou/ra_webs/ttp/api"
-
-	goutils "github.com/akakou/go-utils"
 	"github.com/labstack/echo/v4"
 )
 
-func (service *Service) post(path string, reqBody any) (string, error) {
+const WAIT = 3
+const REGISTER_PATH = "/register"
+
+func (ta *TA) Register() (string, error) {
+	publicKey := ta.privateKey.Public()
+	keyBin := x509.MarshalPKCS1PublicKey(publicKey.(*rsa.PublicKey))
+
+	quote, err := core.AttestServer(keyBin, ta.config.Token)
+	if err != nil {
+		return "", fmt.Errorf("%s: %w", ERROR_ATTEST_PUBLIC_KEY, err)
+	}
+
+	reqBody := core.RegisterRequest{
+		CodeRequest: core.CodeRequest{
+			Repository: ta.config.Repository,
+		},
+		ServerRequest: core.ServerRequest{
+			PublicKey: keyBin,
+			Domain:    ta.config.Domain,
+			Quote:     quote,
+		},
+	}
+
+	return ta.post(REGISTER_PATH, reqBody)
+}
+
+func (ta *TA) post(path string, reqBody any) (string, error) {
 	body, err := json.Marshal(reqBody)
 	if err != nil {
 		return "", err
 	}
 
-	u, err := url.Parse(service.TTPBase)
+	u, err := url.Parse(ta.config.TTP)
 	if err != nil {
 		return "", fmt.Errorf("%v: %v", ERROR_TTP_BASE_PARSE, err)
 	}
@@ -35,7 +59,7 @@ func (service *Service) post(path string, reqBody any) (string, error) {
 	}
 
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", service.Token))
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", ta.config.Token))
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -55,20 +79,4 @@ func (service *Service) post(path string, reqBody any) (string, error) {
 	}
 
 	return string(respBody), nil
-}
-
-func (service *Service) PostCode(repository string) (string, error) {
-	return service.post(api.PostCodeApi.Path, map[string]string{"repository": repository})
-}
-
-const WAIT = 3
-
-func (service *Service) PostServer(domain string, e *echo.Echo) (string, error) {
-	nonce, _ := goutils.RandomHex(64)
-	token := core.DomainToken(service.Token, nonce)
-
-	service.ServDomainAuth(token, domain, e)
-	time.Sleep(WAIT * time.Second)
-
-	return service.post(api.PostServerApi.Path, map[string]string{"domain": domain, "nonce": nonce})
 }

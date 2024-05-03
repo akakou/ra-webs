@@ -2,11 +2,9 @@ module github.com/akakou/ra_webs/test
 
 go 1.21.5
 
-replace service => ../service
-
 replace github.com/akakou/ra_webs/core => ../core
 
-replace github.com/akakou/ra_webs/ta => ../ta
+replace ta => ../ta
 
 replace github.com/akakou/ra_webs/ttp => ../ttp
 
@@ -14,9 +12,9 @@ require (
 	github.com/akakou/golang-utils v0.0.1
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
 	github.com/akakou/ra_webs/ttp v0.0.0-00010101000000-000000000000
-	github.com/labstack/echo/v4 v4.11.4
+	github.com/labstack/echo/v4 v4.12.0
 	github.com/stretchr/testify v1.9.0
-	service v0.0.0-00010101000000-000000000000
+	ta v0.0.0-00010101000000-000000000000
 )
 
 require (

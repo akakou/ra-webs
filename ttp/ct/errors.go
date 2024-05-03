@@ -7,7 +7,6 @@ const (
 	ERROR_SELECT_SERVER   = "failed to select server from db"
 
 	ERROR_LAST_TA_INVALID = "last TA is invalid"
-	ERROR_QUOTE_INVALID   = "quote is invalid"
 	ERROR_DOMAIN_INVALID  = "domain is invalid"
 
 	ERROR_DOMAIN_INVALID_BY_WILDCARD                  = "wildcard domain is not allowed"

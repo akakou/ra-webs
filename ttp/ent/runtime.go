@@ -3,11 +3,12 @@
 package ent
 
 import (
+	"time"
+
 	"github.com/akakou/ra_webs/ttp/ent/schema"
 	"github.com/akakou/ra_webs/ttp/ent/service"
-	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
-	"github.com/akakou/ra_webs/ttp/ent/taserver"
+	"github.com/akakou/ra_webs/ttp/ent/taviolation"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -20,22 +21,16 @@ func init() {
 	serviceDescIsActive := serviceFields[2].Descriptor()
 	// service.DefaultIsActive holds the default value on creation for the is_active field.
 	service.DefaultIsActive = serviceDescIsActive.Default.(bool)
-	taFields := schema.TA{}.Fields()
-	_ = taFields
-	// taDescIsValid is the schema descriptor for is_valid field.
-	taDescIsValid := taFields[2].Descriptor()
-	// ta.DefaultIsValid holds the default value on creation for the is_valid field.
-	ta.DefaultIsValid = taDescIsValid.Default.(bool)
 	tacodeFields := schema.TACode{}.Fields()
 	_ = tacodeFields
 	// tacodeDescIsActive is the schema descriptor for is_active field.
 	tacodeDescIsActive := tacodeFields[3].Descriptor()
 	// tacode.DefaultIsActive holds the default value on creation for the is_active field.
 	tacode.DefaultIsActive = tacodeDescIsActive.Default.(bool)
-	taserverFields := schema.TAServer{}.Fields()
-	_ = taserverFields
-	// taserverDescIsActive is the schema descriptor for is_active field.
-	taserverDescIsActive := taserverFields[1].Descriptor()
-	// taserver.DefaultIsActive holds the default value on creation for the is_active field.
-	taserver.DefaultIsActive = taserverDescIsActive.Default.(bool)
+	taviolationFields := schema.TAViolation{}.Fields()
+	_ = taviolationFields
+	// taviolationDescCreatedAt is the schema descriptor for created_at field.
+	taviolationDescCreatedAt := taviolationFields[0].Descriptor()
+	// taviolation.DefaultCreatedAt holds the default value on creation for the created_at field.
+	taviolation.DefaultCreatedAt = taviolationDescCreatedAt.Default.(func() time.Time)
 }
