@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	golangutils "github.com/akakou/go-utils"
+	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ta"
 	"github.com/labstack/echo/v4"
 )
@@ -21,13 +22,12 @@ func main() {
 		return c.String(http.StatusOK, "Hello")
 	})
 
+	core.EnableDebug()
 	ta, err := ta.DefaultTA()
 
 	if err != nil {
 		panic(err)
 	}
-
-	ta.DomainAuthServer(e)
 
 	e.AutoTLSManager, err = ta.TLSConfig()
 
@@ -35,5 +35,5 @@ func main() {
 		panic(err)
 	}
 
-	e.Logger.Fatal(e.StartAutoTLS(":8443"))
+	e.Logger.Fatal(e.StartAutoTLS(core.TAPort))
 }

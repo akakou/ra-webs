@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp/api"
@@ -60,20 +61,14 @@ func (service *Service) PostCode(repository string) (string, error) {
 	return service.post(api.PostCodeApi.Path, map[string]string{"repository": repository})
 }
 
+const WAIT = 3
+
 func (service *Service) PostServer(domain string, e *echo.Echo) (string, error) {
 	nonce, _ := goutils.RandomHex(64)
 	token := core.DomainToken(service.Token, nonce)
 
-	service.DomainAuthServer(token, domain, e)
+	service.ServDomainAuth(token, domain, e)
+	time.Sleep(WAIT * time.Second)
 
 	return service.post(api.PostServerApi.Path, map[string]string{"domain": domain, "nonce": nonce})
-}
-
-func (service *Service) DomainAuthServer(token, domain string, e *echo.Echo) *echo.Echo {
-	e.GET(api.DOMAIN_AUTH_PATH, func(c echo.Context) error {
-		return c.String(http.StatusOK, token)
-	})
-
-	go e.Start(api.DOMAIN_AUTH_PORT)
-	return e
 }

@@ -18,8 +18,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var PORT = ":11111"
-
 func TestAPI(t *testing.T) {
 	core.EnableDebug()
 	ct.EnableDebug()
@@ -32,7 +30,7 @@ func TestAPI(t *testing.T) {
 
 	api.Route(e, ttp)
 
-	go e.Start(PORT)
+	go e.Start(core.TTPPort)
 
 	token := ""
 
@@ -52,7 +50,7 @@ func TestAPI(t *testing.T) {
 		token = rec.Body.String()
 	})
 
-	svc := service.NewService(token, "http://localhost"+PORT+"/")
+	svc := service.NewService(token, "http://localhost"+core.TTPPort+"/")
 	api.SCHEME = "http"
 
 	t.Run("TestPostTACode", func(t *testing.T) {

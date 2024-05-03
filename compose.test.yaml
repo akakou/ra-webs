@@ -2,7 +2,7 @@ version: '3'
 services:
   ta_example:
     tty: true
-    build: ./docker/ego
+    build: ./docker
     ports:
       - "8443:8443"
     volumes:
@@ -15,15 +15,20 @@ services:
     network_mode: host
 
   ttp:
-    image: golang:latest
+    build: ./docker
     ports:
       - "8000:8000"
     volumes:
       - ./ttp:/ttp
       - ./core:/core
+      - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /ttp/serv
     command: bash -c 'go mod tidy && go run main.go'
     network_mode: host
+    env_file:
+      - test/env/ttp.env
+    privileged: true
+    tty: true
 
   do:
     image: golang:latest
