@@ -14,7 +14,6 @@ require (
 	github.com/akakou/golang-utils v0.0.1
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
 	github.com/akakou/ra_webs/ttp v0.0.0-00010101000000-000000000000
-	github.com/edgelesssys/ego v1.4.1
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/stretchr/testify v1.9.0
 	service v0.0.0-00010101000000-000000000000
@@ -29,8 +28,9 @@ require (
 	github.com/akakou/meta-ct v0.0.5 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/edgelesssys/ego v1.5.0 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
