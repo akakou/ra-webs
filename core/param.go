@@ -10,4 +10,4 @@ const DOMAIN_AUTH_PATH = "/ra-webs"
 
 var TTPPort = ":8000"
 var ServicePort = ":8001"
-var TAPort = ":8443"
+var TAPort = ":443"
