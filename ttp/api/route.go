@@ -14,15 +14,14 @@ func Route(e *echo.Echo, ttp *ttpcore.TTP) {
 		return c.String(http.StatusOK, r)
 	})
 
-	PostCodeApi.Set(e, ttp)
-	PostServerApi.Set(e, ttp)
+	RegisterApi.Set(e, ttp)
 
 	GetCodeApi.Set(e, ttp)
 	GetServerApi.Set(e, ttp)
 
 	PostServiceByAdmin.Set(e, ttp)
 
-	GetTAFromDomainApi.Set(e, ttp)
+	GetServerFromDomainApi.Set(e, ttp)
 
 	WebhookApi().Set(e, ttp)
 }
