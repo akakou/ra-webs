@@ -47,7 +47,7 @@ var GetServerFromDomainApi = goutils.EchoRoute[ttpcore.TTP]{
 				return errors.New("server is not found")
 			}
 
-			if len(serv.Edges.Violation) != 1 {
+			if len(serv.Edges.Violation) != 0 {
 				return errors.New("server violates")
 
 			}
