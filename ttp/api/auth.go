@@ -22,7 +22,7 @@ const (
 	ERROR_DOMAIN_AUTH_TOKEN_INVALID = "domain auth token is invalid"
 )
 
-var SCHEME = "https"
+var SCHEME = "http"
 
 const DOMAIN_AUTH_PORT = ":8082"
 
