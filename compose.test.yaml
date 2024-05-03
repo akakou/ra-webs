@@ -24,6 +24,8 @@ services:
     working_dir: /ttp/serv
     command: bash -c 'go mod tidy && go run main.go'
     network_mode: host
+    env_file:
+      - test/env/ttp.env
 
   do:
     image: golang:latest
