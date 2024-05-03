@@ -8,6 +8,7 @@ replace github.com/akakou/ra_webs/ttp => ../
 
 require (
 	github.com/akakou/extract-embed v0.0.1
+	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
 	github.com/akakou/ra_webs/ttp v0.0.0-00010101000000-000000000000
 	github.com/labstack/echo/v4 v4.11.4
 )
@@ -19,7 +20,6 @@ require (
 	github.com/akakou/go-utils v0.0.3 // indirect
 	github.com/akakou/golang-utils v0.0.1 // indirect
 	github.com/akakou/meta-ct v0.0.5 // indirect
-	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/edgelesssys/ego v1.4.1 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
