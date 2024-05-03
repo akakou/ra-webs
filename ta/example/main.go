@@ -3,12 +3,15 @@ package main
 import (
 	"net/http"
 
+	golangutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/ta"
 	"github.com/labstack/echo/v4"
 )
 
+var ttpRedirectUrl = golangutils.GetEnv("TTP_REDIRECT", "http://localhost:8000/redirect")
+
 func RedirectHandler(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "http://localhost:8081/redirect", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, ttpRedirectUrl, http.StatusTemporaryRedirect)
 }
 
 func main() {
@@ -24,11 +27,13 @@ func main() {
 		panic(err)
 	}
 
+	ta.DomainAuthServer(e)
+
 	e.AutoTLSManager, err = ta.TLSConfig()
 
 	if err != nil {
 		panic(err)
 	}
 
-	e.Logger.Fatal(e.StartAutoTLS(":443"))
+	e.Logger.Fatal(e.StartAutoTLS(":8443"))
 }

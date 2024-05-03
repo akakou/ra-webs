@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const PORT = ":8081"
+const PORT = ":8000"
 
 //go:embed views/*.html
 var embedFiles embed.FS
