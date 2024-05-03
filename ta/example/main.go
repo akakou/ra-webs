@@ -22,7 +22,7 @@ func main() {
 		return c.String(http.StatusOK, "Hello")
 	})
 
-	core.EnableDebug()
+	//core.EnableDebug()
 	ta, err := ta.DefaultTA()
 
 	if err != nil {

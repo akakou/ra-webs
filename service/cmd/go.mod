@@ -8,10 +8,7 @@ replace github.com/akakou/ra_webs/ttp => ../../ttp
 
 replace github.com/akakou/ra_webs/service => ../
 
-require (
-	github.com/akakou/ra_webs/service v0.0.0-00010101000000-000000000000
-	github.com/labstack/echo/v4 v4.11.4
-)
+require github.com/labstack/echo/v4 v4.11.4
 
 require (
 	ariga.io/atlas v0.14.1-0.20230918065911-83ad451a4935 // indirect
@@ -22,6 +19,7 @@ require (
 	github.com/akakou/golang-utils v0.0.1 // indirect
 	github.com/akakou/meta-ct v0.0.5 // indirect
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000 // indirect
+	github.com/akakou/ra_webs/service v0.0.0-00010101000000-000000000000 // indirect
 	github.com/akakou/ra_webs/ttp v0.0.0-00010101000000-000000000000 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/edgelesssys/ego v1.5.0 // indirect
