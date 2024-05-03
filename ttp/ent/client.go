@@ -862,6 +862,22 @@ func (c *TAViolationClient) QueryServer(tv *TAViolation) *TAServerQuery {
 	return query
 }
 
+// QueryService queries the service edge of a TAViolation.
+func (c *TAViolationClient) QueryService(tv *TAViolation) *ServiceQuery {
+	query := (&ServiceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(taviolation.Table, taviolation.FieldID, id),
+			sqlgraph.To(service.Table, service.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, taviolation.ServiceTable, taviolation.ServiceColumn),
+		)
+		fromV = sqlgraph.Neighbors(tv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *TAViolationClient) Hooks() []Hook {
 	return c.hooks.TAViolation

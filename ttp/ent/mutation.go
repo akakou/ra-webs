@@ -1291,7 +1291,7 @@ type TAServerMutation struct {
 	id               *int
 	domain           *string
 	public_key       *[]byte
-	quote            *[]byte
+	quote            *string
 	has_activated    *bool
 	clearedFields    map[string]struct{}
 	violation        map[int]struct{}
@@ -1477,12 +1477,12 @@ func (m *TAServerMutation) ResetPublicKey() {
 }
 
 // SetQuote sets the "quote" field.
-func (m *TAServerMutation) SetQuote(b []byte) {
-	m.quote = &b
+func (m *TAServerMutation) SetQuote(s string) {
+	m.quote = &s
 }
 
 // Quote returns the value of the "quote" field in the mutation.
-func (m *TAServerMutation) Quote() (r []byte, exists bool) {
+func (m *TAServerMutation) Quote() (r string, exists bool) {
 	v := m.quote
 	if v == nil {
 		return
@@ -1493,7 +1493,7 @@ func (m *TAServerMutation) Quote() (r []byte, exists bool) {
 // OldQuote returns the old "quote" field's value of the TAServer entity.
 // If the TAServer object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAServerMutation) OldQuote(ctx context.Context) (v []byte, err error) {
+func (m *TAServerMutation) OldQuote(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldQuote is only allowed on UpdateOne operations")
 	}
@@ -1784,7 +1784,7 @@ func (m *TAServerMutation) SetField(name string, value ent.Value) error {
 		m.SetPublicKey(v)
 		return nil
 	case taserver.FieldQuote:
-		v, ok := value.([]byte)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1985,16 +1985,18 @@ func (m *TAServerMutation) ResetEdge(name string) error {
 // TAViolationMutation represents an operation that mutates the TAViolation nodes in the graph.
 type TAViolationMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	created_at    *time.Time
-	clearedFields map[string]struct{}
-	server        *int
-	clearedserver bool
-	done          bool
-	oldValue      func(context.Context) (*TAViolation, error)
-	predicates    []predicate.TAViolation
+	op             Op
+	typ            string
+	id             *int
+	created_at     *time.Time
+	clearedFields  map[string]struct{}
+	server         *int
+	clearedserver  bool
+	service        *int
+	clearedservice bool
+	done           bool
+	oldValue       func(context.Context) (*TAViolation, error)
+	predicates     []predicate.TAViolation
 }
 
 var _ ent.Mutation = (*TAViolationMutation)(nil)
@@ -2170,6 +2172,45 @@ func (m *TAViolationMutation) ResetServer() {
 	m.clearedserver = false
 }
 
+// SetServiceID sets the "service" edge to the Service entity by id.
+func (m *TAViolationMutation) SetServiceID(id int) {
+	m.service = &id
+}
+
+// ClearService clears the "service" edge to the Service entity.
+func (m *TAViolationMutation) ClearService() {
+	m.clearedservice = true
+}
+
+// ServiceCleared reports if the "service" edge to the Service entity was cleared.
+func (m *TAViolationMutation) ServiceCleared() bool {
+	return m.clearedservice
+}
+
+// ServiceID returns the "service" edge ID in the mutation.
+func (m *TAViolationMutation) ServiceID() (id int, exists bool) {
+	if m.service != nil {
+		return *m.service, true
+	}
+	return
+}
+
+// ServiceIDs returns the "service" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ServiceID instead. It exists only for internal usage by the builders.
+func (m *TAViolationMutation) ServiceIDs() (ids []int) {
+	if id := m.service; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetService resets all changes to the "service" edge.
+func (m *TAViolationMutation) ResetService() {
+	m.service = nil
+	m.clearedservice = false
+}
+
 // Where appends a list predicates to the TAViolationMutation builder.
 func (m *TAViolationMutation) Where(ps ...predicate.TAViolation) {
 	m.predicates = append(m.predicates, ps...)
@@ -2303,9 +2344,12 @@ func (m *TAViolationMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TAViolationMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.server != nil {
 		edges = append(edges, taviolation.EdgeServer)
+	}
+	if m.service != nil {
+		edges = append(edges, taviolation.EdgeService)
 	}
 	return edges
 }
@@ -2318,13 +2362,17 @@ func (m *TAViolationMutation) AddedIDs(name string) []ent.Value {
 		if id := m.server; id != nil {
 			return []ent.Value{*id}
 		}
+	case taviolation.EdgeService:
+		if id := m.service; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TAViolationMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
@@ -2336,9 +2384,12 @@ func (m *TAViolationMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TAViolationMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedserver {
 		edges = append(edges, taviolation.EdgeServer)
+	}
+	if m.clearedservice {
+		edges = append(edges, taviolation.EdgeService)
 	}
 	return edges
 }
@@ -2349,6 +2400,8 @@ func (m *TAViolationMutation) EdgeCleared(name string) bool {
 	switch name {
 	case taviolation.EdgeServer:
 		return m.clearedserver
+	case taviolation.EdgeService:
+		return m.clearedservice
 	}
 	return false
 }
@@ -2360,6 +2413,9 @@ func (m *TAViolationMutation) ClearEdge(name string) error {
 	case taviolation.EdgeServer:
 		m.ClearServer()
 		return nil
+	case taviolation.EdgeService:
+		m.ClearService()
+		return nil
 	}
 	return fmt.Errorf("unknown TAViolation unique edge %s", name)
 }
@@ -2370,6 +2426,9 @@ func (m *TAViolationMutation) ResetEdge(name string) error {
 	switch name {
 	case taviolation.EdgeServer:
 		m.ResetServer()
+		return nil
+	case taviolation.EdgeService:
+		m.ResetService()
 		return nil
 	}
 	return fmt.Errorf("unknown TAViolation edge %s", name)

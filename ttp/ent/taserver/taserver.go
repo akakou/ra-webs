@@ -95,6 +95,11 @@ func ByDomain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDomain, opts...).ToFunc()
 }
 
+// ByQuote orders the results by the quote field.
+func ByQuote(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQuote, opts...).ToFunc()
+}
+
 // ByHasActivated orders the results by the has_activated field.
 func ByHasActivated(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHasActivated, opts...).ToFunc()

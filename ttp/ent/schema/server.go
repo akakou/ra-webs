@@ -16,7 +16,7 @@ func (TAServer) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("domain"),
 		field.Bytes("public_key"),
-		field.Bytes("quote"),
+		field.String("quote"),
 		field.Bool("has_activated"),
 	}
 }

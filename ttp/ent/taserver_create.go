@@ -35,8 +35,8 @@ func (tsc *TAServerCreate) SetPublicKey(b []byte) *TAServerCreate {
 }
 
 // SetQuote sets the "quote" field.
-func (tsc *TAServerCreate) SetQuote(b []byte) *TAServerCreate {
-	tsc.mutation.SetQuote(b)
+func (tsc *TAServerCreate) SetQuote(s string) *TAServerCreate {
+	tsc.mutation.SetQuote(s)
 	return tsc
 }
 
@@ -180,7 +180,7 @@ func (tsc *TAServerCreate) createSpec() (*TAServer, *sqlgraph.CreateSpec) {
 		_node.PublicKey = value
 	}
 	if value, ok := tsc.mutation.Quote(); ok {
-		_spec.SetField(taserver.FieldQuote, field.TypeBytes, value)
+		_spec.SetField(taserver.FieldQuote, field.TypeString, value)
 		_node.Quote = value
 	}
 	if value, ok := tsc.mutation.HasActivated(); ok {

@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/akakou/ra_webs/ttp/ent/taviolation"
 )
@@ -22,18 +23,21 @@ type TAViolation struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TAViolationQuery when eager-loading is set.
-	Edges               TAViolationEdges `json:"edges"`
-	ta_violation_server *int
-	selectValues        sql.SelectValues
+	Edges                TAViolationEdges `json:"edges"`
+	ta_violation_server  *int
+	ta_violation_service *int
+	selectValues         sql.SelectValues
 }
 
 // TAViolationEdges holds the relations/edges for other nodes in the graph.
 type TAViolationEdges struct {
 	// Server holds the value of the server edge.
 	Server *TAServer `json:"server,omitempty"`
+	// Service holds the value of the service edge.
+	Service *Service `json:"service,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // ServerOrErr returns the Server value or an error if the edge
@@ -49,6 +53,19 @@ func (e TAViolationEdges) ServerOrErr() (*TAServer, error) {
 	return nil, &NotLoadedError{edge: "server"}
 }
 
+// ServiceOrErr returns the Service value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TAViolationEdges) ServiceOrErr() (*Service, error) {
+	if e.loadedTypes[1] {
+		if e.Service == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: service.Label}
+		}
+		return e.Service, nil
+	}
+	return nil, &NotLoadedError{edge: "service"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*TAViolation) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -59,6 +76,8 @@ func (*TAViolation) scanValues(columns []string) ([]any, error) {
 		case taviolation.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		case taviolation.ForeignKeys[0]: // ta_violation_server
+			values[i] = new(sql.NullInt64)
+		case taviolation.ForeignKeys[1]: // ta_violation_service
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -94,6 +113,13 @@ func (tv *TAViolation) assignValues(columns []string, values []any) error {
 				tv.ta_violation_server = new(int)
 				*tv.ta_violation_server = int(value.Int64)
 			}
+		case taviolation.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field ta_violation_service", value)
+			} else if value.Valid {
+				tv.ta_violation_service = new(int)
+				*tv.ta_violation_service = int(value.Int64)
+			}
 		default:
 			tv.selectValues.Set(columns[i], values[i])
 		}
@@ -110,6 +136,11 @@ func (tv *TAViolation) Value(name string) (ent.Value, error) {
 // QueryServer queries the "server" edge of the TAViolation entity.
 func (tv *TAViolation) QueryServer() *TAServerQuery {
 	return NewTAViolationClient(tv.config).QueryServer(tv)
+}
+
+// QueryService queries the "service" edge of the TAViolation entity.
+func (tv *TAViolation) QueryService() *ServiceQuery {
+	return NewTAViolationClient(tv.config).QueryService(tv)
 }
 
 // Update returns a builder for updating this TAViolation.

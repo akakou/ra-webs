@@ -18,6 +18,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// EdgeServer holds the string denoting the server edge name in mutations.
 	EdgeServer = "server"
+	// EdgeService holds the string denoting the service edge name in mutations.
+	EdgeService = "service"
 	// Table holds the table name of the taviolation in the database.
 	Table = "ta_violations"
 	// ServerTable is the table that holds the server relation/edge.
@@ -27,6 +29,13 @@ const (
 	ServerInverseTable = "ta_servers"
 	// ServerColumn is the table column denoting the server relation/edge.
 	ServerColumn = "ta_violation_server"
+	// ServiceTable is the table that holds the service relation/edge.
+	ServiceTable = "ta_violations"
+	// ServiceInverseTable is the table name for the Service entity.
+	// It exists in this package in order to avoid circular dependency with the "service" package.
+	ServiceInverseTable = "services"
+	// ServiceColumn is the table column denoting the service relation/edge.
+	ServiceColumn = "ta_violation_service"
 )
 
 // Columns holds all SQL columns for taviolation fields.
@@ -39,6 +48,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"ta_violation_server",
+	"ta_violation_service",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -80,10 +90,24 @@ func ByServerField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newServerStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByServiceField orders the results by service field.
+func ByServiceField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newServiceStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newServerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ServerInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, ServerTable, ServerColumn),
+	)
+}
+func newServiceStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ServiceInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, ServiceTable, ServiceColumn),
 	)
 }

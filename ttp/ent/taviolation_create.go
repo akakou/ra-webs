@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/akakou/ra_webs/ttp/ent/taviolation"
 )
@@ -52,6 +53,25 @@ func (tvc *TAViolationCreate) SetNillableServerID(id *int) *TAViolationCreate {
 // SetServer sets the "server" edge to the TAServer entity.
 func (tvc *TAViolationCreate) SetServer(t *TAServer) *TAViolationCreate {
 	return tvc.SetServerID(t.ID)
+}
+
+// SetServiceID sets the "service" edge to the Service entity by ID.
+func (tvc *TAViolationCreate) SetServiceID(id int) *TAViolationCreate {
+	tvc.mutation.SetServiceID(id)
+	return tvc
+}
+
+// SetNillableServiceID sets the "service" edge to the Service entity by ID if the given value is not nil.
+func (tvc *TAViolationCreate) SetNillableServiceID(id *int) *TAViolationCreate {
+	if id != nil {
+		tvc = tvc.SetServiceID(*id)
+	}
+	return tvc
+}
+
+// SetService sets the "service" edge to the Service entity.
+func (tvc *TAViolationCreate) SetService(s *Service) *TAViolationCreate {
+	return tvc.SetServiceID(s.ID)
 }
 
 // Mutation returns the TAViolationMutation object of the builder.
@@ -145,6 +165,23 @@ func (tvc *TAViolationCreate) createSpec() (*TAViolation, *sqlgraph.CreateSpec) 
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.ta_violation_server = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tvc.mutation.ServiceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   taviolation.ServiceTable,
+			Columns: []string{taviolation.ServiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(service.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ta_violation_service = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

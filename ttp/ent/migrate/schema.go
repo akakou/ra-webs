@@ -49,7 +49,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "domain", Type: field.TypeString},
 		{Name: "public_key", Type: field.TypeBytes},
-		{Name: "quote", Type: field.TypeBytes},
+		{Name: "quote", Type: field.TypeString},
 		{Name: "has_activated", Type: field.TypeBool},
 		{Name: "ta_server_code", Type: field.TypeInt, Nullable: true},
 		{Name: "ta_server_service", Type: field.TypeInt, Nullable: true},
@@ -79,6 +79,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "ta_violation_server", Type: field.TypeInt, Nullable: true},
+		{Name: "ta_violation_service", Type: field.TypeInt, Nullable: true},
 	}
 	// TaViolationsTable holds the schema information for the "ta_violations" table.
 	TaViolationsTable = &schema.Table{
@@ -90,6 +91,12 @@ var (
 				Symbol:     "ta_violations_ta_servers_server",
 				Columns:    []*schema.Column{TaViolationsColumns[2]},
 				RefColumns: []*schema.Column{TaServersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "ta_violations_services_service",
+				Columns:    []*schema.Column{TaViolationsColumns[3]},
+				RefColumns: []*schema.Column{ServicesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -108,4 +115,5 @@ func init() {
 	TaServersTable.ForeignKeys[0].RefTable = TaCodesTable
 	TaServersTable.ForeignKeys[1].RefTable = ServicesTable
 	TaViolationsTable.ForeignKeys[0].RefTable = TaServersTable
+	TaViolationsTable.ForeignKeys[1].RefTable = ServicesTable
 }

@@ -23,7 +23,7 @@ type TAServer struct {
 	// PublicKey holds the value of the "public_key" field.
 	PublicKey []byte `json:"public_key,omitempty"`
 	// Quote holds the value of the "quote" field.
-	Quote []byte `json:"quote,omitempty"`
+	Quote string `json:"quote,omitempty"`
 	// HasActivated holds the value of the "has_activated" field.
 	HasActivated bool `json:"has_activated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -87,13 +87,13 @@ func (*TAServer) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case taserver.FieldPublicKey, taserver.FieldQuote:
+		case taserver.FieldPublicKey:
 			values[i] = new([]byte)
 		case taserver.FieldHasActivated:
 			values[i] = new(sql.NullBool)
 		case taserver.FieldID:
 			values[i] = new(sql.NullInt64)
-		case taserver.FieldDomain:
+		case taserver.FieldDomain, taserver.FieldQuote:
 			values[i] = new(sql.NullString)
 		case taserver.ForeignKeys[0]: // ta_server_code
 			values[i] = new(sql.NullInt64)
@@ -133,10 +133,10 @@ func (ts *TAServer) assignValues(columns []string, values []any) error {
 				ts.PublicKey = *value
 			}
 		case taserver.FieldQuote:
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field quote", values[i])
-			} else if value != nil {
-				ts.Quote = *value
+			} else if value.Valid {
+				ts.Quote = value.String
 			}
 		case taserver.FieldHasActivated:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -216,7 +216,7 @@ func (ts *TAServer) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ts.PublicKey))
 	builder.WriteString(", ")
 	builder.WriteString("quote=")
-	builder.WriteString(fmt.Sprintf("%v", ts.Quote))
+	builder.WriteString(ts.Quote)
 	builder.WriteString(", ")
 	builder.WriteString("has_activated=")
 	builder.WriteString(fmt.Sprintf("%v", ts.HasActivated))

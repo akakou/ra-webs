@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
+	"github.com/akakou/ra_webs/ttp/ent/service"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/akakou/ra_webs/ttp/ent/taviolation"
 )
@@ -18,12 +19,13 @@ import (
 // TAViolationQuery is the builder for querying TAViolation entities.
 type TAViolationQuery struct {
 	config
-	ctx        *QueryContext
-	order      []taviolation.OrderOption
-	inters     []Interceptor
-	predicates []predicate.TAViolation
-	withServer *TAServerQuery
-	withFKs    bool
+	ctx         *QueryContext
+	order       []taviolation.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.TAViolation
+	withServer  *TAServerQuery
+	withService *ServiceQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,6 +77,28 @@ func (tvq *TAViolationQuery) QueryServer() *TAServerQuery {
 			sqlgraph.From(taviolation.Table, taviolation.FieldID, selector),
 			sqlgraph.To(taserver.Table, taserver.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, taviolation.ServerTable, taviolation.ServerColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tvq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryService chains the current query on the "service" edge.
+func (tvq *TAViolationQuery) QueryService() *ServiceQuery {
+	query := (&ServiceClient{config: tvq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tvq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tvq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(taviolation.Table, taviolation.FieldID, selector),
+			sqlgraph.To(service.Table, service.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, taviolation.ServiceTable, taviolation.ServiceColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tvq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,12 +293,13 @@ func (tvq *TAViolationQuery) Clone() *TAViolationQuery {
 		return nil
 	}
 	return &TAViolationQuery{
-		config:     tvq.config,
-		ctx:        tvq.ctx.Clone(),
-		order:      append([]taviolation.OrderOption{}, tvq.order...),
-		inters:     append([]Interceptor{}, tvq.inters...),
-		predicates: append([]predicate.TAViolation{}, tvq.predicates...),
-		withServer: tvq.withServer.Clone(),
+		config:      tvq.config,
+		ctx:         tvq.ctx.Clone(),
+		order:       append([]taviolation.OrderOption{}, tvq.order...),
+		inters:      append([]Interceptor{}, tvq.inters...),
+		predicates:  append([]predicate.TAViolation{}, tvq.predicates...),
+		withServer:  tvq.withServer.Clone(),
+		withService: tvq.withService.Clone(),
 		// clone intermediate query.
 		sql:  tvq.sql.Clone(),
 		path: tvq.path,
@@ -289,6 +314,17 @@ func (tvq *TAViolationQuery) WithServer(opts ...func(*TAServerQuery)) *TAViolati
 		opt(query)
 	}
 	tvq.withServer = query
+	return tvq
+}
+
+// WithService tells the query-builder to eager-load the nodes that are connected to
+// the "service" edge. The optional arguments are used to configure the query builder of the edge.
+func (tvq *TAViolationQuery) WithService(opts ...func(*ServiceQuery)) *TAViolationQuery {
+	query := (&ServiceClient{config: tvq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tvq.withService = query
 	return tvq
 }
 
@@ -371,11 +407,12 @@ func (tvq *TAViolationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		nodes       = []*TAViolation{}
 		withFKs     = tvq.withFKs
 		_spec       = tvq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			tvq.withServer != nil,
+			tvq.withService != nil,
 		}
 	)
-	if tvq.withServer != nil {
+	if tvq.withServer != nil || tvq.withService != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -402,6 +439,12 @@ func (tvq *TAViolationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if query := tvq.withServer; query != nil {
 		if err := tvq.loadServer(ctx, query, nodes, nil,
 			func(n *TAViolation, e *TAServer) { n.Edges.Server = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := tvq.withService; query != nil {
+		if err := tvq.loadService(ctx, query, nodes, nil,
+			func(n *TAViolation, e *Service) { n.Edges.Service = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -433,6 +476,38 @@ func (tvq *TAViolationQuery) loadServer(ctx context.Context, query *TAServerQuer
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "ta_violation_server" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (tvq *TAViolationQuery) loadService(ctx context.Context, query *ServiceQuery, nodes []*TAViolation, init func(*TAViolation), assign func(*TAViolation, *Service)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TAViolation)
+	for i := range nodes {
+		if nodes[i].ta_violation_service == nil {
+			continue
+		}
+		fk := *nodes[i].ta_violation_service
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(service.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "ta_violation_service" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

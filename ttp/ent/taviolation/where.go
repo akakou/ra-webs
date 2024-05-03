@@ -123,6 +123,29 @@ func HasServerWith(preds ...predicate.TAServer) predicate.TAViolation {
 	})
 }
 
+// HasService applies the HasEdge predicate on the "service" edge.
+func HasService() predicate.TAViolation {
+	return predicate.TAViolation(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, ServiceTable, ServiceColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasServiceWith applies the HasEdge predicate on the "service" edge with a given conditions (other predicates).
+func HasServiceWith(preds ...predicate.Service) predicate.TAViolation {
+	return predicate.TAViolation(func(s *sql.Selector) {
+		step := newServiceStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.TAViolation) predicate.TAViolation {
 	return predicate.TAViolation(sql.AndPredicates(predicates...))

@@ -51,8 +51,16 @@ func (tsu *TAServerUpdate) SetPublicKey(b []byte) *TAServerUpdate {
 }
 
 // SetQuote sets the "quote" field.
-func (tsu *TAServerUpdate) SetQuote(b []byte) *TAServerUpdate {
-	tsu.mutation.SetQuote(b)
+func (tsu *TAServerUpdate) SetQuote(s string) *TAServerUpdate {
+	tsu.mutation.SetQuote(s)
+	return tsu
+}
+
+// SetNillableQuote sets the "quote" field if the given value is not nil.
+func (tsu *TAServerUpdate) SetNillableQuote(s *string) *TAServerUpdate {
+	if s != nil {
+		tsu.SetQuote(*s)
+	}
 	return tsu
 }
 
@@ -204,7 +212,7 @@ func (tsu *TAServerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(taserver.FieldPublicKey, field.TypeBytes, value)
 	}
 	if value, ok := tsu.mutation.Quote(); ok {
-		_spec.SetField(taserver.FieldQuote, field.TypeBytes, value)
+		_spec.SetField(taserver.FieldQuote, field.TypeString, value)
 	}
 	if value, ok := tsu.mutation.HasActivated(); ok {
 		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)
@@ -353,8 +361,16 @@ func (tsuo *TAServerUpdateOne) SetPublicKey(b []byte) *TAServerUpdateOne {
 }
 
 // SetQuote sets the "quote" field.
-func (tsuo *TAServerUpdateOne) SetQuote(b []byte) *TAServerUpdateOne {
-	tsuo.mutation.SetQuote(b)
+func (tsuo *TAServerUpdateOne) SetQuote(s string) *TAServerUpdateOne {
+	tsuo.mutation.SetQuote(s)
+	return tsuo
+}
+
+// SetNillableQuote sets the "quote" field if the given value is not nil.
+func (tsuo *TAServerUpdateOne) SetNillableQuote(s *string) *TAServerUpdateOne {
+	if s != nil {
+		tsuo.SetQuote(*s)
+	}
 	return tsuo
 }
 
@@ -536,7 +552,7 @@ func (tsuo *TAServerUpdateOne) sqlSave(ctx context.Context) (_node *TAServer, er
 		_spec.SetField(taserver.FieldPublicKey, field.TypeBytes, value)
 	}
 	if value, ok := tsuo.mutation.Quote(); ok {
-		_spec.SetField(taserver.FieldQuote, field.TypeBytes, value)
+		_spec.SetField(taserver.FieldQuote, field.TypeString, value)
 	}
 	if value, ok := tsuo.mutation.HasActivated(); ok {
 		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)

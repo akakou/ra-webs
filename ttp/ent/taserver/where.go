@@ -64,7 +64,7 @@ func PublicKey(v []byte) predicate.TAServer {
 }
 
 // Quote applies equality check predicate on the "quote" field. It's identical to QuoteEQ.
-func Quote(v []byte) predicate.TAServer {
+func Quote(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldEQ(FieldQuote, v))
 }
 
@@ -179,43 +179,68 @@ func PublicKeyLTE(v []byte) predicate.TAServer {
 }
 
 // QuoteEQ applies the EQ predicate on the "quote" field.
-func QuoteEQ(v []byte) predicate.TAServer {
+func QuoteEQ(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldEQ(FieldQuote, v))
 }
 
 // QuoteNEQ applies the NEQ predicate on the "quote" field.
-func QuoteNEQ(v []byte) predicate.TAServer {
+func QuoteNEQ(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldNEQ(FieldQuote, v))
 }
 
 // QuoteIn applies the In predicate on the "quote" field.
-func QuoteIn(vs ...[]byte) predicate.TAServer {
+func QuoteIn(vs ...string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldIn(FieldQuote, vs...))
 }
 
 // QuoteNotIn applies the NotIn predicate on the "quote" field.
-func QuoteNotIn(vs ...[]byte) predicate.TAServer {
+func QuoteNotIn(vs ...string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldNotIn(FieldQuote, vs...))
 }
 
 // QuoteGT applies the GT predicate on the "quote" field.
-func QuoteGT(v []byte) predicate.TAServer {
+func QuoteGT(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldGT(FieldQuote, v))
 }
 
 // QuoteGTE applies the GTE predicate on the "quote" field.
-func QuoteGTE(v []byte) predicate.TAServer {
+func QuoteGTE(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldGTE(FieldQuote, v))
 }
 
 // QuoteLT applies the LT predicate on the "quote" field.
-func QuoteLT(v []byte) predicate.TAServer {
+func QuoteLT(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldLT(FieldQuote, v))
 }
 
 // QuoteLTE applies the LTE predicate on the "quote" field.
-func QuoteLTE(v []byte) predicate.TAServer {
+func QuoteLTE(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldLTE(FieldQuote, v))
+}
+
+// QuoteContains applies the Contains predicate on the "quote" field.
+func QuoteContains(v string) predicate.TAServer {
+	return predicate.TAServer(sql.FieldContains(FieldQuote, v))
+}
+
+// QuoteHasPrefix applies the HasPrefix predicate on the "quote" field.
+func QuoteHasPrefix(v string) predicate.TAServer {
+	return predicate.TAServer(sql.FieldHasPrefix(FieldQuote, v))
+}
+
+// QuoteHasSuffix applies the HasSuffix predicate on the "quote" field.
+func QuoteHasSuffix(v string) predicate.TAServer {
+	return predicate.TAServer(sql.FieldHasSuffix(FieldQuote, v))
+}
+
+// QuoteEqualFold applies the EqualFold predicate on the "quote" field.
+func QuoteEqualFold(v string) predicate.TAServer {
+	return predicate.TAServer(sql.FieldEqualFold(FieldQuote, v))
+}
+
+// QuoteContainsFold applies the ContainsFold predicate on the "quote" field.
+func QuoteContainsFold(v string) predicate.TAServer {
+	return predicate.TAServer(sql.FieldContainsFold(FieldQuote, v))
 }
 
 // HasActivatedEQ applies the EQ predicate on the "has_activated" field.
