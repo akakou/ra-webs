@@ -18,6 +18,8 @@ github.com/apparentlymart/go-textseg/v13 v13.0.0 h1:Y+KvPE1NYz0xl601PVImeQfFyEy6
 github.com/apparentlymart/go-textseg/v13 v13.0.0/go.mod h1:ZK2fH7c4NqDTLtiYLvIkEghdlcqw7yxLeM89kiTRPUo=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/edgelesssys/ego v1.4.0 h1:LvGJe9ZJ13Fj2h7um8+sVYaTLaNLodWPvQXKswf2sBo=
+github.com/edgelesssys/ego v1.4.0/go.mod h1:MV0PvBnI8N2QI5PBtR2l2ng3ZuUHODFYvyJbmyU3HOc=
 github.com/edgelesssys/ego v1.5.0 h1:euwXc69GRGlxpklIaVZtyh0v27YXzf9ow3iODE7CrPc=
 github.com/edgelesssys/ego v1.5.0/go.mod h1:N58b0J+s3U4sxXeNUT5uiQV9Q9M/U2KsILC44Ku5dnw=
 github.com/go-openapi/inflect v0.19.0 h1:9jCH9scKIbHeV9m12SmPilScz6krDxKRasNNSNPXu/4=
