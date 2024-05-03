@@ -22,7 +22,7 @@ func AttestServer(publicKey []byte, token string) (string, error) {
 
 func VerifyServer(quote string, publicKey []byte, token string) (*attestation.Report, error) {
 	buf := append([]byte(token), publicKey...)
-	report, err := verifyByAzure(quote, []byte(buf))
+	report, err := VerifyByAzure(quote, []byte(buf))
 	return report, err
 }
 
