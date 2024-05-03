@@ -26,7 +26,13 @@ func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
 		return fmt.Errorf("%s: %w", ERROR_SELECT_SERVER, err)
 	}
 
-	isValid := cert.PublicKey.(*rsa.PublicKey).Equal(serv.PublicKey)
+	expected, err := x509.ParsePKCS1PublicKey(serv.PublicKey)
+
+	if err != nil {
+		logViolationByDomain(domain, ttp.DB)
+	}
+
+	isValid := cert.PublicKey.(*rsa.PublicKey).Equal(expected)
 
 	if !isValid {
 		logViolationByDomain(domain, ttp.DB)
