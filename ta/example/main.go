@@ -35,5 +35,5 @@ func main() {
 		panic(err)
 	}
 
-	e.Logger.Fatal(e.StartAutoTLS(":8443"))
+	e.Logger.Fatal(e.StartAutoTLS(core.TAPort))
 }

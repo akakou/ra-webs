@@ -54,7 +54,7 @@ func authenticateDomain(domain, serviceToken, nonce string) error {
 
 	u := url.URL{
 		Scheme: SCHEME,
-		Host:   domain,
+		Host:   domain + core.ServicePort,
 		Path:   core.DOMAIN_AUTH_PATH,
 	}
 

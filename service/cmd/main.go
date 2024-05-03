@@ -29,7 +29,6 @@ func main() {
 		e := echo.New()
 		res, err = service.PostServer(args[1], e)
 	} else if args[0] == CODE_MODE {
-		go service.ServAuthDomain()
 		res, err = service.PostCode(args[1])
 	} else {
 		panic("invalid mode")

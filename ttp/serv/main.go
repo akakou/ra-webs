@@ -7,11 +7,10 @@ import (
 	"io"
 
 	extractembed "github.com/akakou/extract-embed"
+	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp"
 	"github.com/labstack/echo/v4"
 )
-
-const PORT = ":8000"
 
 //go:embed views/*.html
 var embedFiles embed.FS
@@ -57,5 +56,5 @@ func main() {
 	})
 
 	e.Debug = true
-	e.Logger.Fatal(e.Start(PORT))
+	e.Logger.Fatal(e.Start(core.TTPPort))
 }

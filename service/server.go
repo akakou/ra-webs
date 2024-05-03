@@ -3,19 +3,15 @@ package service
 import (
 	"net/http"
 
-	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/core"
 	"github.com/labstack/echo/v4"
 )
 
-func (service *Service) ServAuthDomain() {
-	e := echo.New()
-
+func (service *Service) ServDomainAuth(token, domain string, e *echo.Echo) *echo.Echo {
 	e.GET(core.DOMAIN_AUTH_PATH, func(c echo.Context) error {
-		nonce, _ := goutils.RandomHex(64)
-		h := core.DomainToken(service.Token, nonce)
-		return c.String(http.StatusOK, h)
+		return c.String(http.StatusOK, token)
 	})
 
-	e.Start(":8081")
+	go e.Start(core.ServicePort)
+	return e
 }
