@@ -29,11 +29,7 @@ func main() {
 		panic(err)
 	}
 
-	e.AutoTLSManager, err = ta.TLSConfig()
-
-	if err != nil {
-		panic(err)
-	}
+	ta.Config(e)
 
 	e.Logger.Fatal(e.StartAutoTLS(core.TAPort))
 }
