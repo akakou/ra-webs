@@ -14,12 +14,12 @@ type Tx struct {
 	config
 	// Service is the client for interacting with the Service builders.
 	Service *ServiceClient
-	// TA is the client for interacting with the TA builders.
-	TA *TAClient
 	// TACode is the client for interacting with the TACode builders.
 	TACode *TACodeClient
 	// TAServer is the client for interacting with the TAServer builders.
 	TAServer *TAServerClient
+	// TAViolation is the client for interacting with the TAViolation builders.
+	TAViolation *TAViolationClient
 
 	// lazily loaded.
 	client     *Client
@@ -152,9 +152,9 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Service = NewServiceClient(tx.config)
-	tx.TA = NewTAClient(tx.config)
 	tx.TACode = NewTACodeClient(tx.config)
 	tx.TAServer = NewTAServerClient(tx.config)
+	tx.TAViolation = NewTAViolationClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

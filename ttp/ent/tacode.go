@@ -34,8 +34,8 @@ type TACode struct {
 
 // TACodeEdges holds the relations/edges for other nodes in the graph.
 type TACodeEdges struct {
-	// Ta holds the value of the ta edge.
-	Ta []*TA `json:"ta,omitempty"`
+	// Server holds the value of the server edge.
+	Server []*TAServer `json:"server,omitempty"`
 	// Service holds the value of the service edge.
 	Service *Service `json:"service,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -43,13 +43,13 @@ type TACodeEdges struct {
 	loadedTypes [2]bool
 }
 
-// TaOrErr returns the Ta value or an error if the edge
+// ServerOrErr returns the Server value or an error if the edge
 // was not loaded in eager-loading.
-func (e TACodeEdges) TaOrErr() ([]*TA, error) {
+func (e TACodeEdges) ServerOrErr() ([]*TAServer, error) {
 	if e.loadedTypes[0] {
-		return e.Ta, nil
+		return e.Server, nil
 	}
-	return nil, &NotLoadedError{edge: "ta"}
+	return nil, &NotLoadedError{edge: "server"}
 }
 
 // ServiceOrErr returns the Service value or an error if the edge
@@ -145,9 +145,9 @@ func (tc *TACode) Value(name string) (ent.Value, error) {
 	return tc.selectValues.Get(name)
 }
 
-// QueryTa queries the "ta" edge of the TACode entity.
-func (tc *TACode) QueryTa() *TAQuery {
-	return NewTACodeClient(tc.config).QueryTa(tc)
+// QueryServer queries the "server" edge of the TACode entity.
+func (tc *TACode) QueryServer() *TAServerQuery {
+	return NewTACodeClient(tc.config).QueryServer(tc)
 }
 
 // QueryService queries the "service" edge of the TACode entity.

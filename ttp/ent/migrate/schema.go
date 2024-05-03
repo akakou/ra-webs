@@ -21,35 +21,6 @@ var (
 		Columns:    ServicesColumns,
 		PrimaryKey: []*schema.Column{ServicesColumns[0]},
 	}
-	// TasColumns holds the columns for the "tas" table.
-	TasColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "public_key", Type: field.TypeBytes},
-		{Name: "quote", Type: field.TypeBytes},
-		{Name: "is_valid", Type: field.TypeBool, Default: false},
-		{Name: "ta_code", Type: field.TypeInt, Nullable: true},
-		{Name: "ta_server", Type: field.TypeInt, Nullable: true},
-	}
-	// TasTable holds the schema information for the "tas" table.
-	TasTable = &schema.Table{
-		Name:       "tas",
-		Columns:    TasColumns,
-		PrimaryKey: []*schema.Column{TasColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "tas_ta_codes_code",
-				Columns:    []*schema.Column{TasColumns[4]},
-				RefColumns: []*schema.Column{TaCodesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "tas_ta_servers_server",
-				Columns:    []*schema.Column{TasColumns[5]},
-				RefColumns: []*schema.Column{TaServersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
 	// TaCodesColumns holds the columns for the "ta_codes" table.
 	TaCodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -76,8 +47,11 @@ var (
 	// TaServersColumns holds the columns for the "ta_servers" table.
 	TaServersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "domain", Type: field.TypeString, Unique: true},
-		{Name: "is_active", Type: field.TypeBool, Default: false},
+		{Name: "domain", Type: field.TypeString},
+		{Name: "public_key", Type: field.TypeBytes},
+		{Name: "quote", Type: field.TypeBytes},
+		{Name: "has_activated", Type: field.TypeBool},
+		{Name: "ta_server_code", Type: field.TypeInt, Nullable: true},
 		{Name: "ta_server_service", Type: field.TypeInt, Nullable: true},
 	}
 	// TaServersTable holds the schema information for the "ta_servers" table.
@@ -87,9 +61,35 @@ var (
 		PrimaryKey: []*schema.Column{TaServersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
+				Symbol:     "ta_servers_ta_codes_code",
+				Columns:    []*schema.Column{TaServersColumns[5]},
+				RefColumns: []*schema.Column{TaCodesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
 				Symbol:     "ta_servers_services_service",
-				Columns:    []*schema.Column{TaServersColumns[3]},
+				Columns:    []*schema.Column{TaServersColumns[6]},
 				RefColumns: []*schema.Column{ServicesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// TaViolationsColumns holds the columns for the "ta_violations" table.
+	TaViolationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "ta_violation_server", Type: field.TypeInt, Nullable: true},
+	}
+	// TaViolationsTable holds the schema information for the "ta_violations" table.
+	TaViolationsTable = &schema.Table{
+		Name:       "ta_violations",
+		Columns:    TaViolationsColumns,
+		PrimaryKey: []*schema.Column{TaViolationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ta_violations_ta_servers_server",
+				Columns:    []*schema.Column{TaViolationsColumns[2]},
+				RefColumns: []*schema.Column{TaServersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -97,15 +97,15 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ServicesTable,
-		TasTable,
 		TaCodesTable,
 		TaServersTable,
+		TaViolationsTable,
 	}
 )
 
 func init() {
-	TasTable.ForeignKeys[0].RefTable = TaCodesTable
-	TasTable.ForeignKeys[1].RefTable = TaServersTable
 	TaCodesTable.ForeignKeys[0].RefTable = ServicesTable
-	TaServersTable.ForeignKeys[0].RefTable = ServicesTable
+	TaServersTable.ForeignKeys[0].RefTable = TaCodesTable
+	TaServersTable.ForeignKeys[1].RefTable = ServicesTable
+	TaViolationsTable.ForeignKeys[0].RefTable = TaServersTable
 }

@@ -58,9 +58,19 @@ func Domain(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldEQ(FieldDomain, v))
 }
 
-// IsActive applies equality check predicate on the "is_active" field. It's identical to IsActiveEQ.
-func IsActive(v bool) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldIsActive, v))
+// PublicKey applies equality check predicate on the "public_key" field. It's identical to PublicKeyEQ.
+func PublicKey(v []byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldEQ(FieldPublicKey, v))
+}
+
+// Quote applies equality check predicate on the "quote" field. It's identical to QuoteEQ.
+func Quote(v []byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldEQ(FieldQuote, v))
+}
+
+// HasActivated applies equality check predicate on the "has_activated" field. It's identical to HasActivatedEQ.
+func HasActivated(v bool) predicate.TAServer {
+	return predicate.TAServer(sql.FieldEQ(FieldHasActivated, v))
 }
 
 // DomainEQ applies the EQ predicate on the "domain" field.
@@ -128,31 +138,134 @@ func DomainContainsFold(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldContainsFold(FieldDomain, v))
 }
 
-// IsActiveEQ applies the EQ predicate on the "is_active" field.
-func IsActiveEQ(v bool) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldIsActive, v))
+// PublicKeyEQ applies the EQ predicate on the "public_key" field.
+func PublicKeyEQ(v []byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldEQ(FieldPublicKey, v))
 }
 
-// IsActiveNEQ applies the NEQ predicate on the "is_active" field.
-func IsActiveNEQ(v bool) predicate.TAServer {
-	return predicate.TAServer(sql.FieldNEQ(FieldIsActive, v))
+// PublicKeyNEQ applies the NEQ predicate on the "public_key" field.
+func PublicKeyNEQ(v []byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldNEQ(FieldPublicKey, v))
 }
 
-// HasTa applies the HasEdge predicate on the "ta" edge.
-func HasTa() predicate.TAServer {
+// PublicKeyIn applies the In predicate on the "public_key" field.
+func PublicKeyIn(vs ...[]byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldIn(FieldPublicKey, vs...))
+}
+
+// PublicKeyNotIn applies the NotIn predicate on the "public_key" field.
+func PublicKeyNotIn(vs ...[]byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldNotIn(FieldPublicKey, vs...))
+}
+
+// PublicKeyGT applies the GT predicate on the "public_key" field.
+func PublicKeyGT(v []byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldGT(FieldPublicKey, v))
+}
+
+// PublicKeyGTE applies the GTE predicate on the "public_key" field.
+func PublicKeyGTE(v []byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldGTE(FieldPublicKey, v))
+}
+
+// PublicKeyLT applies the LT predicate on the "public_key" field.
+func PublicKeyLT(v []byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldLT(FieldPublicKey, v))
+}
+
+// PublicKeyLTE applies the LTE predicate on the "public_key" field.
+func PublicKeyLTE(v []byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldLTE(FieldPublicKey, v))
+}
+
+// QuoteEQ applies the EQ predicate on the "quote" field.
+func QuoteEQ(v []byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldEQ(FieldQuote, v))
+}
+
+// QuoteNEQ applies the NEQ predicate on the "quote" field.
+func QuoteNEQ(v []byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldNEQ(FieldQuote, v))
+}
+
+// QuoteIn applies the In predicate on the "quote" field.
+func QuoteIn(vs ...[]byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldIn(FieldQuote, vs...))
+}
+
+// QuoteNotIn applies the NotIn predicate on the "quote" field.
+func QuoteNotIn(vs ...[]byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldNotIn(FieldQuote, vs...))
+}
+
+// QuoteGT applies the GT predicate on the "quote" field.
+func QuoteGT(v []byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldGT(FieldQuote, v))
+}
+
+// QuoteGTE applies the GTE predicate on the "quote" field.
+func QuoteGTE(v []byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldGTE(FieldQuote, v))
+}
+
+// QuoteLT applies the LT predicate on the "quote" field.
+func QuoteLT(v []byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldLT(FieldQuote, v))
+}
+
+// QuoteLTE applies the LTE predicate on the "quote" field.
+func QuoteLTE(v []byte) predicate.TAServer {
+	return predicate.TAServer(sql.FieldLTE(FieldQuote, v))
+}
+
+// HasActivatedEQ applies the EQ predicate on the "has_activated" field.
+func HasActivatedEQ(v bool) predicate.TAServer {
+	return predicate.TAServer(sql.FieldEQ(FieldHasActivated, v))
+}
+
+// HasActivatedNEQ applies the NEQ predicate on the "has_activated" field.
+func HasActivatedNEQ(v bool) predicate.TAServer {
+	return predicate.TAServer(sql.FieldNEQ(FieldHasActivated, v))
+}
+
+// HasViolation applies the HasEdge predicate on the "violation" edge.
+func HasViolation() predicate.TAServer {
 	return predicate.TAServer(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TaTable, TaColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, ViolationTable, ViolationColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasTaWith applies the HasEdge predicate on the "ta" edge with a given conditions (other predicates).
-func HasTaWith(preds ...predicate.TA) predicate.TAServer {
+// HasViolationWith applies the HasEdge predicate on the "violation" edge with a given conditions (other predicates).
+func HasViolationWith(preds ...predicate.TAViolation) predicate.TAServer {
 	return predicate.TAServer(func(s *sql.Selector) {
-		step := newTaStep()
+		step := newViolationStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCode applies the HasEdge predicate on the "code" edge.
+func HasCode() predicate.TAServer {
+	return predicate.TAServer(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, CodeTable, CodeColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCodeWith applies the HasEdge predicate on the "code" edge with a given conditions (other predicates).
+func HasCodeWith(preds ...predicate.TACode) predicate.TAServer {
+	return predicate.TAServer(func(s *sql.Selector) {
+		step := newCodeStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

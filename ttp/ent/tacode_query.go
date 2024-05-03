@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
 	"github.com/akakou/ra_webs/ttp/ent/service"
-	"github.com/akakou/ra_webs/ttp/ent/ta"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
 // TACodeQuery is the builder for querying TACode entities.
@@ -24,7 +24,7 @@ type TACodeQuery struct {
 	order       []tacode.OrderOption
 	inters      []Interceptor
 	predicates  []predicate.TACode
-	withTa      *TAQuery
+	withServer  *TAServerQuery
 	withService *ServiceQuery
 	withFKs     bool
 	// intermediate query (i.e. traversal path).
@@ -63,9 +63,9 @@ func (tcq *TACodeQuery) Order(o ...tacode.OrderOption) *TACodeQuery {
 	return tcq
 }
 
-// QueryTa chains the current query on the "ta" edge.
-func (tcq *TACodeQuery) QueryTa() *TAQuery {
-	query := (&TAClient{config: tcq.config}).Query()
+// QueryServer chains the current query on the "server" edge.
+func (tcq *TACodeQuery) QueryServer() *TAServerQuery {
+	query := (&TAServerClient{config: tcq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tcq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -76,8 +76,8 @@ func (tcq *TACodeQuery) QueryTa() *TAQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tacode.Table, tacode.FieldID, selector),
-			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, tacode.TaTable, tacode.TaColumn),
+			sqlgraph.To(taserver.Table, taserver.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, tacode.ServerTable, tacode.ServerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tcq.driver.Dialect(), step)
 		return fromU, nil
@@ -299,7 +299,7 @@ func (tcq *TACodeQuery) Clone() *TACodeQuery {
 		order:       append([]tacode.OrderOption{}, tcq.order...),
 		inters:      append([]Interceptor{}, tcq.inters...),
 		predicates:  append([]predicate.TACode{}, tcq.predicates...),
-		withTa:      tcq.withTa.Clone(),
+		withServer:  tcq.withServer.Clone(),
 		withService: tcq.withService.Clone(),
 		// clone intermediate query.
 		sql:  tcq.sql.Clone(),
@@ -307,14 +307,14 @@ func (tcq *TACodeQuery) Clone() *TACodeQuery {
 	}
 }
 
-// WithTa tells the query-builder to eager-load the nodes that are connected to
-// the "ta" edge. The optional arguments are used to configure the query builder of the edge.
-func (tcq *TACodeQuery) WithTa(opts ...func(*TAQuery)) *TACodeQuery {
-	query := (&TAClient{config: tcq.config}).Query()
+// WithServer tells the query-builder to eager-load the nodes that are connected to
+// the "server" edge. The optional arguments are used to configure the query builder of the edge.
+func (tcq *TACodeQuery) WithServer(opts ...func(*TAServerQuery)) *TACodeQuery {
+	query := (&TAServerClient{config: tcq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tcq.withTa = query
+	tcq.withServer = query
 	return tcq
 }
 
@@ -409,7 +409,7 @@ func (tcq *TACodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TACo
 		withFKs     = tcq.withFKs
 		_spec       = tcq.querySpec()
 		loadedTypes = [2]bool{
-			tcq.withTa != nil,
+			tcq.withServer != nil,
 			tcq.withService != nil,
 		}
 	)
@@ -437,10 +437,10 @@ func (tcq *TACodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TACo
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := tcq.withTa; query != nil {
-		if err := tcq.loadTa(ctx, query, nodes,
-			func(n *TACode) { n.Edges.Ta = []*TA{} },
-			func(n *TACode, e *TA) { n.Edges.Ta = append(n.Edges.Ta, e) }); err != nil {
+	if query := tcq.withServer; query != nil {
+		if err := tcq.loadServer(ctx, query, nodes,
+			func(n *TACode) { n.Edges.Server = []*TAServer{} },
+			func(n *TACode, e *TAServer) { n.Edges.Server = append(n.Edges.Server, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -453,7 +453,7 @@ func (tcq *TACodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TACo
 	return nodes, nil
 }
 
-func (tcq *TACodeQuery) loadTa(ctx context.Context, query *TAQuery, nodes []*TACode, init func(*TACode), assign func(*TACode, *TA)) error {
+func (tcq *TACodeQuery) loadServer(ctx context.Context, query *TAServerQuery, nodes []*TACode, init func(*TACode), assign func(*TACode, *TAServer)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*TACode)
 	for i := range nodes {
@@ -464,21 +464,21 @@ func (tcq *TACodeQuery) loadTa(ctx context.Context, query *TAQuery, nodes []*TAC
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.TA(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(tacode.TaColumn), fks...))
+	query.Where(predicate.TAServer(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tacode.ServerColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.ta_code
+		fk := n.ta_server_code
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "ta_code" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "ta_server_code" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "ta_code" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "ta_server_code" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

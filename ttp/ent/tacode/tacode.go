@@ -20,19 +20,19 @@ const (
 	FieldUniqueID = "unique_id"
 	// FieldIsActive holds the string denoting the is_active field in the database.
 	FieldIsActive = "is_active"
-	// EdgeTa holds the string denoting the ta edge name in mutations.
-	EdgeTa = "ta"
+	// EdgeServer holds the string denoting the server edge name in mutations.
+	EdgeServer = "server"
 	// EdgeService holds the string denoting the service edge name in mutations.
 	EdgeService = "service"
 	// Table holds the table name of the tacode in the database.
 	Table = "ta_codes"
-	// TaTable is the table that holds the ta relation/edge.
-	TaTable = "tas"
-	// TaInverseTable is the table name for the TA entity.
-	// It exists in this package in order to avoid circular dependency with the "ta" package.
-	TaInverseTable = "tas"
-	// TaColumn is the table column denoting the ta relation/edge.
-	TaColumn = "ta_code"
+	// ServerTable is the table that holds the server relation/edge.
+	ServerTable = "ta_servers"
+	// ServerInverseTable is the table name for the TAServer entity.
+	// It exists in this package in order to avoid circular dependency with the "taserver" package.
+	ServerInverseTable = "ta_servers"
+	// ServerColumn is the table column denoting the server relation/edge.
+	ServerColumn = "ta_server_code"
 	// ServiceTable is the table that holds the service relation/edge.
 	ServiceTable = "ta_codes"
 	// ServiceInverseTable is the table name for the Service entity.
@@ -100,17 +100,17 @@ func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsActive, opts...).ToFunc()
 }
 
-// ByTaCount orders the results by ta count.
-func ByTaCount(opts ...sql.OrderTermOption) OrderOption {
+// ByServerCount orders the results by server count.
+func ByServerCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTaStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newServerStep(), opts...)
 	}
 }
 
-// ByTa orders the results by ta terms.
-func ByTa(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByServer orders the results by server terms.
+func ByServer(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTaStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newServerStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -120,11 +120,11 @@ func ByServiceField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newServiceStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newTaStep() *sqlgraph.Step {
+func newServerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TaInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, TaTable, TaColumn),
+		sqlgraph.To(ServerInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, ServerTable, ServerColumn),
 	)
 }
 func newServiceStep() *sqlgraph.Step {

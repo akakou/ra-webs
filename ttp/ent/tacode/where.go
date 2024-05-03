@@ -253,21 +253,21 @@ func IsActiveNEQ(v bool) predicate.TACode {
 	return predicate.TACode(sql.FieldNEQ(FieldIsActive, v))
 }
 
-// HasTa applies the HasEdge predicate on the "ta" edge.
-func HasTa() predicate.TACode {
+// HasServer applies the HasEdge predicate on the "server" edge.
+func HasServer() predicate.TACode {
 	return predicate.TACode(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TaTable, TaColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, ServerTable, ServerColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasTaWith applies the HasEdge predicate on the "ta" edge with a given conditions (other predicates).
-func HasTaWith(preds ...predicate.TA) predicate.TACode {
+// HasServerWith applies the HasEdge predicate on the "server" edge with a given conditions (other predicates).
+func HasServerWith(preds ...predicate.TAServer) predicate.TACode {
 	return predicate.TACode(func(s *sql.Selector) {
-		step := newTaStep()
+		step := newServerStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
