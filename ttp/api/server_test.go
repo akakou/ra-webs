@@ -39,7 +39,7 @@ func TestTAFromDomainAPI(t *testing.T) {
 		SetService(servicer).
 		SetCode(code).
 		SetPublicKey([]byte("1234")).
-		SetQuote([]byte("1234")).
+		SetQuote("1234").
 		SetHasActivated(true).
 		SaveX(*ttp.DB.Ctx)
 
