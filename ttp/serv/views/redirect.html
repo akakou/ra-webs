@@ -19,7 +19,7 @@
     const INVALID_MESSAGE = "It is failed to veriy."
 
     // NOTE: This is camel case because the names depends on server response.
-    const checkOneValidity = x => x.is_valid && x.edges.code.is_active
+    const checkOneValidity = x => !x.edges.violation
 
     const checkAllValidity = (data) => {
         const res = data.reduce((accumulator, current) => accumulator && checkOneValidity(current), true)
@@ -33,7 +33,7 @@
 
         try {
             var referrer = new URL(document.referrer);
-            resp = await axios.get(`/ta/${referrer.hostname}`)
+            resp = await axios.get(`/server/${referrer.hostname}`)
             console.log(resp)
             isValid = checkAllValidity(resp.data)
 
