@@ -24,6 +24,7 @@ func (ap *TA) TLSConfig() (autocert.Manager, error) {
 	return autocert.Manager{
 		Client: &acmeClient,
 		Cache:  autocert.DirCache(CERT_DIER_CACHE),
+		Prompt: autocert.AcceptTOS,
 		ExtraExtensions: []pkix.Extension{
 			{
 				Id:       core.X509_EXTENSION_LABEL,
