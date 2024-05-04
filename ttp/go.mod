@@ -7,7 +7,7 @@ require (
 	github.com/akakou/extract-embed v0.0.1
 	github.com/akakou/go-utils v0.0.3
 	github.com/akakou/golang-utils v0.0.1
-	github.com/akakou/meta-ct v0.0.5
+	github.com/akakou/meta-ct v0.0.6
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/mattn/go-sqlite3 v1.14.18
