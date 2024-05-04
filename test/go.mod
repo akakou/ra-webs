@@ -9,7 +9,6 @@ replace ta => ../ta
 replace github.com/akakou/ra_webs/ttp => ../ttp
 
 require (
-	github.com/akakou/golang-utils v0.0.1
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
 	github.com/akakou/ra_webs/ttp v0.0.0-00010101000000-000000000000
 	github.com/labstack/echo/v4 v4.12.0
@@ -23,7 +22,8 @@ require (
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/akakou/extract-embed v0.0.1 // indirect
 	github.com/akakou/go-utils v0.0.3 // indirect
-	github.com/akakou/meta-ct v0.0.5 // indirect
+	github.com/akakou/golang-utils v0.0.1 // indirect
+	github.com/akakou/meta-ct v0.0.6 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/edgelesssys/ego v1.5.0 // indirect
