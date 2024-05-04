@@ -15,7 +15,7 @@ func WebhookApi() goutils.EchoRoute[core.TTP] {
 	if err != nil {
 		panic(err)
 	}
-	path := API_ROOT + "webhook/" + hex
+	path := API_ROOT + "/webhook/" + hex
 	fmt.Printf("webhook path: %s\n", path)
 
 	return goutils.EchoRoute[core.TTP]{

@@ -10,7 +10,7 @@ import (
 
 var PostServiceByAdmin = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.POST,
-	Path:   "/service",
+	Path:   API_ROOT + "/service",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			err := authenticateAdmin(ttp, c)

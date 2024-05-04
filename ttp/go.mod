@@ -5,7 +5,7 @@ go 1.21.5
 require (
 	entgo.io/ent v0.12.5
 	github.com/akakou/extract-embed v0.0.1
-	github.com/akakou/go-utils v0.0.4
+	github.com/akakou/go-utils v0.0.3
 	github.com/akakou/golang-utils v0.0.1
 	github.com/akakou/meta-ct v0.0.5
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000

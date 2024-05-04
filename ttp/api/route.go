@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const API_ROOT = "/api/"
+const API_ROOT = "/api"
 
 func Route(e *echo.Echo, ttp *ttpcore.TTP) {
 	e.GET("/", func(c echo.Context) error {
@@ -16,15 +16,14 @@ func Route(e *echo.Echo, ttp *ttpcore.TTP) {
 		return c.String(http.StatusOK, r)
 	})
 
-	g := e.Group(API_ROOT)
-	RegisterApi.Set(g, ttp)
+	RegisterApi.Set(e, ttp)
 
-	GetCodeApi.Set(g, ttp)
-	GetServerApi.Set(g, ttp)
+	GetCodeApi.Set(e, ttp)
+	GetServerApi.Set(e, ttp)
 
-	PostServiceByAdmin.Set(g, ttp)
+	PostServiceByAdmin.Set(e, ttp)
 
-	GetServerFromDomainApi.Set(g, ttp)
+	GetServerFromDomainApi.Set(e, ttp)
 
-	WebhookApi().Set(g, ttp)
+	WebhookApi().Set(e, ttp)
 }
