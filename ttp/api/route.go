@@ -8,6 +8,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const API_ROOT = "/api"
+
 func Route(e *echo.Echo, ttp *ttpcore.TTP) {
 	e.GET("/", func(c echo.Context) error {
 		r := fmt.Sprintf("%v", e.Routers())

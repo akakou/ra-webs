@@ -13,7 +13,7 @@ var BUILD_DOCKER_PATH = "./builder"
 
 var GetCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.GET,
-	Path:   "/code",
+	Path:   API_ROOT + "/code",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			code, err := ttp.DB.Client.TACode.Query().

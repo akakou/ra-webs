@@ -10,6 +10,8 @@ github.com/akakou/extract-embed v0.0.1 h1:ZyD2z0PNqJ53OHmD1cgMFic0wF6t8Yu1a7PcSX
 github.com/akakou/extract-embed v0.0.1/go.mod h1:K6bU3dJXVAMp5NY13kABMAPO3+n/q2mApVBayLhjbbI=
 github.com/akakou/go-utils v0.0.3 h1:FjqjvB0Wfn5dABjSssboKCLpS3ijLvq1/EZGz6LfzJo=
 github.com/akakou/go-utils v0.0.3/go.mod h1:SzaGwCsdvWDAhbTx5nEOggW2E4VAFPTWtVn2oXL3zdA=
+github.com/akakou/go-utils v0.0.4 h1:6VL2ndIEhy/uJqUTtBzsds8pW++16aymQScN84gc0Bc=
+github.com/akakou/go-utils v0.0.4/go.mod h1:SzaGwCsdvWDAhbTx5nEOggW2E4VAFPTWtVn2oXL3zdA=
 github.com/akakou/golang-utils v0.0.1 h1:edSwI2WtOjJd569ANOTUZU2floH/pM7qPVSHKupe6Ow=
 github.com/akakou/golang-utils v0.0.1/go.mod h1:DgqXEneVs1Xk8ueLYOJ0ZFeUe5vQcO/S/rY2ISnuZGs=
 github.com/akakou/meta-ct v0.0.5 h1:mpA2G7X4FJDMZg5qHeSdzgBJutE2qdr+kdSCZDhX51g=
@@ -43,6 +45,8 @@ github.com/kylelemons/godebug v0.0.0-20170820004349-d65d576e9348 h1:MtvEpTB6LX3v
 github.com/kylelemons/godebug v0.0.0-20170820004349-d65d576e9348/go.mod h1:B69LEHPfb2qLo0BaaOLcbitczOKLWTsrBG9LczfCD4k=
 github.com/labstack/echo/v4 v4.11.4 h1:vDZmA+qNeh1pd/cCkEicDMrjtrnMGQ1QFI9gWN1zGq8=
 github.com/labstack/echo/v4 v4.11.4/go.mod h1:noh7EvLwqDsmh/X/HWKPUl1AjzJrhyptRyEbQJfxen8=
+github.com/labstack/echo/v4 v4.12.0 h1:IKpw49IMryVB2p1a4dzwlhP1O2Tf2E0Ir/450lH+kI0=
+github.com/labstack/echo/v4 v4.12.0/go.mod h1:UP9Cr2DJXbOK3Kr9ONYzNowSh7HP0aG0ShAyycHSJvM=
 github.com/labstack/gommon v0.4.2 h1:F8qTUNXgG1+6WQmqoUWnz8WiEU60mXVVw0P4ht1WRA0=
 github.com/labstack/gommon v0.4.2/go.mod h1:QlUFxVM+SNXhDL/Z7YhocGIBYOiwB0mXm1+1bAPHPyU=
 github.com/mattn/go-colorable v0.1.13 h1:fFA4WZxdEF4tXPZVKMLwD8oUnCTTo08duU7wxecdEvA=

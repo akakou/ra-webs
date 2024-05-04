@@ -7,16 +7,15 @@ replace github.com/akakou/ra_webs/core => ../../core
 replace github.com/akakou/ra_webs/ttp => ../
 
 require (
-	github.com/akakou/extract-embed v0.0.1
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
-	github.com/akakou/ra_webs/ttp v0.0.0-00010101000000-000000000000
-	github.com/labstack/echo/v4 v4.11.4
+	github.com/labstack/echo/v4 v4.12.0
 )
 
 require (
 	ariga.io/atlas v0.14.1-0.20230918065911-83ad451a4935 // indirect
 	entgo.io/ent v0.12.5 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
+	github.com/akakou/extract-embed v0.0.1 // indirect
 	github.com/akakou/go-utils v0.0.3 // indirect
 	github.com/akakou/golang-utils v0.0.1 // indirect
 	github.com/akakou/meta-ct v0.0.5 // indirect
