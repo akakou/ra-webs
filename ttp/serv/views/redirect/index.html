@@ -68,7 +68,7 @@
                 const referrer = new URL(document.referrer);
                 setHostname(referrer.hostname)
 
-                const resp = await axios.get(`/server/${referrer.hostname}`)
+                const resp = await axios.get(`/api/server/${referrer.hostname}`)
                 console.log(resp)
 
                 const v = checkAllValidity(resp.data)

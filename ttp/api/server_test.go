@@ -47,11 +47,11 @@ func TestTAFromDomainAPI(t *testing.T) {
 		SetServer(server).
 		SaveX(*ttp.DB.Ctx)
 
-	req := httptest.NewRequest(http.MethodGet, "/server/"+domain, strings.NewReader(""))
+	req := httptest.NewRequest(http.MethodGet, "/api/server/"+domain, strings.NewReader(""))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetPath("/server/:domain")
+	c.SetPath("/api/server/:domain")
 	c.SetParamNames("domain")
 	c.SetParamValues(domain)
 
