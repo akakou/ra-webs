@@ -61,9 +61,13 @@
             const [isValid, setIsValid] = useState(false);
             const [logs, setLogs] = useState([]);
             const [message, setMessage] = useState(INVALID_MESSAGE);
+            const [hostname, setHostname] = useState("");
+
 
             useEffect(async () => {
                 const referrer = new URL(document.referrer);
+                setHostname(referrer.hostname)
+
                 const resp = await axios.get(`/server/${referrer.hostname}`)
                 console.log(resp)
 
@@ -111,6 +115,9 @@
 
                     <h2>Logs</h2>
                     <TableCompornent logs={logs} />
+
+                    <br />
+                    <button onClick={e => window.location = "https://crt.sh/?q=" + hostname}>See certificate logs (on crt.sh)</button>
                 </div>
             );
         }
