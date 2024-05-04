@@ -25,5 +25,7 @@ func Route(e *echo.Echo, ttp *ttpcore.TTP) {
 
 	GetServerFromDomainApi.Set(e, ttp)
 
-	WebhookApi().Set(e, ttp)
+	getWebhookApi, postWebhookApi := WebhookApis()
+	getWebhookApi.Set(e, ttp)
+	postWebhookApi.Set(e, ttp)
 }

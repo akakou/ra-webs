@@ -5,12 +5,13 @@ import (
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
+	metact "github.com/akakou/meta-ct"
 	"github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ct"
 	"github.com/labstack/echo/v4"
 )
 
-func WebhookApi() goutils.EchoRoute[core.TTP] {
+func WebhookApis() (goutils.EchoRoute[core.TTP], goutils.EchoRoute[core.TTP]) {
 	hex, err := goutils.RandomHex(core.RANDOM_SIZE)
 	if err != nil {
 		panic(err)
@@ -18,7 +19,17 @@ func WebhookApi() goutils.EchoRoute[core.TTP] {
 	path := API_ROOT + "/webhook/" + hex
 	fmt.Printf("webhook path: %s\n", path)
 
-	return goutils.EchoRoute[core.TTP]{
+	get := goutils.EchoRoute[core.TTP]{
+		Method: goutils.GET,
+		Path:   path,
+		F: func(ttp *core.TTP) goutils.EchoRouteFunc {
+			return func(c echo.Context) error {
+				return metact.ChallengeAPIFlow(c)
+			}
+		},
+	}
+
+	post := goutils.EchoRoute[core.TTP]{
 		Method: goutils.POST,
 		Path:   path,
 		F: func(ttp *core.TTP) goutils.EchoRouteFunc {
@@ -42,4 +53,6 @@ func WebhookApi() goutils.EchoRoute[core.TTP] {
 			}
 		},
 	}
+
+	return get, post
 }
