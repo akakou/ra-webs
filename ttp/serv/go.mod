@@ -8,6 +8,7 @@ replace github.com/akakou/ra_webs/ttp => ../
 
 require (
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
+	github.com/akakou/ra_webs/ttp v0.0.0-00010101000000-000000000000
 	github.com/labstack/echo/v4 v4.12.0
 )
 

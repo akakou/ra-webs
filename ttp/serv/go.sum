@@ -10,8 +10,6 @@ github.com/akakou/extract-embed v0.0.1 h1:ZyD2z0PNqJ53OHmD1cgMFic0wF6t8Yu1a7PcSX
 github.com/akakou/extract-embed v0.0.1/go.mod h1:K6bU3dJXVAMp5NY13kABMAPO3+n/q2mApVBayLhjbbI=
 github.com/akakou/go-utils v0.0.3 h1:FjqjvB0Wfn5dABjSssboKCLpS3ijLvq1/EZGz6LfzJo=
 github.com/akakou/go-utils v0.0.3/go.mod h1:SzaGwCsdvWDAhbTx5nEOggW2E4VAFPTWtVn2oXL3zdA=
-github.com/akakou/go-utils v0.0.4 h1:6VL2ndIEhy/uJqUTtBzsds8pW++16aymQScN84gc0Bc=
-github.com/akakou/go-utils v0.0.4/go.mod h1:SzaGwCsdvWDAhbTx5nEOggW2E4VAFPTWtVn2oXL3zdA=
 github.com/akakou/golang-utils v0.0.1 h1:edSwI2WtOjJd569ANOTUZU2floH/pM7qPVSHKupe6Ow=
 github.com/akakou/golang-utils v0.0.1/go.mod h1:DgqXEneVs1Xk8ueLYOJ0ZFeUe5vQcO/S/rY2ISnuZGs=
 github.com/akakou/meta-ct v0.0.5 h1:mpA2G7X4FJDMZg5qHeSdzgBJutE2qdr+kdSCZDhX51g=
