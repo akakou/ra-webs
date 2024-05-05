@@ -12,7 +12,6 @@ services:
     restart: unless-stopped
     working_dir: /ta/example
     command: bash -c 'ego-go build && ego sign example && ego run example'
-    network_mode: host
     privileged: true
     environment:
       - OE_SIMULATION=1
@@ -27,7 +26,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /ttp/serv
     command: bash -c 'mount -o remount,exec /dev && go mod tidy && go run main.go'
-    network_mode: host
     env_file:
       - test/env/ttp.env
     privileged: true
