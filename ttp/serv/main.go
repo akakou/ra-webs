@@ -8,6 +8,7 @@ import (
 	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 //go:embed views/*/*.html
@@ -31,6 +32,8 @@ func main() {
 
 	subFS := echo.MustSubFS(embedFiles, "views")
 	e.StaticFS("/app", subFS)
+
+	e.Use(middleware.Logger())
 
 	e.Debug = true
 	e.Logger.Fatal(e.Start(core.TTPPort))

@@ -12,7 +12,24 @@
             "type": "memfs"
         }
     ],
-    "env": null,
+    "env": [
+        {
+            "name": "RA_WEBS_SERVICE_TOKEN",
+            "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_TA_DOMAIN",
+            "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_TTP_BASE",
+            "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_TA_REPOSITORY",
+            "fromHost": true
+        }
+    ],
     "files": [
         {
             "source": "/etc/ssl/certs/ca-certificates.crt",
