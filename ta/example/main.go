@@ -7,6 +7,7 @@ import (
 	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ta"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 var Token = goutils.GetEnv("RA_WEBS_SERVICE_TOKEN", core.DEBUG_TOKEN)
@@ -18,6 +19,7 @@ const REDIRECT_PATH = "/app/redirect"
 
 func main() {
 	e := echo.New()
+	e.Use(middleware.Logger())
 
 	e.GET("/", func(c echo.Context) error {
 		_, err := c.Cookie("isFirstAccess")
