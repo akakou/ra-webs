@@ -6,7 +6,12 @@
     "executableHeap": false,
     "productID": 1,
     "securityVersion": 1,
-    "mounts": null,
+    "mounts": [
+        {
+            "target": "/tmp/ra-webs.cache",
+            "type": "memfs"
+        }
+    ],
     "env": [
         {
             "name": "RA_WEBS_SERVICE_TOKEN",
