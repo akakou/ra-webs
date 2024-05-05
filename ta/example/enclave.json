@@ -1,14 +1,31 @@
 {
- "exe": "example",
- "key": "private.pem",
- "debug": true,
- "heapSize": 512,
- "executableHeap": false,
- "productID": 1,
- "securityVersion": 1,
- "mounts": null,
- "env": null,
- "files": [
+    "exe": "example",
+    "key": "private.pem",
+    "debug": true,
+    "heapSize": 512,
+    "executableHeap": false,
+    "productID": 1,
+    "securityVersion": 1,
+    "mounts": null,
+    "env": [
+        {
+            "name": "RA_WEBS_SERVICE_TOKEN",
+            "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_TA_DOMAIN",
+            "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_TTP_BASE",
+            "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_TA_REPOSITORY",
+            "fromHost": true
+        }
+    ],
+    "files": [
         {
             "source": "/etc/ssl/certs/ca-certificates.crt",
             "target": "/etc/ssl/certs/ca-certificates.crt"
