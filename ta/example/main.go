@@ -3,33 +3,43 @@ package main
 import (
 	"net/http"
 
-	golangutils "github.com/akakou/go-utils"
+	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ta"
 	"github.com/labstack/echo/v4"
 )
 
-var ttpRedirectUrl = golangutils.GetEnv("TTP_REDIRECT", "http://localhost:8000/redirect")
+var Token = goutils.GetEnv("RA_WEBS_SERVICE_TOKEN", core.DEBUG_TOKEN)
+var Domain = goutils.GetEnv("RA_WEBS_TA_DOMAIN", "localhost")
+var TTPBase = goutils.GetEnv("RA_WEBS_TTP_BASE", "http://localhost"+core.TTPPort)
+var Repository = goutils.GetEnv("RA_WEBS_TA_REPOSITORY", "github.com/akakou/ra_webs")
 
-func RedirectHandler(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, ttpRedirectUrl, http.StatusTemporaryRedirect)
-}
+const REDIRECT_PATH = "/app/redirect"
 
 func main() {
 	e := echo.New()
 
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello")
+		_, err := c.Cookie("isFirstAccess")
+		if err != nil {
+			c.SetCookie(&http.Cookie{
+				Name:  "isFirstAccess",
+				Value: "true",
+			})
+			c.Redirect(http.StatusTemporaryRedirect, TTPBase+REDIRECT_PATH)
+		}
+
+		return c.String(http.StatusOK, "Hello, World!")
 	})
 
-	core.EnableDebug()
+	// core.EnableDebug()
 
 	ta, err := ta.InitTA(
 		&ta.Config{
-			Token:      core.DEBUG_TOKEN,
-			Domain:     "localhost",
-			TTP:        "http://localhost" + core.TTPPort,
-			Repository: "https://github.com/akakou-docs/ego-statistical-analysis",
+			Token:      Token,
+			Domain:     Domain,
+			TTP:        TTPBase,
+			Repository: Repository,
 		},
 	)
 
@@ -43,5 +53,6 @@ func main() {
 	}
 
 	e.Debug = true
+	// e.Start(":8002")
 	e.Logger.Fatal(e.StartAutoTLS(core.TAPort))
 }
