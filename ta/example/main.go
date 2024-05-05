@@ -16,15 +16,20 @@ var Repository = goutils.GetEnv("RA_WEBS_TA_REPOSITORY", "github.com/akakou/ra_w
 
 const REDIRECT_PATH = "/app/redirect"
 
-func RedirectHandler(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, Repository+REDIRECT_PATH, http.StatusTemporaryRedirect)
-}
-
 func main() {
 	e := echo.New()
 
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello")
+		_, err := c.Cookie("isFirstAccess")
+		if err != nil {
+			c.SetCookie(&http.Cookie{
+				Name:  "isFirstAccess",
+				Value: "true",
+			})
+			c.Redirect(http.StatusAccepted, TTPBase+REDIRECT_PATH)
+		}
+
+		return c.String(http.StatusOK, "Hello, World!")
 	})
 
 	core.EnableDebug()
