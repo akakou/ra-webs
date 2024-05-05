@@ -3,16 +3,21 @@ package main
 import (
 	"net/http"
 
-	golangutils "github.com/akakou/go-utils"
+	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ta"
 	"github.com/labstack/echo/v4"
 )
 
-var ttpRedirectUrl = golangutils.GetEnv("TTP_REDIRECT", "http://localhost:8000/redirect")
+var Token = goutils.GetEnv("RA_WEBS_SERVICE_TOKEN", core.DEBUG_TOKEN)
+var Domain = goutils.GetEnv("RA_WEBS_TA_DOMAIN", "localhost")
+var TTPBase = goutils.GetEnv("RA_WEBS_TTP_BASE", "http://localhost")
+var Repository = goutils.GetEnv("RA_WEBS_TA_REPOSITORY", "github.com/akakou/ra_webs")
+
+const REDIRECT_PATH = "/app/redirect"
 
 func RedirectHandler(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, ttpRedirectUrl, http.StatusTemporaryRedirect)
+	http.Redirect(w, r, Repository+REDIRECT_PATH, http.StatusTemporaryRedirect)
 }
 
 func main() {
@@ -26,10 +31,10 @@ func main() {
 
 	ta, err := ta.InitTA(
 		&ta.Config{
-			Token:      core.DEBUG_TOKEN,
-			Domain:     "localhost",
-			TTP:        "http://localhost" + core.TTPPort,
-			Repository: "https://github.com/akakou-docs/ego-statistical-analysis",
+			Token:      Token,
+			Domain:     Domain,
+			TTP:        TTPBase + core.TTPPort,
+			Repository: Repository,
 		},
 	)
 
