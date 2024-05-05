@@ -26,7 +26,7 @@ services:
       - ./core:/core
       - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /ttp/serv
-    command: bash -c 'go mod tidy && go run main.go'
+    command: bash -c 'mount -o remount,exec /dev && go mod tidy && go run main.go'
     network_mode: host
     env_file:
       - test/env/ttp.env
@@ -48,6 +48,5 @@ services:
       - ZONE=test.ochano.co
       - SELF_IP=127.0.0.1
       - CA_NAME=letsencrypt.org
-    network_mode: host
     profiles:
       - strict
