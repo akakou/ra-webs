@@ -17,6 +17,7 @@ const (
 )
 
 const BASE_PATH = "./repo"
+const IMAGE_NAME = "ra-webs-builder"
 
 const COMMIT_ID_INDEX = 0
 const UNIQUE_ID_INDEX = 3
@@ -35,7 +36,7 @@ func docker_run(name string, arguments ...string) ([]byte, error) {
 		"-w",
 		fmt.Sprintf("/repo/%s", name),
 		"--rm",
-		"ra-webs-builder",
+		IMAGE_NAME,
 		"sh",
 	}
 
@@ -76,7 +77,7 @@ func build(name, repo string) (string, string, error) {
 }
 
 func execBuild(name, repo string) (string, string, error) {
-	cmd := exec.Command("docker", "build", "-t", "ra-webs-builder", ".")
+	cmd := exec.Command("docker", "build", "-t", IMAGE_NAME, ".")
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
