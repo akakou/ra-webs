@@ -5,7 +5,7 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 )
 
-const CERT_DIER_CACHE = "./ra-webs.cache"
+const CERT_DIER_CACHE = "./tmp/ra-webs.cache"
 
 func (ap *TA) TLSConfig() (autocert.Manager, error) {
 	acmeClient := acme.Client{DirectoryURL: AcmeURL}
