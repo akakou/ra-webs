@@ -11,7 +11,7 @@ import (
 
 var Token = goutils.GetEnv("RA_WEBS_SERVICE_TOKEN", core.DEBUG_TOKEN)
 var Domain = goutils.GetEnv("RA_WEBS_TA_DOMAIN", "localhost")
-var TTPBase = goutils.GetEnv("RA_WEBS_TTP_BASE", "http://localhost")
+var TTPBase = goutils.GetEnv("RA_WEBS_TTP_BASE", "http://localhost"+core.TTPPort)
 var Repository = goutils.GetEnv("RA_WEBS_TA_REPOSITORY", "github.com/akakou/ra_webs")
 
 const REDIRECT_PATH = "/app/redirect"
@@ -26,19 +26,19 @@ func main() {
 				Name:  "isFirstAccess",
 				Value: "true",
 			})
-			c.Redirect(http.StatusAccepted, TTPBase+REDIRECT_PATH)
+			c.Redirect(http.StatusTemporaryRedirect, TTPBase+REDIRECT_PATH)
 		}
 
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
-	core.EnableDebug()
+	// core.EnableDebug()
 
 	ta, err := ta.InitTA(
 		&ta.Config{
 			Token:      Token,
 			Domain:     Domain,
-			TTP:        TTPBase + core.TTPPort,
+			TTP:        TTPBase,
 			Repository: Repository,
 		},
 	)
@@ -53,5 +53,6 @@ func main() {
 	}
 
 	e.Debug = true
+	// e.Start(":8002")
 	e.Logger.Fatal(e.StartAutoTLS(core.TAPort))
 }
