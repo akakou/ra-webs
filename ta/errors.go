@@ -11,7 +11,7 @@ const (
 	ERROR_REPOSITORY_NOT_SET = "failed to read RA_WEBS_TA_REPOSITORY"
 	ERROR_TOKEN_NOT_SET      = "failed to read RA_WEBS_SERVICE_TOKEN"
 	ERROR_DOMAIN_NOT_SET     = "failed to read RA_WEBS_TA_DOMAIN"
-	ERROR_EMAIL_NOT_SET      = "failed to read RA_WEBS_TA_EMAIL"
+	ERROR_EMAIL_NOT_SET      = "failed to read RA_WEBS_SERVICE_EMAIL"
 	ERROR_TTP_BASE_NOT_SET   = "failed to read RA_WEBS_TTP_BASE"
 )
 
