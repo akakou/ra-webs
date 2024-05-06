@@ -79,6 +79,6 @@ func TestTAFromDomainAPI(t *testing.T) {
 
 	assert.Equal(t, violation.ID, respTa[0].Edges.Violation[0].ID)
 
-	t.Errorf("%v", string(bytes))
+	// t.Errorf("%v", string(bytes))
 
 }
