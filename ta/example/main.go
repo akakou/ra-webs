@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
@@ -15,7 +16,7 @@ var Domain = goutils.GetEnv("RA_WEBS_TA_DOMAIN", "localhost")
 var TTPBase = goutils.GetEnv("RA_WEBS_TTP_BASE", "http://localhost"+core.TTPPort)
 var Repository = goutils.GetEnv("RA_WEBS_TA_REPOSITORY", "github.com/akakou/ra_webs")
 
-const REDIRECT_PATH = "/app/redirect"
+const REDIRECT_PATH = "/app/redirect/"
 
 func main() {
 	e := echo.New()
@@ -28,7 +29,9 @@ func main() {
 				Name:  "isFirstAccess",
 				Value: "true",
 			})
-			c.Redirect(http.StatusTemporaryRedirect, TTPBase+REDIRECT_PATH)
+
+			html := fmt.Sprintf("<script>location.href = '%v'</script>", TTPBase+REDIRECT_PATH)
+			c.HTML(http.StatusFound, html)
 		}
 
 		return c.String(http.StatusOK, "Hello, World!")
