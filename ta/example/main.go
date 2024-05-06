@@ -41,7 +41,7 @@ func main() {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
-	e.Server.TLSConfig, err = ta.TLSConfig()
+	err = ta.Config(e)
 	if err != nil {
 		panic(err)
 	}
