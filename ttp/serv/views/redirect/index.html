@@ -18,8 +18,11 @@
         const checkOneValidity = x => !x.edges.violation
 
         const checkAllValidity = (data) => {
-            const res = data.reduce((accumulator, current) => accumulator && checkOneValidity(current), true)
-            return res
+            if (!data.length) return false
+
+            const reduced = data.reduce((accumulator, current) => accumulator && checkOneValidity(current), true)
+            const last_activated = data[data.length - 1].has_activated
+            return last_activated && reduced
         }
 
         const TableCompornent = ({ logs }) => {
@@ -71,7 +74,7 @@
                 const resp = await axios.get(`/api/server/${referrer.hostname}`)
                 console.log(resp)
 
-                const v = checkAllValidity(resp.data)
+                const v = resp.data.length > 0 && checkAllValidity(resp.data)
                 setLogs(resp.data)
                 setIsValid(v)
                 setMessage(v ? VALID_MESSAGE : INVALID_MESSAGE)
