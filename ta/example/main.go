@@ -4,18 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ta"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 const REDIRECT_PATH = "/app/redirect/"
 
 func main() {
-	e := echo.New()
-	e.Use(middleware.Logger())
-
 	config, err := ta.DefaultConfig()
 	if err != nil {
 		panic(err)
@@ -26,26 +20,30 @@ func main() {
 		panic(err)
 	}
 
-	e.GET("/", func(c echo.Context) error {
-		_, err := c.Cookie("isFirstAccess")
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		_, err := r.Cookie("isFirstAccess")
+
 		if err != nil {
-			c.SetCookie(&http.Cookie{
+			http.SetCookie(w, &http.Cookie{
 				Name:  "isFirstAccess",
 				Value: "true",
 			})
 
-			html := fmt.Sprintf("<script>location.href = '%v'</script>", config.TTP+REDIRECT_PATH)
-			c.HTML(http.StatusFound, html)
+			fmt.Fprintf(w, "<script>location.href = '%v'</script>", config.TTP+REDIRECT_PATH)
 		}
+	}
 
-		return c.String(http.StatusOK, "Hello, World!")
-	})
-
-	err = ta.Config(e)
+	tlsConfig, err := ta.TLSConfig()
 	if err != nil {
 		panic(err)
 	}
 
-	e.Debug = true
-	e.Logger.Fatal(e.Start(core.TAPort))
+	server := http.Server{
+		Addr:      ":443",
+		Handler:   nil,
+		TLSConfig: tlsConfig,
+	}
+
+	http.HandleFunc("/", handler)
+	server.ListenAndServeTLS("", "")
 }
