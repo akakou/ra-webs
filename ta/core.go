@@ -29,7 +29,7 @@ func DefaultConfig() (*TAConfig, error) {
 	token := os.Getenv("RA_WEBS_SERVICE_TOKEN")
 	repository := os.Getenv("RA_WEBS_TA_REPOSITORY")
 	domain := os.Getenv("RA_WEBS_TA_DOMAIN")
-	email := os.Getenv("RA_WEBS_TA_EMAIL")
+	email := os.Getenv("RA_WEBS_SERVICE_EMAIL")
 	ttpBase := os.Getenv("RA_WEBS_TTP_BASE")
 
 	if token == "" {

@@ -30,7 +30,7 @@
             "fromHost": true
         },
         {
-            "name": "RA_WEBS_TA_EMAIL",
+            "name": "RA_WEBS_SERVICE_EMAIL",
             "fromHost": true
         }
     ],
