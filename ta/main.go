@@ -14,7 +14,7 @@ func (ta *TA) Config(e *echo.Echo) error {
 
 	fmt.Printf("TTP: output %v\n", output)
 
-	e.AutoTLSManager, err = ta.TLSConfig()
+	e.Server.TLSConfig, err = ta.TLSConfig()
 	if err != nil {
 		return err
 	}
