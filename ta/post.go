@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/akakou/ra_webs/core"
-	"github.com/labstack/echo/v4"
 )
 
 const WAIT = 3
@@ -58,8 +57,8 @@ func (ta *TA) post(path string, reqBody any) (string, error) {
 		return "", fmt.Errorf("%v: %v", ERROR_REQUEST_FAILED, err)
 	}
 
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", ta.config.Token))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", ta.config.Token))
 	req.Close = true
 
 	client := &http.Client{}
