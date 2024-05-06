@@ -13,5 +13,7 @@ const (
 	ERROR_DOMAIN_INVALID_BY_NUM_DOMAIN                = "number of domain must be 1"
 	ERROR_DOMAIN_INVALID_NOT_MATCH_COMMONNAME_AND_SAT = "CN and SAT must be same"
 
+	ERROR_CERTIFICATE_NOT_FOUND = "certificate not match"
+
 	ERROR_EXTENSION_NOT_FOUND = "extension not found"
 )
