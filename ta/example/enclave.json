@@ -28,6 +28,10 @@
         {
             "name": "RA_WEBS_TA_REPOSITORY",
             "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_TA_EMAIL",
+            "fromHost": true
         }
     ],
     "files": [
