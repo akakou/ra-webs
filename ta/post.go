@@ -60,6 +60,7 @@ func (ta *TA) post(path string, reqBody any) (string, error) {
 
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", ta.config.Token))
+	req.Close = true
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
