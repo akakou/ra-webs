@@ -5,12 +5,10 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	"fmt"
 	"log"
 
 	"github.com/go-acme/lego/v4/certcrypto"
 	"github.com/go-acme/lego/v4/certificate"
-	"github.com/go-acme/lego/v4/challenge/http01"
 	"github.com/go-acme/lego/v4/challenge/tlsalpn01"
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/registration"
@@ -56,15 +54,7 @@ func IssueCertificate(key crypto.PrivateKey, domain, email string) *certificate.
 		log.Fatal(err)
 	}
 
-	// We specify an HTTP port of 5002 and an TLS port of 5001 on all interfaces
-	// because we aren't running as root and can't bind a listener to port 80 and 443
-	// (used later when we attempt to pass challenges). Keep in mind that you still
-	// need to proxy challenge traffic to port 5002 and 5001.
-	err = client.Challenge.SetHTTP01Provider(http01.NewProviderServer("", "5002"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = client.Challenge.SetTLSALPN01Provider(tlsalpn01.NewProviderServer("", "5001"))
+	client.Challenge.SetTLSALPN01Provider(tlsalpn01.NewProviderServer("", "443"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -85,10 +75,6 @@ func IssueCertificate(key crypto.PrivateKey, domain, email string) *certificate.
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// Each certificate comes back with the cert bytes, the bytes of the client's
-	// private key, and a certificate URL. SAVE THESE TO DISK.
-	fmt.Printf("%#v\n", certificates)
 
 	return certificates
 }
