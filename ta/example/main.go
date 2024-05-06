@@ -15,7 +15,7 @@ var Domain = goutils.GetEnv("RA_WEBS_TA_DOMAIN", "localhost")
 var TTPBase = goutils.GetEnv("RA_WEBS_TTP_BASE", "http://localhost"+core.TTPPort)
 var Repository = goutils.GetEnv("RA_WEBS_TA_REPOSITORY", "github.com/akakou/ra_webs")
 
-const REDIRECT_PATH = "/app/redirect"
+const REDIRECT_PATH = "/app/redirect/"
 
 func main() {
 	e := echo.New()
