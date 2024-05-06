@@ -1,21 +1,20 @@
 package ta
 
 import (
-	"golang.org/x/crypto/acme"
-	"golang.org/x/crypto/acme/autocert"
+	"crypto/tls"
 )
 
 const CERT_DIER_CACHE = "./tmp/ra-webs.cache"
 
-func (ap *TA) TLSConfig() (autocert.Manager, error) {
-	acmeClient := acme.Client{
-		DirectoryURL: AcmeURL,
-	}
+func (ap *TA) TLSConfig() (*tls.Config, error) {
+	cert := IssueCertificate(ap.privateKey, ap.config.Domain)
 
-	return autocert.Manager{
-		Client:   &acmeClient,
-		Cache:    autocert.DirCache(CERT_DIER_CACHE),
-		Prompt:   autocert.AcceptTOS,
-		ForceRSA: true,
+	return &tls.Config{
+		GetCertificate: func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
+			return &tls.Certificate{
+				Certificate: [][]byte{cert.Certificate},
+				PrivateKey:  ap.privateKey,
+			}, nil
+		},
 	}, nil
 }
