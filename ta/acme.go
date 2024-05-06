@@ -32,9 +32,7 @@ func (u *MyUser) GetPrivateKey() crypto.PrivateKey {
 	return u.key
 }
 
-var email = "ra-webs@example.com"
-
-func IssueCertificate(key crypto.PrivateKey, domain string) *certificate.Resource {
+func IssueCertificate(key crypto.PrivateKey, domain, email string) *certificate.Resource {
 	// Create a user. New accounts need an email and private key to start.
 	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
