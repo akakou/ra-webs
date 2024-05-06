@@ -8,12 +8,14 @@ import (
 const CERT_DIER_CACHE = "./tmp/ra-webs.cache"
 
 func (ap *TA) TLSConfig() (autocert.Manager, error) {
-	acmeClient := acme.Client{DirectoryURL: AcmeURL}
-	acmeClient.Key = ap.privateKey
+	acmeClient := acme.Client{
+		DirectoryURL: AcmeURL,
+	}
 
 	return autocert.Manager{
-		Client: &acmeClient,
-		Cache:  autocert.DirCache(CERT_DIER_CACHE),
-		Prompt: autocert.AcceptTOS,
+		Client:   &acmeClient,
+		Cache:    autocert.DirCache(CERT_DIER_CACHE),
+		Prompt:   autocert.AcceptTOS,
+		ForceRSA: true,
 	}, nil
 }
