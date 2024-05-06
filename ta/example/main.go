@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
@@ -28,7 +29,9 @@ func main() {
 				Name:  "isFirstAccess",
 				Value: "true",
 			})
-			c.Redirect(http.StatusTemporaryRedirect, TTPBase+REDIRECT_PATH)
+
+			html := fmt.Sprintf("<script>location.href = '%v'</script>", TTPBase+REDIRECT_PATH)
+			c.HTML(http.StatusFound, html)
 		}
 
 		return c.String(http.StatusOK, "Hello, World!")
