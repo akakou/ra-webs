@@ -12,36 +12,48 @@ import (
 
 var AcmeURL = autocert.DefaultACMEDirectory
 
-type Config struct {
+type TAConfig struct {
 	TTP        string
 	Token      string
 	Repository string
 	Domain     string
+	Email      string
 }
 
 type TA struct {
-	config     Config
+	config     TAConfig
 	privateKey *rsa.PrivateKey
 }
 
-func DefaultConfig() (*Config, error) {
+func DefaultConfig() (*TAConfig, error) {
 	token := os.Getenv("RA_WEBS_SERVICE_TOKEN")
-	repository := os.Getenv("RA_WEBS_REPOSITORY")
-	domain := os.Getenv("RA_WEBS_DOMAIN")
+	repository := os.Getenv("RA_WEBS_TA_REPOSITORY")
+	domain := os.Getenv("RA_WEBS_TA_DOMAIN")
+	email := os.Getenv("RA_WEBS_TA_EMAIL")
+	ttpBase := os.Getenv("RA_WEBS_TTP_BASE")
 
 	if token == "" {
-		panic("RA_WEBS_SERVICE_TOKEN is not set")
+		return nil, fmt.Errorf("%v", ERROR_TOKEN_NOT_SET)
 	}
 
-	if token == "" {
-		panic("Reporsitory is not set")
+	if repository == "" {
+		return nil, fmt.Errorf("%v", ERROR_REPOSITORY_NOT_SET)
 	}
 
-	return &Config{
+	if email == "" {
+		return nil, fmt.Errorf("%v", ERROR_EMAIL_NOT_SET)
+	}
+
+	if ttpBase == "" {
+		ttpBase = "http://loclhost" + core.TTPPort
+		fmt.Printf("RA_WEBS_TTP_BASE is not set: so use %v\n", ttpBase)
+	}
+
+	return &TAConfig{
 		Token:      token,
 		Repository: repository,
 		Domain:     domain,
-		TTP:        "http://localhost" + core.TTPPort,
+		TTP:        ttpBase,
 	}, nil
 }
 
@@ -54,7 +66,7 @@ func DefaultTA() (*TA, error) {
 	return InitTA(config)
 }
 
-func InitTA(config *Config) (*TA, error) {
+func InitTA(config *TAConfig) (*TA, error) {
 	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", ERROR_GENERATE_RSA_KEY, err)
