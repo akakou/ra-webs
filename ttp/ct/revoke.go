@@ -2,31 +2,36 @@ package ct
 
 import (
 	"github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/ent"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 )
 
-func logViolationByDomain(domain string, db *core.DB) error {
-	serv, err := db.Client.TAServer.
-		Query().
-		Where(taserver.DomainEQ(domain)).
-		Only(*db.Ctx)
-
-	if err != nil {
-		return nil
-	}
-
+func revoke(serv *ent.TAServer, db *core.DB) {
 	db.Client.TAViolation.Create().
 		SetServer(serv).
 		SaveX(*db.Ctx)
 
 	service := serv.QueryService().FirstX(*db.Ctx)
 	service.Update().SetIsActive(false).SaveX(*db.Ctx)
-
-	return nil
 }
 
-func logViolationsByDomains(domains []string, db *core.DB) {
+func revokeByDomain(domain string, last int, db *core.DB) {
+	all, _ := db.Client.TAServer.
+		Query().
+		Where(taserver.DomainEQ(domain)).
+		Where(taserver.IDGT(last - 1)).
+		All(*db.Ctx)
+
+	// todo: error handling
+
+	for _, serv := range all {
+		revoke(serv, db)
+	}
+}
+
+func revokeByDomains(domains []string, db *core.DB) {
 	for _, domain := range domains {
-		logViolationByDomain(domain, db)
+		last := lastValidID(domain, db)
+		revokeByDomain(domain, last, db)
 	}
 }
