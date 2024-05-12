@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
+	"github.com/akakou/ra_webs/core"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/labstack/echo/v4"
@@ -13,7 +14,7 @@ import (
 
 var GetServerApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.GET,
-	Path:   API_ROOT + "/server",
+	Path:   core.API_ROOT + "/server",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			code, err := ttp.DB.Client.TAServer.Query().All(*ttp.DB.Ctx)
@@ -28,7 +29,7 @@ var GetServerApi = goutils.EchoRoute[ttpcore.TTP]{
 
 var GetServerFromDomainApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.GET,
-	Path:   API_ROOT + "/server/:domain",
+	Path:   core.API_ROOT + "/server/:domain",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			domain := c.Param("domain")

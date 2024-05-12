@@ -9,24 +9,59 @@ import (
 
 	"ta"
 
+	goutils "github.com/akakou/go-utils"
+	golangutils "github.com/akakou/golang-utils"
 	"github.com/akakou/ra_webs/core"
 
 	"github.com/akakou/ra_webs/ttp/api"
 	"github.com/akakou/ra_webs/ttp/builder"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/ct"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
 
+type CTForTest struct {
+}
+
+func (CTForTest) Setup(*echo.Echo, *ttpcore.TTP) error {
+	return nil
+}
+
+func (CTForTest) Subscribe(string, *ttpcore.TTP) error {
+	return nil
+}
+
+func ttpForTest() (*ttpcore.TTP, error) {
+	dbType := golangutils.GetEnv("DB_TYPE", "sqlite3")
+	dbConfig := golangutils.GetEnv("DB_CONFIG", "file:ent?mode=memory&cache=shared&_fk=1")
+	fmt.Printf("We use %s as database type and %s as database config\n", dbType, dbConfig)
+
+	adminToken, err := goutils.RandomHex(ttpcore.RANDOM_SIZE)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", ttpcore.ERROR_RANDOM_GENERATE, err)
+	}
+
+	fmt.Printf("Admin token generated: %s\n", adminToken)
+
+	dbc := ttpcore.DBConfig{
+		Type:   dbType,
+		Config: dbConfig,
+	}
+
+	db, err := ttpcore.NewDB(&dbc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", ttpcore.ERROR_INIT_DB, err)
+	}
+
+	return ttpcore.NewTTP(db, &CTForTest{}, adminToken)
+}
 func TestAPI(t *testing.T) {
 	core.EnableDebug()
-	ct.EnableDebug()
 	builder.EnableDebug()
 
 	e := echo.New()
 	e.Debug = true
-	ttp, err := ttpcore.DefaultTTP()
+	ttp, err := ttpForTest()
 	assert.NoError(t, err)
 
 	api.Route(e, ttp)
@@ -53,7 +88,7 @@ func TestAPI(t *testing.T) {
 
 	t.Run("TestRegister", func(t *testing.T) {
 		_ta, _ := ta.InitTA(
-			&ta.Config{
+			&ta.TAConfig{
 				Token:      token,
 				Domain:     "localhost",
 				TTP:        "http://localhost" + core.TTPPort,
