@@ -12,8 +12,8 @@ import (
 	"github.com/go-acme/lego/v4/registration"
 )
 
-//var acmeURL = lego.LEDirectoryProduction
-var acmeURL = lego.LEDirectoryStaging
+var acmeURL = lego.LEDirectoryProduction
+//var acmeURL = lego.LEDirectoryStaging
 
 type MyUser struct {
 	Email        string
