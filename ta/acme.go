@@ -2,17 +2,18 @@ package ta
 
 import (
 	"crypto"
-	"crypto/ecdsa"
-	"crypto/elliptic"
+	"crypto/rsa"
 	"crypto/rand"
 	"log"
 
-	"github.com/go-acme/lego/v4/certcrypto"
 	"github.com/go-acme/lego/v4/certificate"
 	"github.com/go-acme/lego/v4/challenge/tlsalpn01"
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/registration"
 )
+
+//var acmeURL = lego.LEDirectoryProduction
+var acmeURL = lego.LEDirectoryStaging
 
 type MyUser struct {
 	Email        string
@@ -32,7 +33,7 @@ func (u *MyUser) GetPrivateKey() crypto.PrivateKey {
 
 func IssueCertificate(key crypto.PrivateKey, domain, email string) *certificate.Resource {
 	// Create a user. New accounts need an email and private key to start.
-	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -45,8 +46,8 @@ func IssueCertificate(key crypto.PrivateKey, domain, email string) *certificate.
 	config := lego.NewConfig(&myUser)
 
 	// This CA URL is configured for a local dev instance of Boulder running in Docker in a VM.
-	config.CADirURL = lego.LEDirectoryStaging
-	config.Certificate.KeyType = certcrypto.RSA2048
+	config.CADirURL = acmeURL
+	// config.Certificate.KeyType = certcrypto.RSA2048
 
 	// A client facilitates communication with the CA server.
 	client, err := lego.NewClient(config)
