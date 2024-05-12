@@ -31,6 +31,8 @@ func main() {
 
 			fmt.Fprintf(w, "<script>location.href = '%v'</script>", config.TTP+REDIRECT_PATH)
 		}
+
+		fmt.Fprintln(w, "Hello from TA running on TEE :)")
 	}
 
 	tlsConfig, err := ta.TLSConfig()
@@ -47,3 +49,4 @@ func main() {
 	http.HandleFunc("/", handler)
 	server.ListenAndServeTLS("", "")
 }
+
