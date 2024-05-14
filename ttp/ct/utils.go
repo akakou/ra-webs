@@ -8,7 +8,7 @@ import (
 func readFile(name string) (string, error) {
 	lastFile, err := os.Open(name)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	defer lastFile.Close()
