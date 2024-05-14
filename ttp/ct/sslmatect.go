@@ -53,17 +53,17 @@ func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
 		fmt.Println("Now CT check running...")
 
 		if err != nil {
-			fmt.Printf("%v", err)
+			fmt.Printf("ct error: %v\n", err)
 		}
 
 		err = audit.AuditAll(ttp, certs)
 		if err != nil {
-			fmt.Printf("%v", err)
+			fmt.Printf("ct error: %v\n", err)
 		}
 
 		err = writeFile(index.Last)
 		if err != nil {
-			fmt.Printf("%v", err)
+			fmt.Printf("ct error: %v\n", err)
 		}
 
 		time.Sleep(ct.Sleep)
@@ -99,8 +99,13 @@ func (ct *SSLMateCT) SyncFromDB(ttp *core.TTP) error {
 		monitors = append(monitors, m)
 	}
 
+	if len(monitors) == 0 {
+		ct.Sleep = DEFAULT_MAX_SLEEP
+	} else {
+		ct.Sleep = DEFAULT_MAX_SLEEP / time.Duration(len(monitors))
+	}
+
 	ct.Monitors = monitors
-	ct.Sleep = DEFAULT_MAX_SLEEP / time.Duration(len(domains))
 
 	return nil
 }
