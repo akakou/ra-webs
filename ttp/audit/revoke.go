@@ -11,8 +11,15 @@ func revoke(serv *ent.TAServer, db *core.DB) {
 		SetServer(serv).
 		SaveX(*db.Ctx)
 
-	service := serv.QueryService().FirstX(*db.Ctx)
-	service.Update().SetIsActive(false).SaveX(*db.Ctx)
+	service, err := serv.QueryService().First(*db.Ctx)
+	if err != nil {
+		panic(err)
+	}
+	
+	_, err = service.Update().SetIsActive(false).Save(*db.Ctx)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func revokeByDomain(domain string, last int, db *core.DB) {
