@@ -7,6 +7,7 @@ import (
 
 	"github.com/akakou/ra_webs/ttp/audit"
 	"github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/akakou/sslmate-cert-search-api/api"
 	"github.com/akakou/sslmate-cert-search-api/monitor"
 	"github.com/labstack/echo/v4"
@@ -67,23 +68,26 @@ func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
 
 		time.Sleep(ct.Sleep)
 	})
-	
+
 	fmt.Println("ct started...")
 
 	return nil
 }
 
 func (ct *SSLMateCT) SyncFromDB(ttp *core.TTP) error {
-	servers, err := ttp.DB.Client.TAServer.Query().All(*ttp.DB.Ctx)
+	monitors := []monitor.Monitor{}
+
+	domains, err := ttp.DB.Client.TAServer.Query().Select(taserver.FieldDomain).Strings(*ttp.DB.Ctx)
+
 	if err != nil {
 		return err
 	}
 
-	monitors := []monitor.Monitor{}
+	domains = removeDeplication(domains)
 
-	for _, server := range servers {
+	for _, domain := range domains {
 		query := ct.BaseQuery
-		query.Domain = server.Domain
+		query.Domain = domain
 		query.After = ct.Last
 
 		m := monitor.Monitor{
