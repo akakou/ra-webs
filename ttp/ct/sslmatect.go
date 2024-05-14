@@ -26,7 +26,9 @@ type SSLMateCT struct {
 
 func DefaultSSLMateCT(token string) *SSLMateCT {
 	ct := SSLMateCT{
-		Monitors:  []monitor.Monitor{},
+		Monitors: monitor.Monitors{
+			Monitors: []monitor.Monitor{},
+		},
 		Api:       *api.New(token),
 		BaseQuery: monitor.DefaultQuery,
 		Last:      "",
@@ -36,20 +38,8 @@ func DefaultSSLMateCT(token string) *SSLMateCT {
 	return &ct
 }
 
-func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
-	last, err := readFile(LAST_FILE)
-	if err != nil {
-		return err
-	}
-
-	ct.Last = last
-
-	err = ct.SyncFromDB(ttp)
-	if err != nil {
-		return err
-	}
-
-	go ct.Monitors.Run(func(certs []x509.Certificate, index *api.Index, err error) {
+func Routine(ttp *core.TTP) monitor.Callback {
+	return func(certs []x509.Certificate, index *api.Index, err error) {
 		fmt.Println("Now CT check running...")
 
 		if err != nil {
@@ -65,7 +55,23 @@ func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
 		if err != nil {
 			fmt.Printf("ct error: %v\n", err)
 		}
-	})
+	}
+}
+
+func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
+	last, err := readFile(LAST_FILE)
+	if err != nil {
+		return err
+	}
+
+	ct.Last = last
+
+	err = ct.SyncFromDB(ttp)
+	if err != nil {
+		return err
+	}
+
+	go ct.Monitors.Run(Routine(ttp))
 
 	fmt.Println("ct started...")
 
@@ -73,6 +79,7 @@ func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
 }
 
 func (ct *SSLMateCT) SyncFromDB(ttp *core.TTP) error {
+	fmt.Println("starting sync from db...")
 	monitors := []monitor.Monitor{}
 
 	domains, err := ttp.DB.Client.TAServer.Query().Select(taserver.FieldDomain).Strings(*ttp.DB.Ctx)
@@ -102,7 +109,7 @@ func (ct *SSLMateCT) SyncFromDB(ttp *core.TTP) error {
 		monitors = append(monitors, m)
 	}
 
-	ct.Monitors = monitors
+	ct.Monitors.Monitors = monitors
 
 	return nil
 }
