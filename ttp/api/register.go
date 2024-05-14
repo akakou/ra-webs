@@ -60,11 +60,6 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 		return fmt.Errorf(ERROR_QUOTE_INVALID)
 	}
 
-	err = ttp.CT.Subscribe(req.Domain, ttp)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to subscribe %s due to %v", req.Domain, err)
-	}
-
 	taServerCreate := ttp.DB.Client.TAServer.
 		Create().
 		SetDomain(req.Domain).
@@ -79,6 +74,11 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 		return err
 	}
 
+	err = ttp.CT.Subscribe(req.Domain, ttp)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to subscribe %s due to %v", req.Domain, err)
+	}
+	
 	return nil
 }
 
