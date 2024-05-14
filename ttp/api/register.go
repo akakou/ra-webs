@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"time"
 
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/core"
@@ -84,10 +85,10 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 }
 
 func RegisterCode(req *core.CodeRequest, service *ent.Service, ttp *ttpcore.TTP) (*ent.TACode, error) {
-	rawSha256 := sha256.Sum256([]byte(req.Repository))
-	sha256 := fmt.Sprintf("%x", rawSha256)
+	sha256 := sha256.Sum256([]byte(req.Repository))
+	folderName := fmt.Sprintf("%v-%x", time.Now().Unix(), sha256)
 
-	commitId, uniqueIdString, err := builder.Build(sha256, req.Repository)
+	commitId, uniqueIdString, err := builder.Build(folderName, req.Repository)
 	if err != nil {
 		return nil, err
 	}
