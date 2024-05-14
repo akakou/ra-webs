@@ -21,8 +21,8 @@ func readFile(name string) (string, error) {
 	return string(b), nil
 }
 
-func writeFile(body string) error {
-	lastFile, err := os.Open(body)
+func writeFile(name, body string) error {
+	lastFile, err := os.OpenFile(name, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}

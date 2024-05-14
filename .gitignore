@@ -33,3 +33,4 @@ opt/domain-owner/example/example
 **/*.env
 
 **/*.db
+**/last.txt

@@ -34,7 +34,7 @@ func DefaultTTP() (*core.TTP, error) {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_INIT_DB, err)
 	}
 
-	_ct := ct.NewSSLMateCT(token)
+	_ct := ct.DefaultSSLMateCT(token)
 
 	return core.NewTTP(db, _ct, adminToken)
 }
