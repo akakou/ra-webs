@@ -3,6 +3,7 @@ package ct
 import (
 	"crypto/x509"
 	"fmt"
+	"time"
 
 	"github.com/akakou/ra_webs/ttp/audit"
 	"github.com/akakou/ra_webs/ttp/core"
@@ -12,12 +13,14 @@ import (
 )
 
 const LAST_FILE = "./last.txt"
+const DEFAULT_SLEEP = monitor.DEFAULT_SLEEP
 
 type SSLMateCT struct {
 	Monitors  monitor.Monitors
 	Api       api.SSLMateSearchAPI
 	BaseQuery api.Query
 	Last      string
+	Sleep     time.Duration
 }
 
 func NewSSLMateCT(token string) *SSLMateCT {
@@ -26,6 +29,7 @@ func NewSSLMateCT(token string) *SSLMateCT {
 		Api:       *api.New(token),
 		BaseQuery: api.Query{},
 		Last:      "",
+		Sleep:     DEFAULT_SLEEP,
 	}
 
 	return &ct
@@ -49,7 +53,13 @@ func (ct *SSLMateCT) Update(ttp *core.TTP) error {
 		query.Domain = server.Domain
 		query.After = last
 
-		monitors = append(monitors, *monitor.New(&query, &ct.Api))
+		m := monitor.Monitor{
+			Query: &query,
+			Api:   &ct.Api,
+			Sleep: 0,
+		}
+
+		monitors = append(monitors, m)
 	}
 
 	ct.Monitors = monitors
@@ -73,6 +83,7 @@ func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
 			fmt.Printf("%v", err)
 		}
 
+		time.Sleep(ct.Sleep)
 	})
 
 	last, err := readFile(LAST_FILE)
@@ -85,6 +96,6 @@ func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
 	return nil
 }
 
-func (ct *SSLMateCT) Subscribe(string, ttp *core.TTP) error {
+func (ct *SSLMateCT) Subscribe(_ string, ttp *core.TTP) error {
 	return ct.Update(ttp)
 }
