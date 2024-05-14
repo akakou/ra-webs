@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
+	"github.com/akakou/ra_webs/core"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/labstack/echo/v4"
@@ -13,7 +14,7 @@ var BUILD_DOCKER_PATH = "./builder"
 
 var GetCodeApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.GET,
-	Path:   API_ROOT + "/code",
+	Path:   core.API_ROOT + "/code",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			code, err := ttp.DB.Client.TACode.Query().

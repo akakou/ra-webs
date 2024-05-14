@@ -1,21 +1,14 @@
 package core
 
-import (
-	"fmt"
-	"os"
-
-	goutils "github.com/akakou/go-utils"
-	golangutils "github.com/akakou/golang-utils"
-	metact "github.com/akakou/meta-ct"
-)
+import "github.com/labstack/echo/v4"
 
 type TTP struct {
 	DB         *DB
-	CT         *metact.MetaCT
+	CT         CT
 	AdminToken string
 }
 
-func NewTTP(db *DB, ct *metact.MetaCT, adminToken string) (*TTP, error) {
+func NewTTP(db *DB, ct CT, adminToken string) (*TTP, error) {
 	return &TTP{
 		DB:         db,
 		CT:         ct,
@@ -23,33 +16,6 @@ func NewTTP(db *DB, ct *metact.MetaCT, adminToken string) (*TTP, error) {
 	}, nil
 }
 
-func DefaultTTP() (*TTP, error) {
-	dbType := golangutils.GetEnv("DB_TYPE", "sqlite3")
-	dbConfig := golangutils.GetEnv("DB_CONFIG", "file:ent?mode=memory&cache=shared&_fk=1")
-	fmt.Printf("We use %s as database type and %s as database config\n", dbType, dbConfig)
-
-	metaAppId := os.Getenv("META_APP_ID")
-	metaAccessToken := os.Getenv("META_ACCESS_TOKEN")
-
-	adminToken, err := goutils.RandomHex(RANDOM_SIZE)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", ERROR_RANDOM_GENERATE, err)
-	}
-
-	fmt.Printf("Admin token generated: %s\n", adminToken)
-
-	dbc := DBConfig{
-		Type:   dbType,
-		Config: dbConfig,
-	}
-
-	db, err := NewDB(&dbc)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", ERROR_INIT_DB, err)
-	}
-
-	ct := metact.NewCT(metaAppId, metaAccessToken)
-
-	return NewTTP(db, ct, adminToken)
-
+func (ttp *TTP) Setup(e *echo.Echo) error {
+	return ttp.CT.Setup(e, ttp)
 }

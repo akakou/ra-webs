@@ -4,13 +4,14 @@ import (
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
+	"github.com/akakou/ra_webs/core"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
 	"github.com/labstack/echo/v4"
 )
 
 var PostServiceByAdmin = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.POST,
-	Path:   API_ROOT + "/service",
+	Path:   core.API_ROOT + "/service",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			err := authenticateAdmin(ttp, c)

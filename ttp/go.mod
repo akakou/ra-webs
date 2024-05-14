@@ -1,6 +1,6 @@
 module github.com/akakou/ra_webs/ttp
 
-go 1.21.5
+go 1.21.9
 
 require (
 	entgo.io/ent v0.12.5
@@ -9,6 +9,7 @@ require (
 	github.com/akakou/golang-utils v0.0.1
 	github.com/akakou/meta-ct v0.0.6
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
+	github.com/akakou/sslmate-cert-search-api v0.0.8
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/mattn/go-sqlite3 v1.14.18
 	github.com/stretchr/testify v1.9.0

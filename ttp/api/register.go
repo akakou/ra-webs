@@ -12,14 +12,13 @@ import (
 	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp/builder"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/ct"
 	"github.com/akakou/ra_webs/ttp/ent"
 	"github.com/labstack/echo/v4"
 )
 
 var RegisterApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.POST,
-	Path:   API_ROOT +"/register",
+	Path:   core.API_ROOT + "/register",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			service, err := authenticateService(ttp, c)
@@ -61,11 +60,6 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 		return fmt.Errorf(ERROR_QUOTE_INVALID)
 	}
 
-	err = ct.SubscribeCT(req.Domain, ttp.CT)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to subscribe %s due to %v", req.Domain, err)
-	}
-
 	taServerCreate := ttp.DB.Client.TAServer.
 		Create().
 		SetDomain(req.Domain).
@@ -80,6 +74,11 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 		return err
 	}
 
+	err = ttp.CT.Subscribe(req.Domain, ttp)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to subscribe %s due to %v", req.Domain, err)
+	}
+	
 	return nil
 }
 

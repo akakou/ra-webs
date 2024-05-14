@@ -2,42 +2,39 @@ package ttp
 
 import (
 	"fmt"
+	"os"
 
-	rawebscore "github.com/akakou/ra_webs/core"
-	"github.com/akakou/ra_webs/ttp/api"
-	"github.com/akakou/ra_webs/ttp/builder"
+	goutils "github.com/akakou/go-utils"
+	golangutils "github.com/akakou/golang-utils"
 	"github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ct"
-	"github.com/labstack/echo/v4"
 )
 
-func NewTTPServer(ttp *core.TTP) *echo.Echo {
-	e := echo.New()
-	api.Route(e, ttp)
+func DefaultTTP() (*core.TTP, error) {
+	dbType := golangutils.GetEnv("DB_TYPE", "sqlite3")
+	dbConfig := golangutils.GetEnv("DB_CONFIG", "file:ent?mode=memory&cache=shared&_fk=1")
+	fmt.Printf("We use %s as database type and %s as database config\n", dbType, dbConfig)
 
-	return e
-}
+	token := os.Getenv("SSLMATE_TOKEN")
 
-func DefaultTTPServer() (*echo.Echo, error) {
-	ttp, err := core.DefaultTTP()
+	adminToken, err := goutils.RandomHex(core.RANDOM_SIZE)
 	if err != nil {
-		return nil, fmt.Errorf("failed to init ttp: %w", err)
+		return nil, fmt.Errorf("%s: %w", core.ERROR_RANDOM_GENERATE, err)
 	}
 
-	return NewTTPServer(ttp), nil
-}
+	fmt.Printf("Admin token generated: %s\n", adminToken)
 
-func DebugTTPServer() (*echo.Echo, error) {
-	rawebscore.EnableDebug()
-	ct.EnableDebug()
-	builder.EnableDebug()
-
-	ttp, err := core.DefaultTTP()
-	if err != nil {
-		return nil, fmt.Errorf("failed to init ttp: %w", err)
+	dbc := core.DBConfig{
+		Type:   dbType,
+		Config: dbConfig,
 	}
 
-	ttp.DB.Client.Service.Create().SetName("test").SetIsActive(true).SetToken(rawebscore.DEBUG_TOKEN).SaveX(*ttp.DB.Ctx)
+	db, err := core.NewDB(&dbc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", core.ERROR_INIT_DB, err)
+	}
 
-	return NewTTPServer(ttp), nil
+	_ct := ct.NewSSLMateCT(token)
+
+	return core.NewTTP(db, _ct, adminToken)
 }
