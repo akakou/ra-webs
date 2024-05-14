@@ -14,7 +14,7 @@ import (
 )
 
 const LAST_FILE = "./last.txt"
-const DEFAULT_SLEEP = monitor.DEFAULT_SLEEP
+const DEFAULT_MAX_SLEEP = monitor.DEFAULT_SLEEP
 
 type SSLMateCT struct {
 	Monitors  monitor.Monitors
@@ -30,7 +30,7 @@ func NewSSLMateCT(token string) *SSLMateCT {
 		Api:       *api.New(token),
 		BaseQuery: api.Query{},
 		Last:      "",
-		Sleep:     DEFAULT_SLEEP,
+		Sleep:     DEFAULT_MAX_SLEEP,
 	}
 
 	return &ct
@@ -100,6 +100,7 @@ func (ct *SSLMateCT) SyncFromDB(ttp *core.TTP) error {
 	}
 
 	ct.Monitors = monitors
+	ct.Sleep = DEFAULT_MAX_SLEEP / time.Duration(len(domains))
 
 	return nil
 }
