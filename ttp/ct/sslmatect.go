@@ -103,7 +103,6 @@ func (ct *SSLMateCT) SyncFromDB(ttp *core.TTP) error {
 	}
 
 	ct.Monitors = monitors
-	fmt.Printf("%v, %v", ct.Monitors[0].Query.Domain, sleep)
 
 	return nil
 }
