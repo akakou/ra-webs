@@ -40,5 +40,10 @@ func main() {
 	e.Use(middleware.Logger())
 
 	e.Debug = true
+	err = ttp.Setup(e)
+	if err != nil {
+		panic(err)
+	}
+
 	e.Logger.Fatal(e.Start(core.TTPPort))
 }

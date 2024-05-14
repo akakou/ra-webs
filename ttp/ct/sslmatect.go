@@ -95,6 +95,7 @@ func (ct *SSLMateCT) Update(ttp *core.TTP) error {
 
 	return nil
 }
+
 func (ct *SSLMateCT) Subscribe(_ string, ttp *core.TTP) error {
 	return ct.Update(ttp)
 }
