@@ -35,6 +35,35 @@ func NewSSLMateCT(token string) *SSLMateCT {
 	return &ct
 }
 
+func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
+	go ct.Monitors.Run(func(certs []x509.Certificate, index *api.Index, err error) {
+		if err != nil {
+			fmt.Printf("%v", err)
+		}
+
+		err = audit.AuditAll(ttp, certs)
+		if err != nil {
+			fmt.Printf("%v", err)
+		}
+
+		err = writeFile(index.Last)
+		if err != nil {
+			fmt.Printf("%v", err)
+		}
+
+		time.Sleep(ct.Sleep)
+	})
+
+	last, err := readFile(LAST_FILE)
+	if err != nil {
+		return err
+	}
+
+	ct.Last = last
+
+	return nil
+}
+
 func (ct *SSLMateCT) Update(ttp *core.TTP) error {
 	last, err := readFile(LAST_FILE)
 	if err != nil {
@@ -66,36 +95,6 @@ func (ct *SSLMateCT) Update(ttp *core.TTP) error {
 
 	return nil
 }
-
-func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
-	go ct.Monitors.Run(func(certs []x509.Certificate, index *api.Index, err error) {
-		if err != nil {
-			fmt.Printf("%v", err)
-		}
-
-		err = audit.AuditAll(ttp, certs)
-		if err != nil {
-			fmt.Printf("%v", err)
-		}
-
-		err = writeFile(index.Last)
-		if err != nil {
-			fmt.Printf("%v", err)
-		}
-
-		time.Sleep(ct.Sleep)
-	})
-
-	last, err := readFile(LAST_FILE)
-	if err != nil {
-		return err
-	}
-
-	ct.Last = last
-
-	return nil
-}
-
 func (ct *SSLMateCT) Subscribe(_ string, ttp *core.TTP) error {
 	return ct.Update(ttp)
 }
