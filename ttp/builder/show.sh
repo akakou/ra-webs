@@ -1,4 +1,4 @@
-cd repo/example
+cd repo/ta/example
 # cd repo
 
 git log -1 --pretty=format:%H 
