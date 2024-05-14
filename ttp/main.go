@@ -15,8 +15,7 @@ func DefaultTTP() (*core.TTP, error) {
 	dbConfig := golangutils.GetEnv("DB_CONFIG", "file:ent?mode=memory&cache=shared&_fk=1")
 	fmt.Printf("We use %s as database type and %s as database config\n", dbType, dbConfig)
 
-	metaAppId := os.Getenv("META_APP_ID")
-	metaAccessToken := os.Getenv("META_ACCESS_TOKEN")
+	token := os.Getenv("SSLMATE_TOKEN")
 
 	adminToken, err := goutils.RandomHex(core.RANDOM_SIZE)
 	if err != nil {
@@ -35,7 +34,7 @@ func DefaultTTP() (*core.TTP, error) {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_INIT_DB, err)
 	}
 
-	_ct := ct.NewMetaCT(metaAppId, metaAccessToken)
+	_ct := ct.NewSSLMateCT(token)
 
 	return core.NewTTP(db, _ct, adminToken)
 }
