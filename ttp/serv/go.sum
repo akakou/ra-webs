@@ -14,8 +14,8 @@ github.com/akakou/golang-utils v0.0.1 h1:edSwI2WtOjJd569ANOTUZU2floH/pM7qPVSHKup
 github.com/akakou/golang-utils v0.0.1/go.mod h1:DgqXEneVs1Xk8ueLYOJ0ZFeUe5vQcO/S/rY2ISnuZGs=
 github.com/akakou/meta-ct v0.0.6 h1:MWc77DRFYjL02cAQt8o4SXvg0kSfjpu+QqDOQV1VqT4=
 github.com/akakou/meta-ct v0.0.6/go.mod h1:tgQvzvS1WEDZ1C+EJ8sTjudXqW9GEzYkugOiDyerQ3k=
-github.com/akakou/sslmate-cert-search-api v0.0.9 h1:q+Y7/wGFdcRXR9FwqsoVfYQDpeBXAKiaCtjUrozZ5hE=
-github.com/akakou/sslmate-cert-search-api v0.0.9/go.mod h1:4nGHIrY56ATCfZOEfMUwhPqTimnPZQ9/k5aWVFjUpMk=
+github.com/akakou/sslmate-cert-search-api v0.0.14 h1:eore/4i4eEUCm9UtZKNZNg6tvUrF1sxHwvv9eLI99J0=
+github.com/akakou/sslmate-cert-search-api v0.0.14/go.mod h1:4nGHIrY56ATCfZOEfMUwhPqTimnPZQ9/k5aWVFjUpMk=
 github.com/apparentlymart/go-textseg/v13 v13.0.0 h1:Y+KvPE1NYz0xl601PVImeQfFyEy6iT90AvPUL1NNfNw=
 github.com/apparentlymart/go-textseg/v13 v13.0.0/go.mod h1:ZK2fH7c4NqDTLtiYLvIkEghdlcqw7yxLeM89kiTRPUo=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
