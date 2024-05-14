@@ -36,6 +36,13 @@ func NewSSLMateCT(token string) *SSLMateCT {
 }
 
 func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
+	last, err := readFile(LAST_FILE)
+	if err != nil {
+		return err
+	}
+
+	ct.Last = last
+
 	go ct.Monitors.Run(func(certs []x509.Certificate, index *api.Index, err error) {
 		if err != nil {
 			fmt.Printf("%v", err)
@@ -53,13 +60,6 @@ func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
 
 		time.Sleep(ct.Sleep)
 	})
-
-	last, err := readFile(LAST_FILE)
-	if err != nil {
-		return err
-	}
-
-	ct.Last = last
 
 	return nil
 }
