@@ -1,6 +1,6 @@
 module github.com/akakou/ra_webs/ttp
 
-go 1.21.5
+go 1.21.9
 
 require (
 	entgo.io/ent v0.12.5
@@ -19,6 +19,7 @@ require gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 require (
 	ariga.io/atlas v0.14.1-0.20230918065911-83ad451a4935 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
+	github.com/akakou/sslmate-cert-search-api v0.0.5 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/edgelesssys/ego v1.5.0 // indirect
@@ -37,9 +38,11 @@ require (
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
+	golang.org/x/sync v0.4.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	software.sslmate.com/src/certspotter v0.18.0 // indirect
 )
 
 replace github.com/akakou/ra_webs/core => ../core

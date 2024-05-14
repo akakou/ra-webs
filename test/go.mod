@@ -1,6 +1,6 @@
 module github.com/akakou/ra_webs/test
 
-go 1.21.5
+go 1.21.9
 
 replace github.com/akakou/ra_webs/core => ../core
 
@@ -9,6 +9,8 @@ replace ta => ../ta
 replace github.com/akakou/ra_webs/ttp => ../ttp
 
 require (
+	github.com/akakou/go-utils v0.0.3
+	github.com/akakou/golang-utils v0.0.1
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
 	github.com/akakou/ra_webs/ttp v0.0.0-00010101000000-000000000000
 	github.com/labstack/echo/v4 v4.12.0
@@ -21,9 +23,6 @@ require (
 	entgo.io/ent v0.12.5 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/akakou/extract-embed v0.0.1 // indirect
-	github.com/akakou/go-utils v0.0.3 // indirect
-	github.com/akakou/golang-utils v0.0.1 // indirect
-	github.com/akakou/meta-ct v0.0.6 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
