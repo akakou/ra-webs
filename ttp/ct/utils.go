@@ -36,3 +36,17 @@ func writeFile(body string) error {
 
 	return nil
 }
+
+func removeDeplication(src []string) []string {
+	midMap := make(map[string]bool)
+	dest := []string{}
+
+	for _, id := range src {
+		if !midMap[id] {
+			midMap[id] = true
+			dest = append(dest, id)
+		}
+	}
+
+	return dest
+}
