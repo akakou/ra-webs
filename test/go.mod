@@ -23,6 +23,8 @@ require (
 	entgo.io/ent v0.12.5 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/akakou/extract-embed v0.0.1 // indirect
+	github.com/akakou/meta-ct v0.0.6 // indirect
+	github.com/akakou/sslmate-cert-search-api v0.0.6 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
