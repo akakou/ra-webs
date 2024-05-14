@@ -21,16 +21,16 @@ type SSLMateCT struct {
 	Api       api.SSLMateSearchAPI
 	BaseQuery api.Query
 	Last      string
-	Sleep     time.Duration
+	MaxSleep  time.Duration
 }
 
-func NewSSLMateCT(token string) *SSLMateCT {
+func DefaultSSLMateCT(token string) *SSLMateCT {
 	ct := SSLMateCT{
 		Monitors:  []monitor.Monitor{},
 		Api:       *api.New(token),
-		BaseQuery: api.Query{},
+		BaseQuery: monitor.DefaultQuery,
 		Last:      "",
-		Sleep:     DEFAULT_MAX_SLEEP,
+		MaxSleep:  DEFAULT_MAX_SLEEP,
 	}
 
 	return &ct
@@ -49,7 +49,7 @@ func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
 		return err
 	}
 
-	go ct.Monitors.Run(func(certs []x509.Certificate, index *api.Index, err error) {
+	ct.Monitors.Run(func(certs []x509.Certificate, index *api.Index, err error) {
 		fmt.Println("Now CT check running...")
 
 		if err != nil {
@@ -61,12 +61,10 @@ func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
 			fmt.Printf("ct error: %v\n", err)
 		}
 
-		err = writeFile(index.Last)
+		err = writeFile(LAST_FILE, index.Last)
 		if err != nil {
 			fmt.Printf("ct error: %v\n", err)
 		}
-
-		time.Sleep(ct.Sleep)
 	})
 
 	fmt.Println("ct started...")
@@ -85,6 +83,11 @@ func (ct *SSLMateCT) SyncFromDB(ttp *core.TTP) error {
 
 	domains = removeDeplication(domains)
 
+	sleep := ct.MaxSleep
+	if len(domains) > 0 {
+		sleep /= time.Duration(len(domains))
+	}
+
 	for _, domain := range domains {
 		query := ct.BaseQuery
 		query.Domain = domain
@@ -93,19 +96,14 @@ func (ct *SSLMateCT) SyncFromDB(ttp *core.TTP) error {
 		m := monitor.Monitor{
 			Query: &query,
 			Api:   &ct.Api,
-			Sleep: 0,
+			Sleep: sleep,
 		}
 
 		monitors = append(monitors, m)
 	}
 
-	if len(monitors) == 0 {
-		ct.Sleep = DEFAULT_MAX_SLEEP
-	} else {
-		ct.Sleep = DEFAULT_MAX_SLEEP / time.Duration(len(monitors))
-	}
-
 	ct.Monitors = monitors
+	fmt.Printf("%v, %v", ct.Monitors[0].Query.Domain, sleep)
 
 	return nil
 }
