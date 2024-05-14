@@ -45,7 +45,7 @@ func AuditAll(ttp *core.TTP, cert []x509.Certificate) error {
 	for _, c := range cert {
 		err := AuditOne(ttp, &c)
 		if err != nil {
-			return fmt.Errorf("failed to audit: %w", err)
+			fmt.Printf("failed to audit: %v", err)
 		}
 	}
 	return nil
