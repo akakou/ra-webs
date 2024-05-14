@@ -57,7 +57,7 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 	}
 
 	fmt.Printf("Unique ID: %x == %x\n", report.UniqueID, code.UniqueID)
-	if reflect.DeepEqual(report.UniqueID, code.UniqueID) {
+	if !reflect.DeepEqual(report.UniqueID, code.UniqueID) {
 		return fmt.Errorf(ERROR_QUOTE_INVALID)
 	}
 
@@ -79,7 +79,7 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to subscribe %s due to %v", req.Domain, err)
 	}
-	
+
 	return nil
 }
 
