@@ -49,7 +49,7 @@ func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
 		return err
 	}
 
-	ct.Monitors.Run(func(certs []x509.Certificate, index *api.Index, err error) {
+	go ct.Monitors.Run(func(certs []x509.Certificate, index *api.Index, err error) {
 		fmt.Println("Now CT check running...")
 
 		if err != nil {
