@@ -20,9 +20,11 @@ type SSLMateCT struct {
 	Monitors  monitor.Monitors
 	Api       api.SSLMateSearchAPI
 	BaseQuery api.Query
-	Last      string
 	MaxSleep  time.Duration
+	// Last      string
 }
+
+func Nop(c []x509.Certificate, i *api.Index, err error) {}
 
 func DefaultSSLMateCT(token string) *SSLMateCT {
 	ct := SSLMateCT{
@@ -31,11 +33,33 @@ func DefaultSSLMateCT(token string) *SSLMateCT {
 		},
 		Api:       *api.New(token),
 		BaseQuery: monitor.DefaultQuery,
-		Last:      "",
-		MaxSleep:  DEFAULT_MAX_SLEEP,
+		// Last:      "",
+		MaxSleep: DEFAULT_MAX_SLEEP,
 	}
 
 	return &ct
+}
+
+func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
+	// last, err := readFile(LAST_FILE)
+	// if err != nil {
+	// 	return err
+	// }
+
+	err := ct.SyncFromDB(ttp)
+	if err != nil {
+		return err
+	}
+
+	// if last == "" {
+	// 	ct.Monitors.Next(Nop)
+	// }
+
+	go ct.Monitors.Loop(Routine(ttp))
+
+	fmt.Println("ct started...")
+
+	return nil
 }
 
 func Routine(ttp *core.TTP) monitor.Callback {
@@ -51,31 +75,11 @@ func Routine(ttp *core.TTP) monitor.Callback {
 			fmt.Printf("ct error: %v\n", err)
 		}
 
-		err = writeFile(LAST_FILE, index.Last)
-		if err != nil {
-			fmt.Printf("ct error: %v\n", err)
-		}
+		// err = writeFile(LAST_FILE, index.Last)
+		// if err != nil {
+		// 	fmt.Printf("ct error: %v\n", err)
+		// }
 	}
-}
-
-func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
-	last, err := readFile(LAST_FILE)
-	if err != nil {
-		return err
-	}
-
-	ct.Last = last
-
-	err = ct.SyncFromDB(ttp)
-	if err != nil {
-		return err
-	}
-
-	go ct.Monitors.Run(Routine(ttp))
-
-	fmt.Println("ct started...")
-
-	return nil
 }
 
 func (ct *SSLMateCT) SyncFromDB(ttp *core.TTP) error {
@@ -98,7 +102,7 @@ func (ct *SSLMateCT) SyncFromDB(ttp *core.TTP) error {
 	for _, domain := range domains {
 		query := ct.BaseQuery
 		query.Domain = domain
-		query.After = ct.Last
+		// query.After = ct.Last
 
 		m := monitor.Monitor{
 			Query: &query,
@@ -115,5 +119,5 @@ func (ct *SSLMateCT) SyncFromDB(ttp *core.TTP) error {
 }
 
 func (ct *SSLMateCT) Subscribe(_ string, ttp *core.TTP) error {
-	return ct.SyncFromDB(ttp)
+	return nil
 }
