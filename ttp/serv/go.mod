@@ -20,7 +20,7 @@ require (
 	github.com/akakou/go-utils v0.0.3 // indirect
 	github.com/akakou/golang-utils v0.0.1 // indirect
 	github.com/akakou/meta-ct v0.0.6 // indirect
-	github.com/akakou/sslmate-cert-search-api v0.0.8 // indirect
+	github.com/akakou/sslmate-cert-search-api v0.0.9 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/edgelesssys/ego v1.5.0 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect

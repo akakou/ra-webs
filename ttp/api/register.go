@@ -56,6 +56,7 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 		return err
 	}
 
+	fmt.Printf("Unique ID: %x == %x\n", report.UniqueID, code.UniqueID)
 	if reflect.DeepEqual(report.UniqueID, code.UniqueID) {
 		return fmt.Errorf(ERROR_QUOTE_INVALID)
 	}
