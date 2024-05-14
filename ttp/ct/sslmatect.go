@@ -46,14 +46,12 @@ func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
 	// 	return err
 	// }
 
-	err := ct.SyncFromDB(ttp)
+	err := ct.LoadFromDB(ttp)
 	if err != nil {
 		return err
 	}
 
-	// if last == "" {
-	// 	ct.Monitors.Next(Nop)
-	// }
+	ct.Monitors.Next(Nop)
 
 	go ct.Monitors.Loop(Routine(ttp))
 
@@ -82,7 +80,7 @@ func Routine(ttp *core.TTP) monitor.Callback {
 	}
 }
 
-func (ct *SSLMateCT) SyncFromDB(ttp *core.TTP) error {
+func (ct *SSLMateCT) LoadFromDB(ttp *core.TTP) error {
 	fmt.Println("starting sync from db...")
 	monitors := []monitor.Monitor{}
 
@@ -94,30 +92,69 @@ func (ct *SSLMateCT) SyncFromDB(ttp *core.TTP) error {
 
 	domains = removeDeplication(domains)
 
-	sleep := ct.MaxSleep
-	if len(domains) > 0 {
-		sleep /= time.Duration(len(domains))
-	}
-
 	for _, domain := range domains {
 		query := ct.BaseQuery
 		query.Domain = domain
-		// query.After = ct.Last
+		query.After = ""
 
 		m := monitor.Monitor{
 			Query: &query,
 			Api:   &ct.Api,
-			Sleep: sleep,
+			Sleep: DEFAULT_MAX_SLEEP,
 		}
 
 		monitors = append(monitors, m)
 	}
 
 	ct.Monitors.Monitors = monitors
+	ct.ResetSleep()
 
 	return nil
 }
 
-func (ct *SSLMateCT) Subscribe(_ string, ttp *core.TTP) error {
+func (ct *SSLMateCT) ResetSleep() time.Duration {
+	sleep := ct.MaxSleep
+
+	if len(ct.Monitors.Monitors) > 0 {
+		sleep /= time.Duration(len(ct.Monitors.Monitors))
+	}
+
+	for _, monitor := range ct.Monitors.Monitors {
+		monitor.Sleep = sleep
+	}
+
+	return sleep
+}
+
+func hasMonitorForDomain(domain string, monitors monitor.Monitors) bool {
+	hasMonitor := false
+	for _, monitor := range monitors.Monitors {
+		hasMonitor = hasMonitor || (monitor.Query.Domain == domain)
+	}
+
+	return hasMonitor
+}
+
+func (ct *SSLMateCT) Insert(domain string) error {
+	if hasMonitorForDomain(domain, ct.Monitors) {
+		return nil
+	}
+
+	sleep := ct.ResetSleep()
+
+	m := monitor.DefaultMonitor(domain)
+	m.Sleep = sleep
+
+	_, _, err := m.Next()
+	if err != nil {
+		return err
+	}
+
+	ct.Monitors.Monitors = append(ct.Monitors.Monitors, *m)
+
 	return nil
+}
+
+func (ct *SSLMateCT) Subscribe(domain string, ttp *core.TTP) error {
+	return ct.Insert(domain)
 }
