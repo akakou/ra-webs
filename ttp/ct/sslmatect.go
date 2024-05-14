@@ -65,11 +65,6 @@ func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
 }
 
 func (ct *SSLMateCT) Update(ttp *core.TTP) error {
-	last, err := readFile(LAST_FILE)
-	if err != nil {
-		return err
-	}
-
 	servers, err := ttp.DB.Client.TAServer.Query().All(*ttp.DB.Ctx)
 	if err != nil {
 		return err
@@ -80,7 +75,7 @@ func (ct *SSLMateCT) Update(ttp *core.TTP) error {
 	for _, server := range servers {
 		query := ct.BaseQuery
 		query.Domain = server.Domain
-		query.After = last
+		query.After = ct.Last
 
 		m := monitor.Monitor{
 			Query: &query,
