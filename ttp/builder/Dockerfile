@@ -23,7 +23,7 @@ RUN apt-get update -y
 RUN wget https://go.dev/dl/go1.22.2.linux-amd64.tar.gz
 RUN rm -rf /usr/local/go && tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz
 
-RUN apt-get install -qq -y snapd golang-go build-essential libssl-dev clang-11 libssl-dev gdb libsgx-enclave-common libsgx-quote-ex libprotobuf17 libsgx-dcap-ql libsgx-dcap-ql-dev az-dcap-client open-enclave software-properties-common 
+RUN apt-get install -qq -y snapd build-essential libssl-dev clang-11 libssl-dev gdb libsgx-enclave-common libsgx-quote-ex libprotobuf17 libsgx-dcap-ql libsgx-dcap-ql-dev az-dcap-client open-enclave software-properties-common 
 
 RUN wget https://github.com/edgelesssys/ego/releases/download/v1.5.0/ego_1.5.0_amd64_ubuntu-20.04.deb
 RUN apt-get install ./ego_1.5.0_amd64_ubuntu-20.04.deb
