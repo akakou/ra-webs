@@ -4,7 +4,6 @@ echo -en "yes\n" | git clone $1 repo --depth 1 --branch debug-pub-5-15 --single-
 cd repo/ta/example
 #cd repo
 
-ego-go build -buildvcs=false
+ego-go build -buildvcs=false -trimpath=true
 ego sign example
 #ego sign m 
-
