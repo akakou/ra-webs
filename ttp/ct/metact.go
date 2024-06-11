@@ -28,7 +28,7 @@ func NewMetaCT(metaAppId, metaAccessToken string) *MetaCT {
 }
 
 func (ct *MetaCT) Setup(e *echo.Echo, ttp *core.TTP) error {
-	getWebhookApi, postWebhookApi := WebhookApis()
+	getWebhookApi, postWebhookApi := webhookApis()
 	getWebhookApi.Set(e, ttp)
 	postWebhookApi.Set(e, ttp)
 
@@ -43,7 +43,7 @@ func (ct *MetaCT) Subscribe(domain string, ttp *core.TTP) error {
 	return ct.Core.Subscribe(domain)
 }
 
-func MetaCertsToCerts(cs []metact.MetaCert) ([]x509.Certificate, error) {
+func metaCertsToCerts(cs []metact.MetaCert) ([]x509.Certificate, error) {
 	certs := []x509.Certificate{}
 
 	for _, c := range cs {
@@ -59,7 +59,7 @@ func MetaCertsToCerts(cs []metact.MetaCert) ([]x509.Certificate, error) {
 	return certs, nil
 }
 
-func WebhookApis() (goutils.EchoRoute[core.TTP], goutils.EchoRoute[core.TTP]) {
+func webhookApis() (goutils.EchoRoute[core.TTP], goutils.EchoRoute[core.TTP]) {
 	hex, err := goutils.RandomHex(core.RANDOM_SIZE)
 	if err != nil {
 		panic(err)
@@ -89,7 +89,7 @@ func WebhookApis() (goutils.EchoRoute[core.TTP], goutils.EchoRoute[core.TTP]) {
 					return err
 				}
 
-				certs, err := MetaCertsToCerts(cs)
+				certs, err := metaCertsToCerts(cs)
 				if err != nil {
 					return err
 				}
