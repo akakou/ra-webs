@@ -34,3 +34,5 @@ opt/domain-owner/example/example
 
 **/*.db
 **/last.txt
+ta/example/private.pem
+ta/example/public.pem
