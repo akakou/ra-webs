@@ -46,18 +46,21 @@ func (ct *SSLMateCT) Setup(e *echo.Echo, ttp *core.TTP) error {
 	// 	return err
 	// }
 
-	err := ct.LoadFromDB(ttp)
+	err := ct.loadFromDB(ttp)
 	if err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func (ct *SSLMateCT) Run(ttp *core.TTP) {
 	ct.Monitors.Next(Nop)
 
-	go ct.Monitors.Loop(Routine(ttp))
+	ct.Monitors.Loop(Routine(ttp))
 
 	fmt.Println("ct started...")
 
-	return nil
 }
 
 func Routine(ttp *core.TTP) monitor.Callback {
@@ -80,7 +83,11 @@ func Routine(ttp *core.TTP) monitor.Callback {
 	}
 }
 
-func (ct *SSLMateCT) LoadFromDB(ttp *core.TTP) error {
+func (ct *SSLMateCT) Subscribe(domain string, ttp *core.TTP) error {
+	return ct.insert(domain)
+}
+
+func (ct *SSLMateCT) loadFromDB(ttp *core.TTP) error {
 	fmt.Println("starting sync from db...")
 	monitors := []monitor.Monitor{}
 
@@ -107,12 +114,12 @@ func (ct *SSLMateCT) LoadFromDB(ttp *core.TTP) error {
 	}
 
 	ct.Monitors.Monitors = monitors
-	ct.ResetSleep()
+	ct.resetSleep()
 
 	return nil
 }
 
-func (ct *SSLMateCT) ResetSleep() time.Duration {
+func (ct *SSLMateCT) resetSleep() time.Duration {
 	sleep := ct.MaxSleep
 
 	if len(ct.Monitors.Monitors) > 0 {
@@ -135,12 +142,12 @@ func hasMonitorForDomain(domain string, monitors monitor.Monitors) bool {
 	return hasMonitor
 }
 
-func (ct *SSLMateCT) Insert(domain string) error {
+func (ct *SSLMateCT) insert(domain string) error {
 	if hasMonitorForDomain(domain, ct.Monitors) {
 		return nil
 	}
 
-	sleep := ct.ResetSleep()
+	sleep := ct.resetSleep()
 
 	m := monitor.DefaultMonitor(domain)
 	m.Sleep = sleep
@@ -153,8 +160,4 @@ func (ct *SSLMateCT) Insert(domain string) error {
 	ct.Monitors.Monitors = append(ct.Monitors.Monitors, *m)
 
 	return nil
-}
-
-func (ct *SSLMateCT) Subscribe(domain string, ttp *core.TTP) error {
-	return ct.Insert(domain)
 }

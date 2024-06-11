@@ -1,8 +1,11 @@
 package ct
 
 import (
+	"crypto/x509"
 	"io"
 	"os"
+
+	ct "github.com/google/certificate-transparency-go"
 )
 
 func readFile(name string) (string, error) {
@@ -49,4 +52,22 @@ func removeDeplication(src []string) []string {
 	}
 
 	return dest
+}
+
+func parseEntries(entries []ct.LogEntry) ([]x509.Certificate, int64, error) {
+	last := int64(0)
+
+	certs := []x509.Certificate{}
+	for _, e := range entries {
+		cert, err := x509.ParseCertificate(e.X509Cert.Raw)
+
+		if err != nil {
+			return nil, 0, err
+		}
+
+		certs = append(certs, *cert)
+		last = e.Index
+	}
+
+	return certs, last, nil
 }

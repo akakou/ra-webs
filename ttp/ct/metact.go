@@ -33,6 +33,10 @@ func (ct *MetaCT) Setup(e *echo.Echo, ttp *core.TTP) error {
 	postWebhookApi.Set(e, ttp)
 
 	return nil
+
+}
+
+func (ct *MetaCT) Run(ttp *core.TTP) {
 }
 
 func (ct *MetaCT) Subscribe(domain string, ttp *core.TTP) error {
