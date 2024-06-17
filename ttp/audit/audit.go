@@ -2,15 +2,15 @@ package audit
 
 import (
 	"crypto/rsa"
-	"crypto/x509"
 	"fmt"
 
 	"github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ent"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
+	"github.com/google/certificate-transparency-go/x509"
 )
 
-func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
+func Audit(ttp *core.TTP, cert *x509.Certificate) error {
 	domain, err := validateDomains(cert)
 	if err != nil {
 		revokeByDomains(cert.DNSNames, ttp.DB)
@@ -38,15 +38,5 @@ func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
 		serv.Update().SetHasActivated(true).Save(*ttp.DB.Ctx)
 	}
 
-	return nil
-}
-
-func AuditAll(ttp *core.TTP, cert []x509.Certificate) error {
-	for _, c := range cert {
-		err := AuditOne(ttp, &c)
-		if err != nil {
-			fmt.Printf("failed to audit: %v\n", err)
-		}
-	}
 	return nil
 }
