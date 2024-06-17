@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
-	"os"
 	"reflect"
 	"time"
 
@@ -74,11 +73,6 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 	_, err = taServerCreate.Save(*ttp.DB.Ctx)
 	if err != nil {
 		return err
-	}
-
-	err = ttp.CT.Subscribe(req.Domain, ttp)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to subscribe %s due to %v", req.Domain, err)
 	}
 
 	return nil
