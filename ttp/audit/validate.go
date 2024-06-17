@@ -1,8 +1,9 @@
 package audit
 
 import (
-	"crypto/x509"
 	"errors"
+
+	"github.com/google/certificate-transparency-go/x509"
 )
 
 func validateDomains(cert *x509.Certificate) (string, error) {
