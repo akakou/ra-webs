@@ -18,6 +18,7 @@ func DefaultTTP() (*core.TTP, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_RANDOM_GENERATE, err)
 	}
+	adminToken = golangutils.GetEnv("ADMIN_TOKEN", adminToken)
 
 	fmt.Printf("Admin token generated: %s\n", adminToken)
 

@@ -45,7 +45,7 @@ func DefaultConfig() (*TAConfig, error) {
 	}
 
 	if ttpBase == "" {
-		ttpBase = "http://loclhost" + core.TTPPort
+		ttpBase = "http://localhost" + core.TTPPort
 		fmt.Printf("RA_WEBS_TTP_BASE is not set: so use %v\n", ttpBase)
 	}
 
