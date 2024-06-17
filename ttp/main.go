@@ -2,20 +2,17 @@ package ttp
 
 import (
 	"fmt"
-	"os"
 
 	goutils "github.com/akakou/go-utils"
 	golangutils "github.com/akakou/golang-utils"
+	"github.com/akakou/ra_webs/ttp/audit"
 	"github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/ct"
 )
 
 func DefaultTTP() (*core.TTP, error) {
 	dbType := golangutils.GetEnv("DB_TYPE", "sqlite3")
 	dbConfig := golangutils.GetEnv("DB_CONFIG", "file:ent?mode=memory&cache=shared&_fk=1")
 	fmt.Printf("We use %s as database type and %s as database config\n", dbType, dbConfig)
-
-	token := os.Getenv("SSLMATE_TOKEN")
 
 	adminToken, err := goutils.RandomHex(core.RANDOM_SIZE)
 	if err != nil {
@@ -34,7 +31,10 @@ func DefaultTTP() (*core.TTP, error) {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_INIT_DB, err)
 	}
 
-	_ct := ct.DefaultSSLMateCT(token)
+	audit, err := audit.DefaultAuditor()
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", core.ERROR_CREATE_AUDIT, err)
+	}
 
-	return core.NewTTP(db, _ct, adminToken)
+	return core.NewTTP(db, audit, adminToken)
 }
