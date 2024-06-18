@@ -17,7 +17,16 @@ func Audit(ttp *core.TTP, cert *x509.Certificate) error {
 		return fmt.Errorf("%s: %w", ERROR_DOMAIN_INVALID, err)
 	}
 
-	publicKey := x509.MarshalPKCS1PublicKey(cert.PublicKey.(*rsa.PublicKey))
+	unmarshaledPublicKey, isRSA := cert.PublicKey.(*rsa.PublicKey)
+
+	if !isRSA {
+		revokeByDomain(domain, lastValidID(domain, ttp.DB), ttp.DB)
+		return fmt.Errorf("%s", "ERROR_CERTIFICATE_NOT_RSA")
+	}
+
+	publicKey := x509.MarshalPKCS1PublicKey(unmarshaledPublicKey)
+
+
 	lastID := lastValidID(domain, ttp.DB)
 
 	serv, err := ttp.DB.Client.TAServer.
@@ -40,3 +49,4 @@ func Audit(ttp *core.TTP, cert *x509.Certificate) error {
 
 	return nil
 }
+
