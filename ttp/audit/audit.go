@@ -21,11 +21,10 @@ func Audit(ttp *core.TTP, cert *x509.Certificate) error {
 
 	if !isRSA {
 		revokeByDomain(domain, lastValidID(domain, ttp.DB), ttp.DB)
-		return fmt.Errorf("%s", "ERROR_CERTIFICATE_NOT_RSA")
+		return fmt.Errorf("%s", ERROR_PUBLIC_KEY_NOT_RSA)
 	}
 
 	publicKey := x509.MarshalPKCS1PublicKey(unmarshaledPublicKey)
-
 
 	lastID := lastValidID(domain, ttp.DB)
 
@@ -49,4 +48,3 @@ func Audit(ttp *core.TTP, cert *x509.Certificate) error {
 
 	return nil
 }
-
