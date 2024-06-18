@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Service is the client for interacting with the Service builders.
 	Service *ServiceClient
+	// Subscription is the client for interacting with the Subscription builders.
+	Subscription *SubscriptionClient
 	// TACode is the client for interacting with the TACode builders.
 	TACode *TACodeClient
 	// TAServer is the client for interacting with the TAServer builders.
@@ -152,6 +154,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Service = NewServiceClient(tx.config)
+	tx.Subscription = NewSubscriptionClient(tx.config)
 	tx.TACode = NewTACodeClient(tx.config)
 	tx.TAServer = NewTAServerClient(tx.config)
 	tx.TAViolation = NewTAViolationClient(tx.config)

@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
 	"github.com/akakou/ra_webs/ttp/ent/service"
+	"github.com/akakou/ra_webs/ttp/ent/subscription"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/akakou/ra_webs/ttp/ent/taviolation"
@@ -27,10 +28,11 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeService     = "Service"
-	TypeTACode      = "TACode"
-	TypeTAServer    = "TAServer"
-	TypeTAViolation = "TAViolation"
+	TypeService      = "Service"
+	TypeSubscription = "Subscription"
+	TypeTACode       = "TACode"
+	TypeTAServer     = "TAServer"
+	TypeTAViolation  = "TAViolation"
 )
 
 // ServiceMutation represents an operation that mutates the Service nodes in the graph.
@@ -641,6 +643,425 @@ func (m *ServiceMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Service edge %s", name)
+}
+
+// SubscriptionMutation represents an operation that mutates the Subscription nodes in the graph.
+type SubscriptionMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	subscription  *string
+	clearedFields map[string]struct{}
+	server        map[int]struct{}
+	removedserver map[int]struct{}
+	clearedserver bool
+	done          bool
+	oldValue      func(context.Context) (*Subscription, error)
+	predicates    []predicate.Subscription
+}
+
+var _ ent.Mutation = (*SubscriptionMutation)(nil)
+
+// subscriptionOption allows management of the mutation configuration using functional options.
+type subscriptionOption func(*SubscriptionMutation)
+
+// newSubscriptionMutation creates new mutation for the Subscription entity.
+func newSubscriptionMutation(c config, op Op, opts ...subscriptionOption) *SubscriptionMutation {
+	m := &SubscriptionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSubscription,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSubscriptionID sets the ID field of the mutation.
+func withSubscriptionID(id int) subscriptionOption {
+	return func(m *SubscriptionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Subscription
+		)
+		m.oldValue = func(ctx context.Context) (*Subscription, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Subscription.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSubscription sets the old Subscription of the mutation.
+func withSubscription(node *Subscription) subscriptionOption {
+	return func(m *SubscriptionMutation) {
+		m.oldValue = func(context.Context) (*Subscription, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SubscriptionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SubscriptionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SubscriptionMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SubscriptionMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Subscription.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetSubscription sets the "subscription" field.
+func (m *SubscriptionMutation) SetSubscription(s string) {
+	m.subscription = &s
+}
+
+// Subscription returns the value of the "subscription" field in the mutation.
+func (m *SubscriptionMutation) Subscription() (r string, exists bool) {
+	v := m.subscription
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubscription returns the old "subscription" field's value of the Subscription entity.
+// If the Subscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionMutation) OldSubscription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubscription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubscription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubscription: %w", err)
+	}
+	return oldValue.Subscription, nil
+}
+
+// ResetSubscription resets all changes to the "subscription" field.
+func (m *SubscriptionMutation) ResetSubscription() {
+	m.subscription = nil
+}
+
+// AddServerIDs adds the "server" edge to the TAServer entity by ids.
+func (m *SubscriptionMutation) AddServerIDs(ids ...int) {
+	if m.server == nil {
+		m.server = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.server[ids[i]] = struct{}{}
+	}
+}
+
+// ClearServer clears the "server" edge to the TAServer entity.
+func (m *SubscriptionMutation) ClearServer() {
+	m.clearedserver = true
+}
+
+// ServerCleared reports if the "server" edge to the TAServer entity was cleared.
+func (m *SubscriptionMutation) ServerCleared() bool {
+	return m.clearedserver
+}
+
+// RemoveServerIDs removes the "server" edge to the TAServer entity by IDs.
+func (m *SubscriptionMutation) RemoveServerIDs(ids ...int) {
+	if m.removedserver == nil {
+		m.removedserver = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.server, ids[i])
+		m.removedserver[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedServer returns the removed IDs of the "server" edge to the TAServer entity.
+func (m *SubscriptionMutation) RemovedServerIDs() (ids []int) {
+	for id := range m.removedserver {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ServerIDs returns the "server" edge IDs in the mutation.
+func (m *SubscriptionMutation) ServerIDs() (ids []int) {
+	for id := range m.server {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetServer resets all changes to the "server" edge.
+func (m *SubscriptionMutation) ResetServer() {
+	m.server = nil
+	m.clearedserver = false
+	m.removedserver = nil
+}
+
+// Where appends a list predicates to the SubscriptionMutation builder.
+func (m *SubscriptionMutation) Where(ps ...predicate.Subscription) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SubscriptionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SubscriptionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Subscription, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SubscriptionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SubscriptionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Subscription).
+func (m *SubscriptionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SubscriptionMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.subscription != nil {
+		fields = append(fields, subscription.FieldSubscription)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SubscriptionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case subscription.FieldSubscription:
+		return m.Subscription()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SubscriptionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case subscription.FieldSubscription:
+		return m.OldSubscription(ctx)
+	}
+	return nil, fmt.Errorf("unknown Subscription field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubscriptionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case subscription.FieldSubscription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubscription(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Subscription field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SubscriptionMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SubscriptionMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubscriptionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Subscription numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SubscriptionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SubscriptionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SubscriptionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Subscription nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SubscriptionMutation) ResetField(name string) error {
+	switch name {
+	case subscription.FieldSubscription:
+		m.ResetSubscription()
+		return nil
+	}
+	return fmt.Errorf("unknown Subscription field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SubscriptionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.server != nil {
+		edges = append(edges, subscription.EdgeServer)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SubscriptionMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case subscription.EdgeServer:
+		ids := make([]ent.Value, 0, len(m.server))
+		for id := range m.server {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SubscriptionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedserver != nil {
+		edges = append(edges, subscription.EdgeServer)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SubscriptionMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case subscription.EdgeServer:
+		ids := make([]ent.Value, 0, len(m.removedserver))
+		for id := range m.removedserver {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SubscriptionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedserver {
+		edges = append(edges, subscription.EdgeServer)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SubscriptionMutation) EdgeCleared(name string) bool {
+	switch name {
+	case subscription.EdgeServer:
+		return m.clearedserver
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SubscriptionMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Subscription unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SubscriptionMutation) ResetEdge(name string) error {
+	switch name {
+	case subscription.EdgeServer:
+		m.ResetServer()
+		return nil
+	}
+	return fmt.Errorf("unknown Subscription edge %s", name)
 }
 
 // TACodeMutation represents an operation that mutates the TACode nodes in the graph.
@@ -1286,24 +1707,27 @@ func (m *TACodeMutation) ResetEdge(name string) error {
 // TAServerMutation represents an operation that mutates the TAServer nodes in the graph.
 type TAServerMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	domain           *string
-	public_key       *[]byte
-	quote            *string
-	has_activated    *bool
-	clearedFields    map[string]struct{}
-	violation        map[int]struct{}
-	removedviolation map[int]struct{}
-	clearedviolation bool
-	code             *int
-	clearedcode      bool
-	service          *int
-	clearedservice   bool
-	done             bool
-	oldValue         func(context.Context) (*TAServer, error)
-	predicates       []predicate.TAServer
+	op                  Op
+	typ                 string
+	id                  *int
+	domain              *string
+	public_key          *[]byte
+	quote               *string
+	has_activated       *bool
+	clearedFields       map[string]struct{}
+	violation           map[int]struct{}
+	removedviolation    map[int]struct{}
+	clearedviolation    bool
+	code                *int
+	clearedcode         bool
+	service             *int
+	clearedservice      bool
+	subscription        map[int]struct{}
+	removedsubscription map[int]struct{}
+	clearedsubscription bool
+	done                bool
+	oldValue            func(context.Context) (*TAServer, error)
+	predicates          []predicate.TAServer
 }
 
 var _ ent.Mutation = (*TAServerMutation)(nil)
@@ -1680,6 +2104,60 @@ func (m *TAServerMutation) ResetService() {
 	m.clearedservice = false
 }
 
+// AddSubscriptionIDs adds the "subscription" edge to the Subscription entity by ids.
+func (m *TAServerMutation) AddSubscriptionIDs(ids ...int) {
+	if m.subscription == nil {
+		m.subscription = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.subscription[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSubscription clears the "subscription" edge to the Subscription entity.
+func (m *TAServerMutation) ClearSubscription() {
+	m.clearedsubscription = true
+}
+
+// SubscriptionCleared reports if the "subscription" edge to the Subscription entity was cleared.
+func (m *TAServerMutation) SubscriptionCleared() bool {
+	return m.clearedsubscription
+}
+
+// RemoveSubscriptionIDs removes the "subscription" edge to the Subscription entity by IDs.
+func (m *TAServerMutation) RemoveSubscriptionIDs(ids ...int) {
+	if m.removedsubscription == nil {
+		m.removedsubscription = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.subscription, ids[i])
+		m.removedsubscription[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSubscription returns the removed IDs of the "subscription" edge to the Subscription entity.
+func (m *TAServerMutation) RemovedSubscriptionIDs() (ids []int) {
+	for id := range m.removedsubscription {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SubscriptionIDs returns the "subscription" edge IDs in the mutation.
+func (m *TAServerMutation) SubscriptionIDs() (ids []int) {
+	for id := range m.subscription {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSubscription resets all changes to the "subscription" edge.
+func (m *TAServerMutation) ResetSubscription() {
+	m.subscription = nil
+	m.clearedsubscription = false
+	m.removedsubscription = nil
+}
+
 // Where appends a list predicates to the TAServerMutation builder.
 func (m *TAServerMutation) Where(ps ...predicate.TAServer) {
 	m.predicates = append(m.predicates, ps...)
@@ -1864,7 +2342,7 @@ func (m *TAServerMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TAServerMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.violation != nil {
 		edges = append(edges, taserver.EdgeViolation)
 	}
@@ -1873,6 +2351,9 @@ func (m *TAServerMutation) AddedEdges() []string {
 	}
 	if m.service != nil {
 		edges = append(edges, taserver.EdgeService)
+	}
+	if m.subscription != nil {
+		edges = append(edges, taserver.EdgeSubscription)
 	}
 	return edges
 }
@@ -1895,15 +2376,24 @@ func (m *TAServerMutation) AddedIDs(name string) []ent.Value {
 		if id := m.service; id != nil {
 			return []ent.Value{*id}
 		}
+	case taserver.EdgeSubscription:
+		ids := make([]ent.Value, 0, len(m.subscription))
+		for id := range m.subscription {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TAServerMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedviolation != nil {
 		edges = append(edges, taserver.EdgeViolation)
+	}
+	if m.removedsubscription != nil {
+		edges = append(edges, taserver.EdgeSubscription)
 	}
 	return edges
 }
@@ -1918,13 +2408,19 @@ func (m *TAServerMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case taserver.EdgeSubscription:
+		ids := make([]ent.Value, 0, len(m.removedsubscription))
+		for id := range m.removedsubscription {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TAServerMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedviolation {
 		edges = append(edges, taserver.EdgeViolation)
 	}
@@ -1933,6 +2429,9 @@ func (m *TAServerMutation) ClearedEdges() []string {
 	}
 	if m.clearedservice {
 		edges = append(edges, taserver.EdgeService)
+	}
+	if m.clearedsubscription {
+		edges = append(edges, taserver.EdgeSubscription)
 	}
 	return edges
 }
@@ -1947,6 +2446,8 @@ func (m *TAServerMutation) EdgeCleared(name string) bool {
 		return m.clearedcode
 	case taserver.EdgeService:
 		return m.clearedservice
+	case taserver.EdgeSubscription:
+		return m.clearedsubscription
 	}
 	return false
 }
@@ -1977,6 +2478,9 @@ func (m *TAServerMutation) ResetEdge(name string) error {
 		return nil
 	case taserver.EdgeService:
 		m.ResetService()
+		return nil
+	case taserver.EdgeSubscription:
+		m.ResetSubscription()
 		return nil
 	}
 	return fmt.Errorf("unknown TAServer edge %s", name)

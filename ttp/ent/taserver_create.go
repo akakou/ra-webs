@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/service"
+	"github.com/akakou/ra_webs/ttp/ent/subscription"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/akakou/ra_webs/ttp/ent/taviolation"
@@ -97,6 +98,21 @@ func (tsc *TAServerCreate) SetNillableServiceID(id *int) *TAServerCreate {
 // SetService sets the "service" edge to the Service entity.
 func (tsc *TAServerCreate) SetService(s *Service) *TAServerCreate {
 	return tsc.SetServiceID(s.ID)
+}
+
+// AddSubscriptionIDs adds the "subscription" edge to the Subscription entity by IDs.
+func (tsc *TAServerCreate) AddSubscriptionIDs(ids ...int) *TAServerCreate {
+	tsc.mutation.AddSubscriptionIDs(ids...)
+	return tsc
+}
+
+// AddSubscription adds the "subscription" edges to the Subscription entity.
+func (tsc *TAServerCreate) AddSubscription(s ...*Subscription) *TAServerCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tsc.AddSubscriptionIDs(ids...)
 }
 
 // Mutation returns the TAServerMutation object of the builder.
@@ -235,6 +251,22 @@ func (tsc *TAServerCreate) createSpec() (*TAServer, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.ta_server_service = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tsc.mutation.SubscriptionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   taserver.SubscriptionTable,
+			Columns: taserver.SubscriptionPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

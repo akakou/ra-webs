@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
 	"github.com/akakou/ra_webs/ttp/ent/service"
+	"github.com/akakou/ra_webs/ttp/ent/subscription"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/akakou/ra_webs/ttp/ent/taviolation"
@@ -21,14 +22,15 @@ import (
 // TAServerQuery is the builder for querying TAServer entities.
 type TAServerQuery struct {
 	config
-	ctx           *QueryContext
-	order         []taserver.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.TAServer
-	withViolation *TAViolationQuery
-	withCode      *TACodeQuery
-	withService   *ServiceQuery
-	withFKs       bool
+	ctx              *QueryContext
+	order            []taserver.OrderOption
+	inters           []Interceptor
+	predicates       []predicate.TAServer
+	withViolation    *TAViolationQuery
+	withCode         *TACodeQuery
+	withService      *ServiceQuery
+	withSubscription *SubscriptionQuery
+	withFKs          bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -124,6 +126,28 @@ func (tsq *TAServerQuery) QueryService() *ServiceQuery {
 			sqlgraph.From(taserver.Table, taserver.FieldID, selector),
 			sqlgraph.To(service.Table, service.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, taserver.ServiceTable, taserver.ServiceColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tsq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySubscription chains the current query on the "subscription" edge.
+func (tsq *TAServerQuery) QuerySubscription() *SubscriptionQuery {
+	query := (&SubscriptionClient{config: tsq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tsq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tsq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(taserver.Table, taserver.FieldID, selector),
+			sqlgraph.To(subscription.Table, subscription.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, taserver.SubscriptionTable, taserver.SubscriptionPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(tsq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,14 +342,15 @@ func (tsq *TAServerQuery) Clone() *TAServerQuery {
 		return nil
 	}
 	return &TAServerQuery{
-		config:        tsq.config,
-		ctx:           tsq.ctx.Clone(),
-		order:         append([]taserver.OrderOption{}, tsq.order...),
-		inters:        append([]Interceptor{}, tsq.inters...),
-		predicates:    append([]predicate.TAServer{}, tsq.predicates...),
-		withViolation: tsq.withViolation.Clone(),
-		withCode:      tsq.withCode.Clone(),
-		withService:   tsq.withService.Clone(),
+		config:           tsq.config,
+		ctx:              tsq.ctx.Clone(),
+		order:            append([]taserver.OrderOption{}, tsq.order...),
+		inters:           append([]Interceptor{}, tsq.inters...),
+		predicates:       append([]predicate.TAServer{}, tsq.predicates...),
+		withViolation:    tsq.withViolation.Clone(),
+		withCode:         tsq.withCode.Clone(),
+		withService:      tsq.withService.Clone(),
+		withSubscription: tsq.withSubscription.Clone(),
 		// clone intermediate query.
 		sql:  tsq.sql.Clone(),
 		path: tsq.path,
@@ -362,6 +387,17 @@ func (tsq *TAServerQuery) WithService(opts ...func(*ServiceQuery)) *TAServerQuer
 		opt(query)
 	}
 	tsq.withService = query
+	return tsq
+}
+
+// WithSubscription tells the query-builder to eager-load the nodes that are connected to
+// the "subscription" edge. The optional arguments are used to configure the query builder of the edge.
+func (tsq *TAServerQuery) WithSubscription(opts ...func(*SubscriptionQuery)) *TAServerQuery {
+	query := (&SubscriptionClient{config: tsq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tsq.withSubscription = query
 	return tsq
 }
 
@@ -444,10 +480,11 @@ func (tsq *TAServerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA
 		nodes       = []*TAServer{}
 		withFKs     = tsq.withFKs
 		_spec       = tsq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			tsq.withViolation != nil,
 			tsq.withCode != nil,
 			tsq.withService != nil,
+			tsq.withSubscription != nil,
 		}
 	)
 	if tsq.withCode != nil || tsq.withService != nil {
@@ -490,6 +527,13 @@ func (tsq *TAServerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA
 	if query := tsq.withService; query != nil {
 		if err := tsq.loadService(ctx, query, nodes, nil,
 			func(n *TAServer, e *Service) { n.Edges.Service = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := tsq.withSubscription; query != nil {
+		if err := tsq.loadSubscription(ctx, query, nodes,
+			func(n *TAServer) { n.Edges.Subscription = []*Subscription{} },
+			func(n *TAServer, e *Subscription) { n.Edges.Subscription = append(n.Edges.Subscription, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -587,6 +631,67 @@ func (tsq *TAServerQuery) loadService(ctx context.Context, query *ServiceQuery, 
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (tsq *TAServerQuery) loadSubscription(ctx context.Context, query *SubscriptionQuery, nodes []*TAServer, init func(*TAServer), assign func(*TAServer, *Subscription)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*TAServer)
+	nids := make(map[int]map[*TAServer]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(taserver.SubscriptionTable)
+		s.Join(joinT).On(s.C(subscription.FieldID), joinT.C(taserver.SubscriptionPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(taserver.SubscriptionPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(taserver.SubscriptionPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*TAServer]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Subscription](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "subscription" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
 		}
 	}
 	return nil

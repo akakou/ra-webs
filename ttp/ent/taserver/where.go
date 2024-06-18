@@ -322,6 +322,29 @@ func HasServiceWith(preds ...predicate.Service) predicate.TAServer {
 	})
 }
 
+// HasSubscription applies the HasEdge predicate on the "subscription" edge.
+func HasSubscription() predicate.TAServer {
+	return predicate.TAServer(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, SubscriptionTable, SubscriptionPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSubscriptionWith applies the HasEdge predicate on the "subscription" edge with a given conditions (other predicates).
+func HasSubscriptionWith(preds ...predicate.Subscription) predicate.TAServer {
+	return predicate.TAServer(func(s *sql.Selector) {
+		step := newSubscriptionStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.TAServer) predicate.TAServer {
 	return predicate.TAServer(sql.AndPredicates(predicates...))

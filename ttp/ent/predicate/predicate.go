@@ -9,6 +9,9 @@ import (
 // Service is the predicate function for service builders.
 type Service func(*sql.Selector)
 
+// Subscription is the predicate function for subscription builders.
+type Subscription func(*sql.Selector)
+
 // TACode is the predicate function for tacode builders.
 type TACode func(*sql.Selector)
 
