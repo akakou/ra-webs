@@ -4,18 +4,18 @@ import "github.com/labstack/echo/v4"
 
 type TTP struct {
 	DB         *DB
-	CT         CT
+	Audit      Audit
 	AdminToken string
 }
 
-func NewTTP(db *DB, ct CT, adminToken string) (*TTP, error) {
+func NewTTP(db *DB, audit Audit, adminToken string) (*TTP, error) {
 	return &TTP{
 		DB:         db,
-		CT:         ct,
+		Audit:      audit,
 		AdminToken: adminToken,
 	}, nil
 }
 
 func (ttp *TTP) Setup(e *echo.Echo) error {
-	return ttp.CT.Setup(e, ttp)
+	return ttp.Audit.Setup(ttp)
 }

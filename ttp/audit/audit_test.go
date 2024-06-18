@@ -3,8 +3,10 @@ package audit
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/x509"
-	"crypto/x509/pkix"
+
+	"github.com/google/certificate-transparency-go/x509"
+	"github.com/google/certificate-transparency-go/x509/pkix"
+
 	"encoding/pem"
 	"testing"
 
@@ -50,7 +52,7 @@ func testPass(t *testing.T) {
 	ttp.DB.Client.TAServer.Create().SetDomain("example.com").SetPublicKey(keyBuf).SetQuote("1").SetHasActivated(false).SaveX(*ttp.DB.Ctx)
 	ttp.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*ttp.DB.Ctx)
 
-	err := AuditOne(ttp, &x509.Certificate{
+	err := Audit(ttp, &x509.Certificate{
 		DNSNames:  []string{"example.com"},
 		Subject:   pkix.Name{CommonName: "example.com"},
 		PublicKey: &priv.PublicKey,
@@ -69,7 +71,7 @@ func testFailTANoServer(t *testing.T) {
 	ttp.DB.Client.TAServer.Create().SetDomain("example.com").SetPublicKey(keyBuf).SetQuote("1").SetHasActivated(true).SaveX(*ttp.DB.Ctx)
 	ttp.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*ttp.DB.Ctx)
 
-	err := AuditOne(ttp, &x509.Certificate{
+	err := Audit(ttp, &x509.Certificate{
 		DNSNames:  []string{"hoge.example.com"},
 		Subject:   pkix.Name{CommonName: "hoge.example.com"},
 		PublicKey: &priv.PublicKey,
@@ -91,7 +93,7 @@ func testFailByMissDomains(t *testing.T) {
 		PublicKey: []byte{7, 8, 9},
 	}
 
-	err := AuditOne(ttp, &cert)
+	err := Audit(ttp, &cert)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), ERROR_DOMAIN_INVALID)
 
@@ -100,7 +102,7 @@ func testFailByMissDomains(t *testing.T) {
 		PublicKey: []byte{7, 8, 9},
 	}
 
-	err = AuditOne(ttp, &cert)
+	err = Audit(ttp, &cert)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), ERROR_DOMAIN_INVALID)
 

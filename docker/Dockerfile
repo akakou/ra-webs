@@ -28,7 +28,7 @@ RUN wget https://github.com/edgelesssys/ego/releases/download/v1.5.0/ego_1.5.0_a
 RUN apt-get install ./ego_1.5.0_amd64_ubuntu-20.04.deb
 
 RUN yes | ego install az-dcap-client
-RUN apt-get install -y ca-certificates
+RUN apt-get install -y ca-certificates curl
 
 
 

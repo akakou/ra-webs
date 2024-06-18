@@ -8,14 +8,17 @@ services:
     volumes:
       - ./ta:/ta
       - ./core:/core
+      - ./test:/test
       - /dev:/dev
     working_dir: /ta/example
-    command: bash -c 'mount -o remount,exec /dev && ego-go build -buildvcs=false -trimpath=true && ego sign example && ego run example'
+    command: bash -c 'mount -o remount,exec /dev && ego-go build -buildvcs=false -trimpath=true && ego sign example && source /test/issue_service.sh && sleep 10 && ego run example'
     privileged: true
     environment:
       - OE_SIMULATION=0
     env_file:
       - test/env/ta.env
+      - test/env/common.env
+    restart: unless-stopped
 
   ttp:
     build: ./docker
@@ -29,10 +32,9 @@ services:
     command: bash -c 'go mod tidy && go run main.go'
     env_file:
       - test/env/ttp.env
+      - test/env/common.env
     privileged: true
     tty: true
-    environment:
-      - RA_WEBS_TTP_TOKEN="thisisra-websadmintoken"
 
   do:
     image: golang:latest
@@ -49,3 +51,16 @@ services:
       - CA_NAME=letsencrypt.org
     profiles:
       - strict
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    restart: unless-stopped
+    command:
+      - "start"
+      - "--all"
+      - "--config"
+      - "/etc/ngrok.yaml"
+    ports:
+      - 4040:4040
+    volumes:
+      - ./test/ngrok.yaml:/etc/ngrok.yaml

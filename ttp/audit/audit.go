@@ -2,22 +2,31 @@ package audit
 
 import (
 	"crypto/rsa"
-	"crypto/x509"
 	"fmt"
 
 	"github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ent"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
+	"github.com/google/certificate-transparency-go/x509"
 )
 
-func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
+func Audit(ttp *core.TTP, cert *x509.Certificate) error {
 	domain, err := validateDomains(cert)
 	if err != nil {
 		revokeByDomains(cert.DNSNames, ttp.DB)
 		return fmt.Errorf("%s: %w", ERROR_DOMAIN_INVALID, err)
 	}
 
-	publicKey := x509.MarshalPKCS1PublicKey(cert.PublicKey.(*rsa.PublicKey))
+	unmarshaledPublicKey, isRSA := cert.PublicKey.(*rsa.PublicKey)
+
+	if !isRSA {
+		revokeByDomain(domain, lastValidID(domain, ttp.DB), ttp.DB)
+		return fmt.Errorf("%s", "ERROR_CERTIFICATE_NOT_RSA")
+	}
+
+	publicKey := x509.MarshalPKCS1PublicKey(unmarshaledPublicKey)
+
+
 	lastID := lastValidID(domain, ttp.DB)
 
 	serv, err := ttp.DB.Client.TAServer.
@@ -41,12 +50,3 @@ func AuditOne(ttp *core.TTP, cert *x509.Certificate) error {
 	return nil
 }
 
-func AuditAll(ttp *core.TTP, cert []x509.Certificate) error {
-	for _, c := range cert {
-		err := AuditOne(ttp, &c)
-		if err != nil {
-			fmt.Printf("failed to audit: %v\n", err)
-		}
-	}
-	return nil
-}

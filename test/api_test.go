@@ -23,12 +23,11 @@ import (
 type CTForTest struct {
 }
 
-func (CTForTest) Setup(*echo.Echo, *ttpcore.TTP) error {
+func (CTForTest) Setup(*ttpcore.TTP) error {
 	return nil
 }
 
-func (CTForTest) Subscribe(string, *ttpcore.TTP) error {
-	return nil
+func (CTForTest) Run(*ttpcore.TTP) {
 }
 
 func ttpForTest() (*ttpcore.TTP, error) {

@@ -45,5 +45,6 @@ func main() {
 		panic(err)
 	}
 
+	go ttp.Audit.Run(ttp)
 	e.Logger.Fatal(e.Start(core.TTPPort))
 }
