@@ -7,6 +7,7 @@ import (
 	golangutils "github.com/akakou/golang-utils"
 	"github.com/akakou/ra_webs/ttp/audit"
 	"github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/notify"
 )
 
 func DefaultTTP() (*core.TTP, error) {
@@ -37,5 +38,10 @@ func DefaultTTP() (*core.TTP, error) {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_CREATE_AUDIT, err)
 	}
 
-	return core.NewTTP(db, audit, adminToken)
+	n, err := notify.DefaultBrowserNotify()
+	if err != nil {
+		return nil, err
+	}
+
+	return core.NewTTP(db, audit, n, adminToken)
 }
