@@ -2,45 +2,27 @@ package notify
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/SherClockHolmes/webpush-go"
 	"github.com/akakou/ra_webs/ttp/core"
 	"github.com/akakou/ra_webs/ttp/ent"
+	"github.com/labstack/echo/v4"
 )
 
-const TTL_MAX = 2419200
-const DEFAULT_SUBSCRIBER = "ra-webs@example.com"
+const VIOLATION_MESSAGE = "A violation has been detected at "
+const UPDATE_MESSAGE = "A new server has been added at "
 
-type BrowserNotify struct {
-	VapidPublicKey, VapidPrivateKey string
-	Subscriber                      string
-	TTL                             int
+func NotifyViolation(serv *ent.TAServer, ttp *core.TTP) error {
+	msg := fmt.Sprintf("%s %v", VIOLATION_MESSAGE, serv.Domain)
+	return ttp.Notify.Notify([]byte(msg), serv, ttp)
 }
 
-func NewBrowserNotify(vapidPublicKey, vapidPrivateKey, Subscriber string, TTL int) *BrowserNotify {
-	return &BrowserNotify{
-		VapidPublicKey:  vapidPublicKey,
-		VapidPrivateKey: vapidPrivateKey,
-		Subscriber:      Subscriber,
-		TTL:             TTL,
-	}
+func NotifyUpdate(serv *ent.TAServer, ttp *core.TTP) error {
+	msg := fmt.Sprintf("%s %v", UPDATE_MESSAGE, serv.Domain)
+	return ttp.Notify.Notify([]byte(msg), serv, ttp)
 }
 
-func DefaultBrowserNotify() (*BrowserNotify, error) {
-	var err error
-
-	publicKey := os.Getenv("RA_WEBS_VAPID_PUBLIC_KEY")
-	privateKey := os.Getenv("RA_WEBS_VAPID_PRIVATE_KEY")
-
-	if publicKey != "" || privateKey != "" {
-		privateKey, publicKey, err = webpush.GenerateVAPIDKeys()
-	}
-
-	return NewBrowserNotify(privateKey, publicKey, DEFAULT_SUBSCRIBER, TTL_MAX), err
-}
-
-func (notify *BrowserNotify) Notify(msg []byte, serv *ent.TAServer, ttp *core.TTP[BrowserNotify]) error {
+func (notify *BrowserNotify) Notify(msg []byte, serv *ent.TAServer, ttp *core.TTP) error {
 	subscriptions, err := serv.QuerySubscription().All(*ttp.DB.Ctx)
 	if err != nil {
 		panic(err)
@@ -83,4 +65,9 @@ func (notify *BrowserNotify) notifyOne(msg []byte, subscription *ent.Subscriptio
 	defer resp.Body.Close()
 
 	return err
+}
+
+func (notify *BrowserNotify) Setup(e *echo.Echo, ttp *core.TTP) error {
+	postSubscribe.Set(e, ttp)
+	return nil
 }
