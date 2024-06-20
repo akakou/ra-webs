@@ -20,9 +20,21 @@ type SubscriptionCreate struct {
 	hooks    []Hook
 }
 
-// SetSubscription sets the "subscription" field.
-func (sc *SubscriptionCreate) SetSubscription(s string) *SubscriptionCreate {
-	sc.mutation.SetSubscription(s)
+// SetEndpoint sets the "endpoint" field.
+func (sc *SubscriptionCreate) SetEndpoint(s string) *SubscriptionCreate {
+	sc.mutation.SetEndpoint(s)
+	return sc
+}
+
+// SetP256dh sets the "p256dh" field.
+func (sc *SubscriptionCreate) SetP256dh(s string) *SubscriptionCreate {
+	sc.mutation.SetP256dh(s)
+	return sc
+}
+
+// SetAuth sets the "auth" field.
+func (sc *SubscriptionCreate) SetAuth(s string) *SubscriptionCreate {
+	sc.mutation.SetAuth(s)
 	return sc
 }
 
@@ -75,8 +87,14 @@ func (sc *SubscriptionCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (sc *SubscriptionCreate) check() error {
-	if _, ok := sc.mutation.Subscription(); !ok {
-		return &ValidationError{Name: "subscription", err: errors.New(`ent: missing required field "Subscription.subscription"`)}
+	if _, ok := sc.mutation.Endpoint(); !ok {
+		return &ValidationError{Name: "endpoint", err: errors.New(`ent: missing required field "Subscription.endpoint"`)}
+	}
+	if _, ok := sc.mutation.P256dh(); !ok {
+		return &ValidationError{Name: "p256dh", err: errors.New(`ent: missing required field "Subscription.p256dh"`)}
+	}
+	if _, ok := sc.mutation.Auth(); !ok {
+		return &ValidationError{Name: "auth", err: errors.New(`ent: missing required field "Subscription.auth"`)}
 	}
 	return nil
 }
@@ -104,9 +122,17 @@ func (sc *SubscriptionCreate) createSpec() (*Subscription, *sqlgraph.CreateSpec)
 		_node = &Subscription{config: sc.config}
 		_spec = sqlgraph.NewCreateSpec(subscription.Table, sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt))
 	)
-	if value, ok := sc.mutation.Subscription(); ok {
-		_spec.SetField(subscription.FieldSubscription, field.TypeString, value)
-		_node.Subscription = value
+	if value, ok := sc.mutation.Endpoint(); ok {
+		_spec.SetField(subscription.FieldEndpoint, field.TypeString, value)
+		_node.Endpoint = value
+	}
+	if value, ok := sc.mutation.P256dh(); ok {
+		_spec.SetField(subscription.FieldP256dh, field.TypeString, value)
+		_node.P256dh = value
+	}
+	if value, ok := sc.mutation.Auth(); ok {
+		_spec.SetField(subscription.FieldAuth, field.TypeString, value)
+		_node.Auth = value
 	}
 	if nodes := sc.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -53,74 +53,214 @@ func IDLTE(id int) predicate.Subscription {
 	return predicate.Subscription(sql.FieldLTE(FieldID, id))
 }
 
-// Subscription applies equality check predicate on the "subscription" field. It's identical to SubscriptionEQ.
-func Subscription(v string) predicate.Subscription {
-	return predicate.Subscription(sql.FieldEQ(FieldSubscription, v))
+// Endpoint applies equality check predicate on the "endpoint" field. It's identical to EndpointEQ.
+func Endpoint(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldEndpoint, v))
 }
 
-// SubscriptionEQ applies the EQ predicate on the "subscription" field.
-func SubscriptionEQ(v string) predicate.Subscription {
-	return predicate.Subscription(sql.FieldEQ(FieldSubscription, v))
+// P256dh applies equality check predicate on the "p256dh" field. It's identical to P256dhEQ.
+func P256dh(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldP256dh, v))
 }
 
-// SubscriptionNEQ applies the NEQ predicate on the "subscription" field.
-func SubscriptionNEQ(v string) predicate.Subscription {
-	return predicate.Subscription(sql.FieldNEQ(FieldSubscription, v))
+// Auth applies equality check predicate on the "auth" field. It's identical to AuthEQ.
+func Auth(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldAuth, v))
 }
 
-// SubscriptionIn applies the In predicate on the "subscription" field.
-func SubscriptionIn(vs ...string) predicate.Subscription {
-	return predicate.Subscription(sql.FieldIn(FieldSubscription, vs...))
+// EndpointEQ applies the EQ predicate on the "endpoint" field.
+func EndpointEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldEndpoint, v))
 }
 
-// SubscriptionNotIn applies the NotIn predicate on the "subscription" field.
-func SubscriptionNotIn(vs ...string) predicate.Subscription {
-	return predicate.Subscription(sql.FieldNotIn(FieldSubscription, vs...))
+// EndpointNEQ applies the NEQ predicate on the "endpoint" field.
+func EndpointNEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldEndpoint, v))
 }
 
-// SubscriptionGT applies the GT predicate on the "subscription" field.
-func SubscriptionGT(v string) predicate.Subscription {
-	return predicate.Subscription(sql.FieldGT(FieldSubscription, v))
+// EndpointIn applies the In predicate on the "endpoint" field.
+func EndpointIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldEndpoint, vs...))
 }
 
-// SubscriptionGTE applies the GTE predicate on the "subscription" field.
-func SubscriptionGTE(v string) predicate.Subscription {
-	return predicate.Subscription(sql.FieldGTE(FieldSubscription, v))
+// EndpointNotIn applies the NotIn predicate on the "endpoint" field.
+func EndpointNotIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldEndpoint, vs...))
 }
 
-// SubscriptionLT applies the LT predicate on the "subscription" field.
-func SubscriptionLT(v string) predicate.Subscription {
-	return predicate.Subscription(sql.FieldLT(FieldSubscription, v))
+// EndpointGT applies the GT predicate on the "endpoint" field.
+func EndpointGT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldEndpoint, v))
 }
 
-// SubscriptionLTE applies the LTE predicate on the "subscription" field.
-func SubscriptionLTE(v string) predicate.Subscription {
-	return predicate.Subscription(sql.FieldLTE(FieldSubscription, v))
+// EndpointGTE applies the GTE predicate on the "endpoint" field.
+func EndpointGTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldEndpoint, v))
 }
 
-// SubscriptionContains applies the Contains predicate on the "subscription" field.
-func SubscriptionContains(v string) predicate.Subscription {
-	return predicate.Subscription(sql.FieldContains(FieldSubscription, v))
+// EndpointLT applies the LT predicate on the "endpoint" field.
+func EndpointLT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldEndpoint, v))
 }
 
-// SubscriptionHasPrefix applies the HasPrefix predicate on the "subscription" field.
-func SubscriptionHasPrefix(v string) predicate.Subscription {
-	return predicate.Subscription(sql.FieldHasPrefix(FieldSubscription, v))
+// EndpointLTE applies the LTE predicate on the "endpoint" field.
+func EndpointLTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldEndpoint, v))
 }
 
-// SubscriptionHasSuffix applies the HasSuffix predicate on the "subscription" field.
-func SubscriptionHasSuffix(v string) predicate.Subscription {
-	return predicate.Subscription(sql.FieldHasSuffix(FieldSubscription, v))
+// EndpointContains applies the Contains predicate on the "endpoint" field.
+func EndpointContains(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContains(FieldEndpoint, v))
 }
 
-// SubscriptionEqualFold applies the EqualFold predicate on the "subscription" field.
-func SubscriptionEqualFold(v string) predicate.Subscription {
-	return predicate.Subscription(sql.FieldEqualFold(FieldSubscription, v))
+// EndpointHasPrefix applies the HasPrefix predicate on the "endpoint" field.
+func EndpointHasPrefix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasPrefix(FieldEndpoint, v))
 }
 
-// SubscriptionContainsFold applies the ContainsFold predicate on the "subscription" field.
-func SubscriptionContainsFold(v string) predicate.Subscription {
-	return predicate.Subscription(sql.FieldContainsFold(FieldSubscription, v))
+// EndpointHasSuffix applies the HasSuffix predicate on the "endpoint" field.
+func EndpointHasSuffix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasSuffix(FieldEndpoint, v))
+}
+
+// EndpointEqualFold applies the EqualFold predicate on the "endpoint" field.
+func EndpointEqualFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEqualFold(FieldEndpoint, v))
+}
+
+// EndpointContainsFold applies the ContainsFold predicate on the "endpoint" field.
+func EndpointContainsFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContainsFold(FieldEndpoint, v))
+}
+
+// P256dhEQ applies the EQ predicate on the "p256dh" field.
+func P256dhEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldP256dh, v))
+}
+
+// P256dhNEQ applies the NEQ predicate on the "p256dh" field.
+func P256dhNEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldP256dh, v))
+}
+
+// P256dhIn applies the In predicate on the "p256dh" field.
+func P256dhIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldP256dh, vs...))
+}
+
+// P256dhNotIn applies the NotIn predicate on the "p256dh" field.
+func P256dhNotIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldP256dh, vs...))
+}
+
+// P256dhGT applies the GT predicate on the "p256dh" field.
+func P256dhGT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldP256dh, v))
+}
+
+// P256dhGTE applies the GTE predicate on the "p256dh" field.
+func P256dhGTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldP256dh, v))
+}
+
+// P256dhLT applies the LT predicate on the "p256dh" field.
+func P256dhLT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldP256dh, v))
+}
+
+// P256dhLTE applies the LTE predicate on the "p256dh" field.
+func P256dhLTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldP256dh, v))
+}
+
+// P256dhContains applies the Contains predicate on the "p256dh" field.
+func P256dhContains(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContains(FieldP256dh, v))
+}
+
+// P256dhHasPrefix applies the HasPrefix predicate on the "p256dh" field.
+func P256dhHasPrefix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasPrefix(FieldP256dh, v))
+}
+
+// P256dhHasSuffix applies the HasSuffix predicate on the "p256dh" field.
+func P256dhHasSuffix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasSuffix(FieldP256dh, v))
+}
+
+// P256dhEqualFold applies the EqualFold predicate on the "p256dh" field.
+func P256dhEqualFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEqualFold(FieldP256dh, v))
+}
+
+// P256dhContainsFold applies the ContainsFold predicate on the "p256dh" field.
+func P256dhContainsFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContainsFold(FieldP256dh, v))
+}
+
+// AuthEQ applies the EQ predicate on the "auth" field.
+func AuthEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldAuth, v))
+}
+
+// AuthNEQ applies the NEQ predicate on the "auth" field.
+func AuthNEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldAuth, v))
+}
+
+// AuthIn applies the In predicate on the "auth" field.
+func AuthIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldAuth, vs...))
+}
+
+// AuthNotIn applies the NotIn predicate on the "auth" field.
+func AuthNotIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldAuth, vs...))
+}
+
+// AuthGT applies the GT predicate on the "auth" field.
+func AuthGT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldAuth, v))
+}
+
+// AuthGTE applies the GTE predicate on the "auth" field.
+func AuthGTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldAuth, v))
+}
+
+// AuthLT applies the LT predicate on the "auth" field.
+func AuthLT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldAuth, v))
+}
+
+// AuthLTE applies the LTE predicate on the "auth" field.
+func AuthLTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldAuth, v))
+}
+
+// AuthContains applies the Contains predicate on the "auth" field.
+func AuthContains(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContains(FieldAuth, v))
+}
+
+// AuthHasPrefix applies the HasPrefix predicate on the "auth" field.
+func AuthHasPrefix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasPrefix(FieldAuth, v))
+}
+
+// AuthHasSuffix applies the HasSuffix predicate on the "auth" field.
+func AuthHasSuffix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasSuffix(FieldAuth, v))
+}
+
+// AuthEqualFold applies the EqualFold predicate on the "auth" field.
+func AuthEqualFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEqualFold(FieldAuth, v))
+}
+
+// AuthContainsFold applies the ContainsFold predicate on the "auth" field.
+func AuthContainsFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContainsFold(FieldAuth, v))
 }
 
 // HasServer applies the HasEdge predicate on the "server" edge.

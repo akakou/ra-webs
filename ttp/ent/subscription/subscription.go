@@ -12,8 +12,12 @@ const (
 	Label = "subscription"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldSubscription holds the string denoting the subscription field in the database.
-	FieldSubscription = "subscription"
+	// FieldEndpoint holds the string denoting the endpoint field in the database.
+	FieldEndpoint = "endpoint"
+	// FieldP256dh holds the string denoting the p256dh field in the database.
+	FieldP256dh = "p256dh"
+	// FieldAuth holds the string denoting the auth field in the database.
+	FieldAuth = "auth"
 	// EdgeServer holds the string denoting the server edge name in mutations.
 	EdgeServer = "server"
 	// Table holds the table name of the subscription in the database.
@@ -28,7 +32,9 @@ const (
 // Columns holds all SQL columns for subscription fields.
 var Columns = []string{
 	FieldID,
-	FieldSubscription,
+	FieldEndpoint,
+	FieldP256dh,
+	FieldAuth,
 }
 
 var (
@@ -55,9 +61,19 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// BySubscription orders the results by the subscription field.
-func BySubscription(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSubscription, opts...).ToFunc()
+// ByEndpoint orders the results by the endpoint field.
+func ByEndpoint(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEndpoint, opts...).ToFunc()
+}
+
+// ByP256dh orders the results by the p256dh field.
+func ByP256dh(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldP256dh, opts...).ToFunc()
+}
+
+// ByAuth orders the results by the auth field.
+func ByAuth(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAuth, opts...).ToFunc()
 }
 
 // ByServerCount orders the results by server count.

@@ -298,12 +298,12 @@ func (sq *SubscriptionQuery) WithServer(opts ...func(*TAServerQuery)) *Subscript
 // Example:
 //
 //	var v []struct {
-//		Subscription string `json:"subscription,omitempty"`
+//		Endpoint string `json:"endpoint,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Subscription.Query().
-//		GroupBy(subscription.FieldSubscription).
+//		GroupBy(subscription.FieldEndpoint).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (sq *SubscriptionQuery) GroupBy(field string, fields ...string) *SubscriptionGroupBy {
@@ -321,11 +321,11 @@ func (sq *SubscriptionQuery) GroupBy(field string, fields ...string) *Subscripti
 // Example:
 //
 //	var v []struct {
-//		Subscription string `json:"subscription,omitempty"`
+//		Endpoint string `json:"endpoint,omitempty"`
 //	}
 //
 //	client.Subscription.Query().
-//		Select(subscription.FieldSubscription).
+//		Select(subscription.FieldEndpoint).
 //		Scan(ctx, &v)
 func (sq *SubscriptionQuery) Select(fields ...string) *SubscriptionSelect {
 	sq.ctx.Fields = append(sq.ctx.Fields, fields...)

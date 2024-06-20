@@ -14,7 +14,9 @@ type Subscription struct {
 // Fields of the TA.
 func (Subscription) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("subscription"),
+		field.String("endpoint"),
+		field.String("p256dh"),
+		field.String("auth"),
 	}
 }
 

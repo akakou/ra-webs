@@ -24,7 +24,9 @@ var (
 	// SubscriptionsColumns holds the columns for the "subscriptions" table.
 	SubscriptionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "subscription", Type: field.TypeString},
+		{Name: "endpoint", Type: field.TypeString},
+		{Name: "p256dh", Type: field.TypeString},
+		{Name: "auth", Type: field.TypeString},
 	}
 	// SubscriptionsTable holds the schema information for the "subscriptions" table.
 	SubscriptionsTable = &schema.Table{

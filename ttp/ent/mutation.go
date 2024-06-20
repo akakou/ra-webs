@@ -651,7 +651,9 @@ type SubscriptionMutation struct {
 	op            Op
 	typ           string
 	id            *int
-	subscription  *string
+	endpoint      *string
+	p256dh        *string
+	auth          *string
 	clearedFields map[string]struct{}
 	server        map[int]struct{}
 	removedserver map[int]struct{}
@@ -759,40 +761,112 @@ func (m *SubscriptionMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetSubscription sets the "subscription" field.
-func (m *SubscriptionMutation) SetSubscription(s string) {
-	m.subscription = &s
+// SetEndpoint sets the "endpoint" field.
+func (m *SubscriptionMutation) SetEndpoint(s string) {
+	m.endpoint = &s
 }
 
-// Subscription returns the value of the "subscription" field in the mutation.
-func (m *SubscriptionMutation) Subscription() (r string, exists bool) {
-	v := m.subscription
+// Endpoint returns the value of the "endpoint" field in the mutation.
+func (m *SubscriptionMutation) Endpoint() (r string, exists bool) {
+	v := m.endpoint
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldSubscription returns the old "subscription" field's value of the Subscription entity.
+// OldEndpoint returns the old "endpoint" field's value of the Subscription entity.
 // If the Subscription object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SubscriptionMutation) OldSubscription(ctx context.Context) (v string, err error) {
+func (m *SubscriptionMutation) OldEndpoint(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSubscription is only allowed on UpdateOne operations")
+		return v, errors.New("OldEndpoint is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSubscription requires an ID field in the mutation")
+		return v, errors.New("OldEndpoint requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSubscription: %w", err)
+		return v, fmt.Errorf("querying old value for OldEndpoint: %w", err)
 	}
-	return oldValue.Subscription, nil
+	return oldValue.Endpoint, nil
 }
 
-// ResetSubscription resets all changes to the "subscription" field.
-func (m *SubscriptionMutation) ResetSubscription() {
-	m.subscription = nil
+// ResetEndpoint resets all changes to the "endpoint" field.
+func (m *SubscriptionMutation) ResetEndpoint() {
+	m.endpoint = nil
+}
+
+// SetP256dh sets the "p256dh" field.
+func (m *SubscriptionMutation) SetP256dh(s string) {
+	m.p256dh = &s
+}
+
+// P256dh returns the value of the "p256dh" field in the mutation.
+func (m *SubscriptionMutation) P256dh() (r string, exists bool) {
+	v := m.p256dh
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldP256dh returns the old "p256dh" field's value of the Subscription entity.
+// If the Subscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionMutation) OldP256dh(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldP256dh is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldP256dh requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldP256dh: %w", err)
+	}
+	return oldValue.P256dh, nil
+}
+
+// ResetP256dh resets all changes to the "p256dh" field.
+func (m *SubscriptionMutation) ResetP256dh() {
+	m.p256dh = nil
+}
+
+// SetAuth sets the "auth" field.
+func (m *SubscriptionMutation) SetAuth(s string) {
+	m.auth = &s
+}
+
+// Auth returns the value of the "auth" field in the mutation.
+func (m *SubscriptionMutation) Auth() (r string, exists bool) {
+	v := m.auth
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAuth returns the old "auth" field's value of the Subscription entity.
+// If the Subscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionMutation) OldAuth(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAuth is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAuth requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAuth: %w", err)
+	}
+	return oldValue.Auth, nil
+}
+
+// ResetAuth resets all changes to the "auth" field.
+func (m *SubscriptionMutation) ResetAuth() {
+	m.auth = nil
 }
 
 // AddServerIDs adds the "server" edge to the TAServer entity by ids.
@@ -883,9 +957,15 @@ func (m *SubscriptionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SubscriptionMutation) Fields() []string {
-	fields := make([]string, 0, 1)
-	if m.subscription != nil {
-		fields = append(fields, subscription.FieldSubscription)
+	fields := make([]string, 0, 3)
+	if m.endpoint != nil {
+		fields = append(fields, subscription.FieldEndpoint)
+	}
+	if m.p256dh != nil {
+		fields = append(fields, subscription.FieldP256dh)
+	}
+	if m.auth != nil {
+		fields = append(fields, subscription.FieldAuth)
 	}
 	return fields
 }
@@ -895,8 +975,12 @@ func (m *SubscriptionMutation) Fields() []string {
 // schema.
 func (m *SubscriptionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case subscription.FieldSubscription:
-		return m.Subscription()
+	case subscription.FieldEndpoint:
+		return m.Endpoint()
+	case subscription.FieldP256dh:
+		return m.P256dh()
+	case subscription.FieldAuth:
+		return m.Auth()
 	}
 	return nil, false
 }
@@ -906,8 +990,12 @@ func (m *SubscriptionMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *SubscriptionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case subscription.FieldSubscription:
-		return m.OldSubscription(ctx)
+	case subscription.FieldEndpoint:
+		return m.OldEndpoint(ctx)
+	case subscription.FieldP256dh:
+		return m.OldP256dh(ctx)
+	case subscription.FieldAuth:
+		return m.OldAuth(ctx)
 	}
 	return nil, fmt.Errorf("unknown Subscription field %s", name)
 }
@@ -917,12 +1005,26 @@ func (m *SubscriptionMutation) OldField(ctx context.Context, name string) (ent.V
 // type.
 func (m *SubscriptionMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case subscription.FieldSubscription:
+	case subscription.FieldEndpoint:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetSubscription(v)
+		m.SetEndpoint(v)
+		return nil
+	case subscription.FieldP256dh:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetP256dh(v)
+		return nil
+	case subscription.FieldAuth:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAuth(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Subscription field %s", name)
@@ -973,8 +1075,14 @@ func (m *SubscriptionMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *SubscriptionMutation) ResetField(name string) error {
 	switch name {
-	case subscription.FieldSubscription:
-		m.ResetSubscription()
+	case subscription.FieldEndpoint:
+		m.ResetEndpoint()
+		return nil
+	case subscription.FieldP256dh:
+		m.ResetP256dh()
+		return nil
+	case subscription.FieldAuth:
+		m.ResetAuth()
 		return nil
 	}
 	return fmt.Errorf("unknown Subscription field %s", name)

@@ -28,16 +28,44 @@ func (su *SubscriptionUpdate) Where(ps ...predicate.Subscription) *SubscriptionU
 	return su
 }
 
-// SetSubscription sets the "subscription" field.
-func (su *SubscriptionUpdate) SetSubscription(s string) *SubscriptionUpdate {
-	su.mutation.SetSubscription(s)
+// SetEndpoint sets the "endpoint" field.
+func (su *SubscriptionUpdate) SetEndpoint(s string) *SubscriptionUpdate {
+	su.mutation.SetEndpoint(s)
 	return su
 }
 
-// SetNillableSubscription sets the "subscription" field if the given value is not nil.
-func (su *SubscriptionUpdate) SetNillableSubscription(s *string) *SubscriptionUpdate {
+// SetNillableEndpoint sets the "endpoint" field if the given value is not nil.
+func (su *SubscriptionUpdate) SetNillableEndpoint(s *string) *SubscriptionUpdate {
 	if s != nil {
-		su.SetSubscription(*s)
+		su.SetEndpoint(*s)
+	}
+	return su
+}
+
+// SetP256dh sets the "p256dh" field.
+func (su *SubscriptionUpdate) SetP256dh(s string) *SubscriptionUpdate {
+	su.mutation.SetP256dh(s)
+	return su
+}
+
+// SetNillableP256dh sets the "p256dh" field if the given value is not nil.
+func (su *SubscriptionUpdate) SetNillableP256dh(s *string) *SubscriptionUpdate {
+	if s != nil {
+		su.SetP256dh(*s)
+	}
+	return su
+}
+
+// SetAuth sets the "auth" field.
+func (su *SubscriptionUpdate) SetAuth(s string) *SubscriptionUpdate {
+	su.mutation.SetAuth(s)
+	return su
+}
+
+// SetNillableAuth sets the "auth" field if the given value is not nil.
+func (su *SubscriptionUpdate) SetNillableAuth(s *string) *SubscriptionUpdate {
+	if s != nil {
+		su.SetAuth(*s)
 	}
 	return su
 }
@@ -119,8 +147,14 @@ func (su *SubscriptionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := su.mutation.Subscription(); ok {
-		_spec.SetField(subscription.FieldSubscription, field.TypeString, value)
+	if value, ok := su.mutation.Endpoint(); ok {
+		_spec.SetField(subscription.FieldEndpoint, field.TypeString, value)
+	}
+	if value, ok := su.mutation.P256dh(); ok {
+		_spec.SetField(subscription.FieldP256dh, field.TypeString, value)
+	}
+	if value, ok := su.mutation.Auth(); ok {
+		_spec.SetField(subscription.FieldAuth, field.TypeString, value)
 	}
 	if su.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -187,16 +221,44 @@ type SubscriptionUpdateOne struct {
 	mutation *SubscriptionMutation
 }
 
-// SetSubscription sets the "subscription" field.
-func (suo *SubscriptionUpdateOne) SetSubscription(s string) *SubscriptionUpdateOne {
-	suo.mutation.SetSubscription(s)
+// SetEndpoint sets the "endpoint" field.
+func (suo *SubscriptionUpdateOne) SetEndpoint(s string) *SubscriptionUpdateOne {
+	suo.mutation.SetEndpoint(s)
 	return suo
 }
 
-// SetNillableSubscription sets the "subscription" field if the given value is not nil.
-func (suo *SubscriptionUpdateOne) SetNillableSubscription(s *string) *SubscriptionUpdateOne {
+// SetNillableEndpoint sets the "endpoint" field if the given value is not nil.
+func (suo *SubscriptionUpdateOne) SetNillableEndpoint(s *string) *SubscriptionUpdateOne {
 	if s != nil {
-		suo.SetSubscription(*s)
+		suo.SetEndpoint(*s)
+	}
+	return suo
+}
+
+// SetP256dh sets the "p256dh" field.
+func (suo *SubscriptionUpdateOne) SetP256dh(s string) *SubscriptionUpdateOne {
+	suo.mutation.SetP256dh(s)
+	return suo
+}
+
+// SetNillableP256dh sets the "p256dh" field if the given value is not nil.
+func (suo *SubscriptionUpdateOne) SetNillableP256dh(s *string) *SubscriptionUpdateOne {
+	if s != nil {
+		suo.SetP256dh(*s)
+	}
+	return suo
+}
+
+// SetAuth sets the "auth" field.
+func (suo *SubscriptionUpdateOne) SetAuth(s string) *SubscriptionUpdateOne {
+	suo.mutation.SetAuth(s)
+	return suo
+}
+
+// SetNillableAuth sets the "auth" field if the given value is not nil.
+func (suo *SubscriptionUpdateOne) SetNillableAuth(s *string) *SubscriptionUpdateOne {
+	if s != nil {
+		suo.SetAuth(*s)
 	}
 	return suo
 }
@@ -308,8 +370,14 @@ func (suo *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscript
 			}
 		}
 	}
-	if value, ok := suo.mutation.Subscription(); ok {
-		_spec.SetField(subscription.FieldSubscription, field.TypeString, value)
+	if value, ok := suo.mutation.Endpoint(); ok {
+		_spec.SetField(subscription.FieldEndpoint, field.TypeString, value)
+	}
+	if value, ok := suo.mutation.P256dh(); ok {
+		_spec.SetField(subscription.FieldP256dh, field.TypeString, value)
+	}
+	if value, ok := suo.mutation.Auth(); ok {
+		_spec.SetField(subscription.FieldAuth, field.TypeString, value)
 	}
 	if suo.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -16,8 +16,12 @@ type Subscription struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Subscription holds the value of the "subscription" field.
-	Subscription string `json:"subscription,omitempty"`
+	// Endpoint holds the value of the "endpoint" field.
+	Endpoint string `json:"endpoint,omitempty"`
+	// P256dh holds the value of the "p256dh" field.
+	P256dh string `json:"p256dh,omitempty"`
+	// Auth holds the value of the "auth" field.
+	Auth string `json:"auth,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SubscriptionQuery when eager-loading is set.
 	Edges        SubscriptionEdges `json:"edges"`
@@ -49,7 +53,7 @@ func (*Subscription) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case subscription.FieldID:
 			values[i] = new(sql.NullInt64)
-		case subscription.FieldSubscription:
+		case subscription.FieldEndpoint, subscription.FieldP256dh, subscription.FieldAuth:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -72,11 +76,23 @@ func (s *Subscription) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			s.ID = int(value.Int64)
-		case subscription.FieldSubscription:
+		case subscription.FieldEndpoint:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field subscription", values[i])
+				return fmt.Errorf("unexpected type %T for field endpoint", values[i])
 			} else if value.Valid {
-				s.Subscription = value.String
+				s.Endpoint = value.String
+			}
+		case subscription.FieldP256dh:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field p256dh", values[i])
+			} else if value.Valid {
+				s.P256dh = value.String
+			}
+		case subscription.FieldAuth:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field auth", values[i])
+			} else if value.Valid {
+				s.Auth = value.String
 			}
 		default:
 			s.selectValues.Set(columns[i], values[i])
@@ -119,8 +135,14 @@ func (s *Subscription) String() string {
 	var builder strings.Builder
 	builder.WriteString("Subscription(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", s.ID))
-	builder.WriteString("subscription=")
-	builder.WriteString(s.Subscription)
+	builder.WriteString("endpoint=")
+	builder.WriteString(s.Endpoint)
+	builder.WriteString(", ")
+	builder.WriteString("p256dh=")
+	builder.WriteString(s.P256dh)
+	builder.WriteString(", ")
+	builder.WriteString("auth=")
+	builder.WriteString(s.Auth)
 	builder.WriteByte(')')
 	return builder.String()
 }
