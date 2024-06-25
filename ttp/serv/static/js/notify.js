@@ -1,6 +1,6 @@
-const setupNotification = async () => {
+const setupNotification = async (domain) => {
     removeAllNotifcation()
-    const keyResp = await axios.get(`/api/subscription_keys`)
+    const keyResp = await axios.get(`/api/subscription_key`)
     console.log(keyResp)
 
     const permission = await Notification.requestPermission()
@@ -29,7 +29,10 @@ const setupNotification = async () => {
         return
     }
 
-    const subscribeResp = await axios.post(`/api/subscription`, subscription.toJSON())
+    const subscribeResp = await axios.post(`/api/subscription`, {
+        domain: domain,
+        subscription: subscription.toJSON()
+    })
 
     console.log("registered: ", subscribeResp)
 

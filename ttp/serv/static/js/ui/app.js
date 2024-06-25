@@ -6,11 +6,13 @@ const App = () => {
     const [hostname, setHostname] = useState("");
 
     useEffect(async () => {
-        await setupNotification()
+        // const referrer = new URL(document.referrer);
+        const referrer = new URL("https://example.com")
 
-        const referrer = new URL(document.referrer);
         setHostname(referrer.hostname)
   
+        await setupNotification(referrer.hostname)
+
         const {v, data} = await fetchAndValidate(referrer.hostname)
         setLogs(data)
         setIsValid(v)

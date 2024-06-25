@@ -2,12 +2,14 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"html/template"
 	"io"
 
 	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/ttp"
 	"github.com/akakou/ra_webs/ttp/api"
+	"github.com/akakou/ra_webs/ttp/notify"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -60,5 +62,6 @@ func main() {
 	}
 
 	// go ttp.Audit.Run(ttp)
+	fmt.Printf("public: %v\nprivate: %v", ttp.Notify.(*notify.BrowserNotify).VapidPublicKey, ttp.Notify.(*notify.BrowserNotify).VapidPrivateKey)
 	e.Logger.Fatal(e.Start(core.TTPPort))
 }
