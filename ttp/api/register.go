@@ -70,6 +70,11 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 		SetQuote(req.Quote).
 		SetHasActivated(false)
 
+	err = ttpcore.NotifyUpdate(req.Domain, ttp)
+	if err != nil {
+		return err
+	}
+
 	_, err = taServerCreate.Save(*ttp.DB.Ctx)
 	if err != nil {
 		return err

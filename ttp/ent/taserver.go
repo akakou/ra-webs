@@ -42,9 +42,11 @@ type TAServerEdges struct {
 	Code *TACode `json:"code,omitempty"`
 	// Service holds the value of the service edge.
 	Service *Service `json:"service,omitempty"`
+	// Subscription holds the value of the subscription edge.
+	Subscription []*Subscription `json:"subscription,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // ViolationOrErr returns the Violation value or an error if the edge
@@ -80,6 +82,15 @@ func (e TAServerEdges) ServiceOrErr() (*Service, error) {
 		return e.Service, nil
 	}
 	return nil, &NotLoadedError{edge: "service"}
+}
+
+// SubscriptionOrErr returns the Subscription value or an error if the edge
+// was not loaded in eager-loading.
+func (e TAServerEdges) SubscriptionOrErr() ([]*Subscription, error) {
+	if e.loadedTypes[3] {
+		return e.Subscription, nil
+	}
+	return nil, &NotLoadedError{edge: "subscription"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -184,6 +195,11 @@ func (ts *TAServer) QueryCode() *TACodeQuery {
 // QueryService queries the "service" edge of the TAServer entity.
 func (ts *TAServer) QueryService() *ServiceQuery {
 	return NewTAServerClient(ts.config).QueryService(ts)
+}
+
+// QuerySubscription queries the "subscription" edge of the TAServer entity.
+func (ts *TAServer) QuerySubscription() *SubscriptionQuery {
+	return NewTAServerClient(ts.config).QuerySubscription(ts)
 }
 
 // Update returns a builder for updating this TAServer.

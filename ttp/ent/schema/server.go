@@ -27,5 +27,6 @@ func (TAServer) Edges() []ent.Edge {
 		edge.From("violation", TAViolation.Type).Ref("server"),
 		edge.To("code", TACode.Type).Unique(),
 		edge.To("service", Service.Type).Unique(),
+		edge.From("subscription", Subscription.Type).Ref("server"),
 	}
 }

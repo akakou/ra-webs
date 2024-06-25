@@ -15,6 +15,7 @@ require (
 require (
 	ariga.io/atlas v0.14.1-0.20230918065911-83ad451a4935 // indirect
 	entgo.io/ent v0.12.5 // indirect
+	github.com/SherClockHolmes/webpush-go v1.3.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/akakou/ctstream v0.0.1 // indirect
 	github.com/akakou/extract-embed v0.0.1 // indirect

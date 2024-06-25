@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
 	"github.com/akakou/ra_webs/ttp/ent/service"
+	"github.com/akakou/ra_webs/ttp/ent/subscription"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/akakou/ra_webs/ttp/ent/taviolation"
@@ -131,6 +132,21 @@ func (tsu *TAServerUpdate) SetService(s *Service) *TAServerUpdate {
 	return tsu.SetServiceID(s.ID)
 }
 
+// AddSubscriptionIDs adds the "subscription" edge to the Subscription entity by IDs.
+func (tsu *TAServerUpdate) AddSubscriptionIDs(ids ...int) *TAServerUpdate {
+	tsu.mutation.AddSubscriptionIDs(ids...)
+	return tsu
+}
+
+// AddSubscription adds the "subscription" edges to the Subscription entity.
+func (tsu *TAServerUpdate) AddSubscription(s ...*Subscription) *TAServerUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tsu.AddSubscriptionIDs(ids...)
+}
+
 // Mutation returns the TAServerMutation object of the builder.
 func (tsu *TAServerUpdate) Mutation() *TAServerMutation {
 	return tsu.mutation
@@ -167,6 +183,27 @@ func (tsu *TAServerUpdate) ClearCode() *TAServerUpdate {
 func (tsu *TAServerUpdate) ClearService() *TAServerUpdate {
 	tsu.mutation.ClearService()
 	return tsu
+}
+
+// ClearSubscription clears all "subscription" edges to the Subscription entity.
+func (tsu *TAServerUpdate) ClearSubscription() *TAServerUpdate {
+	tsu.mutation.ClearSubscription()
+	return tsu
+}
+
+// RemoveSubscriptionIDs removes the "subscription" edge to Subscription entities by IDs.
+func (tsu *TAServerUpdate) RemoveSubscriptionIDs(ids ...int) *TAServerUpdate {
+	tsu.mutation.RemoveSubscriptionIDs(ids...)
+	return tsu
+}
+
+// RemoveSubscription removes "subscription" edges to Subscription entities.
+func (tsu *TAServerUpdate) RemoveSubscription(s ...*Subscription) *TAServerUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tsu.RemoveSubscriptionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -320,6 +357,51 @@ func (tsu *TAServerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if tsu.mutation.SubscriptionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   taserver.SubscriptionTable,
+			Columns: []string{taserver.SubscriptionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tsu.mutation.RemovedSubscriptionIDs(); len(nodes) > 0 && !tsu.mutation.SubscriptionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   taserver.SubscriptionTable,
+			Columns: []string{taserver.SubscriptionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tsu.mutation.SubscriptionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   taserver.SubscriptionTable,
+			Columns: []string{taserver.SubscriptionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tsu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{taserver.Label}
@@ -441,6 +523,21 @@ func (tsuo *TAServerUpdateOne) SetService(s *Service) *TAServerUpdateOne {
 	return tsuo.SetServiceID(s.ID)
 }
 
+// AddSubscriptionIDs adds the "subscription" edge to the Subscription entity by IDs.
+func (tsuo *TAServerUpdateOne) AddSubscriptionIDs(ids ...int) *TAServerUpdateOne {
+	tsuo.mutation.AddSubscriptionIDs(ids...)
+	return tsuo
+}
+
+// AddSubscription adds the "subscription" edges to the Subscription entity.
+func (tsuo *TAServerUpdateOne) AddSubscription(s ...*Subscription) *TAServerUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tsuo.AddSubscriptionIDs(ids...)
+}
+
 // Mutation returns the TAServerMutation object of the builder.
 func (tsuo *TAServerUpdateOne) Mutation() *TAServerMutation {
 	return tsuo.mutation
@@ -477,6 +574,27 @@ func (tsuo *TAServerUpdateOne) ClearCode() *TAServerUpdateOne {
 func (tsuo *TAServerUpdateOne) ClearService() *TAServerUpdateOne {
 	tsuo.mutation.ClearService()
 	return tsuo
+}
+
+// ClearSubscription clears all "subscription" edges to the Subscription entity.
+func (tsuo *TAServerUpdateOne) ClearSubscription() *TAServerUpdateOne {
+	tsuo.mutation.ClearSubscription()
+	return tsuo
+}
+
+// RemoveSubscriptionIDs removes the "subscription" edge to Subscription entities by IDs.
+func (tsuo *TAServerUpdateOne) RemoveSubscriptionIDs(ids ...int) *TAServerUpdateOne {
+	tsuo.mutation.RemoveSubscriptionIDs(ids...)
+	return tsuo
+}
+
+// RemoveSubscription removes "subscription" edges to Subscription entities.
+func (tsuo *TAServerUpdateOne) RemoveSubscription(s ...*Subscription) *TAServerUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tsuo.RemoveSubscriptionIDs(ids...)
 }
 
 // Where appends a list predicates to the TAServerUpdate builder.
@@ -653,6 +771,51 @@ func (tsuo *TAServerUpdateOne) sqlSave(ctx context.Context) (_node *TAServer, er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(service.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tsuo.mutation.SubscriptionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   taserver.SubscriptionTable,
+			Columns: []string{taserver.SubscriptionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tsuo.mutation.RemovedSubscriptionIDs(); len(nodes) > 0 && !tsuo.mutation.SubscriptionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   taserver.SubscriptionTable,
+			Columns: []string{taserver.SubscriptionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tsuo.mutation.SubscriptionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   taserver.SubscriptionTable,
+			Columns: []string{taserver.SubscriptionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

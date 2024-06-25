@@ -28,7 +28,7 @@ func exampleTTP(t *testing.T) *core.TTP {
 	db, err := core.NewDB(&dbc)
 	assert.NoError(t, err)
 
-	ttp, err := core.NewTTP(db, nil, "")
+	ttp, err := core.NewTTP(db, nil, nil, "")
 	assert.NoError(t, err)
 
 	return ttp

@@ -16,6 +16,7 @@ import (
 	"github.com/akakou/ra_webs/ttp/api"
 	"github.com/akakou/ra_webs/ttp/builder"
 	ttpcore "github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/ttp/notify"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -52,7 +53,7 @@ func ttpForTest() (*ttpcore.TTP, error) {
 		return nil, fmt.Errorf("%s: %w", ttpcore.ERROR_INIT_DB, err)
 	}
 
-	return ttpcore.NewTTP(db, &CTForTest{}, adminToken)
+	return ttpcore.NewTTP(db, &CTForTest{}, &notify.BrowserNotify{}, adminToken)
 }
 func TestAPI(t *testing.T) {
 	core.EnableDebug()

@@ -21,6 +21,28 @@ var (
 		Columns:    ServicesColumns,
 		PrimaryKey: []*schema.Column{ServicesColumns[0]},
 	}
+	// SubscriptionsColumns holds the columns for the "subscriptions" table.
+	SubscriptionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "endpoint", Type: field.TypeString},
+		{Name: "p256dh", Type: field.TypeString},
+		{Name: "auth", Type: field.TypeString},
+		{Name: "subscription_server", Type: field.TypeInt, Nullable: true},
+	}
+	// SubscriptionsTable holds the schema information for the "subscriptions" table.
+	SubscriptionsTable = &schema.Table{
+		Name:       "subscriptions",
+		Columns:    SubscriptionsColumns,
+		PrimaryKey: []*schema.Column{SubscriptionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "subscriptions_ta_servers_server",
+				Columns:    []*schema.Column{SubscriptionsColumns[4]},
+				RefColumns: []*schema.Column{TaServersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// TaCodesColumns holds the columns for the "ta_codes" table.
 	TaCodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -104,6 +126,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ServicesTable,
+		SubscriptionsTable,
 		TaCodesTable,
 		TaServersTable,
 		TaViolationsTable,
@@ -111,6 +134,7 @@ var (
 )
 
 func init() {
+	SubscriptionsTable.ForeignKeys[0].RefTable = TaServersTable
 	TaCodesTable.ForeignKeys[0].RefTable = ServicesTable
 	TaServersTable.ForeignKeys[0].RefTable = TaCodesTable
 	TaServersTable.ForeignKeys[1].RefTable = ServicesTable

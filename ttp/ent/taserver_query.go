@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra_webs/ttp/ent/predicate"
 	"github.com/akakou/ra_webs/ttp/ent/service"
+	"github.com/akakou/ra_webs/ttp/ent/subscription"
 	"github.com/akakou/ra_webs/ttp/ent/tacode"
 	"github.com/akakou/ra_webs/ttp/ent/taserver"
 	"github.com/akakou/ra_webs/ttp/ent/taviolation"
@@ -21,14 +22,15 @@ import (
 // TAServerQuery is the builder for querying TAServer entities.
 type TAServerQuery struct {
 	config
-	ctx           *QueryContext
-	order         []taserver.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.TAServer
-	withViolation *TAViolationQuery
-	withCode      *TACodeQuery
-	withService   *ServiceQuery
-	withFKs       bool
+	ctx              *QueryContext
+	order            []taserver.OrderOption
+	inters           []Interceptor
+	predicates       []predicate.TAServer
+	withViolation    *TAViolationQuery
+	withCode         *TACodeQuery
+	withService      *ServiceQuery
+	withSubscription *SubscriptionQuery
+	withFKs          bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -124,6 +126,28 @@ func (tsq *TAServerQuery) QueryService() *ServiceQuery {
 			sqlgraph.From(taserver.Table, taserver.FieldID, selector),
 			sqlgraph.To(service.Table, service.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, taserver.ServiceTable, taserver.ServiceColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tsq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySubscription chains the current query on the "subscription" edge.
+func (tsq *TAServerQuery) QuerySubscription() *SubscriptionQuery {
+	query := (&SubscriptionClient{config: tsq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tsq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tsq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(taserver.Table, taserver.FieldID, selector),
+			sqlgraph.To(subscription.Table, subscription.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, taserver.SubscriptionTable, taserver.SubscriptionColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tsq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,14 +342,15 @@ func (tsq *TAServerQuery) Clone() *TAServerQuery {
 		return nil
 	}
 	return &TAServerQuery{
-		config:        tsq.config,
-		ctx:           tsq.ctx.Clone(),
-		order:         append([]taserver.OrderOption{}, tsq.order...),
-		inters:        append([]Interceptor{}, tsq.inters...),
-		predicates:    append([]predicate.TAServer{}, tsq.predicates...),
-		withViolation: tsq.withViolation.Clone(),
-		withCode:      tsq.withCode.Clone(),
-		withService:   tsq.withService.Clone(),
+		config:           tsq.config,
+		ctx:              tsq.ctx.Clone(),
+		order:            append([]taserver.OrderOption{}, tsq.order...),
+		inters:           append([]Interceptor{}, tsq.inters...),
+		predicates:       append([]predicate.TAServer{}, tsq.predicates...),
+		withViolation:    tsq.withViolation.Clone(),
+		withCode:         tsq.withCode.Clone(),
+		withService:      tsq.withService.Clone(),
+		withSubscription: tsq.withSubscription.Clone(),
 		// clone intermediate query.
 		sql:  tsq.sql.Clone(),
 		path: tsq.path,
@@ -362,6 +387,17 @@ func (tsq *TAServerQuery) WithService(opts ...func(*ServiceQuery)) *TAServerQuer
 		opt(query)
 	}
 	tsq.withService = query
+	return tsq
+}
+
+// WithSubscription tells the query-builder to eager-load the nodes that are connected to
+// the "subscription" edge. The optional arguments are used to configure the query builder of the edge.
+func (tsq *TAServerQuery) WithSubscription(opts ...func(*SubscriptionQuery)) *TAServerQuery {
+	query := (&SubscriptionClient{config: tsq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tsq.withSubscription = query
 	return tsq
 }
 
@@ -444,10 +480,11 @@ func (tsq *TAServerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA
 		nodes       = []*TAServer{}
 		withFKs     = tsq.withFKs
 		_spec       = tsq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			tsq.withViolation != nil,
 			tsq.withCode != nil,
 			tsq.withService != nil,
+			tsq.withSubscription != nil,
 		}
 	)
 	if tsq.withCode != nil || tsq.withService != nil {
@@ -490,6 +527,13 @@ func (tsq *TAServerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA
 	if query := tsq.withService; query != nil {
 		if err := tsq.loadService(ctx, query, nodes, nil,
 			func(n *TAServer, e *Service) { n.Edges.Service = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := tsq.withSubscription; query != nil {
+		if err := tsq.loadSubscription(ctx, query, nodes,
+			func(n *TAServer) { n.Edges.Subscription = []*Subscription{} },
+			func(n *TAServer, e *Subscription) { n.Edges.Subscription = append(n.Edges.Subscription, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -588,6 +632,37 @@ func (tsq *TAServerQuery) loadService(ctx context.Context, query *ServiceQuery, 
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
+	}
+	return nil
+}
+func (tsq *TAServerQuery) loadSubscription(ctx context.Context, query *SubscriptionQuery, nodes []*TAServer, init func(*TAServer), assign func(*TAServer, *Subscription)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*TAServer)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Subscription(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(taserver.SubscriptionColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.subscription_server
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "subscription_server" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "subscription_server" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }

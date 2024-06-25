@@ -26,6 +26,8 @@ const (
 	EdgeCode = "code"
 	// EdgeService holds the string denoting the service edge name in mutations.
 	EdgeService = "service"
+	// EdgeSubscription holds the string denoting the subscription edge name in mutations.
+	EdgeSubscription = "subscription"
 	// Table holds the table name of the taserver in the database.
 	Table = "ta_servers"
 	// ViolationTable is the table that holds the violation relation/edge.
@@ -49,6 +51,13 @@ const (
 	ServiceInverseTable = "services"
 	// ServiceColumn is the table column denoting the service relation/edge.
 	ServiceColumn = "ta_server_service"
+	// SubscriptionTable is the table that holds the subscription relation/edge.
+	SubscriptionTable = "subscriptions"
+	// SubscriptionInverseTable is the table name for the Subscription entity.
+	// It exists in this package in order to avoid circular dependency with the "subscription" package.
+	SubscriptionInverseTable = "subscriptions"
+	// SubscriptionColumn is the table column denoting the subscription relation/edge.
+	SubscriptionColumn = "subscription_server"
 )
 
 // Columns holds all SQL columns for taserver fields.
@@ -132,6 +141,20 @@ func ByServiceField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newServiceStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// BySubscriptionCount orders the results by subscription count.
+func BySubscriptionCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSubscriptionStep(), opts...)
+	}
+}
+
+// BySubscription orders the results by subscription terms.
+func BySubscription(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSubscriptionStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newViolationStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -151,5 +174,12 @@ func newServiceStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ServiceInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, ServiceTable, ServiceColumn),
+	)
+}
+func newSubscriptionStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SubscriptionInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, SubscriptionTable, SubscriptionColumn),
 	)
 }
