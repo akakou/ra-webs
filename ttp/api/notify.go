@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
@@ -39,10 +38,10 @@ var PostNotifyApi = goutils.EchoRoute[core.TTP]{
 				First(*ttp.DB.Ctx)
 
 			if err != nil {
-				return fmt.Errorf("koredehanai %v, %v", data.Domain, err)
+				return err
 			}
 
-			err = ttp.Notify.Notify([]byte(data.Message), serv, ttp)
+			err = ttp.Notify.Notify([]byte(data.Message), serv.Domain, ttp)
 			if err != nil {
 				return err
 			}

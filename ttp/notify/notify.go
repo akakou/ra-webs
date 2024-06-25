@@ -9,26 +9,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const VIOLATION_MESSAGE = "A violation has been detected at "
-const UPDATE_MESSAGE = "A new server has been added at "
-
-func NotifyViolation(serv *ent.TAServer, ttp *core.TTP) error {
-	msg := fmt.Sprintf("%s %v", VIOLATION_MESSAGE, serv.Domain)
-	return ttp.Notify.Notify([]byte(msg), serv, ttp)
-}
-
-func NotifyUpdate(serv *ent.TAServer, ttp *core.TTP) error {
-	msg := fmt.Sprintf("%s %v", UPDATE_MESSAGE, serv.Domain)
-	return ttp.Notify.Notify([]byte(msg), serv, ttp)
-}
-
-func (notify *BrowserNotify) Notify(msg []byte, serv *ent.TAServer, ttp *core.TTP) error {
-	subscriptions, err := serv.QuerySubscription().All(*ttp.DB.Ctx)
+func (notify *BrowserNotify) Notify(msg []byte, domain string, ttp *core.TTP) error {
+	subscriptions, err := core.SelectSubscription(domain, ttp)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	return notify.notifyAll(msg, subscriptions)
+	err = notify.notifyAll(msg, subscriptions)
+	return err
 }
 
 func (notify *BrowserNotify) notifyAll(msg []byte, subscription []*ent.Subscription) error {
