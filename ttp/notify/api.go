@@ -42,3 +42,23 @@ var postSubscribe = goutils.EchoRoute[core.TTP]{
 		}
 	},
 }
+
+func getSubscriptionKey(notify *BrowserNotify) goutils.EchoRoute[core.TTP] {
+	return goutils.EchoRoute[core.TTP]{
+		Method: goutils.GET,
+		Path:   rawebscore.API_ROOT + "/subscription_key",
+		F: func(ttp *core.TTP) goutils.EchoRouteFunc {
+			return func(c echo.Context) error {
+				VapidPublicKey := notify.VapidPublicKey
+
+				var data struct {
+					VapidPublicKey string `json:"vapid_public_key"`
+				}
+
+				data.VapidPublicKey = VapidPublicKey
+
+				return c.JSON(http.StatusOK, data)
+			}
+		},
+	}
+}

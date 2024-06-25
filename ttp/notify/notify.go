@@ -69,5 +69,6 @@ func (notify *BrowserNotify) notifyOne(msg []byte, subscription *ent.Subscriptio
 
 func (notify *BrowserNotify) Setup(e *echo.Echo, ttp *core.TTP) error {
 	postSubscribe.Set(e, ttp)
+	getSubscriptionKey(notify).Set(e, ttp)
 	return nil
 }
