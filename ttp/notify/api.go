@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var postSubscribe = goutils.EchoRoute[core.TTP]{
+var postSubscribeApi = goutils.EchoRoute[core.TTP]{
 	Method: goutils.POST,
 	Path:   rawebscore.API_ROOT + "/subscription",
 	F: func(ttp *core.TTP) goutils.EchoRouteFunc {
@@ -59,7 +59,7 @@ var postSubscribe = goutils.EchoRoute[core.TTP]{
 	},
 }
 
-func getSubscriptionKey(notify *BrowserNotify) goutils.EchoRoute[core.TTP] {
+func getSubscriptionKeyApi(notify *BrowserNotify) goutils.EchoRoute[core.TTP] {
 	return goutils.EchoRoute[core.TTP]{
 		Method: goutils.GET,
 		Path:   rawebscore.API_ROOT + "/subscription_key",
