@@ -7,6 +7,11 @@ import (
 )
 
 func revoke(serv *ent.TAServer, ttp *core.TTP) {
+	err := core.NotifyViolation(serv.Domain, ttp)
+	if err != nil {
+		panic(err)
+	}
+
 	ttp.DB.Client.TAViolation.Create().
 		SetServer(serv).
 		SaveX(*ttp.DB.Ctx)
