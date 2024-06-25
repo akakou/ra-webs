@@ -27,12 +27,21 @@ var (
 		{Name: "endpoint", Type: field.TypeString},
 		{Name: "p256dh", Type: field.TypeString},
 		{Name: "auth", Type: field.TypeString},
+		{Name: "subscription_server", Type: field.TypeInt, Nullable: true},
 	}
 	// SubscriptionsTable holds the schema information for the "subscriptions" table.
 	SubscriptionsTable = &schema.Table{
 		Name:       "subscriptions",
 		Columns:    SubscriptionsColumns,
 		PrimaryKey: []*schema.Column{SubscriptionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "subscriptions_ta_servers_server",
+				Columns:    []*schema.Column{SubscriptionsColumns[4]},
+				RefColumns: []*schema.Column{TaServersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// TaCodesColumns holds the columns for the "ta_codes" table.
 	TaCodesColumns = []*schema.Column{
@@ -114,31 +123,6 @@ var (
 			},
 		},
 	}
-	// SubscriptionServerColumns holds the columns for the "subscription_server" table.
-	SubscriptionServerColumns = []*schema.Column{
-		{Name: "subscription_id", Type: field.TypeInt},
-		{Name: "ta_server_id", Type: field.TypeInt},
-	}
-	// SubscriptionServerTable holds the schema information for the "subscription_server" table.
-	SubscriptionServerTable = &schema.Table{
-		Name:       "subscription_server",
-		Columns:    SubscriptionServerColumns,
-		PrimaryKey: []*schema.Column{SubscriptionServerColumns[0], SubscriptionServerColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "subscription_server_subscription_id",
-				Columns:    []*schema.Column{SubscriptionServerColumns[0]},
-				RefColumns: []*schema.Column{SubscriptionsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "subscription_server_ta_server_id",
-				Columns:    []*schema.Column{SubscriptionServerColumns[1]},
-				RefColumns: []*schema.Column{TaServersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ServicesTable,
@@ -146,16 +130,14 @@ var (
 		TaCodesTable,
 		TaServersTable,
 		TaViolationsTable,
-		SubscriptionServerTable,
 	}
 )
 
 func init() {
+	SubscriptionsTable.ForeignKeys[0].RefTable = TaServersTable
 	TaCodesTable.ForeignKeys[0].RefTable = ServicesTable
 	TaServersTable.ForeignKeys[0].RefTable = TaCodesTable
 	TaServersTable.ForeignKeys[1].RefTable = ServicesTable
 	TaViolationsTable.ForeignKeys[0].RefTable = TaServersTable
 	TaViolationsTable.ForeignKeys[1].RefTable = ServicesTable
-	SubscriptionServerTable.ForeignKeys[0].RefTable = SubscriptionsTable
-	SubscriptionServerTable.ForeignKeys[1].RefTable = TaServersTable
 }

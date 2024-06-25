@@ -268,7 +268,7 @@ func HasServer() predicate.Subscription {
 	return predicate.Subscription(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, ServerTable, ServerPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, ServerTable, ServerColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

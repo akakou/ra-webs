@@ -22,11 +22,13 @@ const (
 	EdgeServer = "server"
 	// Table holds the table name of the subscription in the database.
 	Table = "subscriptions"
-	// ServerTable is the table that holds the server relation/edge. The primary key declared below.
-	ServerTable = "subscription_server"
+	// ServerTable is the table that holds the server relation/edge.
+	ServerTable = "subscriptions"
 	// ServerInverseTable is the table name for the TAServer entity.
 	// It exists in this package in order to avoid circular dependency with the "taserver" package.
 	ServerInverseTable = "ta_servers"
+	// ServerColumn is the table column denoting the server relation/edge.
+	ServerColumn = "subscription_server"
 )
 
 // Columns holds all SQL columns for subscription fields.
@@ -37,16 +39,21 @@ var Columns = []string{
 	FieldAuth,
 }
 
-var (
-	// ServerPrimaryKey and ServerColumn2 are the table columns denoting the
-	// primary key for the server relation (M2M).
-	ServerPrimaryKey = []string{"subscription_id", "ta_server_id"}
-)
+// ForeignKeys holds the SQL foreign-keys that are owned by the "subscriptions"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"subscription_server",
+}
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -76,23 +83,16 @@ func ByAuth(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAuth, opts...).ToFunc()
 }
 
-// ByServerCount orders the results by server count.
-func ByServerCount(opts ...sql.OrderTermOption) OrderOption {
+// ByServerField orders the results by server field.
+func ByServerField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newServerStep(), opts...)
-	}
-}
-
-// ByServer orders the results by server terms.
-func ByServer(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newServerStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newServerStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newServerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ServerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, ServerTable, ServerPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2O, false, ServerTable, ServerColumn),
 	)
 }

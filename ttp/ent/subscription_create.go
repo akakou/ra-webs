@@ -38,19 +38,23 @@ func (sc *SubscriptionCreate) SetAuth(s string) *SubscriptionCreate {
 	return sc
 }
 
-// AddServerIDs adds the "server" edge to the TAServer entity by IDs.
-func (sc *SubscriptionCreate) AddServerIDs(ids ...int) *SubscriptionCreate {
-	sc.mutation.AddServerIDs(ids...)
+// SetServerID sets the "server" edge to the TAServer entity by ID.
+func (sc *SubscriptionCreate) SetServerID(id int) *SubscriptionCreate {
+	sc.mutation.SetServerID(id)
 	return sc
 }
 
-// AddServer adds the "server" edges to the TAServer entity.
-func (sc *SubscriptionCreate) AddServer(t ...*TAServer) *SubscriptionCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableServerID sets the "server" edge to the TAServer entity by ID if the given value is not nil.
+func (sc *SubscriptionCreate) SetNillableServerID(id *int) *SubscriptionCreate {
+	if id != nil {
+		sc = sc.SetServerID(*id)
 	}
-	return sc.AddServerIDs(ids...)
+	return sc
+}
+
+// SetServer sets the "server" edge to the TAServer entity.
+func (sc *SubscriptionCreate) SetServer(t *TAServer) *SubscriptionCreate {
+	return sc.SetServerID(t.ID)
 }
 
 // Mutation returns the SubscriptionMutation object of the builder.
@@ -136,10 +140,10 @@ func (sc *SubscriptionCreate) createSpec() (*Subscription, *sqlgraph.CreateSpec)
 	}
 	if nodes := sc.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   subscription.ServerTable,
-			Columns: subscription.ServerPrimaryKey,
+			Columns: []string{subscription.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
@@ -148,6 +152,7 @@ func (sc *SubscriptionCreate) createSpec() (*Subscription, *sqlgraph.CreateSpec)
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.subscription_server = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

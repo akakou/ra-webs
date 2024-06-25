@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -24,6 +23,7 @@ type SubscriptionQuery struct {
 	inters     []Interceptor
 	predicates []predicate.Subscription
 	withServer *TAServerQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -74,7 +74,7 @@ func (sq *SubscriptionQuery) QueryServer() *TAServerQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(subscription.Table, subscription.FieldID, selector),
 			sqlgraph.To(taserver.Table, taserver.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, subscription.ServerTable, subscription.ServerPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, subscription.ServerTable, subscription.ServerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
 		return fromU, nil
@@ -369,11 +369,18 @@ func (sq *SubscriptionQuery) prepareQuery(ctx context.Context) error {
 func (sq *SubscriptionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Subscription, error) {
 	var (
 		nodes       = []*Subscription{}
+		withFKs     = sq.withFKs
 		_spec       = sq.querySpec()
 		loadedTypes = [1]bool{
 			sq.withServer != nil,
 		}
 	)
+	if sq.withServer != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, subscription.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Subscription).scanValues(nil, columns)
 	}
@@ -393,9 +400,8 @@ func (sq *SubscriptionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		return nodes, nil
 	}
 	if query := sq.withServer; query != nil {
-		if err := sq.loadServer(ctx, query, nodes,
-			func(n *Subscription) { n.Edges.Server = []*TAServer{} },
-			func(n *Subscription, e *TAServer) { n.Edges.Server = append(n.Edges.Server, e) }); err != nil {
+		if err := sq.loadServer(ctx, query, nodes, nil,
+			func(n *Subscription, e *TAServer) { n.Edges.Server = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -403,62 +409,33 @@ func (sq *SubscriptionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 }
 
 func (sq *SubscriptionQuery) loadServer(ctx context.Context, query *TAServerQuery, nodes []*Subscription, init func(*Subscription), assign func(*Subscription, *TAServer)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Subscription)
-	nids := make(map[int]map[*Subscription]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Subscription)
+	for i := range nodes {
+		if nodes[i].subscription_server == nil {
+			continue
 		}
+		fk := *nodes[i].subscription_server
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(subscription.ServerTable)
-		s.Join(joinT).On(s.C(taserver.FieldID), joinT.C(subscription.ServerPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(subscription.ServerPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(subscription.ServerPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
+	if len(ids) == 0 {
+		return nil
 	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Subscription]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*TAServer](ctx, query, qr, query.inters)
+	query.Where(taserver.IDIn(ids...))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "server" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "subscription_server" returned %v`, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
 	return nil

@@ -518,7 +518,7 @@ func (c *SubscriptionClient) QueryServer(s *Subscription) *TAServerQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(subscription.Table, subscription.FieldID, id),
 			sqlgraph.To(taserver.Table, taserver.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, subscription.ServerTable, subscription.ServerPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, subscription.ServerTable, subscription.ServerColumn),
 		)
 		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
 		return fromV, nil
@@ -880,7 +880,7 @@ func (c *TAServerClient) QuerySubscription(ts *TAServer) *SubscriptionQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(taserver.Table, taserver.FieldID, id),
 			sqlgraph.To(subscription.Table, subscription.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, taserver.SubscriptionTable, taserver.SubscriptionPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, taserver.SubscriptionTable, taserver.SubscriptionColumn),
 		)
 		fromV = sqlgraph.Neighbors(ts.driver.Dialect(), step)
 		return fromV, nil

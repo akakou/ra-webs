@@ -327,7 +327,7 @@ func HasSubscription() predicate.TAServer {
 	return predicate.TAServer(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, SubscriptionTable, SubscriptionPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, SubscriptionTable, SubscriptionColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

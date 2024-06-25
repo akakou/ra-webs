@@ -255,10 +255,10 @@ func (tsc *TAServerCreate) createSpec() (*TAServer, *sqlgraph.CreateSpec) {
 	}
 	if nodes := tsc.mutation.SubscriptionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   taserver.SubscriptionTable,
-			Columns: taserver.SubscriptionPrimaryKey,
+			Columns: []string{taserver.SubscriptionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),

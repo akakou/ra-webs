@@ -359,10 +359,10 @@ func (tsu *TAServerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tsu.mutation.SubscriptionCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   taserver.SubscriptionTable,
-			Columns: taserver.SubscriptionPrimaryKey,
+			Columns: []string{taserver.SubscriptionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
@@ -372,10 +372,10 @@ func (tsu *TAServerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tsu.mutation.RemovedSubscriptionIDs(); len(nodes) > 0 && !tsu.mutation.SubscriptionCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   taserver.SubscriptionTable,
-			Columns: taserver.SubscriptionPrimaryKey,
+			Columns: []string{taserver.SubscriptionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
@@ -388,10 +388,10 @@ func (tsu *TAServerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tsu.mutation.SubscriptionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   taserver.SubscriptionTable,
-			Columns: taserver.SubscriptionPrimaryKey,
+			Columns: []string{taserver.SubscriptionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
@@ -780,10 +780,10 @@ func (tsuo *TAServerUpdateOne) sqlSave(ctx context.Context) (_node *TAServer, er
 	}
 	if tsuo.mutation.SubscriptionCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   taserver.SubscriptionTable,
-			Columns: taserver.SubscriptionPrimaryKey,
+			Columns: []string{taserver.SubscriptionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
@@ -793,10 +793,10 @@ func (tsuo *TAServerUpdateOne) sqlSave(ctx context.Context) (_node *TAServer, er
 	}
 	if nodes := tsuo.mutation.RemovedSubscriptionIDs(); len(nodes) > 0 && !tsuo.mutation.SubscriptionCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   taserver.SubscriptionTable,
-			Columns: taserver.SubscriptionPrimaryKey,
+			Columns: []string{taserver.SubscriptionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
@@ -809,10 +809,10 @@ func (tsuo *TAServerUpdateOne) sqlSave(ctx context.Context) (_node *TAServer, er
 	}
 	if nodes := tsuo.mutation.SubscriptionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   taserver.SubscriptionTable,
-			Columns: taserver.SubscriptionPrimaryKey,
+			Columns: []string{taserver.SubscriptionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),

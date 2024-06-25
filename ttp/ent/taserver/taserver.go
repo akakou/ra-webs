@@ -51,11 +51,13 @@ const (
 	ServiceInverseTable = "services"
 	// ServiceColumn is the table column denoting the service relation/edge.
 	ServiceColumn = "ta_server_service"
-	// SubscriptionTable is the table that holds the subscription relation/edge. The primary key declared below.
-	SubscriptionTable = "subscription_server"
+	// SubscriptionTable is the table that holds the subscription relation/edge.
+	SubscriptionTable = "subscriptions"
 	// SubscriptionInverseTable is the table name for the Subscription entity.
 	// It exists in this package in order to avoid circular dependency with the "subscription" package.
 	SubscriptionInverseTable = "subscriptions"
+	// SubscriptionColumn is the table column denoting the subscription relation/edge.
+	SubscriptionColumn = "subscription_server"
 )
 
 // Columns holds all SQL columns for taserver fields.
@@ -73,12 +75,6 @@ var ForeignKeys = []string{
 	"ta_server_code",
 	"ta_server_service",
 }
-
-var (
-	// SubscriptionPrimaryKey and SubscriptionColumn2 are the table columns denoting the
-	// primary key for the subscription relation (M2M).
-	SubscriptionPrimaryKey = []string{"subscription_id", "ta_server_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -184,6 +180,6 @@ func newSubscriptionStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SubscriptionInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, SubscriptionTable, SubscriptionPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, true, SubscriptionTable, SubscriptionColumn),
 	)
 }

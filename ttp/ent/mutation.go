@@ -655,8 +655,7 @@ type SubscriptionMutation struct {
 	p256dh        *string
 	auth          *string
 	clearedFields map[string]struct{}
-	server        map[int]struct{}
-	removedserver map[int]struct{}
+	server        *int
 	clearedserver bool
 	done          bool
 	oldValue      func(context.Context) (*Subscription, error)
@@ -869,14 +868,9 @@ func (m *SubscriptionMutation) ResetAuth() {
 	m.auth = nil
 }
 
-// AddServerIDs adds the "server" edge to the TAServer entity by ids.
-func (m *SubscriptionMutation) AddServerIDs(ids ...int) {
-	if m.server == nil {
-		m.server = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.server[ids[i]] = struct{}{}
-	}
+// SetServerID sets the "server" edge to the TAServer entity by id.
+func (m *SubscriptionMutation) SetServerID(id int) {
+	m.server = &id
 }
 
 // ClearServer clears the "server" edge to the TAServer entity.
@@ -889,29 +883,20 @@ func (m *SubscriptionMutation) ServerCleared() bool {
 	return m.clearedserver
 }
 
-// RemoveServerIDs removes the "server" edge to the TAServer entity by IDs.
-func (m *SubscriptionMutation) RemoveServerIDs(ids ...int) {
-	if m.removedserver == nil {
-		m.removedserver = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.server, ids[i])
-		m.removedserver[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedServer returns the removed IDs of the "server" edge to the TAServer entity.
-func (m *SubscriptionMutation) RemovedServerIDs() (ids []int) {
-	for id := range m.removedserver {
-		ids = append(ids, id)
+// ServerID returns the "server" edge ID in the mutation.
+func (m *SubscriptionMutation) ServerID() (id int, exists bool) {
+	if m.server != nil {
+		return *m.server, true
 	}
 	return
 }
 
 // ServerIDs returns the "server" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ServerID instead. It exists only for internal usage by the builders.
 func (m *SubscriptionMutation) ServerIDs() (ids []int) {
-	for id := range m.server {
-		ids = append(ids, id)
+	if id := m.server; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -920,7 +905,6 @@ func (m *SubscriptionMutation) ServerIDs() (ids []int) {
 func (m *SubscriptionMutation) ResetServer() {
 	m.server = nil
 	m.clearedserver = false
-	m.removedserver = nil
 }
 
 // Where appends a list predicates to the SubscriptionMutation builder.
@@ -1102,11 +1086,9 @@ func (m *SubscriptionMutation) AddedEdges() []string {
 func (m *SubscriptionMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case subscription.EdgeServer:
-		ids := make([]ent.Value, 0, len(m.server))
-		for id := range m.server {
-			ids = append(ids, id)
+		if id := m.server; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -1114,23 +1096,12 @@ func (m *SubscriptionMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *SubscriptionMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedserver != nil {
-		edges = append(edges, subscription.EdgeServer)
-	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *SubscriptionMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case subscription.EdgeServer:
-		ids := make([]ent.Value, 0, len(m.removedserver))
-		for id := range m.removedserver {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
@@ -1157,6 +1128,9 @@ func (m *SubscriptionMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *SubscriptionMutation) ClearEdge(name string) error {
 	switch name {
+	case subscription.EdgeServer:
+		m.ClearServer()
+		return nil
 	}
 	return fmt.Errorf("unknown Subscription unique edge %s", name)
 }

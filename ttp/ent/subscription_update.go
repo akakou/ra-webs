@@ -70,19 +70,23 @@ func (su *SubscriptionUpdate) SetNillableAuth(s *string) *SubscriptionUpdate {
 	return su
 }
 
-// AddServerIDs adds the "server" edge to the TAServer entity by IDs.
-func (su *SubscriptionUpdate) AddServerIDs(ids ...int) *SubscriptionUpdate {
-	su.mutation.AddServerIDs(ids...)
+// SetServerID sets the "server" edge to the TAServer entity by ID.
+func (su *SubscriptionUpdate) SetServerID(id int) *SubscriptionUpdate {
+	su.mutation.SetServerID(id)
 	return su
 }
 
-// AddServer adds the "server" edges to the TAServer entity.
-func (su *SubscriptionUpdate) AddServer(t ...*TAServer) *SubscriptionUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableServerID sets the "server" edge to the TAServer entity by ID if the given value is not nil.
+func (su *SubscriptionUpdate) SetNillableServerID(id *int) *SubscriptionUpdate {
+	if id != nil {
+		su = su.SetServerID(*id)
 	}
-	return su.AddServerIDs(ids...)
+	return su
+}
+
+// SetServer sets the "server" edge to the TAServer entity.
+func (su *SubscriptionUpdate) SetServer(t *TAServer) *SubscriptionUpdate {
+	return su.SetServerID(t.ID)
 }
 
 // Mutation returns the SubscriptionMutation object of the builder.
@@ -90,25 +94,10 @@ func (su *SubscriptionUpdate) Mutation() *SubscriptionMutation {
 	return su.mutation
 }
 
-// ClearServer clears all "server" edges to the TAServer entity.
+// ClearServer clears the "server" edge to the TAServer entity.
 func (su *SubscriptionUpdate) ClearServer() *SubscriptionUpdate {
 	su.mutation.ClearServer()
 	return su
-}
-
-// RemoveServerIDs removes the "server" edge to TAServer entities by IDs.
-func (su *SubscriptionUpdate) RemoveServerIDs(ids ...int) *SubscriptionUpdate {
-	su.mutation.RemoveServerIDs(ids...)
-	return su
-}
-
-// RemoveServer removes "server" edges to TAServer entities.
-func (su *SubscriptionUpdate) RemoveServer(t ...*TAServer) *SubscriptionUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return su.RemoveServerIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -158,39 +147,23 @@ func (su *SubscriptionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if su.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   subscription.ServerTable,
-			Columns: subscription.ServerPrimaryKey,
+			Columns: []string{subscription.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := su.mutation.RemovedServerIDs(); len(nodes) > 0 && !su.mutation.ServerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   subscription.ServerTable,
-			Columns: subscription.ServerPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := su.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   subscription.ServerTable,
-			Columns: subscription.ServerPrimaryKey,
+			Columns: []string{subscription.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
@@ -263,19 +236,23 @@ func (suo *SubscriptionUpdateOne) SetNillableAuth(s *string) *SubscriptionUpdate
 	return suo
 }
 
-// AddServerIDs adds the "server" edge to the TAServer entity by IDs.
-func (suo *SubscriptionUpdateOne) AddServerIDs(ids ...int) *SubscriptionUpdateOne {
-	suo.mutation.AddServerIDs(ids...)
+// SetServerID sets the "server" edge to the TAServer entity by ID.
+func (suo *SubscriptionUpdateOne) SetServerID(id int) *SubscriptionUpdateOne {
+	suo.mutation.SetServerID(id)
 	return suo
 }
 
-// AddServer adds the "server" edges to the TAServer entity.
-func (suo *SubscriptionUpdateOne) AddServer(t ...*TAServer) *SubscriptionUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableServerID sets the "server" edge to the TAServer entity by ID if the given value is not nil.
+func (suo *SubscriptionUpdateOne) SetNillableServerID(id *int) *SubscriptionUpdateOne {
+	if id != nil {
+		suo = suo.SetServerID(*id)
 	}
-	return suo.AddServerIDs(ids...)
+	return suo
+}
+
+// SetServer sets the "server" edge to the TAServer entity.
+func (suo *SubscriptionUpdateOne) SetServer(t *TAServer) *SubscriptionUpdateOne {
+	return suo.SetServerID(t.ID)
 }
 
 // Mutation returns the SubscriptionMutation object of the builder.
@@ -283,25 +260,10 @@ func (suo *SubscriptionUpdateOne) Mutation() *SubscriptionMutation {
 	return suo.mutation
 }
 
-// ClearServer clears all "server" edges to the TAServer entity.
+// ClearServer clears the "server" edge to the TAServer entity.
 func (suo *SubscriptionUpdateOne) ClearServer() *SubscriptionUpdateOne {
 	suo.mutation.ClearServer()
 	return suo
-}
-
-// RemoveServerIDs removes the "server" edge to TAServer entities by IDs.
-func (suo *SubscriptionUpdateOne) RemoveServerIDs(ids ...int) *SubscriptionUpdateOne {
-	suo.mutation.RemoveServerIDs(ids...)
-	return suo
-}
-
-// RemoveServer removes "server" edges to TAServer entities.
-func (suo *SubscriptionUpdateOne) RemoveServer(t ...*TAServer) *SubscriptionUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return suo.RemoveServerIDs(ids...)
 }
 
 // Where appends a list predicates to the SubscriptionUpdate builder.
@@ -381,39 +343,23 @@ func (suo *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscript
 	}
 	if suo.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   subscription.ServerTable,
-			Columns: subscription.ServerPrimaryKey,
+			Columns: []string{subscription.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := suo.mutation.RemovedServerIDs(); len(nodes) > 0 && !suo.mutation.ServerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   subscription.ServerTable,
-			Columns: subscription.ServerPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := suo.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   subscription.ServerTable,
-			Columns: subscription.ServerPrimaryKey,
+			Columns: []string{subscription.ServerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
