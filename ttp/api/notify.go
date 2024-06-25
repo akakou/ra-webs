@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
@@ -22,8 +23,13 @@ var PostNotifyApi = goutils.EchoRoute[core.TTP]{
 			}
 
 			var data struct {
-				Domain string `json:"domain"`
-				Body   string `json:"body"`
+				Domain  string `json:"domain"`
+				Message string `json:"message"`
+			}
+
+			err = c.Bind(&data)
+			if err != nil {
+				return err
 			}
 
 			serv, err := ttp.DB.Client.TAServer.
@@ -33,10 +39,10 @@ var PostNotifyApi = goutils.EchoRoute[core.TTP]{
 				First(*ttp.DB.Ctx)
 
 			if err != nil {
-				return err
+				return fmt.Errorf("koredehanai %v, %v", data.Domain, err)
 			}
 
-			err = ttp.Notify.Notify([]byte(data.Body), serv, ttp)
+			err = ttp.Notify.Notify([]byte(data.Message), serv, ttp)
 			if err != nil {
 				return err
 			}
