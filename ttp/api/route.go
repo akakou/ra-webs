@@ -22,8 +22,5 @@ func Route(e *echo.Echo, ttp *ttpcore.TTP) {
 	PostServiceByAdmin.Set(e, ttp)
 
 	GetServerFromDomainApi.Set(e, ttp)
-
-	// getWebhookApi, postWebhookApi := WebhookApis()
-	// getWebhookApi.Set(e, ttp)
-	// postWebhookApi.Set(e, ttp)
+	PostNotifyApi.Set(e, ttp)
 }
