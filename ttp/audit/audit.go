@@ -13,14 +13,14 @@ import (
 func Audit(ttp *core.TTP, cert *x509.Certificate) error {
 	domain, err := validateDomains(cert)
 	if err != nil {
-		revokeByDomains(cert.DNSNames, ttp.DB)
+		revokeByDomains(cert.DNSNames, ttp)
 		return fmt.Errorf("%s: %w", ERROR_DOMAIN_INVALID, err)
 	}
 
 	unmarshaledPublicKey, isRSA := cert.PublicKey.(*rsa.PublicKey)
 
 	if !isRSA {
-		revokeByDomain(domain, lastValidID(domain, ttp.DB), ttp.DB)
+		revokeByDomain(domain, lastValidID(domain, ttp.DB), ttp)
 		return fmt.Errorf("%s", ERROR_PUBLIC_KEY_NOT_RSA)
 	}
 
@@ -38,7 +38,7 @@ func Audit(ttp *core.TTP, cert *x509.Certificate) error {
 		First(*ttp.DB.Ctx)
 
 	if err != nil {
-		revokeByDomain(domain, lastID, ttp.DB)
+		revokeByDomain(domain, lastID, ttp)
 		return fmt.Errorf("%v: %v", ERROR_CERTIFICATE_NOT_FOUND, err)
 	}
 
