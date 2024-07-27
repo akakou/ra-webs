@@ -29,7 +29,14 @@ func main() {
 				Value: "true",
 			})
 
-			fmt.Fprintf(w, "<script>location.href = '%v'</script>", config.TTP+REDIRECT_PATH)
+			fmt.Fprintf(w, `
+				We will redirect verifier after 3 second....
+				<script>
+					setTimeout(() => {
+						location.href = '%v'
+					}, 3000)
+				</script>
+				`, config.TTP+REDIRECT_PATH)
 		}
 
 		fmt.Fprintln(w, "Hello from TA running on TEE :)")
@@ -49,4 +56,3 @@ func main() {
 	http.HandleFunc("/", handler)
 	server.ListenAndServeTLS("", "")
 }
-
