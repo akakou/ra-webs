@@ -17,17 +17,19 @@ var DefaultCTLogs = []string{
 }
 
 type Auditor struct {
-	ctstream *ctstream.CTStream
+	ctstream *ctstream.CTsStream
+	sleep    time.Duration
 }
 
 func NewAuditor(sleep time.Duration, url []string) (*Auditor, error) {
-	stream, err := ctstream.New(url, sleep)
+	stream, err := ctstream.DefaultCTsStream(url)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Auditor{
 		ctstream: stream,
+		sleep:    sleep,
 	}, nil
 }
 
@@ -51,5 +53,5 @@ func (a *Auditor) Run(ttp *core.TTP) {
 		}
 
 		fmt.Printf("Certificate: %v\n", cert.Subject.CommonName)
-	})
+	}, a.sleep)
 }
