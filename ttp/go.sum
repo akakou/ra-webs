@@ -12,6 +12,8 @@ github.com/akakou/ctstream v0.0.1 h1:YANeCe1N20Vez5Ybusdpp7ujdt0dpnW38UwqFMFYYZ8
 github.com/akakou/ctstream v0.0.1/go.mod h1:sy1zkObG5QwPQ8FVwTfUZF22A6h9A1IEbVDuckA5qR0=
 github.com/akakou/ctstream v0.0.6 h1:FCuz6zqnlrM/XFp1JV24iF8HMtvIu2Rf+fmzMrlhaR0=
 github.com/akakou/ctstream v0.0.6/go.mod h1:sy1zkObG5QwPQ8FVwTfUZF22A6h9A1IEbVDuckA5qR0=
+github.com/akakou/ctstream v0.0.17 h1:OEErrWtDCiLeQ9KS3OynEs6UNHkYCUu6wbHFjxN/wkA=
+github.com/akakou/ctstream v0.0.17/go.mod h1:sy1zkObG5QwPQ8FVwTfUZF22A6h9A1IEbVDuckA5qR0=
 github.com/akakou/extract-embed v0.0.1 h1:ZyD2z0PNqJ53OHmD1cgMFic0wF6t8Yu1a7PcSXtqlnQ=
 github.com/akakou/extract-embed v0.0.1/go.mod h1:K6bU3dJXVAMp5NY13kABMAPO3+n/q2mApVBayLhjbbI=
 github.com/akakou/go-utils v0.0.3 h1:FjqjvB0Wfn5dABjSssboKCLpS3ijLvq1/EZGz6LfzJo=
