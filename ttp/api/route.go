@@ -15,8 +15,6 @@ func Route(e *echo.Echo, ttp *ttpcore.TTP) {
 	})
 
 	RegisterApi.Set(e, ttp)
-
-	GetCodeApi.Set(e, ttp)
 	GetServerApi.Set(e, ttp)
 
 	PostServiceByAdmin.Set(e, ttp)
