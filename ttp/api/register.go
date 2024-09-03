@@ -18,7 +18,7 @@ import (
 
 var RegisterApi = goutils.EchoRoute[ttpcore.TTP]{
 	Method: goutils.POST,
-	Path:   core.API_ROOT + "/register",
+	Path:   core.API_ROOT + "/ta",
 	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			service, err := authenticateService(ttp, c)

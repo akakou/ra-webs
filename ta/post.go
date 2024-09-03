@@ -14,7 +14,7 @@ import (
 )
 
 const WAIT = 3
-const REGISTER_PATH = "/api/register"
+const REGISTER_PATH = "/api/ta"
 
 func (ta *TA) Register() (string, error) {
 	publicKey := ta.privateKey.Public()
