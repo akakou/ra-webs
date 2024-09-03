@@ -10,7 +10,7 @@ const checkAllValidity = (data) => {
 
 
 const fetchAndValidate = async (url) => {
-    const resp = await axios.get(`/api/server/${url}`)
+    const resp = await axios.get(`/api/ta/${url}`)
     console.log(resp)
 
     const data = resp.data
