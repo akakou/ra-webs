@@ -15,13 +15,13 @@ func (notifier *BrowserNotifier) Notifier(msg []byte, domain string, verifier *c
 		return err
 	}
 
-	err = notifier.notifierAll(msg, subscriptions)
+	err = notifier.notifyAll(msg, subscriptions)
 	return err
 }
 
-func (notifier *BrowserNotifier) notifierAll(msg []byte, subscription []*ent.Subscription) error {
+func (notifier *BrowserNotifier) notifyAll(msg []byte, subscription []*ent.Subscription) error {
 	for _, sub := range subscription {
-		err := notifier.notifierOne(msg, sub)
+		err := notifier.notifyOne(msg, sub)
 		if err != nil {
 			return err
 		}
@@ -30,7 +30,7 @@ func (notifier *BrowserNotifier) notifierAll(msg []byte, subscription []*ent.Sub
 	return nil
 }
 
-func (notifier *BrowserNotifier) notifierOne(msg []byte, subscription *ent.Subscription) error {
+func (notifier *BrowserNotifier) notifyOne(msg []byte, subscription *ent.Subscription) error {
 	s := webpush.Subscription{
 		Endpoint: subscription.Endpoint,
 		Keys: webpush.Keys{
