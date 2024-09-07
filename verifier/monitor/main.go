@@ -29,30 +29,30 @@ type Monitoror struct {
 	ctstream ctcore.CtStream
 }
 
-func NewMonitoror[T ctcore.CtStream](stream T) (*Monitoror, error) {
+func NewMonitor[T ctcore.CtStream](stream T) (*Monitoror, error) {
 	return &Monitoror{
 		ctstream: stream,
 	}, nil
 }
 
-func DefaultDirectMonitoror() (*Monitoror, error) {
+func DefaultDirectMonitor() (*Monitoror, error) {
 	ctx := context.Background()
 	stream, err := direct.DefaultCTsStream(DefaultCTLogs, ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewMonitoror(stream)
+	return NewMonitor(stream)
 }
 
-func DefaultSSLMateMonitoror() (*Monitoror, error) {
+func DefaultSSLMateMonitor() (*Monitoror, error) {
 	ctx := context.Background()
 	stream, err := sslmate.DefaultCTsStream(DefaultCTLogs, ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewMonitoror(stream)
+	return NewMonitor(stream)
 }
 
 func (a *Monitoror) Setup(verifier *core.Verifier) error {
