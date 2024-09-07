@@ -25,17 +25,17 @@ var DefaultCTLogs = []string{
 	"https://ct2024.trustasia.com/log2024/",
 }
 
-type Monitoror struct {
+type Monitor struct {
 	ctstream ctcore.CtStream
 }
 
-func NewMonitor[T ctcore.CtStream](stream T) (*Monitoror, error) {
-	return &Monitoror{
+func NewMonitor[T ctcore.CtStream](stream T) (*Monitor, error) {
+	return &Monitor{
 		ctstream: stream,
 	}, nil
 }
 
-func DefaultDirectMonitor() (*Monitoror, error) {
+func DefaultDirectMonitor() (*Monitor, error) {
 	ctx := context.Background()
 	stream, err := direct.DefaultCTsStream(DefaultCTLogs, ctx)
 	if err != nil {
@@ -45,7 +45,7 @@ func DefaultDirectMonitor() (*Monitoror, error) {
 	return NewMonitor(stream)
 }
 
-func DefaultSSLMateMonitor() (*Monitoror, error) {
+func DefaultSSLMateMonitor() (*Monitor, error) {
 	ctx := context.Background()
 	stream, err := sslmate.DefaultCTsStream(DefaultCTLogs, ctx)
 	if err != nil {
@@ -55,14 +55,14 @@ func DefaultSSLMateMonitor() (*Monitoror, error) {
 	return NewMonitor(stream)
 }
 
-func (a *Monitoror) Setup(verifier *core.Verifier) error {
+func (a *Monitor) Setup(verifier *core.Verifier) error {
 	return a.ctstream.Init()
 }
 
-func (a *Monitoror) Run(verifier *core.Verifier) {
+func (a *Monitor) Run(verifier *core.Verifier) {
 	a.ctstream.Run(func(cert *ctx509.Certificate, i int, params any, err error) {
 		if err == nil {
-		} else if err.Error() == direct.ERROR_NEW_LOGS_NOT_FOUND {
+		} else if err.Error() == direct.ERROR_FAILED_TO_NEW {
 			return
 		} else {
 			fmt.Printf("Error: %v\n", err)
@@ -74,6 +74,6 @@ func (a *Monitoror) Run(verifier *core.Verifier) {
 			fmt.Printf("Error: %v\n", err)
 		}
 
-		fmt.Printf("Certificate: %v\n", cert.Subject.CommonName)
+		// fmt.Printf("Certificate: %v\n", cert.Subject.CommonName)
 	})
 }
