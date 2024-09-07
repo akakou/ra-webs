@@ -35,16 +35,3 @@ services:
       - test/env/common.env
     privileged: true
     tty: true
-
-  ngrok:
-    image: ngrok/ngrok:latest
-    restart: unless-stopped
-    command:
-      - "start"
-      - "--all"
-      - "--config"
-      - "/etc/ngrok.yaml"
-    ports:
-      - 4040:4040
-    volumes:
-      - ./test/ngrok.yaml:/etc/ngrok.yaml
