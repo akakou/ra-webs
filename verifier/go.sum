@@ -10,6 +10,8 @@ github.com/agext/levenshtein v1.2.1 h1:QmvMAjj2aEICytGiWzmxoE0x2KZvE0fvmqMOfy2tj
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/akakou/ctstream v0.0.20 h1:de6UeXLq07+V5teTIuCYOrUw/k+JaKU6eyMxsQnhG7M=
 github.com/akakou/ctstream v0.0.20/go.mod h1:xqEw2npq65DfsQ91c0bQyIau2b16ZJNyUaeulYo96Tc=
+github.com/akakou/ctstream v0.0.22 h1:s2fJOv7bFAzF01v66tReAWF4L7ZTB+OtagvLrCufKJs=
+github.com/akakou/ctstream v0.0.22/go.mod h1:xqEw2npq65DfsQ91c0bQyIau2b16ZJNyUaeulYo96Tc=
 github.com/akakou/extract-embed v0.0.1 h1:ZyD2z0PNqJ53OHmD1cgMFic0wF6t8Yu1a7PcSXtqlnQ=
 github.com/akakou/extract-embed v0.0.1/go.mod h1:K6bU3dJXVAMp5NY13kABMAPO3+n/q2mApVBayLhjbbI=
 github.com/akakou/go-utils v0.0.3 h1:FjqjvB0Wfn5dABjSssboKCLpS3ijLvq1/EZGz6LfzJo=
