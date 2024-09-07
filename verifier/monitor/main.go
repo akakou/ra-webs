@@ -65,7 +65,7 @@ func (a *Monitoror) Run(verifier *core.Verifier) {
 			fmt.Printf("Error: %v\n", err)
 		}
 
-		err = Monitor(verifier, cert)
+		err = Check(verifier, cert)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 		}
