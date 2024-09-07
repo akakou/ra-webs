@@ -13,7 +13,7 @@ import (
 var AcmeURL = autocert.DefaultACMEDirectory
 
 type TAConfig struct {
-	TTP        string
+	Verifier   string
 	Token      string
 	Repository string
 	Domain     string
@@ -30,7 +30,7 @@ func DefaultConfig() (*TAConfig, error) {
 	repository := os.Getenv("RA_WEBS_TA_REPOSITORY")
 	domain := os.Getenv("RA_WEBS_TA_DOMAIN")
 	email := os.Getenv("RA_WEBS_SERVICE_EMAIL")
-	ttpBase := os.Getenv("RA_WEBS_TTP_BASE")
+	verifierBase := os.Getenv("RA_WEBS_Verifier_BASE")
 
 	if token == "" {
 		return nil, fmt.Errorf("%v", ERROR_TOKEN_NOT_SET)
@@ -44,16 +44,16 @@ func DefaultConfig() (*TAConfig, error) {
 		return nil, fmt.Errorf("%v", ERROR_EMAIL_NOT_SET)
 	}
 
-	if ttpBase == "" {
-		ttpBase = "http://localhost" + core.TTPPort
-		fmt.Printf("RA_WEBS_TTP_BASE is not set: so use %v\n", ttpBase)
+	if verifierBase == "" {
+		verifierBase = "http://localhost" + core.VerifierPort
+		fmt.Printf("RA_WEBS_Verifier_BASE is not set: so use %v\n", verifierBase)
 	}
 
 	return &TAConfig{
 		Token:      token,
 		Repository: repository,
 		Domain:     domain,
-		TTP:        ttpBase,
+		Verifier:   verifierBase,
 	}, nil
 }
 

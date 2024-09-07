@@ -20,18 +20,18 @@ services:
       - test/env/common.env
     restart: unless-stopped
 
-  ttp:
+  verifier:
     build: ./docker
     ports:
       - "8000:8000"
     volumes:
-      - ./ttp:/ttp
+      - ./verifier:/verifier
       - ./core:/core
       - /var/run/docker.sock:/var/run/docker.sock
-    working_dir: /ttp/serv
+    working_dir: /verifier/serv
     command: bash -c 'go mod tidy && go run main.go'
     env_file:
-      - test/env/ttp.env
+      - test/env/verifier.env
       - test/env/common.env
     privileged: true
     tty: true

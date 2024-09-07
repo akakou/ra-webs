@@ -1,5 +1,5 @@
 # If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+# hverifiers://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
 # Binaries for programs and plugins
 *.exe
@@ -19,12 +19,12 @@
 
 # Go workspace file
 go.work
-/ttp/ttp
-/ttp/serv/serv
+/verifier/verifier
+/verifier/serv/serv
 ta/certificate.pem
 ta/private.key
 ta/example/example
-ttp/ca_test.json
+verifier/ca_test.json
 
 **/repo
 service/cmd/cmd

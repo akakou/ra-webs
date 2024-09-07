@@ -1,5 +1,5 @@
 cd test && go test .
 cd ..
-cd ttp/api && go test .
+cd verifier/api && go test .
 cd ../../
-cd ttp/audit && go test .
+cd verifier/monitor && go test .

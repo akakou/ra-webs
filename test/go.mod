@@ -6,13 +6,13 @@ replace github.com/akakou/ra_webs/core => ../core
 
 replace ta => ../ta
 
-replace github.com/akakou/ra_webs/ttp => ../ttp
+replace github.com/akakou/ra_webs/verifier => ../verifier
 
 require (
 	github.com/akakou/go-utils v0.0.3
 	github.com/akakou/golang-utils v0.0.1
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
-	github.com/akakou/ra_webs/ttp v0.0.0-00010101000000-000000000000
+	github.com/akakou/ra_webs/verifier v0.0.0-00010101000000-000000000000
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/stretchr/testify v1.9.0
 	ta v0.0.0-00010101000000-000000000000
