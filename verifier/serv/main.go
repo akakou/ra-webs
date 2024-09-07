@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"os"
 
 	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/verifier"
@@ -38,7 +39,10 @@ func InjectSWHeader(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func main() {
+	verifierHost := os.Getenv("RA_WEBS_VERIFIER_HOST")
+
 	e := echo.New()
+
 	verifier, err := verifier.DefaultVerifier()
 	if err != nil {
 		panic(err)
@@ -61,7 +65,6 @@ func main() {
 		panic(err)
 	}
 
-	// go verifier.Monitor.Run(verifier)
 	fmt.Printf("public: %v\nprivate: %v", verifier.Notifier.(*notifier.BrowserNotifier).VapidPublicKey, verifier.Notifier.(*notifier.BrowserNotifier).VapidPrivateKey)
-	e.Logger.Fatal(e.Start(core.VerifierPort))
+	e.Logger.Fatal(e.Start(verifierHost + ":" + core.VerifierPort))
 }
