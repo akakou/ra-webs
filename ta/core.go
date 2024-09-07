@@ -31,6 +31,7 @@ func DefaultConfig() (*TAConfig, error) {
 	domain := os.Getenv("RA_WEBS_TA_DOMAIN")
 	email := os.Getenv("RA_WEBS_SERVICE_EMAIL")
 	verifierBase := os.Getenv("RA_WEBS_VERIFIER_BASE")
+
 	if token == "" {
 		return nil, fmt.Errorf("%v", ERROR_TOKEN_NOT_SET)
 	}
