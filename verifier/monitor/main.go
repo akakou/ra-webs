@@ -62,7 +62,7 @@ func (a *Monitoror) Setup(verifier *core.Verifier) error {
 func (a *Monitoror) Run(verifier *core.Verifier) {
 	a.ctstream.Run(func(cert *ctx509.Certificate, i int, params any, err error) {
 		if err == nil {
-		} else if err.Error() == direct.ERROR_NEW_LOGS_NOT_FOUND {
+		} else if err.Error() == direct.ERROR_FAILED_TO_NEW {
 			return
 		} else {
 			fmt.Printf("Error: %v\n", err)
