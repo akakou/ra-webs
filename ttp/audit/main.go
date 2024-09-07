@@ -6,6 +6,7 @@ import (
 
 	ctcore "github.com/akakou/ctstream/core"
 	"github.com/akakou/ctstream/direct"
+	"github.com/akakou/ctstream/thirdparty/sslmate"
 	"github.com/akakou/ra_webs/ttp/core"
 	ctx509 "github.com/google/certificate-transparency-go/x509"
 )
@@ -42,7 +43,16 @@ func DefaultDirectAuditor() (*Auditor, error) {
 	}
 
 	return NewAuditor(stream)
+}
 
+func DefaultSSLMateAuditor() (*Auditor, error) {
+	ctx := context.Background()
+	stream, err := sslmate.DefaultCTsStream(DefaultCTLogs, ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewAuditor(stream)
 }
 
 func (a *Auditor) Setup(ttp *core.TTP) error {
