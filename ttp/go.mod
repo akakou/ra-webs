@@ -22,7 +22,7 @@ require (
 	ariga.io/atlas v0.14.1-0.20230918065911-83ad451a4935 // indirect
 	github.com/SherClockHolmes/webpush-go v1.3.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
-	github.com/akakou/ctstream v0.0.19 // indirect
+	github.com/akakou/ctstream v0.0.20 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/edgelesssys/ego v1.5.0 // indirect
