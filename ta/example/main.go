@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/akakou/ra_webs/ta"
 )
@@ -11,8 +10,6 @@ import (
 const REDIRECT_PATH = "/app/redirect/"
 
 func main() {
-	exampleTaHost := os.Getenv("RA_WEBS_EXAMPLE_TA_HOST")
-
 	config, err := ta.DefaultConfig()
 	if err != nil {
 		panic(err)
@@ -51,7 +48,7 @@ func main() {
 	}
 
 	server := http.Server{
-		Addr:      exampleTaHost + ":443",
+		Addr:      ":443",
 		Handler:   nil,
 		TLSConfig: tlsConfig,
 	}

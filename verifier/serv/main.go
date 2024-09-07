@@ -50,7 +50,6 @@ func main() {
 	}
 
 	e := echo.New()
-
 	verifier, err := verifier.DefaultVerifier()
 	if err != nil {
 		panic(err)
