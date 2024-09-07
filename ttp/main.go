@@ -33,7 +33,7 @@ func DefaultTTP() (*core.TTP, error) {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_INIT_DB, err)
 	}
 
-	audit, err := audit.DefaultAuditor()
+	audit, err := audit.DefaultDirectAuditor()
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_CREATE_AUDIT, err)
 	}

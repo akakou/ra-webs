@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/akakou/ctstream"
+	ctcore "github.com/akakou/ctstream/core"
+	"github.com/akakou/ctstream/direct"
+	"github.com/akakou/ctstream/thirdparty/sslmate"
 	"github.com/akakou/ra_webs/ttp/core"
-	"github.com/google/certificate-transparency-go/client"
-	"github.com/google/certificate-transparency-go/x509"
+	ctx509 "github.com/google/certificate-transparency-go/x509"
 )
 
 var DefaultCTLogs = []string{
@@ -25,23 +26,33 @@ var DefaultCTLogs = []string{
 }
 
 type Auditor struct {
-	ctstream *ctstream.CTsStream
+	ctstream ctcore.CtStream
 }
 
-func NewAuditor(url []string, ctx context.Context) (*Auditor, error) {
-	stream, err := ctstream.DefaultCTsStream(url, ctx)
-	if err != nil {
-		return nil, err
-	}
-
+func NewAuditor[T ctcore.CtStream](stream T) (*Auditor, error) {
 	return &Auditor{
 		ctstream: stream,
 	}, nil
 }
 
-func DefaultAuditor() (*Auditor, error) {
+func DefaultDirectAuditor() (*Auditor, error) {
 	ctx := context.Background()
-	return NewAuditor(DefaultCTLogs, ctx)
+	stream, err := direct.DefaultCTsStream(DefaultCTLogs, ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewAuditor(stream)
+}
+
+func DefaultSSLMateAuditor() (*Auditor, error) {
+	ctx := context.Background()
+	stream, err := sslmate.DefaultCTsStream(DefaultCTLogs, ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewAuditor(stream)
 }
 
 func (a *Auditor) Setup(ttp *core.TTP) error {
@@ -49,7 +60,7 @@ func (a *Auditor) Setup(ttp *core.TTP) error {
 }
 
 func (a *Auditor) Run(ttp *core.TTP) {
-	a.ctstream.Run(func(cert *x509.Certificate, li ctstream.LogID, lc *client.LogClient, err error) {
+	a.ctstream.Run(func(cert *ctx509.Certificate, i int, params any, err error) {
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 		}
