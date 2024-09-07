@@ -74,6 +74,6 @@ func (a *Monitoror) Run(verifier *core.Verifier) {
 			fmt.Printf("Error: %v\n", err)
 		}
 
-		fmt.Printf("Certificate: %v\n", cert.Subject.CommonName)
+		// fmt.Printf("Certificate: %v\n", cert.Subject.CommonName)
 	})
 }
