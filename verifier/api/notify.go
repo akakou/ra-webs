@@ -5,18 +5,18 @@ import (
 
 	goutils "github.com/akakou/go-utils"
 	rawebscore "github.com/akakou/ra_webs/core"
-	"github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/ent"
-	"github.com/akakou/ra_webs/ttp/ent/taserver"
+	"github.com/akakou/ra_webs/verifier/core"
+	"github.com/akakou/ra_webs/verifier/ent"
+	"github.com/akakou/ra_webs/verifier/ent/taserver"
 	"github.com/labstack/echo/v4"
 )
 
-var PostNotifyApi = goutils.EchoRoute[core.TTP]{
+var PostNotifierApi = goutils.EchoRoute[core.Verifier]{
 	Method: goutils.POST,
-	Path:   rawebscore.API_ROOT + "/notify",
-	F: func(ttp *core.TTP) goutils.EchoRouteFunc {
+	Path:   rawebscore.API_ROOT + "/notifier",
+	F: func(verifier *core.Verifier) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			err := authenticateAdmin(ttp, c)
+			err := authenticateAdmin(verifier, c)
 			if err != nil {
 				return c.String(http.StatusUnauthorized, "token is invalid")
 			}
@@ -31,17 +31,17 @@ var PostNotifyApi = goutils.EchoRoute[core.TTP]{
 				return err
 			}
 
-			serv, err := ttp.DB.Client.TAServer.
+			serv, err := verifier.DB.Client.TAServer.
 				Query().
 				Where(taserver.DomainEQ(data.Domain)).
 				Order(ent.Desc(taserver.FieldID)).
-				First(*ttp.DB.Ctx)
+				First(*verifier.DB.Ctx)
 
 			if err != nil {
 				return err
 			}
 
-			err = ttp.Notify.Notify([]byte(data.Message), serv.Domain, ttp)
+			err = verifier.Notifier.Notifier([]byte(data.Message), serv.Domain, verifier)
 			if err != nil {
 				return err
 			}

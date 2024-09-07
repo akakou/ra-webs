@@ -10,10 +10,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra_webs/ttp/ent/predicate"
-	"github.com/akakou/ra_webs/ttp/ent/service"
-	"github.com/akakou/ra_webs/ttp/ent/taserver"
-	"github.com/akakou/ra_webs/ttp/ent/taviolation"
+	"github.com/akakou/ra_webs/verifier/ent/predicate"
+	"github.com/akakou/ra_webs/verifier/ent/service"
+	"github.com/akakou/ra_webs/verifier/ent/taserver"
+	"github.com/akakou/ra_webs/verifier/ent/taviolation"
 )
 
 // TAViolationQuery is the builder for querying TAViolation entities.

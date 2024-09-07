@@ -1,4 +1,4 @@
-module github.com/akakou/ra_webs/ttp/example
+module github.com/akakou/ra_webs/verifier/example
 
 go 1.21.4
 

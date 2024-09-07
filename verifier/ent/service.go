@@ -8,7 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra_webs/ttp/ent/service"
+	"github.com/akakou/ra_webs/verifier/ent/service"
 )
 
 // Service is the model entity for the Service schema.

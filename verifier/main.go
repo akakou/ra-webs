@@ -1,16 +1,16 @@
-package ttp
+package verifier
 
 import (
 	"fmt"
 
 	goutils "github.com/akakou/go-utils"
 	golangutils "github.com/akakou/golang-utils"
-	"github.com/akakou/ra_webs/ttp/audit"
-	"github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/notify"
+	"github.com/akakou/ra_webs/verifier/core"
+	"github.com/akakou/ra_webs/verifier/monitor"
+	notifier "github.com/akakou/ra_webs/verifier/notifier"
 )
 
-func DefaultTTP() (*core.TTP, error) {
+func DefaultVerifier() (*core.Verifier, error) {
 	dbType := golangutils.GetEnv("DB_TYPE", "sqlite3")
 	dbConfig := golangutils.GetEnv("DB_CONFIG", "file:ent?mode=memory&cache=shared&_fk=1")
 	fmt.Printf("We use %s as database type and %s as database config\n", dbType, dbConfig)
@@ -33,15 +33,15 @@ func DefaultTTP() (*core.TTP, error) {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_INIT_DB, err)
 	}
 
-	audit, err := audit.DefaultDirectAuditor()
+	monitor, err := monitor.DefaultDirectMonitoror()
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_CREATE_AUDIT, err)
 	}
 
-	n, err := notify.DefaultBrowserNotify()
+	n, err := notifier.DefaultBrowserNotifier()
 	if err != nil {
 		return nil, err
 	}
 
-	return core.NewTTP(db, audit, n, adminToken)
+	return core.NewVerifier(db, monitor, n, adminToken)
 }

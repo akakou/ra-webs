@@ -1,4 +1,4 @@
-package notify
+package notifier
 
 import (
 	"os"
@@ -9,14 +9,14 @@ import (
 const TTL_MAX = 2419200
 const DEFAULT_SUBSCRIBER = "ra-webs@example.com"
 
-type BrowserNotify struct {
+type BrowserNotifier struct {
 	VapidPrivateKey, VapidPublicKey string
 	Subscriber                      string
 	TTL                             int
 }
 
-func NewBrowserNotify(vapidPrivateKey, vapidPublicKey, Subscriber string, TTL int) *BrowserNotify {
-	return &BrowserNotify{
+func NewBrowserNotifier(vapidPrivateKey, vapidPublicKey, Subscriber string, TTL int) *BrowserNotifier {
+	return &BrowserNotifier{
 		VapidPrivateKey: vapidPrivateKey,
 		VapidPublicKey:  vapidPublicKey,
 		Subscriber:      Subscriber,
@@ -24,7 +24,7 @@ func NewBrowserNotify(vapidPrivateKey, vapidPublicKey, Subscriber string, TTL in
 	}
 }
 
-func DefaultBrowserNotify() (*BrowserNotify, error) {
+func DefaultBrowserNotifier() (*BrowserNotifier, error) {
 	var err error
 
 	publicKey := os.Getenv("RA_WEBS_VAPID_PUBLIC_KEY")
@@ -34,5 +34,5 @@ func DefaultBrowserNotify() (*BrowserNotify, error) {
 		privateKey, publicKey, err = webpush.GenerateVAPIDKeys()
 	}
 
-	return NewBrowserNotify(privateKey, publicKey, DEFAULT_SUBSCRIBER, TTL_MAX), err
+	return NewBrowserNotifier(privateKey, publicKey, DEFAULT_SUBSCRIBER, TTL_MAX), err
 }

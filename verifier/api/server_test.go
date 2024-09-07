@@ -3,7 +3,7 @@ package api
 // func TestTAFromDomainAPI(t *testing.T) {
 // 	e := echo.New()
 // 	e.Debug = true
-// 	ttp, err := ttp.DefaultTTP()
+// 	ttp, err := ttp.DefaultVerifier()
 // 	assert.NoError(t, err)
 
 // 	domain := "example.com"
@@ -42,7 +42,7 @@ package api
 // 	c.SetParamNames("domain")
 // 	c.SetParamValues(domain)
 
-// 	err = GetServerFromDomainApi.F(ttp)(c)
+// 	err = GetServerFromDomainApi.F(verifier)(c)
 
 // 	assert.NoError(t, err)
 // 	assert.Equal(t, 200, c.Response().Status)

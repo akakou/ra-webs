@@ -1,4 +1,4 @@
-package audit
+package monitor
 
 import (
 	"crypto/rand"
@@ -12,11 +12,11 @@ import (
 
 	golangutils "github.com/akakou/golang-utils"
 	rawebscore "github.com/akakou/ra_webs/core"
-	"github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/verifier/core"
 	"github.com/stretchr/testify/assert"
 )
 
-func exampleTTP(t *testing.T) *core.TTP {
+func exampleVerifier(t *testing.T) *core.Verifier {
 	dbType := golangutils.GetEnv("DB_TYPE", "sqlite3")
 	dbConfig := golangutils.GetEnv("DB_CONFIG", "file:ent?mode=memory&cache=shared&_fk=1")
 
@@ -28,10 +28,10 @@ func exampleTTP(t *testing.T) *core.TTP {
 	db, err := core.NewDB(&dbc)
 	assert.NoError(t, err)
 
-	ttp, err := core.NewTTP(db, nil, nil, "")
+	verifier, err := core.NewVerifier(db, nil, nil, "")
 	assert.NoError(t, err)
 
-	return ttp
+	return verifier
 }
 
 func TestAll(t *testing.T) {
@@ -43,16 +43,16 @@ func TestAll(t *testing.T) {
 }
 
 func testPass(t *testing.T) {
-	ttp := exampleTTP(t)
-	defer ttp.DB.Close()
+	verifier := exampleVerifier(t)
+	defer verifier.DB.Close()
 
 	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
 	keyBuf := x509.MarshalPKCS1PublicKey(&priv.PublicKey)
 
-	ttp.DB.Client.TAServer.Create().SetDomain("example.com").SetPublicKey(keyBuf).SetQuote("1").SetHasActivated(false).SaveX(*ttp.DB.Ctx)
-	ttp.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*ttp.DB.Ctx)
+	verifier.DB.Client.TAServer.Create().SetDomain("example.com").SetPublicKey(keyBuf).SetQuote("1").SetHasActivated(false).SaveX(*verifier.DB.Ctx)
+	verifier.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*verifier.DB.Ctx)
 
-	err := Audit(ttp, &x509.Certificate{
+	err := Monitor(verifier, &x509.Certificate{
 		DNSNames:  []string{"example.com"},
 		Subject:   pkix.Name{CommonName: "example.com"},
 		PublicKey: &priv.PublicKey,
@@ -62,16 +62,16 @@ func testPass(t *testing.T) {
 }
 
 func testFailTANoServer(t *testing.T) {
-	ttp := exampleTTP(t)
-	defer ttp.DB.Close()
+	verifier := exampleVerifier(t)
+	defer verifier.DB.Close()
 
 	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
 	keyBuf := x509.MarshalPKCS1PublicKey(&priv.PublicKey)
 
-	ttp.DB.Client.TAServer.Create().SetDomain("example.com").SetPublicKey(keyBuf).SetQuote("1").SetHasActivated(true).SaveX(*ttp.DB.Ctx)
-	ttp.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*ttp.DB.Ctx)
+	verifier.DB.Client.TAServer.Create().SetDomain("example.com").SetPublicKey(keyBuf).SetQuote("1").SetHasActivated(true).SaveX(*verifier.DB.Ctx)
+	verifier.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*verifier.DB.Ctx)
 
-	err := Audit(ttp, &x509.Certificate{
+	err := Monitor(verifier, &x509.Certificate{
 		DNSNames:  []string{"hoge.example.com"},
 		Subject:   pkix.Name{CommonName: "hoge.example.com"},
 		PublicKey: &priv.PublicKey,
@@ -85,15 +85,15 @@ func testFailByMissDomains(t *testing.T) {
 	// TestMultipleDomain tests the revokeTAByDomains function
 	// by revoking multiple TAs by their domain names.
 
-	ttp := exampleTTP(t)
-	defer ttp.DB.Close()
+	verifier := exampleVerifier(t)
+	defer verifier.DB.Close()
 
 	cert := x509.Certificate{
 		DNSNames:  []string{"example.com", "example.org"},
 		PublicKey: []byte{7, 8, 9},
 	}
 
-	err := Audit(ttp, &cert)
+	err := Monitor(verifier, &cert)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), ERROR_DOMAIN_INVALID)
 
@@ -102,7 +102,7 @@ func testFailByMissDomains(t *testing.T) {
 		PublicKey: []byte{7, 8, 9},
 	}
 
-	err = Audit(ttp, &cert)
+	err = Monitor(verifier, &cert)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), ERROR_DOMAIN_INVALID)
 
@@ -134,7 +134,7 @@ ww==
 	cert, err := x509.ParseCertificate(c.Bytes)
 	assert.NoError(t, err)
 
-	// ttp := exampleTTP(t)
+	// verifier := exampleVerifier(t)
 	_, err = validateDomains(cert)
 	assert.NoError(t, err)
 }

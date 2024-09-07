@@ -9,17 +9,17 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/akakou/ra_webs/ttp/ent/migrate"
+	"github.com/akakou/ra_webs/verifier/ent/migrate"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/akakou/ra_webs/ttp/ent/service"
-	"github.com/akakou/ra_webs/ttp/ent/subscription"
-	"github.com/akakou/ra_webs/ttp/ent/tacode"
-	"github.com/akakou/ra_webs/ttp/ent/taserver"
-	"github.com/akakou/ra_webs/ttp/ent/taviolation"
+	"github.com/akakou/ra_webs/verifier/ent/service"
+	"github.com/akakou/ra_webs/verifier/ent/subscription"
+	"github.com/akakou/ra_webs/verifier/ent/tacode"
+	"github.com/akakou/ra_webs/verifier/ent/taserver"
+	"github.com/akakou/ra_webs/verifier/ent/taviolation"
 )
 
 // Client is the client that holds all ent builders.

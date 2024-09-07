@@ -8,8 +8,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra_webs/ttp/ent/service"
-	"github.com/akakou/ra_webs/ttp/ent/tacode"
+	"github.com/akakou/ra_webs/verifier/ent/service"
+	"github.com/akakou/ra_webs/verifier/ent/tacode"
 )
 
 // TACode is the model entity for the TACode schema.

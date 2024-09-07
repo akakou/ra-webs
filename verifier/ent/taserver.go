@@ -8,9 +8,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra_webs/ttp/ent/service"
-	"github.com/akakou/ra_webs/ttp/ent/tacode"
-	"github.com/akakou/ra_webs/ttp/ent/taserver"
+	"github.com/akakou/ra_webs/verifier/ent/service"
+	"github.com/akakou/ra_webs/verifier/ent/tacode"
+	"github.com/akakou/ra_webs/verifier/ent/taserver"
 )
 
 // TAServer is the model entity for the TAServer schema.

@@ -1,6 +1,6 @@
 package core
 
-type Audit interface {
-	Setup(*TTP) error
-	Run(*TTP)
+type Monitor interface {
+	Setup(*Verifier) error
+	Run(*Verifier)
 }

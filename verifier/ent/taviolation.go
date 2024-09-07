@@ -9,9 +9,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra_webs/ttp/ent/service"
-	"github.com/akakou/ra_webs/ttp/ent/taserver"
-	"github.com/akakou/ra_webs/ttp/ent/taviolation"
+	"github.com/akakou/ra_webs/verifier/ent/service"
+	"github.com/akakou/ra_webs/verifier/ent/taserver"
+	"github.com/akakou/ra_webs/verifier/ent/taviolation"
 )
 
 // TAViolation is the model entity for the TAViolation schema.

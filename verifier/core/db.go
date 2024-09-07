@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/akakou/ra_webs/ttp/ent"
+	"github.com/akakou/ra_webs/verifier/ent"
 	_ "github.com/mattn/go-sqlite3"
 )
 

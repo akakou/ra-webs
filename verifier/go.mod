@@ -1,15 +1,15 @@
-module github.com/akakou/ra_webs/ttp
+module github.com/akakou/ra_webs/verifier
 
 go 1.21.9
 
 require (
 	entgo.io/ent v0.12.5
+	github.com/SherClockHolmes/webpush-go v1.3.0
+	github.com/akakou/ctstream v0.0.20
 	github.com/akakou/extract-embed v0.0.1
 	github.com/akakou/go-utils v0.0.3
 	github.com/akakou/golang-utils v0.0.1
-	github.com/akakou/meta-ct v0.0.6
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
-	github.com/akakou/sslmate-cert-search-api v0.0.14
 	github.com/google/certificate-transparency-go v1.2.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/mattn/go-sqlite3 v1.14.22
@@ -20,9 +20,8 @@ require gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 
 require (
 	ariga.io/atlas v0.14.1-0.20230918065911-83ad451a4935 // indirect
-	github.com/SherClockHolmes/webpush-go v1.3.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
-	github.com/akakou/ctstream v0.0.20 // indirect
+	github.com/akakou/sslmate-cert-search-api v0.0.14 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/edgelesssys/ego v1.5.0 // indirect

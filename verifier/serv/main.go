@@ -7,9 +7,9 @@ import (
 	"io"
 
 	"github.com/akakou/ra_webs/core"
-	"github.com/akakou/ra_webs/ttp"
-	"github.com/akakou/ra_webs/ttp/api"
-	"github.com/akakou/ra_webs/ttp/notify"
+	"github.com/akakou/ra_webs/verifier"
+	"github.com/akakou/ra_webs/verifier/api"
+	"github.com/akakou/ra_webs/verifier/notifier"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -39,12 +39,12 @@ func InjectSWHeader(next echo.HandlerFunc) echo.HandlerFunc {
 
 func main() {
 	e := echo.New()
-	ttp, err := ttp.DefaultTTP()
+	verifier, err := verifier.DefaultVerifier()
 	if err != nil {
 		panic(err)
 	}
 
-	api.Route(e, ttp)
+	api.Route(e, verifier)
 
 	viewSubFS := echo.MustSubFS(viewEmbedFiles, "views")
 	e.StaticFS("/app", viewSubFS)
@@ -56,12 +56,12 @@ func main() {
 	e.Use(InjectSWHeader)
 
 	e.Debug = true
-	err = ttp.Setup(e)
+	err = verifier.Setup(e)
 	if err != nil {
 		panic(err)
 	}
 
-	// go ttp.Audit.Run(ttp)
-	fmt.Printf("public: %v\nprivate: %v", ttp.Notify.(*notify.BrowserNotify).VapidPublicKey, ttp.Notify.(*notify.BrowserNotify).VapidPrivateKey)
-	e.Logger.Fatal(e.Start(core.TTPPort))
+	// go verifier.Monitor.Run(verifier)
+	fmt.Printf("public: %v\nprivate: %v", verifier.Notifier.(*notifier.BrowserNotifier).VapidPublicKey, verifier.Notifier.(*notifier.BrowserNotifier).VapidPrivateKey)
+	e.Logger.Fatal(e.Start(core.VerifierPort))
 }

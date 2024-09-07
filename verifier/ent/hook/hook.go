@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/akakou/ra_webs/ttp/ent"
+	"github.com/akakou/ra_webs/verifier/ent"
 )
 
 // The ServiceFunc type is an adapter to allow the use of ordinary

@@ -7,17 +7,17 @@ import (
 
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/core"
-	ttpcore "github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/ent/taserver"
+	verifiercore "github.com/akakou/ra_webs/verifier/core"
+	"github.com/akakou/ra_webs/verifier/ent/taserver"
 	"github.com/labstack/echo/v4"
 )
 
-var GetServerApi = goutils.EchoRoute[ttpcore.TTP]{
+var GetServerApi = goutils.EchoRoute[verifiercore.Verifier]{
 	Method: goutils.GET,
 	Path:   core.API_ROOT + "/ta",
-	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
+	F: func(verifier *verifiercore.Verifier) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			code, err := ttp.DB.Client.TAServer.Query().All(*ttp.DB.Ctx)
+			code, err := verifier.DB.Client.TAServer.Query().All(*verifier.DB.Ctx)
 			if err != nil {
 				return err
 			}
@@ -27,21 +27,21 @@ var GetServerApi = goutils.EchoRoute[ttpcore.TTP]{
 	},
 }
 
-var GetServerFromDomainApi = goutils.EchoRoute[ttpcore.TTP]{
+var GetServerFromDomainApi = goutils.EchoRoute[verifiercore.Verifier]{
 	Method: goutils.GET,
 	Path:   core.API_ROOT + "/ta/:domain",
-	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
+	F: func(verifier *verifiercore.Verifier) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			domain := c.Param("domain")
 
 			fmt.Printf("domain: %v\n", domain)
-			servs, err := ttp.DB.Client.TAServer.
+			servs, err := verifier.DB.Client.TAServer.
 				Query().
 				Where(taserver.Domain(domain)).
 				Where(taserver.HasActivated(true)).
 				WithCode().
 				WithViolation().
-				All(*ttp.DB.Ctx)
+				All(*verifier.DB.Ctx)
 
 			if err != nil {
 				return errors.New("server is not found")

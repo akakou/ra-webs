@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra_webs/ttp/ent/predicate"
-	"github.com/akakou/ra_webs/ttp/ent/taserver"
+	"github.com/akakou/ra_webs/verifier/ent/predicate"
+	"github.com/akakou/ra_webs/verifier/ent/taserver"
 )
 
 // TAServerDelete is the builder for deleting a TAServer entity.

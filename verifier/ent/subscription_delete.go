@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra_webs/ttp/ent/predicate"
-	"github.com/akakou/ra_webs/ttp/ent/subscription"
+	"github.com/akakou/ra_webs/verifier/ent/predicate"
+	"github.com/akakou/ra_webs/verifier/ent/subscription"
 )
 
 // SubscriptionDelete is the builder for deleting a Subscription entity.

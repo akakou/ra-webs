@@ -1,23 +1,25 @@
-module github.com/akakou/ra_webs/ttp/serv
+module github.com/akakou/ra_webs/verifier/serv
 
 go 1.21.9
 
 replace github.com/akakou/ra_webs/core => ../../core
 
-replace github.com/akakou/ra_webs/ttp => ../
+replace github.com/akakou/ra_webs/verifier => ../
 
 require (
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
-	github.com/akakou/ra_webs/ttp v0.0.0-00010101000000-000000000000
+	github.com/akakou/ra_webs/verifier v0.0.0-00010101000000-000000000000
 	github.com/labstack/echo/v4 v4.12.0
 )
+
+require github.com/akakou/sslmate-cert-search-api v0.0.14 // indirect
 
 require (
 	ariga.io/atlas v0.14.1-0.20230918065911-83ad451a4935 // indirect
 	entgo.io/ent v0.12.5 // indirect
 	github.com/SherClockHolmes/webpush-go v1.3.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
-	github.com/akakou/ctstream v0.0.1 // indirect
+	github.com/akakou/ctstream v0.0.20 // indirect
 	github.com/akakou/extract-embed v0.0.1 // indirect
 	github.com/akakou/go-utils v0.0.3 // indirect
 	github.com/akakou/golang-utils v0.0.1 // indirect
@@ -28,7 +30,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/google/certificate-transparency-go v1.2.1 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/uuid v1.3.0 // indirect
+	github.com/google/uuid v1.3.0 // indirect; noi
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

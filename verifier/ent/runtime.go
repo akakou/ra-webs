@@ -5,10 +5,10 @@ package ent
 import (
 	"time"
 
-	"github.com/akakou/ra_webs/ttp/ent/schema"
-	"github.com/akakou/ra_webs/ttp/ent/service"
-	"github.com/akakou/ra_webs/ttp/ent/tacode"
-	"github.com/akakou/ra_webs/ttp/ent/taviolation"
+	"github.com/akakou/ra_webs/verifier/ent/schema"
+	"github.com/akakou/ra_webs/verifier/ent/service"
+	"github.com/akakou/ra_webs/verifier/ent/tacode"
+	"github.com/akakou/ra_webs/verifier/ent/taviolation"
 )
 
 // The init function reads all schema descriptors with runtime code

@@ -2,29 +2,29 @@ package core
 
 import "github.com/labstack/echo/v4"
 
-type TTP struct {
+type Verifier struct {
 	DB         *DB
-	Audit      Audit
-	Notify     Notify
+	Monitor    Monitor
+	Notifier   Notifier
 	AdminToken string
 }
 
-func NewTTP(db *DB, audit Audit, notify Notify, adminToken string) (*TTP, error) {
-	return &TTP{
+func NewVerifier(db *DB, monitor Monitor, notifier Notifier, adminToken string) (*Verifier, error) {
+	return &Verifier{
 		DB:         db,
-		Audit:      audit,
+		Monitor:    monitor,
 		AdminToken: adminToken,
-		Notify:     notify,
+		Notifier:   notifier,
 	}, nil
 }
 
-func (ttp *TTP) Setup(e *echo.Echo) error {
-	err := ttp.Audit.Setup(ttp)
+func (verifier *Verifier) Setup(e *echo.Echo) error {
+	err := verifier.Monitor.Setup(verifier)
 	if err != nil {
 		return err
 	}
 
-	err = ttp.Notify.Setup(e, ttp)
+	err = verifier.Notifier.Setup(e, verifier)
 	if err != nil {
 		return err
 	}

@@ -3,9 +3,9 @@ package api
 import (
 	"fmt"
 
-	ttpcore "github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/ent"
-	"github.com/akakou/ra_webs/ttp/ent/service"
+	verifiercore "github.com/akakou/ra_webs/verifier/core"
+	"github.com/akakou/ra_webs/verifier/ent"
+	"github.com/akakou/ra_webs/verifier/ent/service"
 	"github.com/labstack/echo/v4"
 )
 
@@ -19,11 +19,11 @@ const (
 
 var SCHEME = "https"
 
-func authenticateService(ttp *ttpcore.TTP, c echo.Context) (*ent.Service, error) {
+func authenticateService(verifier *verifiercore.Verifier, c echo.Context) (*ent.Service, error) {
 	authorization := c.Request().Header["Authorization"][0]
 	token := authorization[len("Bearer "):]
 
-	service, err := ttp.DB.Client.Service.Query().Where(service.TokenEQ(token)).Only(*ttp.DB.Ctx)
+	service, err := verifier.DB.Client.Service.Query().Where(service.TokenEQ(token)).Only(*verifier.DB.Ctx)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", ERROR_AUTHENTICATE_SERVICE, err)
 	}
@@ -31,11 +31,11 @@ func authenticateService(ttp *ttpcore.TTP, c echo.Context) (*ent.Service, error)
 	return service, nil
 }
 
-func authenticateAdmin(ttp *ttpcore.TTP, c echo.Context) error {
+func authenticateAdmin(verifier *verifiercore.Verifier, c echo.Context) error {
 	authorization := c.Request().Header["Authorization"][0]
 	token := authorization[len("Bearer "):]
 
-	if token != ttp.AdminToken {
+	if token != verifier.AdminToken {
 		return fmt.Errorf(ERROR_AUTHENTICATE_ADMIN)
 	}
 

@@ -9,9 +9,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra_webs/ttp/ent/service"
-	"github.com/akakou/ra_webs/ttp/ent/tacode"
-	"github.com/akakou/ra_webs/ttp/ent/taserver"
+	"github.com/akakou/ra_webs/verifier/ent/service"
+	"github.com/akakou/ra_webs/verifier/ent/tacode"
+	"github.com/akakou/ra_webs/verifier/ent/taserver"
 )
 
 // ServiceCreate is the builder for creating a Service entity.

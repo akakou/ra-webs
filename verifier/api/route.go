@@ -4,21 +4,21 @@ import (
 	"fmt"
 	"net/http"
 
-	ttpcore "github.com/akakou/ra_webs/ttp/core"
+	verifiercore "github.com/akakou/ra_webs/verifier/core"
 	"github.com/labstack/echo/v4"
 )
 
-func Route(e *echo.Echo, ttp *ttpcore.TTP) {
+func Route(e *echo.Echo, verifier *verifiercore.Verifier) {
 	e.GET("/", func(c echo.Context) error {
 		r := fmt.Sprintf("%v", e.Routers())
 		return c.String(http.StatusOK, r)
 	})
 
-	RegisterApi.Set(e, ttp)
-	GetServerApi.Set(e, ttp)
+	RegisterApi.Set(e, verifier)
+	GetServerApi.Set(e, verifier)
 
-	PostServiceByAdmin.Set(e, ttp)
+	PostServiceByAdmin.Set(e, verifier)
 
-	GetServerFromDomainApi.Set(e, ttp)
-	PostNotifyApi.Set(e, ttp)
+	GetServerFromDomainApi.Set(e, verifier)
+	PostNotifierApi.Set(e, verifier)
 }

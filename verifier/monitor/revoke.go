@@ -1,49 +1,49 @@
-package audit
+package monitor
 
 import (
-	"github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/ent"
-	"github.com/akakou/ra_webs/ttp/ent/taserver"
+	"github.com/akakou/ra_webs/verifier/core"
+	"github.com/akakou/ra_webs/verifier/ent"
+	"github.com/akakou/ra_webs/verifier/ent/taserver"
 )
 
-func revoke(serv *ent.TAServer, ttp *core.TTP) {
-	err := core.NotifyViolation(serv.Domain, ttp)
+func revoke(serv *ent.TAServer, verifier *core.Verifier) {
+	err := core.NotifierViolation(serv.Domain, verifier)
 	if err != nil {
 		panic(err)
 	}
 
-	ttp.DB.Client.TAViolation.Create().
+	verifier.DB.Client.TAViolation.Create().
 		SetServer(serv).
-		SaveX(*ttp.DB.Ctx)
+		SaveX(*verifier.DB.Ctx)
 
-	service, err := serv.QueryService().First(*ttp.DB.Ctx)
+	service, err := serv.QueryService().First(*verifier.DB.Ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = service.Update().SetIsActive(false).Save(*ttp.DB.Ctx)
+	_, err = service.Update().SetIsActive(false).Save(*verifier.DB.Ctx)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func revokeByDomain(domain string, last int, ttp *core.TTP) {
-	all, _ := ttp.DB.Client.TAServer.
+func revokeByDomain(domain string, last int, verifier *core.Verifier) {
+	all, _ := verifier.DB.Client.TAServer.
 		Query().
 		Where(taserver.DomainEQ(domain)).
 		Where(taserver.IDGT(last - 1)).
-		All(*ttp.DB.Ctx)
+		All(*verifier.DB.Ctx)
 
 	// todo: error handling
 
 	for _, serv := range all {
-		revoke(serv, ttp)
+		revoke(serv, verifier)
 	}
 }
 
-func revokeByDomains(domains []string, ttp *core.TTP) {
+func revokeByDomains(domains []string, verifier *core.Verifier) {
 	for _, domain := range domains {
-		last := lastValidID(domain, ttp.DB)
-		revokeByDomain(domain, last, ttp)
+		last := lastValidID(domain, verifier.DB)
+		revokeByDomain(domain, last, verifier)
 	}
 }

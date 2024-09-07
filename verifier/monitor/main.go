@@ -1,4 +1,4 @@
-package audit
+package monitor
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	ctcore "github.com/akakou/ctstream/core"
 	"github.com/akakou/ctstream/direct"
 	"github.com/akakou/ctstream/thirdparty/sslmate"
-	"github.com/akakou/ra_webs/ttp/core"
+	"github.com/akakou/ra_webs/verifier/core"
 	ctx509 "github.com/google/certificate-transparency-go/x509"
 )
 
@@ -25,47 +25,47 @@ var DefaultCTLogs = []string{
 	"https://ct2024.trustasia.com/log2024/",
 }
 
-type Auditor struct {
+type Monitoror struct {
 	ctstream ctcore.CtStream
 }
 
-func NewAuditor[T ctcore.CtStream](stream T) (*Auditor, error) {
-	return &Auditor{
+func NewMonitoror[T ctcore.CtStream](stream T) (*Monitoror, error) {
+	return &Monitoror{
 		ctstream: stream,
 	}, nil
 }
 
-func DefaultDirectAuditor() (*Auditor, error) {
+func DefaultDirectMonitoror() (*Monitoror, error) {
 	ctx := context.Background()
 	stream, err := direct.DefaultCTsStream(DefaultCTLogs, ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewAuditor(stream)
+	return NewMonitoror(stream)
 }
 
-func DefaultSSLMateAuditor() (*Auditor, error) {
+func DefaultSSLMateMonitoror() (*Monitoror, error) {
 	ctx := context.Background()
 	stream, err := sslmate.DefaultCTsStream(DefaultCTLogs, ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewAuditor(stream)
+	return NewMonitoror(stream)
 }
 
-func (a *Auditor) Setup(ttp *core.TTP) error {
+func (a *Monitoror) Setup(verifier *core.Verifier) error {
 	return a.ctstream.Init()
 }
 
-func (a *Auditor) Run(ttp *core.TTP) {
+func (a *Monitoror) Run(verifier *core.Verifier) {
 	a.ctstream.Run(func(cert *ctx509.Certificate, i int, params any, err error) {
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 		}
 
-		err = Audit(ttp, cert)
+		err = Monitor(verifier, cert)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 		}

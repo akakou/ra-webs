@@ -5,33 +5,33 @@ import (
 
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/core"
-	ttpcore "github.com/akakou/ra_webs/ttp/core"
+	verifiercore "github.com/akakou/ra_webs/verifier/core"
 	"github.com/labstack/echo/v4"
 )
 
-var PostServiceByAdmin = goutils.EchoRoute[ttpcore.TTP]{
+var PostServiceByAdmin = goutils.EchoRoute[verifiercore.Verifier]{
 	Method: goutils.POST,
 	Path:   core.API_ROOT + "/service",
-	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
+	F: func(verifier *verifiercore.Verifier) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			err := authenticateAdmin(ttp, c)
+			err := authenticateAdmin(verifier, c)
 
 			if err != nil {
 				return c.String(http.StatusUnauthorized, "token is invalid")
 			}
 
-			token, err := goutils.RandomHex(ttpcore.RANDOM_SIZE)
+			token, err := goutils.RandomHex(verifiercore.RANDOM_SIZE)
 
 			if err != nil {
 				return err
 			}
 
-			service, err := ttp.DB.Client.Service.
+			service, err := verifier.DB.Client.Service.
 				Create().
 				SetName("").
 				SetToken(token).
 				SetIsActive(true).
-				Save(*ttp.DB.Ctx)
+				Save(*verifier.DB.Ctx)
 
 			if err != nil {
 				return err

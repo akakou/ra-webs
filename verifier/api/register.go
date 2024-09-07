@@ -10,18 +10,18 @@ import (
 
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/core"
-	"github.com/akakou/ra_webs/ttp/builder"
-	ttpcore "github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/ent"
+	"github.com/akakou/ra_webs/verifier/builder"
+	verifiercore "github.com/akakou/ra_webs/verifier/core"
+	"github.com/akakou/ra_webs/verifier/ent"
 	"github.com/labstack/echo/v4"
 )
 
-var RegisterApi = goutils.EchoRoute[ttpcore.TTP]{
+var RegisterApi = goutils.EchoRoute[verifiercore.Verifier]{
 	Method: goutils.POST,
 	Path:   core.API_ROOT + "/ta",
-	F: func(ttp *ttpcore.TTP) goutils.EchoRouteFunc {
+	F: func(verifier *verifiercore.Verifier) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			service, err := authenticateService(ttp, c)
+			service, err := authenticateService(verifier, c)
 			if err != nil {
 				return c.String(http.StatusUnauthorized, "token is invalid")
 			}
@@ -32,13 +32,13 @@ var RegisterApi = goutils.EchoRoute[ttpcore.TTP]{
 				return err
 			}
 
-			code, err := RegisterCode(&req.CodeRequest, service, ttp)
+			code, err := RegisterCode(&req.CodeRequest, service, verifier)
 
 			if err != nil {
 				return err
 			}
 
-			err = RegisterServer(&req.ServerRequest, code, service, ttp)
+			err = RegisterServer(&req.ServerRequest, code, service, verifier)
 			if err != nil {
 				return err
 			}
@@ -49,7 +49,7 @@ var RegisterApi = goutils.EchoRoute[ttpcore.TTP]{
 	},
 }
 
-func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Service, ttp *ttpcore.TTP) error {
+func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Service, verifier *verifiercore.Verifier) error {
 	report, err := core.VerifyServer(req.Quote, req.PublicKey, service.Token)
 
 	if err != nil {
@@ -61,7 +61,7 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 		return fmt.Errorf(ERROR_QUOTE_INVALID)
 	}
 
-	taServerCreate := ttp.DB.Client.TAServer.
+	taServerCreate := verifier.DB.Client.TAServer.
 		Create().
 		SetDomain(req.Domain).
 		SetService(service).
@@ -70,12 +70,12 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 		SetQuote(req.Quote).
 		SetHasActivated(false)
 
-	err = ttpcore.NotifyUpdate(req.Domain, ttp)
+	err = verifiercore.NotifierUpdate(req.Domain, verifier)
 	if err != nil {
 		return err
 	}
 
-	_, err = taServerCreate.Save(*ttp.DB.Ctx)
+	_, err = taServerCreate.Save(*verifier.DB.Ctx)
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 	return nil
 }
 
-func RegisterCode(req *core.CodeRequest, service *ent.Service, ttp *ttpcore.TTP) (*ent.TACode, error) {
+func RegisterCode(req *core.CodeRequest, service *ent.Service, verifier *verifiercore.Verifier) (*ent.TACode, error) {
 	sha256 := sha256.Sum256([]byte(req.Repository))
 	folderName := fmt.Sprintf("%v-%x", time.Now().Unix(), sha256)
 
@@ -94,7 +94,7 @@ func RegisterCode(req *core.CodeRequest, service *ent.Service, ttp *ttpcore.TTP)
 
 	uniqueId, _ := hex.DecodeString(uniqueIdString)
 
-	codeCreate := ttp.DB.Client.TACode.
+	codeCreate := verifier.DB.Client.TACode.
 		Create().
 		SetRepository(req.Repository).
 		SetCommitID(commitId).
@@ -102,7 +102,7 @@ func RegisterCode(req *core.CodeRequest, service *ent.Service, ttp *ttpcore.TTP)
 		SetIsActive(false).
 		SetService(service)
 
-	code, err := codeCreate.Save(*ttp.DB.Ctx)
+	code, err := codeCreate.Save(*verifier.DB.Ctx)
 
 	if err != nil {
 		return nil, err

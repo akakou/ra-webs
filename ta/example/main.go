@@ -36,7 +36,7 @@ func main() {
 						location.href = '%v'
 					}, 3000)
 				</script>
-				`, config.TTP+REDIRECT_PATH)
+				`, config.Verifier+REDIRECT_PATH)
 		}
 
 		fmt.Fprintln(w, "Hello from TA running on TEE :)")

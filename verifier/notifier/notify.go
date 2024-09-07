@@ -1,27 +1,27 @@
-package notify
+package notifier
 
 import (
 	"fmt"
 
 	"github.com/SherClockHolmes/webpush-go"
-	"github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/ent"
+	"github.com/akakou/ra_webs/verifier/core"
+	"github.com/akakou/ra_webs/verifier/ent"
 	"github.com/labstack/echo/v4"
 )
 
-func (notify *BrowserNotify) Notify(msg []byte, domain string, ttp *core.TTP) error {
-	subscriptions, err := core.SelectSubscription(domain, ttp)
+func (notifier *BrowserNotifier) Notifier(msg []byte, domain string, verifier *core.Verifier) error {
+	subscriptions, err := core.SelectSubscription(domain, verifier)
 	if err != nil {
 		return err
 	}
 
-	err = notify.notifyAll(msg, subscriptions)
+	err = notifier.notifierAll(msg, subscriptions)
 	return err
 }
 
-func (notify *BrowserNotify) notifyAll(msg []byte, subscription []*ent.Subscription) error {
+func (notifier *BrowserNotifier) notifierAll(msg []byte, subscription []*ent.Subscription) error {
 	for _, sub := range subscription {
-		err := notify.notifyOne(msg, sub)
+		err := notifier.notifierOne(msg, sub)
 		if err != nil {
 			return err
 		}
@@ -30,7 +30,7 @@ func (notify *BrowserNotify) notifyAll(msg []byte, subscription []*ent.Subscript
 	return nil
 }
 
-func (notify *BrowserNotify) notifyOne(msg []byte, subscription *ent.Subscription) error {
+func (notifier *BrowserNotifier) notifierOne(msg []byte, subscription *ent.Subscription) error {
 	s := webpush.Subscription{
 		Endpoint: subscription.Endpoint,
 		Keys: webpush.Keys{
@@ -40,10 +40,10 @@ func (notify *BrowserNotify) notifyOne(msg []byte, subscription *ent.Subscriptio
 	}
 
 	resp, err := webpush.SendNotification(msg, &s, &webpush.Options{
-		Subscriber:      notify.Subscriber,
-		VAPIDPublicKey:  notify.VapidPublicKey,
-		VAPIDPrivateKey: notify.VapidPrivateKey,
-		TTL:             notify.TTL,
+		Subscriber:      notifier.Subscriber,
+		VAPIDPublicKey:  notifier.VapidPublicKey,
+		VAPIDPrivateKey: notifier.VapidPrivateKey,
+		TTL:             notifier.TTL,
 	})
 
 	if err != nil {
@@ -55,8 +55,8 @@ func (notify *BrowserNotify) notifyOne(msg []byte, subscription *ent.Subscriptio
 	return err
 }
 
-func (notify *BrowserNotify) Setup(e *echo.Echo, ttp *core.TTP) error {
-	postSubscribeApi.Set(e, ttp)
-	getSubscriptionKeyApi(notify).Set(e, ttp)
+func (notifier *BrowserNotifier) Setup(e *echo.Echo, verifier *core.Verifier) error {
+	postSubscribeApi.Set(e, verifier)
+	getSubscriptionKeyApi(notifier).Set(e, verifier)
 	return nil
 }

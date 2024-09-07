@@ -1,4 +1,4 @@
-package audit
+package monitor
 
 const (
 	ERROR_SELECT_TA       = "failed to select ta info from db"

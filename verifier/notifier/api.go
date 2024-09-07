@@ -1,20 +1,20 @@
-package notify
+package notifier
 
 import (
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
 	rawebscore "github.com/akakou/ra_webs/core"
-	"github.com/akakou/ra_webs/ttp/core"
-	"github.com/akakou/ra_webs/ttp/ent"
-	"github.com/akakou/ra_webs/ttp/ent/taserver"
+	"github.com/akakou/ra_webs/verifier/core"
+	"github.com/akakou/ra_webs/verifier/ent"
+	"github.com/akakou/ra_webs/verifier/ent/taserver"
 	"github.com/labstack/echo/v4"
 )
 
-var postSubscribeApi = goutils.EchoRoute[core.TTP]{
+var postSubscribeApi = goutils.EchoRoute[core.Verifier]{
 	Method: goutils.POST,
 	Path:   rawebscore.API_ROOT + "/subscription",
-	F: func(ttp *core.TTP) goutils.EchoRouteFunc {
+	F: func(verifier *core.Verifier) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			var data struct {
 				Domain       string `json:"domain"`
@@ -32,23 +32,23 @@ var postSubscribeApi = goutils.EchoRoute[core.TTP]{
 				return err
 			}
 
-			serv, err := ttp.DB.Client.TAServer.
+			serv, err := verifier.DB.Client.TAServer.
 				Query().
 				Where(taserver.DomainEQ(data.Domain)).
 				Order(ent.Desc(taserver.FieldID)).
-				First(*ttp.DB.Ctx)
+				First(*verifier.DB.Ctx)
 
 			if err != nil {
 				return err
 			}
 
-			subscription, err := ttp.DB.Client.Subscription.
+			subscription, err := verifier.DB.Client.Subscription.
 				Create().
 				SetEndpoint(data.Subscription.Endpoint).
 				SetAuth(data.Subscription.Keys.Auth).
 				SetP256dh(data.Subscription.Keys.P256dh).
 				SetServer(serv).
-				Save(*ttp.DB.Ctx)
+				Save(*verifier.DB.Ctx)
 
 			if err != nil {
 				return err
@@ -59,13 +59,13 @@ var postSubscribeApi = goutils.EchoRoute[core.TTP]{
 	},
 }
 
-func getSubscriptionKeyApi(notify *BrowserNotify) goutils.EchoRoute[core.TTP] {
-	return goutils.EchoRoute[core.TTP]{
+func getSubscriptionKeyApi(notifier *BrowserNotifier) goutils.EchoRoute[core.Verifier] {
+	return goutils.EchoRoute[core.Verifier]{
 		Method: goutils.GET,
 		Path:   rawebscore.API_ROOT + "/subscription_key",
-		F: func(ttp *core.TTP) goutils.EchoRouteFunc {
+		F: func(verifier *core.Verifier) goutils.EchoRouteFunc {
 			return func(c echo.Context) error {
-				VapidPublicKey := notify.VapidPublicKey
+				VapidPublicKey := notifier.VapidPublicKey
 
 				var data struct {
 					VapidPublicKey string `json:"vapid_public_key"`
