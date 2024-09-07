@@ -15,6 +15,7 @@ const (
 
 	ERROR_CERTIFICATE_NOT_FOUND = "certificate not match"
 
-	ERROR_EXTENSION_NOT_FOUND = "extension not found"
-	ERROR_PUBLIC_KEY_NOT_RSA  = "public key is not RSA"
+	ERROR_EXTENSION_NOT_FOUND  = "extension not found"
+	ERROR_PUBLIC_KEY_NOT_RSA   = "public key is not RSA"
+	ERROR_PUBLIC_KEY_NOT_MATCH = "public key is not match"
 )

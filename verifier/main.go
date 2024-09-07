@@ -33,7 +33,7 @@ func DefaultVerifier() (*core.Verifier, error) {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_INIT_DB, err)
 	}
 
-	monitor, err := monitor.DefaultDirectMonitoror()
+	monitor, err := monitor.DefaultDirectMonitor()
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_CREATE_AUDIT, err)
 	}
