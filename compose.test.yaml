@@ -3,8 +3,7 @@ services:
   ta_example:
     tty: true
     build: ./docker
-    ports:
-      - "443:443"
+    network_mode: host
     volumes:
       - ./ta:/ta
       - ./core:/core
@@ -23,7 +22,7 @@ services:
   verifier:
     build: ./docker
     ports:
-      - "8000:8000"
+      - "10.0.0.5:443:443"
     volumes:
       - ./verifier:/verifier
       - ./core:/core

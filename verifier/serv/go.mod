@@ -7,19 +7,21 @@ replace github.com/akakou/ra_webs/core => ../../core
 replace github.com/akakou/ra_webs/verifier => ../
 
 require (
-	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
 	github.com/akakou/ra_webs/verifier v0.0.0-00010101000000-000000000000
 	github.com/labstack/echo/v4 v4.12.0
 )
 
-require github.com/akakou/sslmate-cert-search-api v0.0.14 // indirect
+require (
+	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000 // indirect
+	github.com/akakou/sslmate-cert-search-api v0.0.14 // indirect
+)
 
 require (
 	ariga.io/atlas v0.14.1-0.20230918065911-83ad451a4935 // indirect
 	entgo.io/ent v0.12.5 // indirect
 	github.com/SherClockHolmes/webpush-go v1.3.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
-	github.com/akakou/ctstream v0.0.20 // indirect
+	github.com/akakou/ctstream v0.0.22 // indirect
 	github.com/akakou/extract-embed v0.0.1 // indirect
 	github.com/akakou/go-utils v0.0.3 // indirect
 	github.com/akakou/golang-utils v0.0.1 // indirect
@@ -40,7 +42,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/zclconf/go-cty v1.8.0 // indirect
-	golang.org/x/crypto v0.23.0 // indirect
+	golang.org/x/crypto v0.23.0
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
