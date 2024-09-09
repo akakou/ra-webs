@@ -1,21 +1,16 @@
 package main
 
 import (
-	"crypto/tls"
 	"embed"
 	"fmt"
 	"html/template"
 	"io"
-	"net/http"
-	"os"
 
 	"github.com/akakou/ra_webs/verifier"
 	"github.com/akakou/ra_webs/verifier/api"
 	"github.com/akakou/ra_webs/verifier/notifier"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"golang.org/x/crypto/acme"
-	"golang.org/x/crypto/acme/autocert"
 )
 
 //go:embed views/*/*.html
@@ -42,13 +37,6 @@ func InjectSWHeader(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func main() {
-	verifierHost := os.Getenv("RA_WEBS_VERIFIER_HOST")
-
-	autoTLSManager := autocert.Manager{
-		Prompt: autocert.AcceptTOS,
-		Cache:  autocert.DirCache("/var/www/.cache"),
-	}
-
 	e := echo.New()
 	verifier, err := verifier.DefaultVerifier()
 	if err != nil {
@@ -74,19 +62,9 @@ func main() {
 
 	fmt.Printf("public: %v\nprivate: %v", verifier.Notifier.(*notifier.BrowserNotifier).VapidPublicKey, verifier.Notifier.(*notifier.BrowserNotifier).VapidPrivateKey)
 
-	s := http.Server{
-		Addr:    verifierHost + ":443",
-		Handler: e,
-		TLSConfig: &tls.Config{
-			GetCertificate: autoTLSManager.GetCertificate,
-			NextProtos:     []string{acme.ALPNProto},
-		},
-	}
-
 	go verifier.Monitor.Run(verifier)
 	// fmt.Printf("public: %v\nprivate: %v", verifier.Notifier.(*notifier.BrowserNotifier).VapidPublicKey, verifier.Notifier.(*notifier.BrowserNotifier).VapidPrivateKey)
 
-	if err := s.ListenAndServeTLS("", ""); err != http.ErrServerClosed {
-		e.Logger.Fatal(err)
-	}
+	e.Logger.Fatal(e.Start(":8080"))
 }
+

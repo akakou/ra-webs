@@ -10,19 +10,18 @@ services:
       - ./test:/test
       - /dev:/dev
     working_dir: /ta/example
-    command: bash -c 'mount -o remount,exec /dev && ego-go build -buildvcs=false -trimpath=true && ego sign example && source /test/issue_service.sh && sleep 10 && ego run example'
+    command: bash -c 'mount -o remount,exec /dev && ego-go build -buildvcs=false -trimpath=true && ego sign example && source /test/issue_service.sh && ego run example'
     privileged: true
     environment:
       - OE_SIMULATION=0
     env_file:
       - test/env/ta.env
       - test/env/common.env
-    restart: unless-stopped
+    profiles:
+      - ta
 
   verifier:
     build: ./docker
-    ports:
-      - "10.0.0.5:443:443"
     volumes:
       - ./verifier:/verifier
       - ./core:/core
@@ -34,3 +33,14 @@ services:
       - test/env/common.env
     privileged: true
     tty: true
+    profiles:
+      - verifier
+
+  tunnel:
+    restart: unless-stopped
+    image: cloudflare/cloudflared
+    command: tunnel --url http://verifier:8080 
+    env_file:
+      - test/env/tunnel.env
+    profiles:
+      - verifier
