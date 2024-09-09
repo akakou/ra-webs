@@ -2,12 +2,12 @@ package api
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/core"
 	verifiercore "github.com/akakou/ra_webs/verifier/core"
+	"github.com/akakou/ra_webs/verifier/ent"
 	"github.com/akakou/ra_webs/verifier/ent/taserver"
 	"github.com/labstack/echo/v4"
 )
@@ -34,20 +34,29 @@ var GetServerFromDomainApi = goutils.EchoRoute[verifiercore.Verifier]{
 		return func(c echo.Context) error {
 			domain := c.Param("domain")
 
-			fmt.Printf("domain: %v\n", domain)
+			// fmt.Printf("domain: %v\n", domain)
 			servs, err := verifier.DB.Client.TAServer.
 				Query().
 				Where(taserver.Domain(domain)).
 				Where(taserver.HasActivated(true)).
 				WithCode().
 				WithViolation().
+				Order(ent.Desc(taserver.FieldID)).
 				All(*verifier.DB.Ctx)
 
 			if err != nil {
 				return errors.New("server is not found")
 			}
 
-			return c.JSON(http.StatusOK, servs)
+			var res struct {
+				TA      []*ent.TAServer `json:"ta"`
+				IsValid bool            `json:"is_valid"`
+			}
+
+			res.TA = servs
+			res.IsValid = checkTAValiditiy(servs)
+
+			return c.JSON(http.StatusOK, res)
 		}
 	},
 }
