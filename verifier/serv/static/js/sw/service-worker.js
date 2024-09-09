@@ -1,10 +1,8 @@
 self.addEventListener('push', function (event) {
-    console.log('Received a push message', event);
-    const data = event.data?.json() ?? {};
-
-    const title = data.title || "Something Has Happened";
-    const message =
-      data.message || "Here's something you might want to check out.";
+    const text = event.data.text();
+    const lines = text.split('\n')
+    const title = lines[0]
+    const message = lines.slice(1).join('\n')
 
     event.waitUntil(
         self.registration.showNotification(title, {
