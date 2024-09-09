@@ -18,7 +18,7 @@ echo ""
 
 ### Build
 ego-go build -buildvcs=false -trimpath=true &> $LOG_PATH
-ego sign m &> $LOG_PATH
+ego sign $EXECUTABLE &> $LOG_PATH
 
 ### Show UniqueID
 ego uniqueid $EXECUTABLE
