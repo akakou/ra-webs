@@ -28,7 +28,7 @@ const BUILD_SCRIPT = BASE_REPO_PATH + "build.sh"
 const COMMIT_ID_INDEX = 0
 const UNIQUE_ID_INDEX = 1
 
-const BRANCH = "feature/direct-building"
+const BRANCH = "for-check"
 const EXECUTABLE = "example"
 
 func build(name, repo string) (string, string, error) {

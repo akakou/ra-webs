@@ -3,9 +3,7 @@ services:
   ta_example:
     tty: true
     build: ./docker
-    # network_mode: host
-    ports:
-      - "10.0.0.4:443:443"
+    network_mode: host
     volumes:
       - ./ta:/ta
       - ./core:/core
