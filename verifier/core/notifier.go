@@ -13,20 +13,20 @@ const UPDATE_MESSAGE = "A new server has been added at "
 
 func NotifierViolation(domain string, verifier *Verifier) error {
 	msg := fmt.Sprintf("%s %v", VIOLATION_MESSAGE, domain)
-	return verifier.Notifier.Notifier([]byte(msg), domain, verifier)
+	return verifier.Notifier.Notify([]byte(msg), domain, verifier)
 }
 
 func NotifierUpdate(domain string, verifier *Verifier) error {
 	msg := fmt.Sprintf("%s %v", UPDATE_MESSAGE, domain)
-	return verifier.Notifier.Notifier([]byte(msg), domain, verifier)
+	return verifier.Notifier.Notify([]byte(msg), domain, verifier)
 }
 
 type Notifier interface {
-	Notifier(msg []byte, domain string, verifier *Verifier) error
+	Notify(msg []byte, domain string, verifier *Verifier) error
 	Setup(e *echo.Echo, verifier *Verifier) error // todo: fix
 }
 
-const ERROR_FAILED_TO_NOTIFY = "failed to notifier"
+const ERROR_FAILED_TO_NOTIFY = "failed to notify"
 
 func SelectSubscription(domain string, verifier *Verifier) ([]*ent.Subscription, error) {
 	result := []*ent.Subscription{}
