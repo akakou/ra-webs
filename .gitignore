@@ -33,6 +33,8 @@ opt/domain-owner/example/example
 **/*.env
 
 **/*.db
+**/*.sqlite3
+
 **/last.txt
 ta/example/private.pem
 ta/example/public.pem
