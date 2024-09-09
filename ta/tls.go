@@ -9,7 +9,7 @@ import (
 
 const CERT_DIER_CACHE = "./tmp/ra-webs.cache"
 
-func parsePemCertiifcate(raw []byte, privateKey *rsa.PrivateKey) (*tls.Certificate, error) {
+func parsePemCertificate(raw []byte, privateKey *rsa.PrivateKey) (*tls.Certificate, error) {
 	certs := make([][]byte, 0)
 
 	for block, rest := pem.Decode(raw); block != nil; block, rest = pem.Decode(rest) {
@@ -35,7 +35,7 @@ func (ap *TA) TLSConfig() (*tls.Config, error) {
 
 	resouce := IssueCertificate(ap.privateKey, ap.config.Domain, ap.config.Email)
 
-	cert, err := parsePemCertiifcate(resouce.Certificate, ap.privateKey)
+	cert, err := parsePemCertificate(resouce.Certificate, ap.privateKey)
 
 	if err != nil {
 		return nil, err
@@ -47,4 +47,3 @@ func (ap *TA) TLSConfig() (*tls.Config, error) {
 		},
 	}, nil
 }
-

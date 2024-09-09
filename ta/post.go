@@ -47,7 +47,7 @@ func (ta *TA) post(path string, reqBody any) (string, error) {
 
 	u, err := url.Parse(ta.config.Verifier)
 	if err != nil {
-		return "", fmt.Errorf("%v: %v", ERROR_Verifier_BASE_PARSE, err)
+		return "", fmt.Errorf("%v: %v", ERROR_VERIFIER_BASE_PARSE, err)
 	}
 
 	u.Path = path
