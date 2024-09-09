@@ -54,5 +54,7 @@ func main() {
 	}
 
 	http.HandleFunc("/", handler)
-	server.ListenAndServeTLS("", "")
+
+	err = server.ListenAndServeTLS("", "")
+	panic(err)
 }
