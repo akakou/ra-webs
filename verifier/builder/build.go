@@ -29,12 +29,13 @@ const COMMIT_ID_INDEX = 0
 const UNIQUE_ID_INDEX = 1
 
 const BRANCH = "main"
+const EXECUTABLE = "m"
 
 func build(name, repo string) (string, string, error) {
 	extractembed.Extract(BASE_REPO_PATH, &embedFiles)
 
 	var outBuf, errBuf bytes.Buffer
-	cmd := exec.Command("sh", BUILD_SCRIPT, repo, BASE_REPO_PATH+"/"+name, BRANCH, BASE_PROGRAM_PATH)
+	cmd := exec.Command("sh", BUILD_SCRIPT, repo, BASE_REPO_PATH+"/"+name, BRANCH, BASE_PROGRAM_PATH, EXECUTABLE)
 
 	cmd.Stdout = &outBuf
 	cmd.Stderr = &errBuf

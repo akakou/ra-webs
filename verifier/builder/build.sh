@@ -11,4 +11,4 @@ ego-go build -buildvcs=false -trimpath=true >&2
 ego sign m >&2
 
 ### Show UniqueID
-ego uniqueid m 
+ego uniqueid $4
