@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (notifier *BrowserNotifier) Notifier(msg []byte, domain string, verifier *core.Verifier) error {
+func (notifier *BrowserNotifier) Notify(msg []byte, domain string, verifier *core.Verifier) error {
 	subscriptions, err := core.SelectSubscription(domain, verifier)
 	if err != nil {
 		return err
