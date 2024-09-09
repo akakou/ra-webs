@@ -21,7 +21,7 @@ var embedFiles embed.FS
 var Build = build
 
 const BASE_REPO_PATH = "./repo/"
-const BASE_PROGRAM_PATH = "."
+const BASE_PROGRAM_PATH = "./"
 
 const BUILD_SCRIPT = BASE_REPO_PATH + "build.sh"
 
@@ -35,7 +35,7 @@ func build(name, repo string) (string, string, error) {
 	extractembed.Extract(BASE_REPO_PATH, &embedFiles)
 
 	var outBuf, errBuf bytes.Buffer
-	cmd := exec.Command("sh", BUILD_SCRIPT, name, repo, BASE_REPO_PATH, BRANCH, BASE_PROGRAM_PATH, EXECUTABLE)
+	cmd := exec.Command("bash", BUILD_SCRIPT, name, repo, BASE_REPO_PATH, BRANCH, BASE_PROGRAM_PATH, EXECUTABLE)
 
 	fmt.Printf("Running command: %v\n", cmd.String())
 
