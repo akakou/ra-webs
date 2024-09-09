@@ -6,8 +6,8 @@ const App = () => {
     const [hostname, setHostname] = useState("");
 
     useEffect(async () => {
-        // const referrer = new URL(document.referrer);
-        const referrer = new URL("https://example.com")
+        const referrer = new URL(document.referrer);
+        // const referrer = new URL("https://example.com")
 
         setHostname(referrer.hostname)
   
