@@ -15,7 +15,7 @@ func revoke(serv *ent.TAServer, verifier *core.Verifier) {
 		SetServer(serv).
 		SaveX(*verifier.DB.Ctx)
 
-	service, err := serv.QueryService().First(*verifier.DB.Ctx)
+	service, err := serv.QueryService().Only(*verifier.DB.Ctx)
 	if err != nil {
 		panic(err)
 	}
