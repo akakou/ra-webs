@@ -13,8 +13,13 @@ const App = () => {
   
         await setupNotification(referrer.hostname)
 
-        const {v, data} = await fetchAndValidate(referrer.hostname)
-        setLogs(data)
+        const resp = await axios.get(`/api/ta/${referrer.hostname}`)
+        console.log(resp)
+    
+        const ta = resp.data.ta
+        const v = resp.data.is_valid
+    
+        setLogs(ta)
         setIsValid(v)
         setMessage(v ? VALID_MESSAGE : INVALID_MESSAGE)
 
