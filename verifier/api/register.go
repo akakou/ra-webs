@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -13,8 +14,11 @@ import (
 	"github.com/akakou/ra_webs/verifier/builder"
 	verifiercore "github.com/akakou/ra_webs/verifier/core"
 	"github.com/akakou/ra_webs/verifier/ent"
+	"github.com/akakou/ra_webs/verifier/ent/taserver"
 	"github.com/labstack/echo/v4"
 )
+
+const TA_SERVER_NOT_FOUND = "ent: ta_server not found"
 
 var RegisterApi = goutils.EchoRoute[verifiercore.Verifier]{
 	Method: goutils.POST,
@@ -61,6 +65,25 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 		return fmt.Errorf(ERROR_QUOTE_INVALID)
 	}
 
+	last, err := verifier.DB.Client.TAServer.
+		Query().
+		Order(ent.Desc(taserver.FieldID)).
+		WithCode().
+		First(*verifier.DB.Ctx)
+
+	if err == nil {
+	} else if err.Error() == TA_SERVER_NOT_FOUND {
+	} else {
+		return err
+	}
+
+	if last == nil && !bytes.Equal(report.UniqueID, last.Edges.Code.UniqueID) {
+		err := verifiercore.NotifierUpdate(req.Domain, verifier)
+		if err != nil {
+			return err
+		}
+	}
+
 	taServerCreate := verifier.DB.Client.TAServer.
 		Create().
 		SetDomain(req.Domain).
@@ -69,11 +92,6 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 		SetPublicKey(req.PublicKey).
 		SetQuote(req.Quote).
 		SetHasActivated(false)
-
-	err = verifiercore.NotifierUpdate(req.Domain, verifier)
-	if err != nil {
-		return err
-	}
 
 	_, err = taServerCreate.Save(*verifier.DB.Ctx)
 	if err != nil {
