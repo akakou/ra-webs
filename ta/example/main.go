@@ -21,6 +21,8 @@ func main() {
 	}
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+
 		_, err := r.Cookie("isFirstAccess")
 
 		if err != nil {
