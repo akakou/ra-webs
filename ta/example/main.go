@@ -48,11 +48,12 @@ func main() {
 	}
 
 	server := http.Server{
-		Addr:      "10.0.0.5:443:443",
+		Addr:      ":443",
 		Handler:   nil,
 		TLSConfig: tlsConfig,
 	}
 
 	http.HandleFunc("/", handler)
-	server.ListenAndServeTLS("", "")
+	err = server.ListenAndServeTLS("", "")
+	panic(err)
 }
