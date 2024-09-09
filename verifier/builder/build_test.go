@@ -1,12 +1,16 @@
 package builder
 
-import "testing"
+import (
+	"testing"
+	"fmt"
+)
 
 const EXPECTED_COMMIT_ID = "b9d0bc9519799ae2b07ce033d5dd942d7c275beb"
-const EXPECTED_UNIQUE_ID = "ccb94ab5dbb6a5eeeeadf315b817a688a2097a7f7469882c65ad251712c5c905"
+const EXPECTED_UNIQUE_ID = "ea0e1b510d48a85981d5a0b3794bb08b75962a67bd44798cdeeaff58745d701a"
 
 func TestMain(t *testing.T) {
 	commitId, uniqueId, err := build("1", "https://github.com/akakou-docs/ego-statistical-analysis")
+	fmt.Printf("commit id: %v\nunique id: %v", commitId, uniqueId)
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}

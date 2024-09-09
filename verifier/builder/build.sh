@@ -3,7 +3,8 @@ echo -en "yes\n" | git clone $1 $2 --depth 1 --branch $3 --single-branch --quiet
 cd $2 >&2
 
 ### Show Git Log
-git log -1 --pretty=format:%H 
+git log -1 --pretty=format:%H
+echo ""
 
 ### Build
 ego-go build -buildvcs=false -trimpath=true >&2

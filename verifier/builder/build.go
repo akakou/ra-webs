@@ -47,7 +47,7 @@ func build(name, repo string) (string, string, error) {
 	}
 
 	lines := strings.Split(outBuf.String(), "\n")
-	if len(lines) != 2 {
+	if len(lines) != 3 {
 		return "", "", fmt.Errorf("%v: expected 2 lines, but got %v", ERROR_OUTPUT_SIZE_WRONG, len(lines))
 	}
 
