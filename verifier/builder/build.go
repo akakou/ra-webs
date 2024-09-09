@@ -1,10 +1,9 @@
 package builder
 
 import (
+	"bytes"
 	"embed"
-	"errors"
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
 
@@ -12,93 +11,45 @@ import (
 )
 
 const (
-	ERROR_BUILD_CONTAINER = "failed to execute build bulding container"
-	ERROR_RUN_CONTAINER   = "failed to execute run building container"
+	ERROR_RUNNING_CMD       = "Error running command"
+	ERROR_OUTPUT_SIZE_WRONG = "Error outpu size is wrong"
 )
 
-const BASE_PATH = "./repo"
-const IMAGE_NAME = "ra-webs-builder"
-
-const COMMIT_ID_INDEX = 0
-const UNIQUE_ID_INDEX = 3
-
-//go:embed *.sh Dockerfile
+//go:embed build.sh
 var embedFiles embed.FS
-
-func docker_run(name string, arguments ...string) ([]byte, error) {
-	directory := fmt.Sprintf("%s/%s", BASE_PATH, name)
-	os.Mkdir(directory, 0600)
-
-	params := []string{
-		"run",
-		"-v",
-		fmt.Sprintf("%s:/repo/%s:z", directory, name),
-		"-w",
-		fmt.Sprintf("/repo/%s", name),
-		"--rm",
-		IMAGE_NAME,
-		"sh",
-	}
-
-	args := append(params, arguments...)
-
-	fmt.Printf("docker args: %s\n", args)
-
-	return exec.Command("docker", args...).CombinedOutput()
-}
 
 var Build = build
 
+const BASE_REPO_PATH = "./repo/"
+const BASE_PROGRAM_PATH = "."
+
+const BUILD_SCRIPT = BASE_REPO_PATH + "build.sh"
+
+const COMMIT_ID_INDEX = 0
+const UNIQUE_ID_INDEX = 1
+
+const BRANCH = "main"
+
 func build(name, repo string) (string, string, error) {
-	extractembed.Extract(BASE_PATH, &embedFiles)
+	extractembed.Extract(BASE_REPO_PATH, &embedFiles)
 
-	current, err := os.Getwd()
-	if err != nil {
-		return "", "", err
-	}
+	var outBuf, errBuf bytes.Buffer
+	cmd := exec.Command("sh", BUILD_SCRIPT, repo, BASE_REPO_PATH+"/"+name, BRANCH, BASE_PROGRAM_PATH)
 
-	err = os.Chdir(BASE_PATH)
-	if err != nil {
-		return "", "", err
-	}
+	cmd.Stdout = &outBuf
+	cmd.Stderr = &errBuf
 
-	commitId, uniqueId, err := execBuild(name, repo)
+	err := cmd.Run()
+	fmt.Print(errBuf.String())
 
 	if err != nil {
-		return "", "", err
+		return "", "", fmt.Errorf("%v: %v", ERROR_RUNNING_CMD, err)
 	}
 
-	err = os.Chdir(current)
-	if err != nil {
-		return "", "", err
+	lines := strings.Split(outBuf.String(), "\n")
+	if len(lines) != 2 {
+		return "", "", fmt.Errorf("%v: expected 2 lines, but got %v", ERROR_OUTPUT_SIZE_WRONG, len(lines))
 	}
 
-	return commitId, uniqueId, nil
-}
-
-func execBuild(name, repo string) (string, string, error) {
-	cmd := exec.Command("docker", "build", "-t", IMAGE_NAME, ".")
-	output, err := cmd.CombinedOutput()
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "stdout: %s\nerr: %s", output, err)
-		return "", "", errors.New(ERROR_BUILD_CONTAINER)
-	}
-
-	output, err = docker_run(name, "/build/build.sh", repo)
-
-	fmt.Fprintf(os.Stderr, "stdout: %s\nerr: %s", output, err)
-	if err != nil {
-		return "", "", errors.New(ERROR_RUN_CONTAINER + "1")
-	}
-
-	output, err = docker_run(name, "/build/show.sh", name)
-
-	fmt.Fprintf(os.Stderr, "cmd: %s\nstdout: %s\nerr: %s", cmd.Args, output, err)
-	if err != nil {
-		return "", "", errors.New(ERROR_RUN_CONTAINER + "2")
-	}
-
-	lines := strings.Split(string(output), "\n")
 	return lines[COMMIT_ID_INDEX], lines[UNIQUE_ID_INDEX], nil
 }
