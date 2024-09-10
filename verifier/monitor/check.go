@@ -13,7 +13,7 @@ import (
 
 const TA_SERVER_NOT_FOUND = "ent: ta_server not found"
 
-func check(domain string, pk interface{}, verifier *core.Verifier) error {
+func check(domain string, pk interface{}, ctLogId string, verifier *core.Verifier) error {
 	serv, err := verifier.DB.Client.TAServer.
 		Query().
 		Where(taserver.DomainEQ(domain)).
@@ -42,15 +42,16 @@ func check(domain string, pk interface{}, verifier *core.Verifier) error {
 	}
 
 	if !serv.HasActivated {
+		UpdateLastLog(serv.Domain, ctLogId, verifier.DB)
 		serv.Update().SetHasActivated(true).Save(*verifier.DB.Ctx)
 	}
 
 	return nil
 }
 
-func Check(verifier *core.Verifier, cert *x509.Certificate) error {
+func Check(cert *x509.Certificate, ctLogId string, verifier *core.Verifier) error {
 	for _, domain := range cert.DNSNames {
-		err := check(domain, cert.PublicKey, verifier)
+		err := check(domain, cert.PublicKey, ctLogId, verifier)
 
 		if err != nil {
 			return err

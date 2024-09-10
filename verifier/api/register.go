@@ -38,7 +38,7 @@ var RegisterApi = goutils.EchoRoute[verifiercore.Verifier]{
 				return err
 			}
 
-			err = verifier.Monitor.Register(verifier)
+			err = verifier.Monitor.Register(req.Domain, verifier)
 			if err != nil {
 				return err
 			}

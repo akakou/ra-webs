@@ -1,6 +1,7 @@
 package verifier
 
 import (
+	"context"
 	"fmt"
 
 	goutils "github.com/akakou/go-utils"
@@ -33,7 +34,7 @@ func DefaultVerifier() (*core.Verifier, error) {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_INIT_DB, err)
 	}
 
-	monitor, err := monitor.DefaultSSLMateMonitor()
+	monitor, err := monitor.LoadSSLMateMonitor(db, context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_CREATE_AUDIT, err)
 	}
