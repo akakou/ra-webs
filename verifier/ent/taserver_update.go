@@ -79,6 +79,20 @@ func (tsu *TAServerUpdate) SetNillableHasActivated(b *bool) *TAServerUpdate {
 	return tsu
 }
 
+// SetLastCtlog sets the "last_ctlog" field.
+func (tsu *TAServerUpdate) SetLastCtlog(s string) *TAServerUpdate {
+	tsu.mutation.SetLastCtlog(s)
+	return tsu
+}
+
+// SetNillableLastCtlog sets the "last_ctlog" field if the given value is not nil.
+func (tsu *TAServerUpdate) SetNillableLastCtlog(s *string) *TAServerUpdate {
+	if s != nil {
+		tsu.SetLastCtlog(*s)
+	}
+	return tsu
+}
+
 // AddViolationIDs adds the "violation" edge to the TAViolation entity by IDs.
 func (tsu *TAServerUpdate) AddViolationIDs(ids ...int) *TAServerUpdate {
 	tsu.mutation.AddViolationIDs(ids...)
@@ -253,6 +267,9 @@ func (tsu *TAServerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tsu.mutation.HasActivated(); ok {
 		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)
+	}
+	if value, ok := tsu.mutation.LastCtlog(); ok {
+		_spec.SetField(taserver.FieldLastCtlog, field.TypeString, value)
 	}
 	if tsu.mutation.ViolationCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -470,6 +487,20 @@ func (tsuo *TAServerUpdateOne) SetNillableHasActivated(b *bool) *TAServerUpdateO
 	return tsuo
 }
 
+// SetLastCtlog sets the "last_ctlog" field.
+func (tsuo *TAServerUpdateOne) SetLastCtlog(s string) *TAServerUpdateOne {
+	tsuo.mutation.SetLastCtlog(s)
+	return tsuo
+}
+
+// SetNillableLastCtlog sets the "last_ctlog" field if the given value is not nil.
+func (tsuo *TAServerUpdateOne) SetNillableLastCtlog(s *string) *TAServerUpdateOne {
+	if s != nil {
+		tsuo.SetLastCtlog(*s)
+	}
+	return tsuo
+}
+
 // AddViolationIDs adds the "violation" edge to the TAViolation entity by IDs.
 func (tsuo *TAServerUpdateOne) AddViolationIDs(ids ...int) *TAServerUpdateOne {
 	tsuo.mutation.AddViolationIDs(ids...)
@@ -674,6 +705,9 @@ func (tsuo *TAServerUpdateOne) sqlSave(ctx context.Context) (_node *TAServer, er
 	}
 	if value, ok := tsuo.mutation.HasActivated(); ok {
 		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)
+	}
+	if value, ok := tsuo.mutation.LastCtlog(); ok {
+		_spec.SetField(taserver.FieldLastCtlog, field.TypeString, value)
 	}
 	if tsuo.mutation.ViolationCleared() {
 		edge := &sqlgraph.EdgeSpec{

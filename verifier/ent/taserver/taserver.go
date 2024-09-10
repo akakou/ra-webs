@@ -20,6 +20,8 @@ const (
 	FieldQuote = "quote"
 	// FieldHasActivated holds the string denoting the has_activated field in the database.
 	FieldHasActivated = "has_activated"
+	// FieldLastCtlog holds the string denoting the last_ctlog field in the database.
+	FieldLastCtlog = "last_ctlog"
 	// EdgeViolation holds the string denoting the violation edge name in mutations.
 	EdgeViolation = "violation"
 	// EdgeCode holds the string denoting the code edge name in mutations.
@@ -67,6 +69,7 @@ var Columns = []string{
 	FieldPublicKey,
 	FieldQuote,
 	FieldHasActivated,
+	FieldLastCtlog,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "ta_servers"
@@ -91,6 +94,11 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultLastCtlog holds the default value on creation for the "last_ctlog" field.
+	DefaultLastCtlog string
+)
+
 // OrderOption defines the ordering options for the TAServer queries.
 type OrderOption func(*sql.Selector)
 
@@ -112,6 +120,11 @@ func ByQuote(opts ...sql.OrderTermOption) OrderOption {
 // ByHasActivated orders the results by the has_activated field.
 func ByHasActivated(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHasActivated, opts...).ToFunc()
+}
+
+// ByLastCtlog orders the results by the last_ctlog field.
+func ByLastCtlog(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastCtlog, opts...).ToFunc()
 }
 
 // ByViolationCount orders the results by violation count.

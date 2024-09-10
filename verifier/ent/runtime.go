@@ -8,6 +8,7 @@ import (
 	"github.com/akakou/ra_webs/verifier/ent/schema"
 	"github.com/akakou/ra_webs/verifier/ent/service"
 	"github.com/akakou/ra_webs/verifier/ent/tacode"
+	"github.com/akakou/ra_webs/verifier/ent/taserver"
 	"github.com/akakou/ra_webs/verifier/ent/taviolation"
 )
 
@@ -27,6 +28,12 @@ func init() {
 	tacodeDescIsActive := tacodeFields[3].Descriptor()
 	// tacode.DefaultIsActive holds the default value on creation for the is_active field.
 	tacode.DefaultIsActive = tacodeDescIsActive.Default.(bool)
+	taserverFields := schema.TAServer{}.Fields()
+	_ = taserverFields
+	// taserverDescLastCtlog is the schema descriptor for last_ctlog field.
+	taserverDescLastCtlog := taserverFields[4].Descriptor()
+	// taserver.DefaultLastCtlog holds the default value on creation for the last_ctlog field.
+	taserver.DefaultLastCtlog = taserverDescLastCtlog.Default.(string)
 	taviolationFields := schema.TAViolation{}.Fields()
 	_ = taviolationFields
 	// taviolationDescCreatedAt is the schema descriptor for created_at field.

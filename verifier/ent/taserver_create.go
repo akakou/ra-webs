@@ -47,6 +47,20 @@ func (tsc *TAServerCreate) SetHasActivated(b bool) *TAServerCreate {
 	return tsc
 }
 
+// SetLastCtlog sets the "last_ctlog" field.
+func (tsc *TAServerCreate) SetLastCtlog(s string) *TAServerCreate {
+	tsc.mutation.SetLastCtlog(s)
+	return tsc
+}
+
+// SetNillableLastCtlog sets the "last_ctlog" field if the given value is not nil.
+func (tsc *TAServerCreate) SetNillableLastCtlog(s *string) *TAServerCreate {
+	if s != nil {
+		tsc.SetLastCtlog(*s)
+	}
+	return tsc
+}
+
 // AddViolationIDs adds the "violation" edge to the TAViolation entity by IDs.
 func (tsc *TAServerCreate) AddViolationIDs(ids ...int) *TAServerCreate {
 	tsc.mutation.AddViolationIDs(ids...)
@@ -122,6 +136,7 @@ func (tsc *TAServerCreate) Mutation() *TAServerMutation {
 
 // Save creates the TAServer in the database.
 func (tsc *TAServerCreate) Save(ctx context.Context) (*TAServer, error) {
+	tsc.defaults()
 	return withHooks(ctx, tsc.sqlSave, tsc.mutation, tsc.hooks)
 }
 
@@ -147,6 +162,14 @@ func (tsc *TAServerCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tsc *TAServerCreate) defaults() {
+	if _, ok := tsc.mutation.LastCtlog(); !ok {
+		v := taserver.DefaultLastCtlog
+		tsc.mutation.SetLastCtlog(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (tsc *TAServerCreate) check() error {
 	if _, ok := tsc.mutation.Domain(); !ok {
@@ -160,6 +183,9 @@ func (tsc *TAServerCreate) check() error {
 	}
 	if _, ok := tsc.mutation.HasActivated(); !ok {
 		return &ValidationError{Name: "has_activated", err: errors.New(`ent: missing required field "TAServer.has_activated"`)}
+	}
+	if _, ok := tsc.mutation.LastCtlog(); !ok {
+		return &ValidationError{Name: "last_ctlog", err: errors.New(`ent: missing required field "TAServer.last_ctlog"`)}
 	}
 	return nil
 }
@@ -202,6 +228,10 @@ func (tsc *TAServerCreate) createSpec() (*TAServer, *sqlgraph.CreateSpec) {
 	if value, ok := tsc.mutation.HasActivated(); ok {
 		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)
 		_node.HasActivated = value
+	}
+	if value, ok := tsc.mutation.LastCtlog(); ok {
+		_spec.SetField(taserver.FieldLastCtlog, field.TypeString, value)
+		_node.LastCtlog = value
 	}
 	if nodes := tsc.mutation.ViolationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -290,6 +320,7 @@ func (tscb *TAServerCreateBulk) Save(ctx context.Context) ([]*TAServer, error) {
 	for i := range tscb.builders {
 		func(i int, root context.Context) {
 			builder := tscb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TAServerMutation)
 				if !ok {
