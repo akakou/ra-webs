@@ -34,7 +34,6 @@ func NewMonitor[T ctcore.CtStream](stream T) (*Monitor, error) {
 		ctstream: stream,
 	}, nil
 }
-
 func DefaultDirectMonitor() (*Monitor, error) {
 	ctx := context.Background()
 	stream, err := direct.DefaultCTsStream(DefaultCTLogs, ctx)
@@ -57,6 +56,10 @@ func DefaultSSLMateMonitor() (*Monitor, error) {
 
 func (a *Monitor) Setup(verifier *core.Verifier) error {
 	return a.ctstream.Init()
+}
+
+func (a *Monitor) Register(verifier *core.Verifier) error {
+	return nil
 }
 
 func (a *Monitor) Run(verifier *core.Verifier) {
