@@ -1796,7 +1796,6 @@ type TAServerMutation struct {
 	public_key          *[]byte
 	quote               *string
 	has_activated       *bool
-	last_ctlog          *string
 	clearedFields       map[string]struct{}
 	violation           map[int]struct{}
 	removedviolation    map[int]struct{}
@@ -2055,42 +2054,6 @@ func (m *TAServerMutation) ResetHasActivated() {
 	m.has_activated = nil
 }
 
-// SetLastCtlog sets the "last_ctlog" field.
-func (m *TAServerMutation) SetLastCtlog(s string) {
-	m.last_ctlog = &s
-}
-
-// LastCtlog returns the value of the "last_ctlog" field in the mutation.
-func (m *TAServerMutation) LastCtlog() (r string, exists bool) {
-	v := m.last_ctlog
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLastCtlog returns the old "last_ctlog" field's value of the TAServer entity.
-// If the TAServer object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAServerMutation) OldLastCtlog(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLastCtlog is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLastCtlog requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLastCtlog: %w", err)
-	}
-	return oldValue.LastCtlog, nil
-}
-
-// ResetLastCtlog resets all changes to the "last_ctlog" field.
-func (m *TAServerMutation) ResetLastCtlog() {
-	m.last_ctlog = nil
-}
-
 // AddViolationIDs adds the "violation" edge to the TAViolation entity by ids.
 func (m *TAServerMutation) AddViolationIDs(ids ...int) {
 	if m.violation == nil {
@@ -2311,7 +2274,7 @@ func (m *TAServerMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TAServerMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 4)
 	if m.domain != nil {
 		fields = append(fields, taserver.FieldDomain)
 	}
@@ -2323,9 +2286,6 @@ func (m *TAServerMutation) Fields() []string {
 	}
 	if m.has_activated != nil {
 		fields = append(fields, taserver.FieldHasActivated)
-	}
-	if m.last_ctlog != nil {
-		fields = append(fields, taserver.FieldLastCtlog)
 	}
 	return fields
 }
@@ -2343,8 +2303,6 @@ func (m *TAServerMutation) Field(name string) (ent.Value, bool) {
 		return m.Quote()
 	case taserver.FieldHasActivated:
 		return m.HasActivated()
-	case taserver.FieldLastCtlog:
-		return m.LastCtlog()
 	}
 	return nil, false
 }
@@ -2362,8 +2320,6 @@ func (m *TAServerMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldQuote(ctx)
 	case taserver.FieldHasActivated:
 		return m.OldHasActivated(ctx)
-	case taserver.FieldLastCtlog:
-		return m.OldLastCtlog(ctx)
 	}
 	return nil, fmt.Errorf("unknown TAServer field %s", name)
 }
@@ -2400,13 +2356,6 @@ func (m *TAServerMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetHasActivated(v)
-		return nil
-	case taserver.FieldLastCtlog:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLastCtlog(v)
 		return nil
 	}
 	return fmt.Errorf("unknown TAServer field %s", name)
@@ -2468,9 +2417,6 @@ func (m *TAServerMutation) ResetField(name string) error {
 		return nil
 	case taserver.FieldHasActivated:
 		m.ResetHasActivated()
-		return nil
-	case taserver.FieldLastCtlog:
-		m.ResetLastCtlog()
 		return nil
 	}
 	return fmt.Errorf("unknown TAServer field %s", name)

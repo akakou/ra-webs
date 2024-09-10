@@ -73,11 +73,6 @@ func HasActivated(v bool) predicate.TAServer {
 	return predicate.TAServer(sql.FieldEQ(FieldHasActivated, v))
 }
 
-// LastCtlog applies equality check predicate on the "last_ctlog" field. It's identical to LastCtlogEQ.
-func LastCtlog(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldLastCtlog, v))
-}
-
 // DomainEQ applies the EQ predicate on the "domain" field.
 func DomainEQ(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldEQ(FieldDomain, v))
@@ -256,71 +251,6 @@ func HasActivatedEQ(v bool) predicate.TAServer {
 // HasActivatedNEQ applies the NEQ predicate on the "has_activated" field.
 func HasActivatedNEQ(v bool) predicate.TAServer {
 	return predicate.TAServer(sql.FieldNEQ(FieldHasActivated, v))
-}
-
-// LastCtlogEQ applies the EQ predicate on the "last_ctlog" field.
-func LastCtlogEQ(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldLastCtlog, v))
-}
-
-// LastCtlogNEQ applies the NEQ predicate on the "last_ctlog" field.
-func LastCtlogNEQ(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldNEQ(FieldLastCtlog, v))
-}
-
-// LastCtlogIn applies the In predicate on the "last_ctlog" field.
-func LastCtlogIn(vs ...string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldIn(FieldLastCtlog, vs...))
-}
-
-// LastCtlogNotIn applies the NotIn predicate on the "last_ctlog" field.
-func LastCtlogNotIn(vs ...string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldNotIn(FieldLastCtlog, vs...))
-}
-
-// LastCtlogGT applies the GT predicate on the "last_ctlog" field.
-func LastCtlogGT(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldGT(FieldLastCtlog, v))
-}
-
-// LastCtlogGTE applies the GTE predicate on the "last_ctlog" field.
-func LastCtlogGTE(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldGTE(FieldLastCtlog, v))
-}
-
-// LastCtlogLT applies the LT predicate on the "last_ctlog" field.
-func LastCtlogLT(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldLT(FieldLastCtlog, v))
-}
-
-// LastCtlogLTE applies the LTE predicate on the "last_ctlog" field.
-func LastCtlogLTE(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldLTE(FieldLastCtlog, v))
-}
-
-// LastCtlogContains applies the Contains predicate on the "last_ctlog" field.
-func LastCtlogContains(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldContains(FieldLastCtlog, v))
-}
-
-// LastCtlogHasPrefix applies the HasPrefix predicate on the "last_ctlog" field.
-func LastCtlogHasPrefix(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldHasPrefix(FieldLastCtlog, v))
-}
-
-// LastCtlogHasSuffix applies the HasSuffix predicate on the "last_ctlog" field.
-func LastCtlogHasSuffix(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldHasSuffix(FieldLastCtlog, v))
-}
-
-// LastCtlogEqualFold applies the EqualFold predicate on the "last_ctlog" field.
-func LastCtlogEqualFold(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEqualFold(FieldLastCtlog, v))
-}
-
-// LastCtlogContainsFold applies the ContainsFold predicate on the "last_ctlog" field.
-func LastCtlogContainsFold(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldContainsFold(FieldLastCtlog, v))
 }
 
 // HasViolation applies the HasEdge predicate on the "violation" edge.

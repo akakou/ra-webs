@@ -73,7 +73,6 @@ var (
 		{Name: "public_key", Type: field.TypeBytes},
 		{Name: "quote", Type: field.TypeString},
 		{Name: "has_activated", Type: field.TypeBool},
-		{Name: "last_ctlog", Type: field.TypeString, Default: ""},
 		{Name: "ta_server_code", Type: field.TypeInt, Nullable: true},
 		{Name: "ta_server_service", Type: field.TypeInt, Nullable: true},
 	}
@@ -85,13 +84,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ta_servers_ta_codes_code",
-				Columns:    []*schema.Column{TaServersColumns[6]},
+				Columns:    []*schema.Column{TaServersColumns[5]},
 				RefColumns: []*schema.Column{TaCodesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "ta_servers_services_service",
-				Columns:    []*schema.Column{TaServersColumns[7]},
+				Columns:    []*schema.Column{TaServersColumns[6]},
 				RefColumns: []*schema.Column{ServicesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

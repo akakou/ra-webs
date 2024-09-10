@@ -26,8 +26,6 @@ type TAServer struct {
 	Quote string `json:"quote,omitempty"`
 	// HasActivated holds the value of the "has_activated" field.
 	HasActivated bool `json:"has_activated,omitempty"`
-	// LastCtlog holds the value of the "last_ctlog" field.
-	LastCtlog string `json:"last_ctlog,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TAServerQuery when eager-loading is set.
 	Edges             TAServerEdges `json:"edges"`
@@ -106,7 +104,7 @@ func (*TAServer) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case taserver.FieldID:
 			values[i] = new(sql.NullInt64)
-		case taserver.FieldDomain, taserver.FieldQuote, taserver.FieldLastCtlog:
+		case taserver.FieldDomain, taserver.FieldQuote:
 			values[i] = new(sql.NullString)
 		case taserver.ForeignKeys[0]: // ta_server_code
 			values[i] = new(sql.NullInt64)
@@ -156,12 +154,6 @@ func (ts *TAServer) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field has_activated", values[i])
 			} else if value.Valid {
 				ts.HasActivated = value.Bool
-			}
-		case taserver.FieldLastCtlog:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field last_ctlog", values[i])
-			} else if value.Valid {
-				ts.LastCtlog = value.String
 			}
 		case taserver.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -244,9 +236,6 @@ func (ts *TAServer) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("has_activated=")
 	builder.WriteString(fmt.Sprintf("%v", ts.HasActivated))
-	builder.WriteString(", ")
-	builder.WriteString("last_ctlog=")
-	builder.WriteString(ts.LastCtlog)
 	builder.WriteByte(')')
 	return builder.String()
 }

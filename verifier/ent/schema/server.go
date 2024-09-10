@@ -18,7 +18,6 @@ func (TAServer) Fields() []ent.Field {
 		field.Bytes("public_key"),
 		field.String("quote"),
 		field.Bool("has_activated"),
-		field.String("last_ctlog").Default(""),
 	}
 }
 
