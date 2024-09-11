@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/akakou/extract-embed v0.0.1 // indirect
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000 // indirect
 	github.com/akakou/sslmate-cert-search-api v0.0.14 // indirect
 )
@@ -22,7 +23,6 @@ require (
 	github.com/SherClockHolmes/webpush-go v1.3.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/akakou/ctstream v0.0.29 // indirect
-	github.com/akakou/extract-embed v0.0.1 // indirect
 	github.com/akakou/go-utils v0.0.5 // indirect
 	github.com/akakou/golang-utils v0.0.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
