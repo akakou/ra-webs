@@ -7,18 +7,54 @@ import (
 	ctcore "github.com/akakou/ctstream/core"
 	"github.com/akakou/ctstream/direct"
 	"github.com/akakou/ctstream/thirdparty/sslmate"
+	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/verifier/core"
+	"github.com/akakou/ra_webs/verifier/ent"
+	"github.com/akakou/ra_webs/verifier/ent/taserver"
 	ctx509 "github.com/google/certificate-transparency-go/x509"
 )
+
+const LOG_FILE_PATH = "last.log"
 
 type SSLMateStream = ctcore.ConcurrentCTsStream[*ctcore.CTStream[*sslmate.SSLMateCTClient]]
 
 type SSLMateMonitor struct {
-	ctstream *SSLMateStream
-	ctx      context.Context
+	ctstream   *SSLMateStream
+	lastLogger *goutils.File[int]
+	ctx        context.Context
+}
+
+func NewSSLMateMonitor(ctx context.Context) *SSLMateMonitor {
+	return &SSLMateMonitor{
+		ctx: ctx,
+	}
+
 }
 
 func (a *SSLMateMonitor) Setup(verifier *core.Verifier) error {
+	servers, err := verifier.DB.Client.TAServer.Query().Select(taserver.FieldDomain).All(*verifier.DB.Ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, server := range servers {
+		sslmate.AddByDomain(server.Domain, a.ctx, a.ctstream)
+	}
+
+	lastLogger, err := goutils.OpenIntFile(LOG_FILE_PATH)
+	if err != nil {
+		return err
+	}
+
+	a.lastLogger = lastLogger
+	first, err := lastLogger.Restore()
+
+	if err != nil {
+		return err
+	}
+
+	sslmate.SetFirst(*first, a.ctstream)
+
 	return a.ctstream.Init()
 }
 
@@ -37,13 +73,36 @@ func (a *SSLMateMonitor) Run(verifier *core.Verifier) {
 			return
 		}
 
-		index := params.(sslmate.SSLMateCTParams)
+		option := params.(sslmate.SSLMateCTParams)
+		domain := option.Client.Domain
 
-		err = Check(cert, index.Last, verifier)
+		serv, err := verifier.DB.Client.TAServer.
+			Query().
+			Where(taserver.DomainEQ(domain)).
+			Order(ent.Desc(taserver.FieldID)).
+			First(*verifier.DB.Ctx)
+
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			return
+		}
+
+		last := sslmate.GetFirst(a.ctstream)
+
+		err = a.lastLogger.Store(&last)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 		}
 
-		// fmt.Printf("Certificate: %v\n", cert.Subject.CommonName)
+		err = Check(cert.PublicKey, serv)
+		if err != nil {
+			fmt.Printf("Violation: %v\n", err)
+			revoke(serv, verifier)
+			return
+		}
+
+		if !serv.HasActivated {
+			serv.Update().SetHasActivated(true).Save(*verifier.DB.Ctx)
+		}
 	})
 }
