@@ -18,7 +18,7 @@ func NewVerifier(db *DB, monitor Monitor, notifier Notifier, adminToken string) 
 	}, nil
 }
 
-func (verifier *Verifier) Setup(e *echo.Echo) error {
+func (verifier *Verifier) Setup(e *echo.Group) error {
 	err := verifier.Monitor.Setup(verifier)
 	if err != nil {
 		return err

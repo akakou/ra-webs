@@ -5,9 +5,9 @@ go 1.21.9
 require (
 	entgo.io/ent v0.12.5
 	github.com/SherClockHolmes/webpush-go v1.3.0
-	github.com/akakou/ctstream v0.0.22
+	github.com/akakou/ctstream v0.0.29
 	github.com/akakou/extract-embed v0.0.1
-	github.com/akakou/go-utils v0.0.3
+	github.com/akakou/go-utils v0.0.6
 	github.com/akakou/golang-utils v0.0.1
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
 	github.com/google/certificate-transparency-go v1.2.1
