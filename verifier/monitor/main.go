@@ -15,6 +15,7 @@ import (
 )
 
 const LOG_FILE_PATH = "last.log"
+const FILE_EMPLTY = "strconv.Atoi: parsing \"\": invalid syntax"
 
 type SSLMateStream = ctcore.ConcurrentCTsStream[*ctcore.CTStream[*sslmate.SSLMateCTClient]]
 
@@ -32,28 +33,26 @@ func NewSSLMateMonitor(ctx context.Context) *SSLMateMonitor {
 }
 
 func (a *SSLMateMonitor) Setup(verifier *core.Verifier) error {
-	servers, err := verifier.DB.Client.TAServer.Query().Select(taserver.FieldDomain).All(*verifier.DB.Ctx)
+	stream, err := a.loadStream(verifier)
 	if err != nil {
 		return err
 	}
 
-	for _, server := range servers {
-		sslmate.AddByDomain(server.Domain, a.ctx, a.ctstream)
-	}
+	a.ctstream = stream
 
-	lastLogger, err := goutils.OpenIntFile(LOG_FILE_PATH)
+	lastLogger, err := a.loadFileLogger()
 	if err != nil {
 		return err
 	}
 
 	a.lastLogger = lastLogger
-	first, err := lastLogger.Restore()
 
+	first, err := a.loadFirst(lastLogger)
 	if err != nil {
 		return err
 	}
 
-	sslmate.SetFirst(*first, a.ctstream)
+	sslmate.SetFirst(first, a.ctstream)
 
 	return a.ctstream.Init()
 }
