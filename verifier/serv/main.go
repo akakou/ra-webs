@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"io"
 
+	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/verifier"
 	"github.com/akakou/ra_webs/verifier/api"
 	"github.com/akakou/ra_webs/verifier/notifier"
@@ -38,7 +39,7 @@ func InjectSWHeader(next echo.HandlerFunc) echo.HandlerFunc {
 
 func main() {
 	e := echo.New()
-	apiGroup := e.Group("/api")
+	apiGroup := e.Group(core.API_ROOT)
 
 	verifier, err := verifier.DefaultVerifier()
 	if err != nil {

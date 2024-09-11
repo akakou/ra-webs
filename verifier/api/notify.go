@@ -4,14 +4,13 @@ import (
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
-	rawebscore "github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/verifier/core"
 	"github.com/labstack/echo/v4"
 )
 
 var PostNotifierApi = goutils.EchoRoute[core.Verifier]{
 	Method: goutils.POST,
-	Path:   rawebscore.API_ROOT + "/notify",
+	Path:   "/notify",
 	F: func(verifier *core.Verifier) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			err := authenticateAdmin(verifier, c)

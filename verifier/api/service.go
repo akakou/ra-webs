@@ -4,14 +4,13 @@ import (
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
-	"github.com/akakou/ra_webs/core"
 	verifiercore "github.com/akakou/ra_webs/verifier/core"
 	"github.com/labstack/echo/v4"
 )
 
 var PostServiceByAdmin = goutils.EchoRoute[verifiercore.Verifier]{
 	Method: goutils.POST,
-	Path:   core.API_ROOT + "/service",
+	Path:   "/service",
 	F: func(verifier *verifiercore.Verifier) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			err := authenticateAdmin(verifier, c)

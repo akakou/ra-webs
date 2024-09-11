@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
-	rawebscore "github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/verifier/core"
 	"github.com/akakou/ra_webs/verifier/ent"
 	"github.com/akakou/ra_webs/verifier/ent/taserver"
@@ -13,7 +12,7 @@ import (
 
 var postSubscribeApi = goutils.EchoRoute[core.Verifier]{
 	Method: goutils.POST,
-	Path:   rawebscore.API_ROOT + "/subscription",
+	Path:   "/subscription",
 	F: func(verifier *core.Verifier) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			var data struct {
@@ -62,7 +61,7 @@ var postSubscribeApi = goutils.EchoRoute[core.Verifier]{
 func getSubscriptionKeyApi(notifier *BrowserNotifier) goutils.EchoRoute[core.Verifier] {
 	return goutils.EchoRoute[core.Verifier]{
 		Method: goutils.GET,
-		Path:   rawebscore.API_ROOT + "/subscription_key",
+		Path:   "/subscription_key",
 		F: func(verifier *core.Verifier) goutils.EchoRouteFunc {
 			return func(c echo.Context) error {
 				VapidPublicKey := notifier.VapidPublicKey

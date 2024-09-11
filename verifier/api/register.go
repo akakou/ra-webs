@@ -18,7 +18,7 @@ import (
 
 var RegisterApi = goutils.EchoRoute[verifiercore.Verifier]{
 	Method: goutils.POST,
-	Path:   core.API_ROOT + "/ta",
+	Path:   "/ta",
 	F: func(verifier *verifiercore.Verifier) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			service, err := authenticateService(verifier, c)

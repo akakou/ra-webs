@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
-	"github.com/akakou/ra_webs/core"
 	verifiercore "github.com/akakou/ra_webs/verifier/core"
 	"github.com/akakou/ra_webs/verifier/ent"
 	"github.com/akakou/ra_webs/verifier/ent/taserver"
@@ -14,7 +13,7 @@ import (
 
 var GetServerApi = goutils.EchoRoute[verifiercore.Verifier]{
 	Method: goutils.GET,
-	Path:   core.API_ROOT + "/ta",
+	Path:   "/ta",
 	F: func(verifier *verifiercore.Verifier) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			code, err := verifier.DB.Client.TAServer.Query().All(*verifier.DB.Ctx)
@@ -29,7 +28,7 @@ var GetServerApi = goutils.EchoRoute[verifiercore.Verifier]{
 
 var GetServerFromDomainApi = goutils.EchoRoute[verifiercore.Verifier]{
 	Method: goutils.GET,
-	Path:   core.API_ROOT + "/ta/:domain",
+	Path:   "/ta/:domain",
 	F: func(verifier *verifiercore.Verifier) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			domain := c.Param("domain")
