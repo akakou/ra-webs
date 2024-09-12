@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	crtshapi "github.com/akakou/crtsh"
 	ctcore "github.com/akakou/ctstream/core"
 	"github.com/akakou/ctstream/direct"
 	"github.com/akakou/ctstream/monitor/crtsh"
@@ -38,7 +39,17 @@ func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 }
 
 func (a *CrtshMonitor) Register(domain string, verifier *core.Verifier) error {
-	err := crtsh.AddByDomain(domain, context.Background(), a.ctstream)
+	entries, err := crtshapi.Fetch(domain, crtshapi.EXCLUDE_EXPIRED)
+	if err != nil {
+		return err
+	}
+
+	if len(entries) != 0 {
+		return fmt.Errorf(ERROR_FAILED_OTHER_CERTIFICATE_EXISTS)
+	}
+
+	err = crtsh.AddByDomain(domain, context.Background(), a.ctstream)
+
 	return err
 }
 
