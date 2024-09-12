@@ -1,6 +1,8 @@
 package monitor
 
 import (
+	"fmt"
+
 	"github.com/akakou/ctstream/monitor/crtsh"
 	"github.com/akakou/ra_webs/verifier/core"
 	"github.com/akakou/ra_webs/verifier/ent/taserver"
@@ -9,7 +11,7 @@ import (
 func (a *CrtshMonitor) loadStream(verifier *core.Verifier) error {
 	servers, err := verifier.DB.Client.TAServer.Query().Select(taserver.FieldDomain).All(*verifier.DB.Ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("%v:%v", ERROR_SELECT_TAS, err)
 	}
 
 	domains := []string{}
@@ -19,7 +21,7 @@ func (a *CrtshMonitor) loadStream(verifier *core.Verifier) error {
 
 	a.ctstream, err = crtsh.DefaultCTsStream(domains, a.ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("%v:%v", ERROR_FAILED_TO_NEW_CTSSTREAM, err)
 	}
 
 	return nil
