@@ -39,3 +39,4 @@ opt/domain-owner/example/example
 ta/example/private.pem
 ta/example/public.pem
 verifier/serv/last.log
+verifier/serv/first-log.txt
