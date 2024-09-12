@@ -27,7 +27,11 @@ func NewCrtshMonitor(ctx context.Context) *CrtshMonitor {
 }
 
 func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
-	a.loadStream(verifier)
+	err := a.loadStream(verifier)
+	if err != nil {
+		return err
+	}
+
 	return a.ctstream.Init()
 }
 
