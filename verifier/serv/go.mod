@@ -1,20 +1,36 @@
 module github.com/akakou/ra_webs/verifier/serv
 
-go 1.21.9
+go 1.22.4
 
 replace github.com/akakou/ra_webs/core => ../../core
 
 replace github.com/akakou/ra_webs/verifier => ../
 
 require (
+	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
 	github.com/akakou/ra_webs/verifier v0.0.0-00010101000000-000000000000
 	github.com/labstack/echo/v4 v4.12.0
 )
 
 require (
+	github.com/PuerkitoBio/goquery v1.8.0 // indirect
+	github.com/akakou/crtsh v0.0.3 // indirect
 	github.com/akakou/extract-embed v0.0.1 // indirect
-	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000 // indirect
-	github.com/akakou/sslmate-cert-search-api v0.0.14 // indirect
+	github.com/andybalholm/cascadia v1.3.1 // indirect
+	github.com/cockroachdb/errors v1.11.3 // indirect
+	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
+	github.com/cockroachdb/redact v1.1.5 // indirect
+	github.com/getsentry/sentry-go v0.27.0 // indirect
+	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
+	github.com/kr/text v0.2.0 // indirect
+	github.com/mmcdole/gofeed v1.3.0 // indirect
+	github.com/mmcdole/goxpp v1.1.1-0.20240225020742-a0c311522b23 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/rogpeppe/go-internal v1.9.0 // indirect
 )
 
 require (
@@ -22,7 +38,7 @@ require (
 	entgo.io/ent v0.12.5 // indirect
 	github.com/SherClockHolmes/webpush-go v1.3.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
-	github.com/akakou/ctstream v0.0.29 // indirect
+	github.com/akakou/ctstream v0.0.32 // indirect
 	github.com/akakou/go-utils v0.0.6 // indirect
 	github.com/akakou/golang-utils v0.0.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
