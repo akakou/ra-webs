@@ -1,6 +1,7 @@
 package verifier
 
 import (
+	"context"
 	"fmt"
 
 	goutils "github.com/akakou/go-utils"
@@ -33,15 +34,12 @@ func DefaultVerifier() (*core.Verifier, error) {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_INIT_DB, err)
 	}
 
-	monitor, err := monitor.DefaultDirectMonitor()
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", core.ERROR_CREATE_AUDIT, err)
-	}
+	monitor := monitor.NewCrtshMonitor(context.Background())
 
-	n, err := notifier.DefaultBrowserNotifier()
+	notifier, err := notifier.DefaultBrowserNotifier()
 	if err != nil {
 		return nil, err
 	}
 
-	return core.NewVerifier(db, monitor, n, adminToken)
+	return core.NewVerifier(db, monitor, notifier, adminToken)
 }

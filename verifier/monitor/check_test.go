@@ -36,7 +36,6 @@ func TestAll(t *testing.T) {
 	rawebscore.EnableDebug()
 
 	t.Run("Pass", testPass)
-	t.Run("PassNoTAServer", testPassNoTAServer)
 }
 
 func testPass(t *testing.T) {
@@ -46,31 +45,10 @@ func testPass(t *testing.T) {
 	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
 	keyBuf := x509.MarshalPKCS1PublicKey(&priv.PublicKey)
 
-	verifier.DB.Client.TAServer.Create().SetDomain("example.com").SetPublicKey(keyBuf).SetQuote("1").SetHasActivated(false).SaveX(*verifier.DB.Ctx)
+	server := verifier.DB.Client.TAServer.Create().SetDomain("example.com").SetPublicKey(keyBuf).SetQuote("1").SetHasActivated(false).SaveX(*verifier.DB.Ctx)
 	verifier.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*verifier.DB.Ctx)
 
-	err := Check(verifier, &x509.Certificate{
-		DNSNames:  []string{"example.com"},
-		PublicKey: &priv.PublicKey,
-	})
-
-	assert.NoError(t, err)
-}
-
-func testPassNoTAServer(t *testing.T) {
-	verifier := exampleVerifier(t)
-	defer verifier.DB.Close()
-
-	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
-	keyBuf := x509.MarshalPKCS1PublicKey(&priv.PublicKey)
-
-	verifier.DB.Client.TAServer.Create().SetDomain("example.com").SetPublicKey(keyBuf).SetQuote("1").SetHasActivated(true).SaveX(*verifier.DB.Ctx)
-	verifier.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*verifier.DB.Ctx)
-
-	err := Check(verifier, &x509.Certificate{
-		DNSNames:  []string{"hoge.example.com"},
-		PublicKey: &priv.PublicKey,
-	})
+	err := Check(&priv.PublicKey, server)
 
 	assert.NoError(t, err)
 }

@@ -23,7 +23,7 @@ func NotifierUpdate(domain string, verifier *Verifier) error {
 
 type Notifier interface {
 	Notify(msg []byte, domain string, verifier *Verifier) error
-	Setup(e *echo.Echo, verifier *Verifier) error // todo: fix
+	Setup(e *echo.Group, verifier *Verifier) error // todo: fix
 }
 
 const ERROR_FAILED_TO_NOTIFY = "failed to notify"

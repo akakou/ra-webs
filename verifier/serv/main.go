@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"io"
 
+	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/verifier"
 	"github.com/akakou/ra_webs/verifier/api"
 	"github.com/akakou/ra_webs/verifier/notifier"
@@ -38,12 +39,14 @@ func InjectSWHeader(next echo.HandlerFunc) echo.HandlerFunc {
 
 func main() {
 	e := echo.New()
+	apiGroup := e.Group(core.API_ROOT)
+
 	verifier, err := verifier.DefaultVerifier()
 	if err != nil {
 		panic(err)
 	}
 
-	api.Route(e, verifier)
+	api.Route(apiGroup, verifier)
 
 	viewSubFS := echo.MustSubFS(viewEmbedFiles, "views")
 	e.StaticFS("/app", viewSubFS)
@@ -55,7 +58,7 @@ func main() {
 	e.Use(InjectSWHeader)
 
 	e.Debug = true
-	err = verifier.Setup(e)
+	err = verifier.Setup(apiGroup)
 	if err != nil {
 		panic(err)
 	}
@@ -67,4 +70,3 @@ func main() {
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
-
