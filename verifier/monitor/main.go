@@ -13,9 +13,6 @@ import (
 	ctx509 "github.com/google/certificate-transparency-go/x509"
 )
 
-const LOG_FILE_PATH = "last.log"
-const FILE_EMPLTY = "strconv.Atoi: parsing \"\": invalid syntax"
-
 type CrtshStream = ctcore.ConcurrentCTsStream[*ctcore.CTStream[*crtsh.CrtshCTClient]]
 
 type CrtshMonitor struct {
@@ -30,7 +27,11 @@ func NewCrtshMonitor(ctx context.Context) *CrtshMonitor {
 }
 
 func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
-	a.loadStream(verifier)
+	err := a.loadStream(verifier)
+	if err != nil {
+		return err
+	}
+
 	return a.ctstream.Init()
 }
 
