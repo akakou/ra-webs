@@ -39,7 +39,7 @@ func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 }
 
 func (a *CrtshMonitor) Register(domain string, verifier *core.Verifier) error {
-	entries, err := crtshapi.Fetch(domain, "expired")
+	entries, err := crtshapi.Fetch(domain, crtshapi.EXCLUDE_EXPIRED)
 	if err != nil {
 		return err
 	}
