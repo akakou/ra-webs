@@ -32,13 +32,28 @@ var RegisterApi = goutils.EchoRoute[verifiercore.Verifier]{
 				return err
 			}
 
-			code, err := RegisterCode(&req.CodeRequest, service, verifier)
+			commitId, uniqueId, err := BuildCode(req)
+			if err != nil {
+				return err
+			}
 
+			err = CheckValidity(uniqueId, req, service, verifier)
 			if err != nil {
 				return err
 			}
 
 			err = verifier.Monitor.Register(req.Domain, verifier)
+			if err != nil {
+				return err
+			}
+
+			err = verifiercore.NotifierUpdate(req.Domain, verifier)
+			if err != nil {
+				return err
+			}
+
+			code, err := RegisterCode(commitId, uniqueId, &req.CodeRequest, service, verifier)
+
 			if err != nil {
 				return err
 			}
@@ -54,18 +69,41 @@ var RegisterApi = goutils.EchoRoute[verifiercore.Verifier]{
 	},
 }
 
-func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Service, verifier *verifiercore.Verifier) error {
+func BuildCode(req core.RegisterRequest) (string, []byte, error) {
+	sha256 := sha256.Sum256([]byte(req.Repository))
+	folderName := fmt.Sprintf("%v-%x", time.Now().Unix(), sha256)
+
+	commitId, uniqueIdString, err := builder.Build(folderName, req.Repository)
+	if err != nil {
+		return "", []byte{}, err
+	}
+
+	uniqueId, _ := hex.DecodeString(uniqueIdString)
+
+	return commitId, uniqueId, nil
+}
+
+func CheckValidity(uniqueId []byte, req core.RegisterRequest, service *ent.Service, verifier *verifiercore.Verifier) error {
 	report, err := core.VerifyServer(req.Quote, req.PublicKey, service.Token)
 
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Unique ID: %x == %x\n", report.UniqueID, code.UniqueID)
-	if !reflect.DeepEqual(report.UniqueID, code.UniqueID) {
+	fmt.Printf("Unique ID: %x == %x\n", report.UniqueID, uniqueId)
+	if !reflect.DeepEqual(report.UniqueID, uniqueId) {
 		return fmt.Errorf(ERROR_QUOTE_INVALID)
 	}
 
+	err = verifier.Monitor.PreCheck(req.Domain, verifier)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Service, verifier *verifiercore.Verifier) error {
 	taServerCreate := verifier.DB.Client.TAServer.
 		Create().
 		SetDomain(req.Domain).
@@ -75,12 +113,7 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 		SetQuote(req.Quote).
 		SetHasActivated(false)
 
-	err = verifiercore.NotifierUpdate(req.Domain, verifier)
-	if err != nil {
-		return err
-	}
-
-	_, err = taServerCreate.Save(*verifier.DB.Ctx)
+	_, err := taServerCreate.Save(*verifier.DB.Ctx)
 	if err != nil {
 		return err
 	}
@@ -88,17 +121,7 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 	return nil
 }
 
-func RegisterCode(req *core.CodeRequest, service *ent.Service, verifier *verifiercore.Verifier) (*ent.TACode, error) {
-	sha256 := sha256.Sum256([]byte(req.Repository))
-	folderName := fmt.Sprintf("%v-%x", time.Now().Unix(), sha256)
-
-	commitId, uniqueIdString, err := builder.Build(folderName, req.Repository)
-	if err != nil {
-		return nil, err
-	}
-
-	uniqueId, _ := hex.DecodeString(uniqueIdString)
-
+func RegisterCode(commitId string, uniqueId []byte, req *core.CodeRequest, service *ent.Service, verifier *verifiercore.Verifier) (*ent.TACode, error) {
 	codeCreate := verifier.DB.Client.TACode.
 		Create().
 		SetRepository(req.Repository).
