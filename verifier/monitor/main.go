@@ -50,7 +50,7 @@ func (a *CrtshMonitor) PreCheck(domain string, verifier *core.Verifier) error {
 	}
 
 	resp, err := crtapi.Fetch(domain, crtapi.EXCLUDE_EXPIRED)
-	if err.Error() != ctcore.ERROR_NOT_FOUND {
+	if err != nil {
 		return err
 	}
 
