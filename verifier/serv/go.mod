@@ -14,7 +14,7 @@ require (
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
-	github.com/akakou/crtsh v0.0.3 // indirect
+	github.com/akakou/crtsh v0.0.4 // indirect
 	github.com/akakou/extract-embed v0.0.1 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/cockroachdb/errors v1.11.3 // indirect
@@ -38,7 +38,7 @@ require (
 	entgo.io/ent v0.12.5 // indirect
 	github.com/SherClockHolmes/webpush-go v1.3.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
-	github.com/akakou/ctstream v0.0.32 // indirect
+	github.com/akakou/ctstream v0.0.33 // indirect
 	github.com/akakou/go-utils v0.0.6 // indirect
 	github.com/akakou/golang-utils v0.0.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect

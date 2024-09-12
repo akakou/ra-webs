@@ -5,7 +5,8 @@ go 1.22.4
 require (
 	entgo.io/ent v0.12.5
 	github.com/SherClockHolmes/webpush-go v1.3.0
-	github.com/akakou/ctstream v0.0.32
+	github.com/akakou/crtsh v0.0.4
+	github.com/akakou/ctstream v0.0.33
 	github.com/akakou/extract-embed v0.0.1
 	github.com/akakou/go-utils v0.0.6
 	github.com/akakou/golang-utils v0.0.1
@@ -22,8 +23,6 @@ require (
 	ariga.io/atlas v0.14.1-0.20230918065911-83ad451a4935 // indirect
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
-	github.com/akakou/crtsh v0.0.3 // indirect
-	github.com/akakou/sslmate-cert-search-api v0.0.14 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/cockroachdb/errors v1.11.3 // indirect

@@ -10,10 +10,10 @@ github.com/SherClockHolmes/webpush-go v1.3.0 h1:CAu3FvEE9QS4drc3iKNgpBWFfGqNthKl
 github.com/SherClockHolmes/webpush-go v1.3.0/go.mod h1:AxRHmJuYwKGG1PVgYzToik1lphQvDnqFYDqimHvwhIw=
 github.com/agext/levenshtein v1.2.1 h1:QmvMAjj2aEICytGiWzmxoE0x2KZvE0fvmqMOfy2tjT8=
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
-github.com/akakou/crtsh v0.0.3 h1:fwrI1thAO0QC6DO3DGzX+ba309E5fyf+n0IU8TleJgw=
-github.com/akakou/crtsh v0.0.3/go.mod h1:0oFospryauw/FDhIOqsRcfxDjlW6u2AJqLlU3G63qIc=
-github.com/akakou/ctstream v0.0.32 h1:VNOY/GwlC85p0ZTttLhlxSge2guMuROx36cp58BQhu0=
-github.com/akakou/ctstream v0.0.32/go.mod h1:Iwgvd1SopEr6+HEEd3QjID4nXdW752M771/tfWkop5A=
+github.com/akakou/crtsh v0.0.4 h1:GGpY8XMjRwTNl6KdHYSJDbmN6napLb0+YN+heNoqrC8=
+github.com/akakou/crtsh v0.0.4/go.mod h1:0oFospryauw/FDhIOqsRcfxDjlW6u2AJqLlU3G63qIc=
+github.com/akakou/ctstream v0.0.33 h1:fE77MMLsjnchUxnqH5j7SP6iRB8Cj1aJsS2kxQRyPC0=
+github.com/akakou/ctstream v0.0.33/go.mod h1:uV9Gcb5w+KKsjC7KbY9zsLey9R56ieUTjHXFNZccF/A=
 github.com/akakou/extract-embed v0.0.1 h1:ZyD2z0PNqJ53OHmD1cgMFic0wF6t8Yu1a7PcSXtqlnQ=
 github.com/akakou/extract-embed v0.0.1/go.mod h1:K6bU3dJXVAMp5NY13kABMAPO3+n/q2mApVBayLhjbbI=
 github.com/akakou/go-utils v0.0.6 h1:8KiikVZki+g/kTWoxlSRqAasif3H+oMyqcYv+KNBnDE=
