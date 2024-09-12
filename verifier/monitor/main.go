@@ -9,6 +9,7 @@ import (
 	ctcore "github.com/akakou/ctstream/core"
 	"github.com/akakou/ctstream/direct"
 	"github.com/akakou/ctstream/monitor/crtsh"
+	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/verifier/core"
 	"github.com/akakou/ra_webs/verifier/ent"
 	"github.com/akakou/ra_webs/verifier/ent/taserver"
@@ -18,8 +19,10 @@ import (
 type CrtshStream = ctcore.CTStream[*ctcore.CTClients[*crtsh.CrtshCTClient]]
 
 type CrtshMonitor struct {
-	ctstream *CrtshStream
-	ctx      context.Context
+	ctstream   *CrtshStream
+	ctx        context.Context
+	lastLogger *goutils.File[int]
+	first      int
 }
 
 func NewCrtshMonitor(ctx context.Context) *CrtshMonitor {
@@ -31,6 +34,16 @@ func NewCrtshMonitor(ctx context.Context) *CrtshMonitor {
 
 func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 	err := a.loadStream(verifier)
+	if err != nil {
+		return err
+	}
+
+	err = a.loadFileLogger()
+	if err != nil {
+		return err
+	}
+
+	err = a.loadFirst()
 	if err != nil {
 		return err
 	}
@@ -89,6 +102,11 @@ func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 
 		option := params.(*crtsh.CrtshCTParams)
 		domain := option.Client.Domain
+
+		if option.ID > a.first {
+			a.first = option.ID
+			a.lastLogger.Store(&a.first)
+		}
 
 		serv, err := verifier.DB.Client.TAServer.
 			Query().
