@@ -6,8 +6,7 @@ import (
 
 	ctcore "github.com/akakou/ctstream/core"
 	"github.com/akakou/ctstream/direct"
-	"github.com/akakou/ctstream/monitor/sslmate"
-	goutils "github.com/akakou/go-utils"
+	"github.com/akakou/ctstream/monitor/crtsh"
 	"github.com/akakou/ra_webs/verifier/core"
 	"github.com/akakou/ra_webs/verifier/ent"
 	"github.com/akakou/ra_webs/verifier/ent/taserver"
@@ -17,52 +16,30 @@ import (
 const LOG_FILE_PATH = "last.log"
 const FILE_EMPLTY = "strconv.Atoi: parsing \"\": invalid syntax"
 
-type SSLMateStream = ctcore.ConcurrentCTsStream[*ctcore.CTStream[*sslmate.SSLMateCTClient]]
+type CrtshStream = ctcore.ConcurrentCTsStream[*ctcore.CTStream[*crtsh.CrtshCTClient]]
 
-type SSLMateMonitor struct {
-	ctstream   *SSLMateStream
-	lastLogger *goutils.File[int]
-	ctx        context.Context
+type CrtshMonitor struct {
+	ctstream *CrtshStream
+	ctx      context.Context
 }
 
-func NewSSLMateMonitor(ctx context.Context) *SSLMateMonitor {
-	return &SSLMateMonitor{
+func NewCrtshMonitor(ctx context.Context) *CrtshMonitor {
+	return &CrtshMonitor{
 		ctx: ctx,
 	}
-
 }
 
-func (a *SSLMateMonitor) Setup(verifier *core.Verifier) error {
-	stream, err := a.loadStream(verifier)
-	if err != nil {
-		return err
-	}
-
-	a.ctstream = stream
-
-	lastLogger, err := a.loadFileLogger(verifier)
-	if err != nil {
-		return err
-	}
-
-	a.lastLogger = lastLogger
-
-	first, err := a.loadFirst(lastLogger)
-	if err != nil {
-		return err
-	}
-
-	sslmate.SetFirst(first, a.ctstream)
-
+func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
+	a.loadStream(verifier)
 	return a.ctstream.Init()
 }
 
-func (a *SSLMateMonitor) Register(domain string, verifier *core.Verifier) error {
-	err := sslmate.AddByDomain(domain, context.Background(), a.ctstream)
+func (a *CrtshMonitor) Register(domain string, verifier *core.Verifier) error {
+	err := crtsh.AddByDomain(domain, context.Background(), a.ctstream)
 	return err
 }
 
-func (a *SSLMateMonitor) Run(verifier *core.Verifier) {
+func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 	a.ctstream.Run(func(cert *ctx509.Certificate, i int, params any, err error) {
 		if err == nil {
 		} else if err.Error() == direct.ERROR_FAILED_TO_NEW {
@@ -72,7 +49,7 @@ func (a *SSLMateMonitor) Run(verifier *core.Verifier) {
 			return
 		}
 
-		option := params.(sslmate.SSLMateCTParams)
+		option := params.(*crtsh.CrtshCTParams)
 		domain := option.Client.Domain
 
 		serv, err := verifier.DB.Client.TAServer.
@@ -84,13 +61,6 @@ func (a *SSLMateMonitor) Run(verifier *core.Verifier) {
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			return
-		}
-
-		last := sslmate.GetFirst(a.ctstream)
-
-		err = a.lastLogger.Store(&last)
-		if err != nil {
-			fmt.Printf("Error: %v\n", err)
 		}
 
 		err = Check(cert.PublicKey, serv)
