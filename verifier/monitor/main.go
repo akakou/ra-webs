@@ -3,6 +3,7 @@ package monitor
 import (
 	"context"
 	"fmt"
+	"time"
 
 	ctcore "github.com/akakou/ctstream/core"
 	"github.com/akakou/ctstream/direct"
@@ -21,6 +22,7 @@ type CrtshMonitor struct {
 }
 
 func NewCrtshMonitor(ctx context.Context) *CrtshMonitor {
+	ctcore.DefaultEpochSleep = 10 * time.Second
 	return &CrtshMonitor{
 		ctx: ctx,
 	}
