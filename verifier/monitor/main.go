@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	crtshapi "github.com/akakou/crtsh"
+	crtapi "github.com/akakou/crtsh"
 	ctcore "github.com/akakou/ctstream/core"
 	"github.com/akakou/ctstream/direct"
 	"github.com/akakou/ctstream/monitor/crtsh"
@@ -15,7 +15,7 @@ import (
 	ctx509 "github.com/google/certificate-transparency-go/x509"
 )
 
-type CrtshStream = ctcore.ConcurrentCTsStream[*ctcore.CTStream[*crtsh.CrtshCTClient]]
+type CrtshStream = ctcore.CTStream[*ctcore.CTClients[*crtsh.CrtshCTClient]]
 
 type CrtshMonitor struct {
 	ctstream *CrtshStream
@@ -38,17 +38,41 @@ func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 	return a.ctstream.Init()
 }
 
-func (a *CrtshMonitor) Register(domain string, verifier *core.Verifier) error {
-	entries, err := crtshapi.Fetch(domain, crtshapi.EXCLUDE_EXPIRED)
-	if err != nil {
+func (a *CrtshMonitor) PreCheck(domain string, verifier *core.Verifier) error {
+	_, _, err := crtsh.SelectByDomain(domain, a.ctstream.Client)
+
+	if err == nil {
+		return nil
+	}
+
+	if err.Error() != ctcore.ERROR_NOT_FOUND {
 		return err
 	}
 
-	if len(entries) != 0 {
+	resp, err := crtapi.Fetch(domain, crtapi.EXCLUDE_EXPIRED)
+	if err.Error() != ctcore.ERROR_NOT_FOUND {
+		return err
+	}
+
+	if len(resp) != 0 {
 		return fmt.Errorf(ERROR_FAILED_OTHER_CERTIFICATE_EXISTS)
 	}
 
-	err = crtsh.AddByDomain(domain, context.Background(), a.ctstream)
+	return nil
+
+}
+
+func (a *CrtshMonitor) Register(domain string, verifier *core.Verifier) error {
+	client, _, err := crtsh.AddByDomain(domain, a.ctstream.Client)
+	if err != nil {
+		return nil
+	}
+
+	err = client.Init()
+
+	if err != nil {
+		return nil
+	}
 
 	return err
 }
