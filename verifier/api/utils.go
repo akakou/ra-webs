@@ -8,5 +8,5 @@ func checkTAValiditiy(servs []*ent.TAServer) bool {
 		isValid = isValid && len(serv.Edges.Violation) == 0
 	}
 
-	return isValid && servs[0].HasActivated && len(servs) > 0
+	return isValid && len(servs) > 0 && servs[0].HasActivated
 }
