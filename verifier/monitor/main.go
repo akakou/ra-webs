@@ -6,7 +6,7 @@ import (
 
 	ctcore "github.com/akakou/ctstream/core"
 	"github.com/akakou/ctstream/direct"
-	"github.com/akakou/ctstream/thirdparty/sslmate"
+	"github.com/akakou/ctstream/monitor/sslmate"
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/verifier/core"
 	"github.com/akakou/ra_webs/verifier/ent"
@@ -40,7 +40,7 @@ func (a *SSLMateMonitor) Setup(verifier *core.Verifier) error {
 
 	a.ctstream = stream
 
-	lastLogger, err := a.loadFileLogger()
+	lastLogger, err := a.loadFileLogger(verifier)
 	if err != nil {
 		return err
 	}

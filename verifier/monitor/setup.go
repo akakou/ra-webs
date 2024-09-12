@@ -3,7 +3,7 @@ package monitor
 import (
 	"fmt"
 
-	"github.com/akakou/ctstream/thirdparty/sslmate"
+	"github.com/akakou/ctstream/monitor/sslmate"
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/verifier/core"
 	"github.com/akakou/ra_webs/verifier/ent/taserver"

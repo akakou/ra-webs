@@ -1,11 +1,11 @@
 module github.com/akakou/ra_webs/verifier
 
-go 1.21.9
+go 1.22.4
 
 require (
 	entgo.io/ent v0.12.5
 	github.com/SherClockHolmes/webpush-go v1.3.0
-	github.com/akakou/ctstream v0.0.29
+	github.com/akakou/ctstream v0.0.32
 	github.com/akakou/extract-embed v0.0.1
 	github.com/akakou/go-utils v0.0.6
 	github.com/akakou/golang-utils v0.0.1
