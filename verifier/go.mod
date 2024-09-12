@@ -6,7 +6,7 @@ require (
 	entgo.io/ent v0.12.5
 	github.com/SherClockHolmes/webpush-go v1.3.0
 	github.com/akakou/crtsh v0.0.4
-	github.com/akakou/ctstream v0.0.34
+	github.com/akakou/ctstream v0.0.36
 	github.com/akakou/extract-embed v0.0.1
 	github.com/akakou/go-utils v0.0.6
 	github.com/akakou/golang-utils v0.0.1
