@@ -48,7 +48,13 @@ func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 		return err
 	}
 
-	return a.ctstream.Init()
+	err = a.ctstream.Init()
+
+	if err != nil {
+		return nil
+	}
+
+	return err
 }
 
 func (a *CrtshMonitor) PreCheck(domain string, exist bool, verifier *core.Verifier) error {
