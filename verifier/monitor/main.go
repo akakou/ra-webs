@@ -51,15 +51,9 @@ func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 	return a.ctstream.Init()
 }
 
-func (a *CrtshMonitor) PreCheck(domain string, verifier *core.Verifier) error {
-	_, _, err := crtsh.SelectByDomain(domain, a.ctstream.Client)
-
-	if err == nil {
+func (a *CrtshMonitor) PreCheck(domain string, exist bool, verifier *core.Verifier) error {
+	if exist {
 		return nil
-	}
-
-	if err.Error() != ctcore.ERROR_NOT_FOUND {
-		return err
 	}
 
 	resp, err := crtapi.Fetch(domain, crtapi.EXCLUDE_EXPIRED)
@@ -75,7 +69,11 @@ func (a *CrtshMonitor) PreCheck(domain string, verifier *core.Verifier) error {
 
 }
 
-func (a *CrtshMonitor) Register(domain string, verifier *core.Verifier) error {
+func (a *CrtshMonitor) Register(domain string, exist bool, verifier *core.Verifier) error {
+	if exist {
+		return nil
+	}
+
 	client, _, err := crtsh.AddByDomain(domain, a.ctstream.Client)
 	if err != nil {
 		return nil
