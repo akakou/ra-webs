@@ -8,7 +8,7 @@ require (
 	github.com/akakou/crtsh v0.0.4
 	github.com/akakou/ctstream v0.0.36
 	github.com/akakou/extract-embed v0.0.1
-	github.com/akakou/go-utils v0.0.6
+	github.com/akakou/go-utils v0.0.7
 	github.com/akakou/golang-utils v0.0.1
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
 	github.com/google/certificate-transparency-go v1.2.1
