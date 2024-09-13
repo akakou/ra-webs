@@ -2,10 +2,13 @@ package builder
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"embed"
+	"encoding/hex"
 	"fmt"
 	"os/exec"
 	"strings"
+	"time"
 
 	extractembed "github.com/akakou/extract-embed"
 )
@@ -31,7 +34,29 @@ const UNIQUE_ID_INDEX = 1
 const BRANCH = "for-check"
 const EXECUTABLE = "example"
 
-func build(name, repo string) (string, string, error) {
+type BuildOutput struct {
+	CommitId string
+	UniqueId []byte
+}
+
+func build(repo string) (*BuildOutput, error) {
+	sha256 := sha256.Sum256([]byte(repo))
+	folderName := fmt.Sprintf("%v-%x", time.Now().Unix(), sha256)
+
+	commitId, uniqueIdString, err := buildCode(folderName, repo)
+	if err != nil {
+		return nil, err
+	}
+
+	uniqueId, _ := hex.DecodeString(uniqueIdString)
+
+	return &BuildOutput{
+		CommitId: commitId,
+		UniqueId: uniqueId,
+	}, nil
+}
+
+func buildCode(name, repo string) (string, string, error) {
 	extractembed.Extract(BASE_REPO_PATH, &embedFiles)
 
 	var outBuf, errBuf bytes.Buffer

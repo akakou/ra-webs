@@ -1,12 +1,9 @@
 package api
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"net/http"
 	"reflect"
-	"time"
 
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra_webs/core"
@@ -33,38 +30,17 @@ var RegisterApi = goutils.EchoRoute[verifiercore.Verifier]{
 				return err
 			}
 
-			exists, err := CheckDomainExist(req.Domain, verifier)
+			exists, err := DomainExist(req.Domain, verifier)
 			if err != nil {
 				return err
 			}
 
-			commitId, uniqueId, err := BuildCode(req)
+			output, err := builder.Build(req.Repository)
 			if err != nil {
 				return err
 			}
 
-			err = CheckValidity(uniqueId, req, exists, service, verifier)
-			if err != nil {
-				return err
-			}
-
-			err = verifier.Monitor.Register(req.Domain, exists, verifier)
-			if err != nil {
-				return err
-			}
-
-			err = verifiercore.NotifierUpdate(req.Domain, verifier)
-			if err != nil {
-				return err
-			}
-
-			code, err := RegisterCode(commitId, uniqueId, &req.CodeRequest, service, verifier)
-
-			if err != nil {
-				return err
-			}
-
-			err = RegisterServer(&req.ServerRequest, code, service, verifier)
+			err = CheckValidity(output.UniqueId, req, exists, service, verifier)
 			if err != nil {
 				return err
 			}
@@ -75,18 +51,14 @@ var RegisterApi = goutils.EchoRoute[verifiercore.Verifier]{
 	},
 }
 
-func BuildCode(req core.RegisterRequest) (string, []byte, error) {
-	sha256 := sha256.Sum256([]byte(req.Repository))
-	folderName := fmt.Sprintf("%v-%x", time.Now().Unix(), sha256)
+func DomainExist(domain string, verifier *verifiercore.Verifier) (bool, error) {
+	exists, err := verifier.DB.Client.TAServer.Query().Where(taserver.Domain(domain)).Exist(*verifier.DB.Ctx)
 
-	commitId, uniqueIdString, err := builder.Build(folderName, req.Repository)
 	if err != nil {
-		return "", []byte{}, err
+		return exists, err
 	}
 
-	uniqueId, _ := hex.DecodeString(uniqueIdString)
-
-	return commitId, uniqueId, nil
+	return exists, nil
 }
 
 func CheckValidity(uniqueId []byte, req core.RegisterRequest, exist bool, service *ent.Service, verifier *verifiercore.Verifier) error {
@@ -102,6 +74,31 @@ func CheckValidity(uniqueId []byte, req core.RegisterRequest, exist bool, servic
 	}
 
 	err = verifier.Monitor.PreCheck(req.Domain, exist, verifier)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func Register(req *core.RegisterRequest, output *builder.BuildOutput, exist bool, service *ent.Service, verifier *verifiercore.Verifier) error {
+	err := verifier.Monitor.Register(req.Domain, exist, verifier)
+	if err != nil {
+		return err
+	}
+
+	err = verifiercore.NotifierUpdate(req.Domain, verifier)
+	if err != nil {
+		return err
+	}
+
+	code, err := RegisterCode(output, &req.CodeRequest, service, verifier)
+
+	if err != nil {
+		return err
+	}
+
+	err = RegisterServer(&req.ServerRequest, code, service, verifier)
 	if err != nil {
 		return err
 	}
@@ -127,12 +124,12 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 	return nil
 }
 
-func RegisterCode(commitId string, uniqueId []byte, req *core.CodeRequest, service *ent.Service, verifier *verifiercore.Verifier) (*ent.TACode, error) {
+func RegisterCode(output *builder.BuildOutput, req *core.CodeRequest, service *ent.Service, verifier *verifiercore.Verifier) (*ent.TACode, error) {
 	codeCreate := verifier.DB.Client.TACode.
 		Create().
 		SetRepository(req.Repository).
-		SetCommitID(commitId).
-		SetUniqueID(uniqueId).
+		SetCommitID(output.CommitId).
+		SetUniqueID(output.UniqueId).
 		SetIsActive(false).
 		SetService(service)
 
@@ -143,14 +140,4 @@ func RegisterCode(commitId string, uniqueId []byte, req *core.CodeRequest, servi
 	}
 
 	return code, nil
-}
-
-func CheckDomainExist(domain string, verifier *verifiercore.Verifier) (bool, error) {
-	exists, err := verifier.DB.Client.TAServer.Query().Where(taserver.Domain(domain)).Exist(*verifier.DB.Ctx)
-
-	if err != nil {
-		return exists, err
-	}
-
-	return exists, nil
 }
