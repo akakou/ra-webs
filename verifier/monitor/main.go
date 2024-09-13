@@ -103,7 +103,7 @@ func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 		option := params.(*crtsh.CrtshCTParams)
 		domain := option.Client.Domain
 
-		fmt.Printf("crtid: %v, domain: %v\n", option.ID, domain)
+		fmt.Printf("[received] crtid: %v, domain: %v\n", option.ID, domain)
 
 		if option.ID > a.first {
 			a.first = option.ID
@@ -115,6 +115,8 @@ func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 			Where(taserver.DomainEQ(domain)).
 			Order(ent.Desc(taserver.FieldID)).
 			First(*verifier.DB.Ctx)
+
+		fmt.Printf("[last] dbid: %v, domain: %v\n", serv.ID, domain)
 
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
