@@ -58,3 +58,9 @@ func (a *CrtshMonitor) loadFirst() error {
 	fmt.Printf("First: %v\n", *first)
 	return nil
 }
+
+func (a *CrtshMonitor) loadFirstToClient() {
+	for _, c := range a.ctstream.Client.Clients {
+		c.ID = a.first
+	}
+}

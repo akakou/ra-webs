@@ -48,6 +48,8 @@ func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 		return err
 	}
 
+	a.loadFirstToClient()
+
 	err = a.ctstream.Init()
 
 	if err != nil {
