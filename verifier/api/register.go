@@ -13,6 +13,7 @@ import (
 	"github.com/akakou/ra_webs/verifier/builder"
 	verifiercore "github.com/akakou/ra_webs/verifier/core"
 	"github.com/akakou/ra_webs/verifier/ent"
+	"github.com/akakou/ra_webs/verifier/ent/taserver"
 	"github.com/labstack/echo/v4"
 )
 
@@ -32,17 +33,22 @@ var RegisterApi = goutils.EchoRoute[verifiercore.Verifier]{
 				return err
 			}
 
+			exists, err := CheckDomainExist(req.Domain, verifier)
+			if err != nil {
+				return err
+			}
+
 			commitId, uniqueId, err := BuildCode(req)
 			if err != nil {
 				return err
 			}
 
-			err = CheckValidity(uniqueId, req, service, verifier)
+			err = CheckValidity(uniqueId, req, exists, service, verifier)
 			if err != nil {
 				return err
 			}
 
-			err = verifier.Monitor.Register(req.Domain, verifier)
+			err = verifier.Monitor.Register(req.Domain, exists, verifier)
 			if err != nil {
 				return err
 			}
@@ -83,7 +89,7 @@ func BuildCode(req core.RegisterRequest) (string, []byte, error) {
 	return commitId, uniqueId, nil
 }
 
-func CheckValidity(uniqueId []byte, req core.RegisterRequest, service *ent.Service, verifier *verifiercore.Verifier) error {
+func CheckValidity(uniqueId []byte, req core.RegisterRequest, exist bool, service *ent.Service, verifier *verifiercore.Verifier) error {
 	report, err := core.VerifyServer(req.Quote, req.PublicKey, service.Token)
 
 	if err != nil {
@@ -95,7 +101,7 @@ func CheckValidity(uniqueId []byte, req core.RegisterRequest, service *ent.Servi
 		return fmt.Errorf(ERROR_QUOTE_INVALID)
 	}
 
-	err = verifier.Monitor.PreCheck(req.Domain, verifier)
+	err = verifier.Monitor.PreCheck(req.Domain, exist, verifier)
 	if err != nil {
 		return err
 	}
@@ -137,4 +143,14 @@ func RegisterCode(commitId string, uniqueId []byte, req *core.CodeRequest, servi
 	}
 
 	return code, nil
+}
+
+func CheckDomainExist(domain string, verifier *verifiercore.Verifier) (bool, error) {
+	exists, err := verifier.DB.Client.TAServer.Query().Where(taserver.Domain(domain)).Exist(*verifier.DB.Ctx)
+
+	if err != nil {
+		return exists, err
+	}
+
+	return exists, nil
 }
