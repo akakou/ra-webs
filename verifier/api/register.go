@@ -45,6 +45,11 @@ var RegisterApi = goutils.EchoRoute[verifiercore.Verifier]{
 				return err
 			}
 
+			err = Register(&req, output, exists, service, verifier)
+			if err != nil {
+				return err
+			}
+
 			return c.String(http.StatusOK, "ok")
 
 		}
