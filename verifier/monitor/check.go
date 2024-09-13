@@ -18,6 +18,7 @@ func Check(pk interface{}, serv *ent.TAServer) error {
 	}
 
 	publicKey := x509.MarshalPKCS1PublicKey(unmarshaledPublicKey)
+	fmt.Printf("compireing public key:\n%v\n!=%v\n\n", serv.PublicKey, publicKey)
 
 	if !bytes.Equal(serv.PublicKey, publicKey) {
 		return fmt.Errorf("%v: %v != %v", ERROR_PUBLIC_KEY_NOT_MATCH, serv.PublicKey, publicKey)

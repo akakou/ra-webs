@@ -103,6 +103,8 @@ func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 		option := params.(*crtsh.CrtshCTParams)
 		domain := option.Client.Domain
 
+		fmt.Printf("crtid: %v, domain: %v\n", option.ID, domain)
+
 		if option.ID > a.first {
 			a.first = option.ID
 			a.lastLogger.Store(&a.first)
