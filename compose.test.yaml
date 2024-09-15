@@ -1,0 +1,46 @@
+version: '3'
+services:
+  ta_example:
+    tty: true
+    build: ./docker
+    network_mode: host
+    volumes:
+      - ./ta:/ta
+      - ./core:/core
+      - ./test:/test
+      - /dev:/dev
+    working_dir: /ta/example
+    command: bash -c 'mount -o remount,exec /dev && ego-go build -buildvcs=false -trimpath=true && ego sign example && source /test/issue_service.sh && ego run example'
+    privileged: true
+    environment:
+      - OE_SIMULATION=0
+    env_file:
+      - test/env/ta.env
+      - test/env/common.env
+    profiles:
+      - ta
+
+  verifier:
+    build: ./docker
+    volumes:
+      - ./verifier:/verifier
+      - ./core:/core
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /verifier/serv
+    command: bash -c 'go mod tidy && go run main.go'
+    env_file:
+      - test/env/verifier.env
+      - test/env/common.env
+    privileged: true
+    tty: true
+    profiles:
+      - verifier
+
+  tunnel:
+    restart: unless-stopped
+    image: cloudflare/cloudflared
+    command: tunnel --url http://verifier:8080 
+    env_file:
+      - test/env/tunnel.env
+    profiles:
+      - verifier
