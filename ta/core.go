@@ -31,7 +31,7 @@ func DefaultConfig() (*TAConfig, error) {
 	repository := os.Getenv("RA_WEBS_TA_REPOSITORY")
 	domain := os.Getenv("RA_WEBS_TA_DOMAIN")
 	email := os.Getenv("RA_WEBS_SERVICE_EMAIL")
-	verifierBase := os.Getenv("RA_WEBS_VERIFIER_BASES")
+	verifierBaseEnv := os.Getenv("RA_WEBS_VERIFIER_BASES")
 
 	if token == "" {
 		return nil, fmt.Errorf("%v", ERROR_TOKEN_NOT_SET)
@@ -45,19 +45,17 @@ func DefaultConfig() (*TAConfig, error) {
 		return nil, fmt.Errorf("%v", ERROR_EMAIL_NOT_SET)
 	}
 
-	verifier := []string{}
-	if verifierBase == "" {
-		verifier = []string{"http://localhost" + core.VerifierPort}
-		fmt.Printf("RA_WEBS_VERIFIER_BASES is not set: so use %v\n", verifierBase)
-	} else {
-		verifier = strings.Split(verifierBase, ",")
+	if verifierBaseEnv == "" {
+		verifierBaseEnv = "http://localhost" + core.VerifierPort
+		fmt.Printf("RA_WEBS_VERIFIER_BASES is not set: so use %v\n", verifierBaseEnv)
 	}
+	verifiers := strings.Split(verifierBaseEnv, ",")
 
 	return &TAConfig{
 		Token:      token,
 		Repository: repository,
 		Domain:     domain,
-		Verifiers:  verifier,
+		Verifiers:  verifiers,
 	}, nil
 }
 
