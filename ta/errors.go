@@ -12,5 +12,5 @@ const (
 	ERROR_TOKEN_NOT_SET         = "failed to read RA_WEBS_SERVICE_TOKEN"
 	ERROR_DOMAIN_NOT_SET        = "failed to read RA_WEBS_TA_DOMAIN"
 	ERROR_EMAIL_NOT_SET         = "failed to read RA_WEBS_SERVICE_EMAIL"
-	ERROR_VERIFIER_BASE_NOT_SET = "failed to read RA_WEBS_VERIFIER_BASE"
+	ERROR_VERIFIER_BASE_NOT_SET = "failed to read RA_WEBS_VERIFIER_BASES"
 )
