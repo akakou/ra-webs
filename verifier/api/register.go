@@ -135,7 +135,7 @@ func RegisterCode(output *builder.BuildOutput, req *core.CodeRequest, service *e
 		SetRepository(req.Repository).
 		SetCommitID(output.CommitId).
 		SetUniqueID(output.UniqueId).
-		SetIsActive(false).
+		SetIsActive(true).
 		SetService(service)
 
 	code, err := codeCreate.Save(*verifier.DB.Ctx)
