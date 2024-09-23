@@ -16,7 +16,23 @@ import (
 const WAIT = 3
 const REGISTER_PATH = "/api/ta"
 
-func (ta *TA) Register() (string, error) {
+func (ta *TA) Register() (map[string]string, error) {
+	msgs := map[string]string{}
+
+	for _, verifierBase := range ta.config.Verifiers {
+		res, err := ta.registerOne(verifierBase)
+		msgs[verifierBase] = res
+
+		if err != nil {
+			return msgs, err
+		}
+
+	}
+
+	return msgs, nil
+}
+
+func (ta *TA) registerOne(verifierBase string) (string, error) {
 	publicKey := ta.privateKey.Public()
 	keyBin := x509.MarshalPKCS1PublicKey(publicKey.(*rsa.PublicKey))
 
@@ -36,16 +52,16 @@ func (ta *TA) Register() (string, error) {
 		},
 	}
 
-	return ta.post(REGISTER_PATH, reqBody)
+	return ta.post(verifierBase, REGISTER_PATH, reqBody)
 }
 
-func (ta *TA) post(path string, reqBody any) (string, error) {
+func (ta *TA) post(verifierBase, path string, reqBody any) (string, error) {
 	body, err := json.Marshal(reqBody)
 	if err != nil {
 		return "", err
 	}
 
-	u, err := url.Parse(ta.config.Verifier)
+	u, err := url.Parse(verifierBase)
 	if err != nil {
 		return "", fmt.Errorf("%v: %v", ERROR_VERIFIER_BASE_PARSE, err)
 	}
