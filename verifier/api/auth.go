@@ -11,6 +11,7 @@ import (
 
 const (
 	ERROR_AUTHENTICATE_SERVICE      = "failed to authenticate service"
+	ERROR_SERVICE_NOT_ACTIVE        = "service is not active"
 	ERROR_AUTHENTICATE_ADMIN        = "failed to authenticate admin"
 	ERROR_ACCESS_DOMAIN_AUTH_TARGET = "failed to access domain auth target"
 	ERROR_DOMAIN_AUTH_INVALID       = "domain auth token is invalid"
@@ -23,9 +24,16 @@ func authenticateService(verifier *verifiercore.Verifier, c echo.Context) (*ent.
 	authorization := c.Request().Header["Authorization"][0]
 	token := authorization[len("Bearer "):]
 
-	service, err := verifier.DB.Client.Service.Query().Where(service.TokenEQ(token)).Only(*verifier.DB.Ctx)
+	service, err := verifier.DB.Client.Service.Query().
+		Where(service.TokenEQ(token)).
+		Only(*verifier.DB.Ctx)
+
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", ERROR_AUTHENTICATE_SERVICE, err)
+	}
+
+	if !service.IsActive {
+		return nil, fmt.Errorf(ERROR_SERVICE_NOT_ACTIVE)
 	}
 
 	return service, nil
