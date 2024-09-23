@@ -23,12 +23,22 @@ type CrtshMonitor struct {
 	ctx        context.Context
 	lastLogger *goutils.File[int]
 	last       int
+	interval   time.Duration
 }
 
-func NewCrtshMonitor(ctx context.Context) *CrtshMonitor {
-	ctcore.DefaultEpochSleep = 10 * time.Second
+var DefaultInterval = 10 * time.Second
+
+func NewCrtshMonitor(interval time.Duration, ctx context.Context) *CrtshMonitor {
 	return &CrtshMonitor{
-		ctx: ctx,
+		ctx:      ctx,
+		interval: interval,
+	}
+}
+
+func DefaultCrtshMonitor(ctx context.Context) *CrtshMonitor {
+	return &CrtshMonitor{
+		ctx:      ctx,
+		interval: DefaultInterval,
 	}
 }
 
@@ -37,6 +47,8 @@ func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 	if err != nil {
 		return err
 	}
+
+	a.updateInteval()
 
 	err = a.loadFileLogger()
 	if err != nil {
@@ -87,6 +99,8 @@ func (a *CrtshMonitor) Register(domain string, exist bool, verifier *core.Verifi
 		return nil
 	}
 
+	a.updateInteval()
+
 	err = client.Init()
 
 	if err != nil {
@@ -94,6 +108,15 @@ func (a *CrtshMonitor) Register(domain string, exist bool, verifier *core.Verifi
 	}
 
 	return err
+}
+
+func (a *CrtshMonitor) updateInteval() {
+	l := len(a.ctstream.Client.Clients)
+	if l == 0 {
+		l = 1
+	}
+
+	a.ctstream.Sleep = a.interval / time.Duration(l)
 }
 
 func (a *CrtshMonitor) Run(verifier *core.Verifier) {
