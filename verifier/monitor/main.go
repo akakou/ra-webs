@@ -113,7 +113,15 @@ func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 
 		if option.ID > a.first {
 			a.first = option.ID
-			a.lastLogger.Store(&a.first)
+		}
+
+		clientsLen := len(a.ctstream.Client.Clients)
+		lastClient := a.ctstream.Client.Clients[clientsLen-1]
+		if option.Client.Domain == lastClient.Domain {
+			err := a.lastLogger.Store(&a.first)
+			if err != nil {
+				panic(err)
+			}
 		}
 
 		serv, err := verifier.DB.Client.TAServer.
