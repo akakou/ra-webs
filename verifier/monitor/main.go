@@ -22,7 +22,7 @@ type CrtshMonitor struct {
 	ctstream   *CrtshStream
 	ctx        context.Context
 	lastLogger *goutils.File[int]
-	first      int
+	last       int
 }
 
 func NewCrtshMonitor(ctx context.Context) *CrtshMonitor {
@@ -111,14 +111,14 @@ func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 
 		fmt.Printf("[received] crtid: %v, domain: %v\n", option.ID, domain)
 
-		if option.ID > a.first {
-			a.first = option.ID
+		if option.ID > a.last {
+			a.last = option.ID
 		}
 
 		clientsLen := len(a.ctstream.Client.Clients)
 		lastClient := a.ctstream.Client.Clients[clientsLen-1]
 		if option.Client.Domain == lastClient.Domain {
-			err := a.lastLogger.Store(&a.first)
+			err := a.lastLogger.Store(&a.last)
 			if err != nil {
 				panic(err)
 			}
