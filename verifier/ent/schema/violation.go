@@ -19,6 +19,7 @@ func (TAViolation) Fields() []ent.Field {
 		field.Time("created_at").Immutable().Default(func() time.Time {
 			return time.Now()
 		}),
+		field.Int("monitor_log_id"),
 	}
 }
 

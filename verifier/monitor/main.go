@@ -132,7 +132,7 @@ func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 		err = Check(cert.PublicKey, serv)
 		if err != nil {
 			fmt.Printf("Violation: %v\n", err)
-			revoke(serv, verifier)
+			revoke(option.ID, serv, verifier)
 			return
 		}
 
