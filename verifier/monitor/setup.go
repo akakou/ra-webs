@@ -61,6 +61,6 @@ func (a *CrtshMonitor) loadFirst() error {
 
 func (a *CrtshMonitor) loadFirstToClient() {
 	for _, c := range a.ctstream.Client.Clients {
-		c.ID = a.first
+		c.ID = a.last
 	}
 }
