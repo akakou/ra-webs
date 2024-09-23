@@ -53,7 +53,7 @@ func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 	err = a.ctstream.Init()
 
 	if err != nil {
-		return nil
+		return err
 	}
 
 	return err
