@@ -38,13 +38,24 @@ var GetServerFromDomainApi = goutils.EchoRoute[verifiercore.Verifier]{
 				Query().
 				Where(taserver.Domain(domain)).
 				Where(taserver.HasActivated(true)).
-				WithCode().
 				WithViolation().
+				WithCode().
+				WithService().
 				Order(ent.Desc(taserver.FieldID)).
 				All(*verifier.DB.Ctx)
 
 			if err != nil {
 				return errors.New("server is not found")
+			}
+
+			isValid1, err := checkViolationLogs(servs)
+			if err != nil {
+				return err
+			}
+
+			isValid2, err := checkTAValidity(servs[0], verifier)
+			if err != nil {
+				return err
 			}
 
 			var res struct {
@@ -53,7 +64,7 @@ var GetServerFromDomainApi = goutils.EchoRoute[verifiercore.Verifier]{
 			}
 
 			res.TA = servs
-			res.IsValid = checkTAValiditiy(servs)
+			res.IsValid = isValid1 && isValid2
 
 			return c.JSON(http.StatusOK, res)
 		}
