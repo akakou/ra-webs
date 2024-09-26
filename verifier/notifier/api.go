@@ -58,10 +58,10 @@ var postSubscribeApi = goutils.EchoRoute[core.Verifier]{
 	},
 }
 
-func getSubscriptionKeyApi(notifier *BrowserNotifier) goutils.EchoRoute[core.Verifier] {
+func getSubscriptionConfigApi(notifier *BrowserNotifier) goutils.EchoRoute[core.Verifier] {
 	return goutils.EchoRoute[core.Verifier]{
 		Method: goutils.GET,
-		Path:   "/subscription_key",
+		Path:   "/config/subscription",
 		F: func(verifier *core.Verifier) goutils.EchoRouteFunc {
 			return func(c echo.Context) error {
 				VapidPublicKey := notifier.VapidPublicKey
