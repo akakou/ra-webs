@@ -1,4 +1,3 @@
-Verifier_BASE="http://localhost:8000"
-ADMIN_TOKEN="5e3e410b035405a78ff7b40724f914cf8df49ddd6bf6f1554f11274a066ae8f37917e131800cdf6869e7c659b95bc2d5007bf9b5456bf36c072b3d7a88d1e952"
-curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $ADMIN_TOKEN" $Verifier_BASE/api/notifier -d '{"domain": "example.com", "body": "Hello, World!"}'
-
+VERIFIER_BASE="https://tells-object-keep-threat.trycloudflare.com"
+ADMIN_TOKEN="5af5745994ff116304f96a76bb05460bc7f80cd2dc0a6e5532ee085261b06576cac5dcabb86ce9026a80bdfd16bb0991009a564f4e8c044abde5f9c9f68c6868"
+curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $ADMIN_TOKEN" $VERIFIER_BASE/api/notify -d "{\"domain\" : \"$1\", \"body\" : \"$2\"}"

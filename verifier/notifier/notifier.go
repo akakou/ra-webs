@@ -57,6 +57,6 @@ func (notifier *BrowserNotifier) notifyOne(msg []byte, subscription *ent.Subscri
 
 func (notifier *BrowserNotifier) Setup(e *echo.Group, verifier *core.Verifier) error {
 	postSubscribeApi.Set(e, verifier)
-	getSubscriptionKeyApi(notifier).Set(e, verifier)
+	getSubscriptionConfigApi(notifier).Set(e, verifier)
 	return nil
 }

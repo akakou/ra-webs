@@ -22,13 +22,23 @@ type CrtshMonitor struct {
 	ctstream   *CrtshStream
 	ctx        context.Context
 	lastLogger *goutils.File[int]
-	first      int
+	last       int
+	interval   time.Duration
 }
 
-func NewCrtshMonitor(ctx context.Context) *CrtshMonitor {
-	ctcore.DefaultEpochSleep = 10 * time.Second
+var DefaultInterval = 10 * time.Second
+
+func NewCrtshMonitor(interval time.Duration, ctx context.Context) *CrtshMonitor {
 	return &CrtshMonitor{
-		ctx: ctx,
+		ctx:      ctx,
+		interval: interval,
+	}
+}
+
+func DefaultCrtshMonitor(ctx context.Context) *CrtshMonitor {
+	return &CrtshMonitor{
+		ctx:      ctx,
+		interval: DefaultInterval,
 	}
 }
 
@@ -37,6 +47,8 @@ func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 	if err != nil {
 		return err
 	}
+
+	a.updateInteval()
 
 	err = a.loadFileLogger()
 	if err != nil {
@@ -53,7 +65,7 @@ func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 	err = a.ctstream.Init()
 
 	if err != nil {
-		return nil
+		return err
 	}
 
 	return err
@@ -87,6 +99,8 @@ func (a *CrtshMonitor) Register(domain string, exist bool, verifier *core.Verifi
 		return nil
 	}
 
+	a.updateInteval()
+
 	err = client.Init()
 
 	if err != nil {
@@ -94,6 +108,15 @@ func (a *CrtshMonitor) Register(domain string, exist bool, verifier *core.Verifi
 	}
 
 	return err
+}
+
+func (a *CrtshMonitor) updateInteval() {
+	l := len(a.ctstream.Client.Clients)
+	if l == 0 {
+		l = 1
+	}
+
+	a.ctstream.Sleep = a.interval / time.Duration(l)
 }
 
 func (a *CrtshMonitor) Run(verifier *core.Verifier) {
@@ -111,9 +134,17 @@ func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 
 		fmt.Printf("[received] crtid: %v, domain: %v\n", option.ID, domain)
 
-		if option.ID > a.first {
-			a.first = option.ID
-			a.lastLogger.Store(&a.first)
+		if option.ID > a.last {
+			a.last = option.ID
+		}
+
+		clientsLen := len(a.ctstream.Client.Clients)
+		lastClient := a.ctstream.Client.Clients[clientsLen-1]
+		if option.Client.Domain == lastClient.Domain {
+			err := a.lastLogger.Store(&a.last)
+			if err != nil {
+				panic(err)
+			}
 		}
 
 		serv, err := verifier.DB.Client.TAServer.
@@ -132,7 +163,7 @@ func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 		err = Check(cert.PublicKey, serv)
 		if err != nil {
 			fmt.Printf("Violation: %v\n", err)
-			revoke(serv, verifier)
+			revoke(option.ID, serv, verifier)
 			return
 		}
 

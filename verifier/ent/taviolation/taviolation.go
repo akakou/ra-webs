@@ -16,6 +16,8 @@ const (
 	FieldID = "id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldMonitorLogID holds the string denoting the monitor_log_id field in the database.
+	FieldMonitorLogID = "monitor_log_id"
 	// EdgeServer holds the string denoting the server edge name in mutations.
 	EdgeServer = "server"
 	// EdgeService holds the string denoting the service edge name in mutations.
@@ -42,6 +44,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
+	FieldMonitorLogID,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "ta_violations"
@@ -82,6 +85,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByMonitorLogID orders the results by the monitor_log_id field.
+func ByMonitorLogID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMonitorLogID, opts...).ToFunc()
 }
 
 // ByServerField orders the results by server field.

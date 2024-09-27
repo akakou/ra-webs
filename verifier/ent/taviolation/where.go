@@ -60,6 +60,11 @@ func CreatedAt(v time.Time) predicate.TAViolation {
 	return predicate.TAViolation(sql.FieldEQ(FieldCreatedAt, v))
 }
 
+// MonitorLogID applies equality check predicate on the "monitor_log_id" field. It's identical to MonitorLogIDEQ.
+func MonitorLogID(v int) predicate.TAViolation {
+	return predicate.TAViolation(sql.FieldEQ(FieldMonitorLogID, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.TAViolation {
 	return predicate.TAViolation(sql.FieldEQ(FieldCreatedAt, v))
@@ -98,6 +103,46 @@ func CreatedAtLT(v time.Time) predicate.TAViolation {
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v time.Time) predicate.TAViolation {
 	return predicate.TAViolation(sql.FieldLTE(FieldCreatedAt, v))
+}
+
+// MonitorLogIDEQ applies the EQ predicate on the "monitor_log_id" field.
+func MonitorLogIDEQ(v int) predicate.TAViolation {
+	return predicate.TAViolation(sql.FieldEQ(FieldMonitorLogID, v))
+}
+
+// MonitorLogIDNEQ applies the NEQ predicate on the "monitor_log_id" field.
+func MonitorLogIDNEQ(v int) predicate.TAViolation {
+	return predicate.TAViolation(sql.FieldNEQ(FieldMonitorLogID, v))
+}
+
+// MonitorLogIDIn applies the In predicate on the "monitor_log_id" field.
+func MonitorLogIDIn(vs ...int) predicate.TAViolation {
+	return predicate.TAViolation(sql.FieldIn(FieldMonitorLogID, vs...))
+}
+
+// MonitorLogIDNotIn applies the NotIn predicate on the "monitor_log_id" field.
+func MonitorLogIDNotIn(vs ...int) predicate.TAViolation {
+	return predicate.TAViolation(sql.FieldNotIn(FieldMonitorLogID, vs...))
+}
+
+// MonitorLogIDGT applies the GT predicate on the "monitor_log_id" field.
+func MonitorLogIDGT(v int) predicate.TAViolation {
+	return predicate.TAViolation(sql.FieldGT(FieldMonitorLogID, v))
+}
+
+// MonitorLogIDGTE applies the GTE predicate on the "monitor_log_id" field.
+func MonitorLogIDGTE(v int) predicate.TAViolation {
+	return predicate.TAViolation(sql.FieldGTE(FieldMonitorLogID, v))
+}
+
+// MonitorLogIDLT applies the LT predicate on the "monitor_log_id" field.
+func MonitorLogIDLT(v int) predicate.TAViolation {
+	return predicate.TAViolation(sql.FieldLT(FieldMonitorLogID, v))
+}
+
+// MonitorLogIDLTE applies the LTE predicate on the "monitor_log_id" field.
+func MonitorLogIDLTE(v int) predicate.TAViolation {
+	return predicate.TAViolation(sql.FieldLTE(FieldMonitorLogID, v))
 }
 
 // HasServer applies the HasEdge predicate on the "server" edge.

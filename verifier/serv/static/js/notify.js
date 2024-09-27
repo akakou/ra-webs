@@ -1,6 +1,6 @@
 const setupNotification = async (domain) => {
     removeAllNotifcation()
-    const keyResp = await axios.get(`/api/subscription_key`)
+    const keyResp = await axios.get(`/api/config/subscription`)
     console.log(keyResp)
 
     const permission = await Notification.requestPermission()

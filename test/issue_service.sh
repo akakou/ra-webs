@@ -1,4 +1,8 @@
+# ADMIN_TOKEN=""
+# RA_WEBS_VERIFIER_BASE=""
+
 export RA_WEBS_SERVICE_TOKEN=$(curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $ADMIN_TOKEN" $RA_WEBS_VERIFIER_BASE/api/service)
 
 echo -en $RA_WEBS_SERVICE_TOKEN
 
+#export RA_WEBS_SERVICE_TOKEN=af3f7da03f2e7309831d28aea055f81c42aea364952e23bbd2bbb9308570d4f1baa77ec00da8a62405ffd3bc9181b49f442243f62ff9776d345480f568c1fdde
