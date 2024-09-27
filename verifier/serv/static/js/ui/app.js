@@ -18,10 +18,13 @@ const App = () => {
     
         const ta = resp.data.ta
         const v = resp.data.is_valid
-    
+
+        var message = v ? VALID_MESSAGE : INVALID_MESSAGE
+        message += " " + resp.data.message + "."
+
         setLogs(ta)
         setIsValid(v)
-        setMessage(v ? VALID_MESSAGE : INVALID_MESSAGE)
+        setMessage(message)
 
         if (v) {
             setTimeout(() => {

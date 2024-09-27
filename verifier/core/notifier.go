@@ -9,7 +9,7 @@ import (
 )
 
 const VIOLATION_MESSAGE = "A violation has been detected at "
-const UPDATE_MESSAGE = "A new server has been added at "
+const UPDATE_MESSAGE = "A update has been registered at "
 
 func NotifierViolation(domain string, verifier *Verifier) error {
 	msg := fmt.Sprintf("%s %v", VIOLATION_MESSAGE, domain)

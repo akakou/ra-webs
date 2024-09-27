@@ -1,7 +1,6 @@
 package api
 
 import (
-	"errors"
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
@@ -33,27 +32,47 @@ var GetServerFromDomainApi = goutils.EchoRoute[verifiercore.Verifier]{
 		return func(c echo.Context) error {
 			domain := c.Param("domain")
 
+			type Res struct {
+				TA      []*ent.TAServer `json:"ta"`
+				IsValid bool            `json:"is_valid"`
+				Message string          `json:"message"`
+			}
+
+			res := Res{}
+
+			handleError := func(err error, r *Res) error {
+				r.IsValid = false
+				r.Message = err.Error()
+				return c.JSON(http.StatusOK, res)
+			}
+
 			// fmt.Printf("domain: %v\n", domain)
 			servs, err := verifier.DB.Client.TAServer.
 				Query().
 				Where(taserver.Domain(domain)).
-				Where(taserver.HasActivated(true)).
-				WithCode().
 				WithViolation().
+				WithCode().
+				WithService().
 				Order(ent.Desc(taserver.FieldID)).
 				All(*verifier.DB.Ctx)
 
-			if err != nil {
-				return errors.New("server is not found")
-			}
-
-			var res struct {
-				TA      []*ent.TAServer `json:"ta"`
-				IsValid bool            `json:"is_valid"`
-			}
-
 			res.TA = servs
-			res.IsValid = checkTAValiditiy(servs)
+
+			if err != nil {
+				return handleError(err, &res)
+			}
+
+			isValid1, err := checkViolationLogs(servs)
+			if err != nil {
+				return handleError(err, &res)
+			}
+
+			isValid2, err := checkTAValidity(servs[0], verifier)
+			if err != nil {
+				return handleError(err, &res)
+			}
+
+			res.IsValid = isValid1 && isValid2
 
 			return c.JSON(http.StatusOK, res)
 		}

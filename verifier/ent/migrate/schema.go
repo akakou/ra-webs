@@ -72,7 +72,7 @@ var (
 		{Name: "domain", Type: field.TypeString},
 		{Name: "public_key", Type: field.TypeBytes},
 		{Name: "quote", Type: field.TypeString},
-		{Name: "has_activated", Type: field.TypeBool},
+		{Name: "is_active", Type: field.TypeBool, Default: false},
 		{Name: "ta_server_code", Type: field.TypeInt, Nullable: true},
 		{Name: "ta_server_service", Type: field.TypeInt, Nullable: true},
 	}
@@ -100,6 +100,7 @@ var (
 	TaViolationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "monitor_log_id", Type: field.TypeInt},
 		{Name: "ta_violation_server", Type: field.TypeInt, Nullable: true},
 		{Name: "ta_violation_service", Type: field.TypeInt, Nullable: true},
 	}
@@ -111,13 +112,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ta_violations_ta_servers_server",
-				Columns:    []*schema.Column{TaViolationsColumns[2]},
+				Columns:    []*schema.Column{TaViolationsColumns[3]},
 				RefColumns: []*schema.Column{TaServersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "ta_violations_services_service",
-				Columns:    []*schema.Column{TaViolationsColumns[3]},
+				Columns:    []*schema.Column{TaViolationsColumns[4]},
 				RefColumns: []*schema.Column{ServicesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

@@ -9,7 +9,7 @@ import (
 	"github.com/akakou/ra_webs/verifier/ent/taserver"
 )
 
-const LOG_FILE_PATH = "first-log.txt"
+const LOG_FILE_PATH = "last-log.txt"
 
 const FILE_EMPLTY = "strconv.Atoi: parsing \"\": invalid syntax"
 
@@ -61,6 +61,6 @@ func (a *CrtshMonitor) loadFirst() error {
 
 func (a *CrtshMonitor) loadFirstToClient() {
 	for _, c := range a.ctstream.Client.Clients {
-		c.ID = a.first
+		c.ID = a.last
 	}
 }
