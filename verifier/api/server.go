@@ -37,7 +37,6 @@ var GetServerFromDomainApi = goutils.EchoRoute[verifiercore.Verifier]{
 			servs, err := verifier.DB.Client.TAServer.
 				Query().
 				Where(taserver.Domain(domain)).
-				Where(taserver.HasActivated(true)).
 				WithViolation().
 				WithCode().
 				WithService().
