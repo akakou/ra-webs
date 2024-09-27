@@ -96,7 +96,7 @@ func (a *CrtshMonitor) Register(domain string, exist bool, verifier *core.Verifi
 
 	client, _, err := crtsh.AddByDomain(domain, a.ctstream.Client)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	a.updateInteval()
@@ -104,7 +104,7 @@ func (a *CrtshMonitor) Register(domain string, exist bool, verifier *core.Verifi
 	err = client.Init()
 
 	if err != nil {
-		return nil
+		return err
 	}
 
 	return err
