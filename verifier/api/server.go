@@ -43,7 +43,7 @@ var GetServerFromDomainApi = goutils.EchoRoute[verifiercore.Verifier]{
 			handleError := func(err error, r *Res) error {
 				r.IsValid = false
 				r.Message = err.Error()
-				return c.JSON(http.StatusInternalServerError, res)
+				return c.JSON(http.StatusOK, res)
 			}
 
 			// fmt.Printf("domain: %v\n", domain)
