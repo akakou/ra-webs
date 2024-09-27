@@ -117,6 +117,7 @@ func (a *CrtshMonitor) updateInterval() {
 	}
 
 	a.ctstream.Sleep = a.interval / time.Duration(l)
+	fmt.Printf("New Interval: %v \n", a.ctstream.Sleep)
 }
 
 func (a *CrtshMonitor) Run(verifier *core.Verifier) {
