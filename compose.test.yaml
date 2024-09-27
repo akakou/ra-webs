@@ -27,7 +27,7 @@ services:
       - ./core:/core
       - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /verifier/serv
-    command: bash -c 'go mod tidy && go run main.go'
+    command: bash -c 'rm db.sqlite3 ; go mod tidy && go run main.go'
     env_file:
       - test/env/verifier.env
       - test/env/common.env
