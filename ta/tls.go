@@ -27,11 +27,12 @@ func parsePemCertificate(raw []byte, privateKey *rsa.PrivateKey) (*tls.Certifica
 }
 
 func (ap *TA) TLSConfig() (*tls.Config, error) {
-	res, err := ap.Register()
+	str, err := ap.Register()
 	if err != nil {
 		return nil, err
 	}
-	fmt.Print(res)
+
+	fmt.Printf("Register result: %s\n", str)
 
 	resouce := IssueCertificate(ap.privateKey, ap.config.Domain, ap.config.Email)
 

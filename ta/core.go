@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/akakou/ra_webs/core"
 	"golang.org/x/crypto/acme/autocert"
@@ -13,7 +14,7 @@ import (
 var AcmeURL = autocert.DefaultACMEDirectory
 
 type TAConfig struct {
-	Verifier   string
+	Verifiers  []string
 	Token      string
 	Repository string
 	Domain     string
@@ -30,7 +31,7 @@ func DefaultConfig() (*TAConfig, error) {
 	repository := os.Getenv("RA_WEBS_TA_REPOSITORY")
 	domain := os.Getenv("RA_WEBS_TA_DOMAIN")
 	email := os.Getenv("RA_WEBS_SERVICE_EMAIL")
-	verifierBase := os.Getenv("RA_WEBS_VERIFIER_BASE")
+	verifierBaseEnv := os.Getenv("RA_WEBS_VERIFIER_BASES")
 
 	if token == "" {
 		return nil, fmt.Errorf("%v", ERROR_TOKEN_NOT_SET)
@@ -44,16 +45,17 @@ func DefaultConfig() (*TAConfig, error) {
 		return nil, fmt.Errorf("%v", ERROR_EMAIL_NOT_SET)
 	}
 
-	if verifierBase == "" {
-		verifierBase = "http://localhost" + core.VerifierPort
-		fmt.Printf("RA_WEBS_VERIFIER_BASE is not set: so use %v\n", verifierBase)
+	if verifierBaseEnv == "" {
+		verifierBaseEnv = "http://localhost" + core.VerifierPort
+		fmt.Printf("RA_WEBS_VERIFIER_BASES is not set: so use %v\n", verifierBaseEnv)
 	}
+	verifiers := strings.Split(verifierBaseEnv, ",")
 
 	return &TAConfig{
 		Token:      token,
 		Repository: repository,
 		Domain:     domain,
-		Verifier:   verifierBase,
+		Verifiers:  verifiers,
 	}, nil
 }
 
