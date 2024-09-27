@@ -4,7 +4,7 @@
         "domain": "example.com",
         "public_key": "MTIzNA==",
         "quote": "MTIzNA==",
-        "has_activated": true,
+        "is_active": true,
         "edges": {
             "code": {
                 "id": 1,

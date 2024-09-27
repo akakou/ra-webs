@@ -167,8 +167,8 @@ func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 			return
 		}
 
-		if !serv.HasActivated {
-			serv.Update().SetHasActivated(true).Save(*verifier.DB.Ctx)
+		if !serv.IsActive {
+			serv.Update().SetIsActive(true).Save(*verifier.DB.Ctx)
 		}
 	})
 }
