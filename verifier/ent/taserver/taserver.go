@@ -18,8 +18,8 @@ const (
 	FieldPublicKey = "public_key"
 	// FieldQuote holds the string denoting the quote field in the database.
 	FieldQuote = "quote"
-	// FieldHasActivated holds the string denoting the has_activated field in the database.
-	FieldHasActivated = "has_activated"
+	// FieldIsActive holds the string denoting the is_active field in the database.
+	FieldIsActive = "is_active"
 	// EdgeViolation holds the string denoting the violation edge name in mutations.
 	EdgeViolation = "violation"
 	// EdgeCode holds the string denoting the code edge name in mutations.
@@ -66,7 +66,7 @@ var Columns = []string{
 	FieldDomain,
 	FieldPublicKey,
 	FieldQuote,
-	FieldHasActivated,
+	FieldIsActive,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "ta_servers"
@@ -91,6 +91,11 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultIsActive holds the default value on creation for the "is_active" field.
+	DefaultIsActive bool
+)
+
 // OrderOption defines the ordering options for the TAServer queries.
 type OrderOption func(*sql.Selector)
 
@@ -109,9 +114,9 @@ func ByQuote(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldQuote, opts...).ToFunc()
 }
 
-// ByHasActivated orders the results by the has_activated field.
-func ByHasActivated(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldHasActivated, opts...).ToFunc()
+// ByIsActive orders the results by the is_active field.
+func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsActive, opts...).ToFunc()
 }
 
 // ByViolationCount orders the results by violation count.

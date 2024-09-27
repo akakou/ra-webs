@@ -41,9 +41,17 @@ func (tsc *TAServerCreate) SetQuote(s string) *TAServerCreate {
 	return tsc
 }
 
-// SetHasActivated sets the "has_activated" field.
-func (tsc *TAServerCreate) SetHasActivated(b bool) *TAServerCreate {
-	tsc.mutation.SetHasActivated(b)
+// SetIsActive sets the "is_active" field.
+func (tsc *TAServerCreate) SetIsActive(b bool) *TAServerCreate {
+	tsc.mutation.SetIsActive(b)
+	return tsc
+}
+
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (tsc *TAServerCreate) SetNillableIsActive(b *bool) *TAServerCreate {
+	if b != nil {
+		tsc.SetIsActive(*b)
+	}
 	return tsc
 }
 
@@ -122,6 +130,7 @@ func (tsc *TAServerCreate) Mutation() *TAServerMutation {
 
 // Save creates the TAServer in the database.
 func (tsc *TAServerCreate) Save(ctx context.Context) (*TAServer, error) {
+	tsc.defaults()
 	return withHooks(ctx, tsc.sqlSave, tsc.mutation, tsc.hooks)
 }
 
@@ -147,6 +156,14 @@ func (tsc *TAServerCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tsc *TAServerCreate) defaults() {
+	if _, ok := tsc.mutation.IsActive(); !ok {
+		v := taserver.DefaultIsActive
+		tsc.mutation.SetIsActive(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (tsc *TAServerCreate) check() error {
 	if _, ok := tsc.mutation.Domain(); !ok {
@@ -158,8 +175,8 @@ func (tsc *TAServerCreate) check() error {
 	if _, ok := tsc.mutation.Quote(); !ok {
 		return &ValidationError{Name: "quote", err: errors.New(`ent: missing required field "TAServer.quote"`)}
 	}
-	if _, ok := tsc.mutation.HasActivated(); !ok {
-		return &ValidationError{Name: "has_activated", err: errors.New(`ent: missing required field "TAServer.has_activated"`)}
+	if _, ok := tsc.mutation.IsActive(); !ok {
+		return &ValidationError{Name: "is_active", err: errors.New(`ent: missing required field "TAServer.is_active"`)}
 	}
 	return nil
 }
@@ -199,9 +216,9 @@ func (tsc *TAServerCreate) createSpec() (*TAServer, *sqlgraph.CreateSpec) {
 		_spec.SetField(taserver.FieldQuote, field.TypeString, value)
 		_node.Quote = value
 	}
-	if value, ok := tsc.mutation.HasActivated(); ok {
-		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)
-		_node.HasActivated = value
+	if value, ok := tsc.mutation.IsActive(); ok {
+		_spec.SetField(taserver.FieldIsActive, field.TypeBool, value)
+		_node.IsActive = value
 	}
 	if nodes := tsc.mutation.ViolationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -290,6 +307,7 @@ func (tscb *TAServerCreateBulk) Save(ctx context.Context) ([]*TAServer, error) {
 	for i := range tscb.builders {
 		func(i int, root context.Context) {
 			builder := tscb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TAServerMutation)
 				if !ok {
