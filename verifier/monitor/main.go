@@ -48,7 +48,7 @@ func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 		return err
 	}
 
-	a.updateInteval()
+	a.updateInterval()
 
 	err = a.loadFileLogger()
 	if err != nil {
@@ -99,7 +99,7 @@ func (a *CrtshMonitor) Register(domain string, exist bool, verifier *core.Verifi
 		return err
 	}
 
-	a.updateInteval()
+	a.updateInterval()
 
 	err = client.Init()
 
@@ -110,7 +110,7 @@ func (a *CrtshMonitor) Register(domain string, exist bool, verifier *core.Verifi
 	return err
 }
 
-func (a *CrtshMonitor) updateInteval() {
+func (a *CrtshMonitor) updateInterval() {
 	l := len(a.ctstream.Client.Clients)
 	if l == 0 {
 		l = 1
