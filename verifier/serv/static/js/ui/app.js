@@ -20,7 +20,7 @@ const App = () => {
         const v = resp.data.is_valid
 
         var message = v ? VALID_MESSAGE : INVALID_MESSAGE
-        message += "</br>" + resp.data.message
+        message += resp.data.message + "."
 
         setLogs(ta)
         setIsValid(v)
