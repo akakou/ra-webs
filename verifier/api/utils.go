@@ -19,7 +19,7 @@ func checkTAValidity(serv *ent.TAServer, verifier *verifiercore.Verifier) (bool,
 	}
 
 	if !serv.IsActive {
-		return false, errors.New("server has been not activated")
+		return false, errors.New("server has not been activated")
 	}
 
 	if !code.IsActive {
