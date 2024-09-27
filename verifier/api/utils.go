@@ -17,18 +17,36 @@ func checkTAValidity(serv *ent.TAServer, verifier *verifiercore.Verifier) (bool,
 	if err != nil {
 		return false, errors.New("service is not found")
 	}
-	return serv.HasActivated && service.IsActive && code.IsActive && code.Edges.Service.IsActive, nil
+
+	if !serv.IsActive {
+		return false, errors.New("server has been not activated")
+	}
+
+	if !code.IsActive {
+		return false, errors.New("code is not active")
+	}
+
+	if !service.IsActive {
+		return false, errors.New("service of server is not active")
+	}
+
+	if !code.Edges.Service.IsActive {
+		return false, errors.New("service of code is not active")
+	}
+
+	return true, nil
 }
 
 func checkViolationLogs(servs []*ent.TAServer) (bool, error) {
-	isValid := true
-
 	if len(servs) == 0 {
 		return false, errors.New("server is not found")
 	}
 
 	for _, serv := range servs {
-		isValid = isValid && len(serv.Edges.Violation) == 0
+		if len(serv.Edges.Violation) != 0 {
+			return false, errors.New("server has violation logs")
+		}
 	}
-	return isValid, nil
+
+	return true, nil
 }

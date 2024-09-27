@@ -8,6 +8,7 @@ const TableCompornent = ({ logs }) => {
             <td>{server.edges.code.repository}</td>
             <td>{server.edges.code.commit_id}</td>
             <td>{server.edges.code.unique_id}</td>
+            <td>{!!server.is_active}</td>
             <td><a
                 href={`${server.edges.code.repository}/tree/${server.edges.code.commit_id}`}
             >Go to Repo</a></td>
@@ -23,6 +24,7 @@ const TableCompornent = ({ logs }) => {
                     <th>Repository</th>
                     <th>Commit_ID</th>
                     <th>Unique ID</th>
+                    <th>Activated</th>
                     <th>Repository Link</th>
                 </tr>
             </thead>

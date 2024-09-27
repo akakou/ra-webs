@@ -65,16 +65,16 @@ func (tsu *TAServerUpdate) SetNillableQuote(s *string) *TAServerUpdate {
 	return tsu
 }
 
-// SetHasActivated sets the "has_activated" field.
-func (tsu *TAServerUpdate) SetHasActivated(b bool) *TAServerUpdate {
-	tsu.mutation.SetHasActivated(b)
+// SetIsActive sets the "is_active" field.
+func (tsu *TAServerUpdate) SetIsActive(b bool) *TAServerUpdate {
+	tsu.mutation.SetIsActive(b)
 	return tsu
 }
 
-// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
-func (tsu *TAServerUpdate) SetNillableHasActivated(b *bool) *TAServerUpdate {
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (tsu *TAServerUpdate) SetNillableIsActive(b *bool) *TAServerUpdate {
 	if b != nil {
-		tsu.SetHasActivated(*b)
+		tsu.SetIsActive(*b)
 	}
 	return tsu
 }
@@ -251,8 +251,8 @@ func (tsu *TAServerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tsu.mutation.Quote(); ok {
 		_spec.SetField(taserver.FieldQuote, field.TypeString, value)
 	}
-	if value, ok := tsu.mutation.HasActivated(); ok {
-		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)
+	if value, ok := tsu.mutation.IsActive(); ok {
+		_spec.SetField(taserver.FieldIsActive, field.TypeBool, value)
 	}
 	if tsu.mutation.ViolationCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -456,16 +456,16 @@ func (tsuo *TAServerUpdateOne) SetNillableQuote(s *string) *TAServerUpdateOne {
 	return tsuo
 }
 
-// SetHasActivated sets the "has_activated" field.
-func (tsuo *TAServerUpdateOne) SetHasActivated(b bool) *TAServerUpdateOne {
-	tsuo.mutation.SetHasActivated(b)
+// SetIsActive sets the "is_active" field.
+func (tsuo *TAServerUpdateOne) SetIsActive(b bool) *TAServerUpdateOne {
+	tsuo.mutation.SetIsActive(b)
 	return tsuo
 }
 
-// SetNillableHasActivated sets the "has_activated" field if the given value is not nil.
-func (tsuo *TAServerUpdateOne) SetNillableHasActivated(b *bool) *TAServerUpdateOne {
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (tsuo *TAServerUpdateOne) SetNillableIsActive(b *bool) *TAServerUpdateOne {
 	if b != nil {
-		tsuo.SetHasActivated(*b)
+		tsuo.SetIsActive(*b)
 	}
 	return tsuo
 }
@@ -672,8 +672,8 @@ func (tsuo *TAServerUpdateOne) sqlSave(ctx context.Context) (_node *TAServer, er
 	if value, ok := tsuo.mutation.Quote(); ok {
 		_spec.SetField(taserver.FieldQuote, field.TypeString, value)
 	}
-	if value, ok := tsuo.mutation.HasActivated(); ok {
-		_spec.SetField(taserver.FieldHasActivated, field.TypeBool, value)
+	if value, ok := tsuo.mutation.IsActive(); ok {
+		_spec.SetField(taserver.FieldIsActive, field.TypeBool, value)
 	}
 	if tsuo.mutation.ViolationCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -48,7 +48,7 @@ func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 		return err
 	}
 
-	a.updateInteval()
+	a.updateInterval()
 
 	err = a.loadFileLogger()
 	if err != nil {
@@ -96,27 +96,28 @@ func (a *CrtshMonitor) Register(domain string, exist bool, verifier *core.Verifi
 
 	client, _, err := crtsh.AddByDomain(domain, a.ctstream.Client)
 	if err != nil {
-		return nil
+		return err
 	}
 
-	a.updateInteval()
+	a.updateInterval()
 
 	err = client.Init()
 
 	if err != nil {
-		return nil
+		return err
 	}
 
 	return err
 }
 
-func (a *CrtshMonitor) updateInteval() {
+func (a *CrtshMonitor) updateInterval() {
 	l := len(a.ctstream.Client.Clients)
 	if l == 0 {
 		l = 1
 	}
 
 	a.ctstream.Sleep = a.interval / time.Duration(l)
+	fmt.Printf("New Interval: %v \n", a.ctstream.Sleep)
 }
 
 func (a *CrtshMonitor) Run(verifier *core.Verifier) {
@@ -167,8 +168,8 @@ func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 			return
 		}
 
-		if !serv.HasActivated {
-			serv.Update().SetHasActivated(true).Save(*verifier.DB.Ctx)
+		if !serv.IsActive {
+			serv.Update().SetIsActive(true).Save(*verifier.DB.Ctx)
 		}
 	})
 }

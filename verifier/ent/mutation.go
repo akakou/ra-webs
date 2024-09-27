@@ -1795,7 +1795,7 @@ type TAServerMutation struct {
 	domain              *string
 	public_key          *[]byte
 	quote               *string
-	has_activated       *bool
+	is_active           *bool
 	clearedFields       map[string]struct{}
 	violation           map[int]struct{}
 	removedviolation    map[int]struct{}
@@ -2018,40 +2018,40 @@ func (m *TAServerMutation) ResetQuote() {
 	m.quote = nil
 }
 
-// SetHasActivated sets the "has_activated" field.
-func (m *TAServerMutation) SetHasActivated(b bool) {
-	m.has_activated = &b
+// SetIsActive sets the "is_active" field.
+func (m *TAServerMutation) SetIsActive(b bool) {
+	m.is_active = &b
 }
 
-// HasActivated returns the value of the "has_activated" field in the mutation.
-func (m *TAServerMutation) HasActivated() (r bool, exists bool) {
-	v := m.has_activated
+// IsActive returns the value of the "is_active" field in the mutation.
+func (m *TAServerMutation) IsActive() (r bool, exists bool) {
+	v := m.is_active
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHasActivated returns the old "has_activated" field's value of the TAServer entity.
+// OldIsActive returns the old "is_active" field's value of the TAServer entity.
 // If the TAServer object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAServerMutation) OldHasActivated(ctx context.Context) (v bool, err error) {
+func (m *TAServerMutation) OldIsActive(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHasActivated is only allowed on UpdateOne operations")
+		return v, errors.New("OldIsActive is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHasActivated requires an ID field in the mutation")
+		return v, errors.New("OldIsActive requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHasActivated: %w", err)
+		return v, fmt.Errorf("querying old value for OldIsActive: %w", err)
 	}
-	return oldValue.HasActivated, nil
+	return oldValue.IsActive, nil
 }
 
-// ResetHasActivated resets all changes to the "has_activated" field.
-func (m *TAServerMutation) ResetHasActivated() {
-	m.has_activated = nil
+// ResetIsActive resets all changes to the "is_active" field.
+func (m *TAServerMutation) ResetIsActive() {
+	m.is_active = nil
 }
 
 // AddViolationIDs adds the "violation" edge to the TAViolation entity by ids.
@@ -2284,8 +2284,8 @@ func (m *TAServerMutation) Fields() []string {
 	if m.quote != nil {
 		fields = append(fields, taserver.FieldQuote)
 	}
-	if m.has_activated != nil {
-		fields = append(fields, taserver.FieldHasActivated)
+	if m.is_active != nil {
+		fields = append(fields, taserver.FieldIsActive)
 	}
 	return fields
 }
@@ -2301,8 +2301,8 @@ func (m *TAServerMutation) Field(name string) (ent.Value, bool) {
 		return m.PublicKey()
 	case taserver.FieldQuote:
 		return m.Quote()
-	case taserver.FieldHasActivated:
-		return m.HasActivated()
+	case taserver.FieldIsActive:
+		return m.IsActive()
 	}
 	return nil, false
 }
@@ -2318,8 +2318,8 @@ func (m *TAServerMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldPublicKey(ctx)
 	case taserver.FieldQuote:
 		return m.OldQuote(ctx)
-	case taserver.FieldHasActivated:
-		return m.OldHasActivated(ctx)
+	case taserver.FieldIsActive:
+		return m.OldIsActive(ctx)
 	}
 	return nil, fmt.Errorf("unknown TAServer field %s", name)
 }
@@ -2350,12 +2350,12 @@ func (m *TAServerMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetQuote(v)
 		return nil
-	case taserver.FieldHasActivated:
+	case taserver.FieldIsActive:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetHasActivated(v)
+		m.SetIsActive(v)
 		return nil
 	}
 	return fmt.Errorf("unknown TAServer field %s", name)
@@ -2415,8 +2415,8 @@ func (m *TAServerMutation) ResetField(name string) error {
 	case taserver.FieldQuote:
 		m.ResetQuote()
 		return nil
-	case taserver.FieldHasActivated:
-		m.ResetHasActivated()
+	case taserver.FieldIsActive:
+		m.ResetIsActive()
 		return nil
 	}
 	return fmt.Errorf("unknown TAServer field %s", name)

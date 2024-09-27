@@ -72,7 +72,7 @@ var (
 		{Name: "domain", Type: field.TypeString},
 		{Name: "public_key", Type: field.TypeBytes},
 		{Name: "quote", Type: field.TypeString},
-		{Name: "has_activated", Type: field.TypeBool},
+		{Name: "is_active", Type: field.TypeBool, Default: false},
 		{Name: "ta_server_code", Type: field.TypeInt, Nullable: true},
 		{Name: "ta_server_service", Type: field.TypeInt, Nullable: true},
 	}
