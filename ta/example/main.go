@@ -31,14 +31,12 @@ func main() {
 				Value: "true",
 			})
 
-			fmt.Fprintf(w, `
-				We will redirect verifier after 3 second....
-				<script>
-					setTimeout(() => {
-						location.href = '%v'
-					}, 3000)
-				</script>
-				`, config.Verifiers[0]+REDIRECT_PATH)
+			fmt.Fprintln(w, `We open verifier....<br/>`)
+			fmt.Fprintln(w, `<script>`)
+			for _, v := range config.Verifiers {
+				fmt.Fprintf(w, `open('%v')\n`, v)
+			}
+			fmt.Fprintln(w, `</script>`)
 		}
 
 		fmt.Fprintln(w, "Hello from TA running on TEE :)")
