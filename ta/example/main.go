@@ -7,7 +7,7 @@ import (
 	"github.com/akakou/ra_webs/ta"
 )
 
-const REDIRECT_PATH = "/app/redirect/"
+const REDIRECT_PATH = "/app/verification-status/"
 
 func main() {
 	config, err := ta.DefaultConfig()
