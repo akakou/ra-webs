@@ -26,17 +26,6 @@ const App = () => {
         setIsValid(v)
         setMessage(message)
 
-        if (v) {
-            setTimeout(() => {
-                if (localStorage.stopAutoRedirect == 'true') {
-                    setMessage(VALID_AND_STOP_MESSAGE)
-                    return
-                }
-
-                window.location = document.referrer
-
-            }, 5000)
-        }
     }, []);
 
     return (
@@ -50,14 +39,6 @@ const App = () => {
             <h3>Message: </h3>
             <p>{message}</p>
 
-            <input
-                type="checkbox"
-                name="subscribe"
-                defaultChecked={localStorage.stopAutoRedirect == 'true'}
-                onChange={e => {
-                    localStorage.stopAutoRedirect = e.target.checked
-                }}
-            />
             <label for="autoredirect">Do not redirect back automatically</label>
 
 
