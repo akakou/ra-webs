@@ -7,7 +7,7 @@ import (
 	"github.com/akakou/ra_webs/ta"
 )
 
-const REDIRECT_PATH = "/app/verification-status/"
+const POPUP_PATH = "/app/verification-status/"
 
 func main() {
 	config, err := ta.DefaultConfig()
@@ -32,9 +32,9 @@ func main() {
 			})
 
 			fmt.Fprintln(w, `We open verifier....<br/>`)
-			fmt.Fprintln(w, `<script>`)
+			fmt.Fprint(w, `<script>`)
 			for _, v := range config.Verifiers {
-				fmt.Fprintf(w, `open('%v')\n`, v)
+				fmt.Fprintf(w, `open('%v');`, v+POPUP_PATH)
 			}
 			fmt.Fprintln(w, `</script>`)
 		}
