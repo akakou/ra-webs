@@ -32,9 +32,9 @@ func main() {
 			})
 
 			fmt.Fprintln(w, `We open verifier....<br/>`)
-			fmt.Fprintln(w, `<script>`)
+			fmt.Fprint(w, `<script>`)
 			for _, v := range config.Verifiers {
-				fmt.Fprintf(w, `open('%v')`, v+POPUP_PATH)
+				fmt.Fprintf(w, `open('%v');`, v+POPUP_PATH)
 			}
 			fmt.Fprintln(w, `</script>`)
 		}
