@@ -17,7 +17,7 @@ const setupNotification = async (domain) => {
 
     let subscription
     try {
-        await navigator.serviceWorker.register('/static/js/sw/service-worker.js', {scope: "/app/redirect/"})
+        await navigator.serviceWorker.register('/static/js/sw/service-worker.js', {scope: "/app/verification-status/"})
         const sw = await navigator.serviceWorker.ready;
 
         subscription = await sw.pushManager.subscribe({
