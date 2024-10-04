@@ -23,10 +23,10 @@ func main() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 
-		fmt.Fprintln(w, "Hello from TA running on TEE :)")
+		fmt.Fprintln(w, "Hello from TA running on TEE :)<br/>")
 
 		for _, v := range config.Verifiers {
-			fmt.Fprintf(w, `<button onclick="window.open('%s');">Verifier Page (%s)</button><br>`, v+VERIFIER_PATH, v)
+			fmt.Fprintf(w, `<button onclick="window.open('%s');">Verifier Page (%s)</button><br/>`, v+VERIFIER_PATH, v)
 		}
 	}
 
