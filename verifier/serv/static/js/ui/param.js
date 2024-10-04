@@ -1,3 +1,3 @@
-const VALID_MESSAGE = "It will be back...after 5 sec..."
+const VALID_MESSAGE = "The verification is successful."
 const INVALID_MESSAGE = "The verification is failed."
 
