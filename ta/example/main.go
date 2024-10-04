@@ -7,7 +7,7 @@ import (
 	"github.com/akakou/ra_webs/ta"
 )
 
-const REDIRECT_PATH = "/app/redirect/"
+const VERIFIER_PATH = "/app/verification-status/"
 
 func main() {
 	config, err := ta.DefaultConfig()
@@ -23,25 +23,11 @@ func main() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 
-		_, err := r.Cookie("isFirstAccess")
+		fmt.Fprintln(w, "Hello from TA running on TEE :)<br/>")
 
-		if err != nil {
-			http.SetCookie(w, &http.Cookie{
-				Name:  "isFirstAccess",
-				Value: "true",
-			})
-
-			fmt.Fprintf(w, `
-				We will redirect verifier after 3 second....
-				<script>
-					setTimeout(() => {
-						location.href = '%v'
-					}, 3000)
-				</script>
-				`, config.Verifiers[0]+REDIRECT_PATH)
+		for _, v := range config.Verifiers {
+			fmt.Fprintf(w, `<button onclick="window.open('%s');">Verifier Page (%s)</button><br/>`, v+VERIFIER_PATH, v)
 		}
-
-		fmt.Fprintln(w, "Hello from TA running on TEE :)")
 	}
 
 	tlsConfig, err := ta.TLSConfig()

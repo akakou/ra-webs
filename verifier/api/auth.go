@@ -15,7 +15,9 @@ const (
 	ERROR_AUTHENTICATE_ADMIN        = "failed to authenticate admin"
 	ERROR_ACCESS_DOMAIN_AUTH_TARGET = "failed to access domain auth target"
 	ERROR_DOMAIN_AUTH_INVALID       = "domain auth token is invalid"
-	ERROR_QUOTE_INVALID             = "quote is invalid"
+	ERROR_QUOTE_INVALID1            = "quote is invalid (debug)"
+	ERROR_QUOTE_INVALID2            = "quote is invalid (up-to-date)"
+	ERROR_QUOTE_INVALID3            = "quote is invalid (unique)"
 )
 
 var SCHEME = "https"

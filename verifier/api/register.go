@@ -11,6 +11,7 @@ import (
 	verifiercore "github.com/akakou/ra_webs/verifier/core"
 	"github.com/akakou/ra_webs/verifier/ent"
 	"github.com/akakou/ra_webs/verifier/ent/taserver"
+	"github.com/edgelesssys/ego/attestation/tcbstatus"
 	"github.com/labstack/echo/v4"
 )
 
@@ -68,14 +69,21 @@ func DomainExist(domain string, verifier *verifiercore.Verifier) (bool, error) {
 
 func CheckValidity(uniqueId []byte, req core.RegisterRequest, exist bool, service *ent.Service, verifier *verifiercore.Verifier) error {
 	report, err := core.VerifyServer(req.Quote, req.PublicKey, service.Token)
-
 	if err != nil {
 		return err
 	}
 
+	if report.Debug {
+		return fmt.Errorf(ERROR_QUOTE_INVALID1)
+	}
+
+	if report.TCBStatus != tcbstatus.UpToDate {
+		return fmt.Errorf(ERROR_QUOTE_INVALID2)
+	}
+
 	fmt.Printf("Unique ID: %x == %x\n", report.UniqueID, uniqueId)
 	if !reflect.DeepEqual(report.UniqueID, uniqueId) {
-		return fmt.Errorf(ERROR_QUOTE_INVALID)
+		return fmt.Errorf(ERROR_QUOTE_INVALID3)
 	}
 
 	err = verifier.Monitor.PreCheck(req.Domain, exist, verifier)
