@@ -32,7 +32,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 
 func InjectSWHeader(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		c.Response().Header().Set("Service-Worker-Allowed", "/app/redirect/")
+		c.Response().Header().Set("Service-Worker-Allowed", "/app/verification-status/")
 		return next(c)
 	}
 }
