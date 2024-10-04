@@ -39,9 +39,6 @@ const App = () => {
             <h3>Message: </h3>
             <p>{message}</p>
 
-            <label for="autoredirect">Do not redirect back automatically</label>
-
-
             <br />
 
             <h2>Logs</h2>
