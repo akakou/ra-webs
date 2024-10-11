@@ -3,9 +3,7 @@ const TableCompornent = ({ logs }) => {
 
     const rows = logs.map((server, index) =>
         <tr key={index}>
-            <td>
-                {index + 1}
-            </td>
+            <td>{server.id}</td>
             <td>{server.domain}</td>
             <td>{server.edges.code.unique_id}</td>
             <td>
@@ -17,6 +15,7 @@ const TableCompornent = ({ logs }) => {
                 <a href={gitRepo(server)}>{gitRepo(server)}</a>
             </td>
             <td>{(!!server.is_active).toString()}</td>
+            <td>{(server.edges.violation.length == 0).toString()}</td>
         </tr>
     );
 
@@ -30,6 +29,7 @@ const TableCompornent = ({ logs }) => {
                     <th>crt.sh ID</th>
                     <th>Git Repository</th>
                     <th>Activated</th>
+                    <th>Violated</th>
                 </tr>
             </thead>
             <tbody>
