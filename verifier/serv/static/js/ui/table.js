@@ -9,8 +9,8 @@ const TableCompornent = ({ logs }) => {
             <td>{server.domain}</td>
             <td>{server.edges.code.unique_id}</td>
             <td>
-                <a href={"https://crt.sh?id="+server.server.monitor_log_id}>
-                {server.server.monitor_log_id}
+                <a href={"https://crt.sh?id="+server.monitor_log_id}>
+                {server.monitor_log_id}
                 </a>
             </td>
             <td>
