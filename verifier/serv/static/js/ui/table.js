@@ -15,7 +15,7 @@ const TableCompornent = ({ logs }) => {
                 <a href={gitRepo(server)}>{gitRepo(server)}</a>
             </td>
             <td>{(!!server.is_active).toString()}</td>
-            <td>{(server.edges.violation.length == 0).toString()}</td>
+            <td>{(!!server.edges.violation).toString()}</td>
         </tr>
     );
 
