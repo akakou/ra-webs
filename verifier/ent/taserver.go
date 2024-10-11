@@ -24,6 +24,8 @@ type TAServer struct {
 	PublicKey []byte `json:"public_key,omitempty"`
 	// Quote holds the value of the "quote" field.
 	Quote string `json:"quote,omitempty"`
+	// MonitorLogID holds the value of the "monitor_log_id" field.
+	MonitorLogID int `json:"monitor_log_id,omitempty"`
 	// IsActive holds the value of the "is_active" field.
 	IsActive bool `json:"is_active,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -102,7 +104,7 @@ func (*TAServer) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case taserver.FieldIsActive:
 			values[i] = new(sql.NullBool)
-		case taserver.FieldID:
+		case taserver.FieldID, taserver.FieldMonitorLogID:
 			values[i] = new(sql.NullInt64)
 		case taserver.FieldDomain, taserver.FieldQuote:
 			values[i] = new(sql.NullString)
@@ -148,6 +150,12 @@ func (ts *TAServer) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field quote", values[i])
 			} else if value.Valid {
 				ts.Quote = value.String
+			}
+		case taserver.FieldMonitorLogID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field monitor_log_id", values[i])
+			} else if value.Valid {
+				ts.MonitorLogID = int(value.Int64)
 			}
 		case taserver.FieldIsActive:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -233,6 +241,9 @@ func (ts *TAServer) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("quote=")
 	builder.WriteString(ts.Quote)
+	builder.WriteString(", ")
+	builder.WriteString("monitor_log_id=")
+	builder.WriteString(fmt.Sprintf("%v", ts.MonitorLogID))
 	builder.WriteString(", ")
 	builder.WriteString("is_active=")
 	builder.WriteString(fmt.Sprintf("%v", ts.IsActive))
