@@ -9,8 +9,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var PostReloadDBApi = goutils.EchoRoute[core.Verifier]{
-	Method: goutils.POST,
+var GetReloadDBApi = goutils.EchoRoute[core.Verifier]{
+	Method: goutils.GET,
 	Path:   "/reloaddb",
 	F: func(verifier *core.Verifier) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
