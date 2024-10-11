@@ -1795,6 +1795,8 @@ type TAServerMutation struct {
 	domain              *string
 	public_key          *[]byte
 	quote               *string
+	monitor_log_id      *int
+	addmonitor_log_id   *int
 	is_active           *bool
 	clearedFields       map[string]struct{}
 	violation           map[int]struct{}
@@ -2016,6 +2018,62 @@ func (m *TAServerMutation) OldQuote(ctx context.Context) (v string, err error) {
 // ResetQuote resets all changes to the "quote" field.
 func (m *TAServerMutation) ResetQuote() {
 	m.quote = nil
+}
+
+// SetMonitorLogID sets the "monitor_log_id" field.
+func (m *TAServerMutation) SetMonitorLogID(i int) {
+	m.monitor_log_id = &i
+	m.addmonitor_log_id = nil
+}
+
+// MonitorLogID returns the value of the "monitor_log_id" field in the mutation.
+func (m *TAServerMutation) MonitorLogID() (r int, exists bool) {
+	v := m.monitor_log_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMonitorLogID returns the old "monitor_log_id" field's value of the TAServer entity.
+// If the TAServer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TAServerMutation) OldMonitorLogID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMonitorLogID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMonitorLogID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMonitorLogID: %w", err)
+	}
+	return oldValue.MonitorLogID, nil
+}
+
+// AddMonitorLogID adds i to the "monitor_log_id" field.
+func (m *TAServerMutation) AddMonitorLogID(i int) {
+	if m.addmonitor_log_id != nil {
+		*m.addmonitor_log_id += i
+	} else {
+		m.addmonitor_log_id = &i
+	}
+}
+
+// AddedMonitorLogID returns the value that was added to the "monitor_log_id" field in this mutation.
+func (m *TAServerMutation) AddedMonitorLogID() (r int, exists bool) {
+	v := m.addmonitor_log_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMonitorLogID resets all changes to the "monitor_log_id" field.
+func (m *TAServerMutation) ResetMonitorLogID() {
+	m.monitor_log_id = nil
+	m.addmonitor_log_id = nil
 }
 
 // SetIsActive sets the "is_active" field.
@@ -2274,7 +2332,7 @@ func (m *TAServerMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TAServerMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.domain != nil {
 		fields = append(fields, taserver.FieldDomain)
 	}
@@ -2283,6 +2341,9 @@ func (m *TAServerMutation) Fields() []string {
 	}
 	if m.quote != nil {
 		fields = append(fields, taserver.FieldQuote)
+	}
+	if m.monitor_log_id != nil {
+		fields = append(fields, taserver.FieldMonitorLogID)
 	}
 	if m.is_active != nil {
 		fields = append(fields, taserver.FieldIsActive)
@@ -2301,6 +2362,8 @@ func (m *TAServerMutation) Field(name string) (ent.Value, bool) {
 		return m.PublicKey()
 	case taserver.FieldQuote:
 		return m.Quote()
+	case taserver.FieldMonitorLogID:
+		return m.MonitorLogID()
 	case taserver.FieldIsActive:
 		return m.IsActive()
 	}
@@ -2318,6 +2381,8 @@ func (m *TAServerMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldPublicKey(ctx)
 	case taserver.FieldQuote:
 		return m.OldQuote(ctx)
+	case taserver.FieldMonitorLogID:
+		return m.OldMonitorLogID(ctx)
 	case taserver.FieldIsActive:
 		return m.OldIsActive(ctx)
 	}
@@ -2350,6 +2415,13 @@ func (m *TAServerMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetQuote(v)
 		return nil
+	case taserver.FieldMonitorLogID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMonitorLogID(v)
+		return nil
 	case taserver.FieldIsActive:
 		v, ok := value.(bool)
 		if !ok {
@@ -2364,13 +2436,21 @@ func (m *TAServerMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *TAServerMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addmonitor_log_id != nil {
+		fields = append(fields, taserver.FieldMonitorLogID)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *TAServerMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case taserver.FieldMonitorLogID:
+		return m.AddedMonitorLogID()
+	}
 	return nil, false
 }
 
@@ -2379,6 +2459,13 @@ func (m *TAServerMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *TAServerMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case taserver.FieldMonitorLogID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMonitorLogID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown TAServer numeric field %s", name)
 }
@@ -2414,6 +2501,9 @@ func (m *TAServerMutation) ResetField(name string) error {
 		return nil
 	case taserver.FieldQuote:
 		m.ResetQuote()
+		return nil
+	case taserver.FieldMonitorLogID:
+		m.ResetMonitorLogID()
 		return nil
 	case taserver.FieldIsActive:
 		m.ResetIsActive()
@@ -2571,20 +2661,18 @@ func (m *TAServerMutation) ResetEdge(name string) error {
 // TAViolationMutation represents an operation that mutates the TAViolation nodes in the graph.
 type TAViolationMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *int
-	created_at        *time.Time
-	monitor_log_id    *int
-	addmonitor_log_id *int
-	clearedFields     map[string]struct{}
-	server            *int
-	clearedserver     bool
-	service           *int
-	clearedservice    bool
-	done              bool
-	oldValue          func(context.Context) (*TAViolation, error)
-	predicates        []predicate.TAViolation
+	op             Op
+	typ            string
+	id             *int
+	created_at     *time.Time
+	clearedFields  map[string]struct{}
+	server         *int
+	clearedserver  bool
+	service        *int
+	clearedservice bool
+	done           bool
+	oldValue       func(context.Context) (*TAViolation, error)
+	predicates     []predicate.TAViolation
 }
 
 var _ ent.Mutation = (*TAViolationMutation)(nil)
@@ -2721,62 +2809,6 @@ func (m *TAViolationMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetMonitorLogID sets the "monitor_log_id" field.
-func (m *TAViolationMutation) SetMonitorLogID(i int) {
-	m.monitor_log_id = &i
-	m.addmonitor_log_id = nil
-}
-
-// MonitorLogID returns the value of the "monitor_log_id" field in the mutation.
-func (m *TAViolationMutation) MonitorLogID() (r int, exists bool) {
-	v := m.monitor_log_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldMonitorLogID returns the old "monitor_log_id" field's value of the TAViolation entity.
-// If the TAViolation object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAViolationMutation) OldMonitorLogID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMonitorLogID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMonitorLogID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMonitorLogID: %w", err)
-	}
-	return oldValue.MonitorLogID, nil
-}
-
-// AddMonitorLogID adds i to the "monitor_log_id" field.
-func (m *TAViolationMutation) AddMonitorLogID(i int) {
-	if m.addmonitor_log_id != nil {
-		*m.addmonitor_log_id += i
-	} else {
-		m.addmonitor_log_id = &i
-	}
-}
-
-// AddedMonitorLogID returns the value that was added to the "monitor_log_id" field in this mutation.
-func (m *TAViolationMutation) AddedMonitorLogID() (r int, exists bool) {
-	v := m.addmonitor_log_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetMonitorLogID resets all changes to the "monitor_log_id" field.
-func (m *TAViolationMutation) ResetMonitorLogID() {
-	m.monitor_log_id = nil
-	m.addmonitor_log_id = nil
-}
-
 // SetServerID sets the "server" edge to the TAServer entity by id.
 func (m *TAViolationMutation) SetServerID(id int) {
 	m.server = &id
@@ -2889,12 +2921,9 @@ func (m *TAViolationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TAViolationMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 1)
 	if m.created_at != nil {
 		fields = append(fields, taviolation.FieldCreatedAt)
-	}
-	if m.monitor_log_id != nil {
-		fields = append(fields, taviolation.FieldMonitorLogID)
 	}
 	return fields
 }
@@ -2906,8 +2935,6 @@ func (m *TAViolationMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case taviolation.FieldCreatedAt:
 		return m.CreatedAt()
-	case taviolation.FieldMonitorLogID:
-		return m.MonitorLogID()
 	}
 	return nil, false
 }
@@ -2919,8 +2946,6 @@ func (m *TAViolationMutation) OldField(ctx context.Context, name string) (ent.Va
 	switch name {
 	case taviolation.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case taviolation.FieldMonitorLogID:
-		return m.OldMonitorLogID(ctx)
 	}
 	return nil, fmt.Errorf("unknown TAViolation field %s", name)
 }
@@ -2937,13 +2962,6 @@ func (m *TAViolationMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case taviolation.FieldMonitorLogID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetMonitorLogID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown TAViolation field %s", name)
 }
@@ -2951,21 +2969,13 @@ func (m *TAViolationMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *TAViolationMutation) AddedFields() []string {
-	var fields []string
-	if m.addmonitor_log_id != nil {
-		fields = append(fields, taviolation.FieldMonitorLogID)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *TAViolationMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case taviolation.FieldMonitorLogID:
-		return m.AddedMonitorLogID()
-	}
 	return nil, false
 }
 
@@ -2974,13 +2984,6 @@ func (m *TAViolationMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *TAViolationMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case taviolation.FieldMonitorLogID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddMonitorLogID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown TAViolation numeric field %s", name)
 }
@@ -3010,9 +3013,6 @@ func (m *TAViolationMutation) ResetField(name string) error {
 	switch name {
 	case taviolation.FieldCreatedAt:
 		m.ResetCreatedAt()
-		return nil
-	case taviolation.FieldMonitorLogID:
-		m.ResetMonitorLogID()
 		return nil
 	}
 	return fmt.Errorf("unknown TAViolation field %s", name)

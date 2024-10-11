@@ -1,17 +1,22 @@
 const TableCompornent = ({ logs }) => {
+    const gitRepo = s => `${s.edges.code.repository}/tree/${s.edges.code.commit_id}`
+
     const rows = logs.map((server, index) =>
         <tr key={index}>
             <td>
                 {index + 1}
             </td>
             <td>{server.domain}</td>
-            <td>{server.edges.code.repository}</td>
-            <td>{server.edges.code.commit_id}</td>
             <td>{server.edges.code.unique_id}</td>
+            <td>
+                <a href={"https://crt.sh?id="+server.server.monitor_log_id}>
+                {server.server.monitor_log_id}
+                </a>
+            </td>
+            <td>
+                <a href={gitRepo(server)}>{gitRepo(server)}</a>
+            </td>
             <td>{(!!server.is_active).toString()}</td>
-            <td><a
-                href={`${server.edges.code.repository}/tree/${server.edges.code.commit_id}`}
-            >Go to Repo</a></td>
         </tr>
     );
 
@@ -21,11 +26,10 @@ const TableCompornent = ({ logs }) => {
                 <tr>
                     <th>Index</th>
                     <th>Domain</th>
-                    <th>Repository</th>
-                    <th>Commit_ID</th>
                     <th>Unique ID</th>
+                    <th>crt.sh ID</th>
+                    <th>Git Repository</th>
                     <th>Activated</th>
-                    <th>Repository Link</th>
                 </tr>
             </thead>
             <tbody>
