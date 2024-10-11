@@ -18,6 +18,8 @@ const (
 	FieldPublicKey = "public_key"
 	// FieldQuote holds the string denoting the quote field in the database.
 	FieldQuote = "quote"
+	// FieldMonitorLogID holds the string denoting the monitor_log_id field in the database.
+	FieldMonitorLogID = "monitor_log_id"
 	// FieldIsActive holds the string denoting the is_active field in the database.
 	FieldIsActive = "is_active"
 	// EdgeViolation holds the string denoting the violation edge name in mutations.
@@ -66,6 +68,7 @@ var Columns = []string{
 	FieldDomain,
 	FieldPublicKey,
 	FieldQuote,
+	FieldMonitorLogID,
 	FieldIsActive,
 }
 
@@ -112,6 +115,11 @@ func ByDomain(opts ...sql.OrderTermOption) OrderOption {
 // ByQuote orders the results by the quote field.
 func ByQuote(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldQuote, opts...).ToFunc()
+}
+
+// ByMonitorLogID orders the results by the monitor_log_id field.
+func ByMonitorLogID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMonitorLogID, opts...).ToFunc()
 }
 
 // ByIsActive orders the results by the is_active field.

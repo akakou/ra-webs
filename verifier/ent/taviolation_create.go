@@ -36,12 +36,6 @@ func (tvc *TAViolationCreate) SetNillableCreatedAt(t *time.Time) *TAViolationCre
 	return tvc
 }
 
-// SetMonitorLogID sets the "monitor_log_id" field.
-func (tvc *TAViolationCreate) SetMonitorLogID(i int) *TAViolationCreate {
-	tvc.mutation.SetMonitorLogID(i)
-	return tvc
-}
-
 // SetServerID sets the "server" edge to the TAServer entity by ID.
 func (tvc *TAViolationCreate) SetServerID(id int) *TAViolationCreate {
 	tvc.mutation.SetServerID(id)
@@ -126,9 +120,6 @@ func (tvc *TAViolationCreate) check() error {
 	if _, ok := tvc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "TAViolation.created_at"`)}
 	}
-	if _, ok := tvc.mutation.MonitorLogID(); !ok {
-		return &ValidationError{Name: "monitor_log_id", err: errors.New(`ent: missing required field "TAViolation.monitor_log_id"`)}
-	}
 	return nil
 }
 
@@ -158,10 +149,6 @@ func (tvc *TAViolationCreate) createSpec() (*TAViolation, *sqlgraph.CreateSpec) 
 	if value, ok := tvc.mutation.CreatedAt(); ok {
 		_spec.SetField(taviolation.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
-	}
-	if value, ok := tvc.mutation.MonitorLogID(); ok {
-		_spec.SetField(taviolation.FieldMonitorLogID, field.TypeInt, value)
-		_node.MonitorLogID = value
 	}
 	if nodes := tvc.mutation.ServerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

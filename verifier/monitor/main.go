@@ -163,10 +163,12 @@ func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 			return
 		}
 
+		serv.Update().SetMonitorLogID(option.ID).Save(*verifier.DB.Ctx)
+
 		err = Check(cert.PublicKey, serv)
 		if err != nil {
 			fmt.Printf("Violation: %v\n", err)
-			revoke(option.ID, serv, verifier)
+			revoke(serv, verifier)
 			return
 		}
 
