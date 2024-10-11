@@ -13,4 +13,6 @@ func Route(e *echo.Group, verifier *verifiercore.Verifier) {
 
 	GetServerFromDomainApi.Set(e, verifier)
 	PostNotifierApi.Set(e, verifier)
+
+	PostReloadDBApi.Set(e, verifier)
 }
