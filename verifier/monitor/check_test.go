@@ -45,7 +45,7 @@ func testPass(t *testing.T) {
 	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
 	keyBuf := x509.MarshalPKCS1PublicKey(&priv.PublicKey)
 
-	server := verifier.DB.Client.TAServer.Create().SetDomain("example.com").SetPublicKey(keyBuf).SetQuote("1").SetIsActive(false).SaveX(*verifier.DB.Ctx)
+	server := verifier.DB.Client.TAServer.Create().SetDomain("example.com").SetPublicKey(keyBuf).SetQuote("1").SetMonitorLogID(0).SetIsActive(false).SaveX(*verifier.DB.Ctx)
 	verifier.DB.Client.TACode.Create().SetUniqueID([]byte{1, 2, 3}).SetRepository("").SetCommitID("").SaveX(*verifier.DB.Ctx)
 
 	err := Check(&priv.PublicKey, server)
