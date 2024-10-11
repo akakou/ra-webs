@@ -29,27 +29,6 @@ func (tvu *TAViolationUpdate) Where(ps ...predicate.TAViolation) *TAViolationUpd
 	return tvu
 }
 
-// SetMonitorLogID sets the "monitor_log_id" field.
-func (tvu *TAViolationUpdate) SetMonitorLogID(i int) *TAViolationUpdate {
-	tvu.mutation.ResetMonitorLogID()
-	tvu.mutation.SetMonitorLogID(i)
-	return tvu
-}
-
-// SetNillableMonitorLogID sets the "monitor_log_id" field if the given value is not nil.
-func (tvu *TAViolationUpdate) SetNillableMonitorLogID(i *int) *TAViolationUpdate {
-	if i != nil {
-		tvu.SetMonitorLogID(*i)
-	}
-	return tvu
-}
-
-// AddMonitorLogID adds i to the "monitor_log_id" field.
-func (tvu *TAViolationUpdate) AddMonitorLogID(i int) *TAViolationUpdate {
-	tvu.mutation.AddMonitorLogID(i)
-	return tvu
-}
-
 // SetServerID sets the "server" edge to the TAServer entity by ID.
 func (tvu *TAViolationUpdate) SetServerID(id int) *TAViolationUpdate {
 	tvu.mutation.SetServerID(id)
@@ -141,12 +120,6 @@ func (tvu *TAViolationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := tvu.mutation.MonitorLogID(); ok {
-		_spec.SetField(taviolation.FieldMonitorLogID, field.TypeInt, value)
-	}
-	if value, ok := tvu.mutation.AddedMonitorLogID(); ok {
-		_spec.AddField(taviolation.FieldMonitorLogID, field.TypeInt, value)
-	}
 	if tvu.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -223,27 +196,6 @@ type TAViolationUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *TAViolationMutation
-}
-
-// SetMonitorLogID sets the "monitor_log_id" field.
-func (tvuo *TAViolationUpdateOne) SetMonitorLogID(i int) *TAViolationUpdateOne {
-	tvuo.mutation.ResetMonitorLogID()
-	tvuo.mutation.SetMonitorLogID(i)
-	return tvuo
-}
-
-// SetNillableMonitorLogID sets the "monitor_log_id" field if the given value is not nil.
-func (tvuo *TAViolationUpdateOne) SetNillableMonitorLogID(i *int) *TAViolationUpdateOne {
-	if i != nil {
-		tvuo.SetMonitorLogID(*i)
-	}
-	return tvuo
-}
-
-// AddMonitorLogID adds i to the "monitor_log_id" field.
-func (tvuo *TAViolationUpdateOne) AddMonitorLogID(i int) *TAViolationUpdateOne {
-	tvuo.mutation.AddMonitorLogID(i)
-	return tvuo
 }
 
 // SetServerID sets the "server" edge to the TAServer entity by ID.
@@ -366,12 +318,6 @@ func (tvuo *TAViolationUpdateOne) sqlSave(ctx context.Context) (_node *TAViolati
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := tvuo.mutation.MonitorLogID(); ok {
-		_spec.SetField(taviolation.FieldMonitorLogID, field.TypeInt, value)
-	}
-	if value, ok := tvuo.mutation.AddedMonitorLogID(); ok {
-		_spec.AddField(taviolation.FieldMonitorLogID, field.TypeInt, value)
 	}
 	if tvuo.mutation.ServerCleared() {
 		edge := &sqlgraph.EdgeSpec{

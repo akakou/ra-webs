@@ -21,8 +21,6 @@ type TAViolation struct {
 	ID int `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
-	// MonitorLogID holds the value of the "monitor_log_id" field.
-	MonitorLogID int `json:"monitor_log_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TAViolationQuery when eager-loading is set.
 	Edges                TAViolationEdges `json:"edges"`
@@ -73,7 +71,7 @@ func (*TAViolation) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case taviolation.FieldID, taviolation.FieldMonitorLogID:
+		case taviolation.FieldID:
 			values[i] = new(sql.NullInt64)
 		case taviolation.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -107,12 +105,6 @@ func (tv *TAViolation) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				tv.CreatedAt = value.Time
-			}
-		case taviolation.FieldMonitorLogID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field monitor_log_id", values[i])
-			} else if value.Valid {
-				tv.MonitorLogID = int(value.Int64)
 			}
 		case taviolation.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -176,9 +168,6 @@ func (tv *TAViolation) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", tv.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(tv.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("monitor_log_id=")
-	builder.WriteString(fmt.Sprintf("%v", tv.MonitorLogID))
 	builder.WriteByte(')')
 	return builder.String()
 }

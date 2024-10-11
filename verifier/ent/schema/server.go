@@ -17,6 +17,7 @@ func (TAServer) Fields() []ent.Field {
 		field.String("domain"),
 		field.Bytes("public_key"),
 		field.String("quote"),
+		field.Int("monitor_log_id"),
 		field.Bool("is_active").Default(false),
 	}
 }

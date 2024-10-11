@@ -68,6 +68,11 @@ func Quote(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldEQ(FieldQuote, v))
 }
 
+// MonitorLogID applies equality check predicate on the "monitor_log_id" field. It's identical to MonitorLogIDEQ.
+func MonitorLogID(v int) predicate.TAServer {
+	return predicate.TAServer(sql.FieldEQ(FieldMonitorLogID, v))
+}
+
 // IsActive applies equality check predicate on the "is_active" field. It's identical to IsActiveEQ.
 func IsActive(v bool) predicate.TAServer {
 	return predicate.TAServer(sql.FieldEQ(FieldIsActive, v))
@@ -241,6 +246,46 @@ func QuoteEqualFold(v string) predicate.TAServer {
 // QuoteContainsFold applies the ContainsFold predicate on the "quote" field.
 func QuoteContainsFold(v string) predicate.TAServer {
 	return predicate.TAServer(sql.FieldContainsFold(FieldQuote, v))
+}
+
+// MonitorLogIDEQ applies the EQ predicate on the "monitor_log_id" field.
+func MonitorLogIDEQ(v int) predicate.TAServer {
+	return predicate.TAServer(sql.FieldEQ(FieldMonitorLogID, v))
+}
+
+// MonitorLogIDNEQ applies the NEQ predicate on the "monitor_log_id" field.
+func MonitorLogIDNEQ(v int) predicate.TAServer {
+	return predicate.TAServer(sql.FieldNEQ(FieldMonitorLogID, v))
+}
+
+// MonitorLogIDIn applies the In predicate on the "monitor_log_id" field.
+func MonitorLogIDIn(vs ...int) predicate.TAServer {
+	return predicate.TAServer(sql.FieldIn(FieldMonitorLogID, vs...))
+}
+
+// MonitorLogIDNotIn applies the NotIn predicate on the "monitor_log_id" field.
+func MonitorLogIDNotIn(vs ...int) predicate.TAServer {
+	return predicate.TAServer(sql.FieldNotIn(FieldMonitorLogID, vs...))
+}
+
+// MonitorLogIDGT applies the GT predicate on the "monitor_log_id" field.
+func MonitorLogIDGT(v int) predicate.TAServer {
+	return predicate.TAServer(sql.FieldGT(FieldMonitorLogID, v))
+}
+
+// MonitorLogIDGTE applies the GTE predicate on the "monitor_log_id" field.
+func MonitorLogIDGTE(v int) predicate.TAServer {
+	return predicate.TAServer(sql.FieldGTE(FieldMonitorLogID, v))
+}
+
+// MonitorLogIDLT applies the LT predicate on the "monitor_log_id" field.
+func MonitorLogIDLT(v int) predicate.TAServer {
+	return predicate.TAServer(sql.FieldLT(FieldMonitorLogID, v))
+}
+
+// MonitorLogIDLTE applies the LTE predicate on the "monitor_log_id" field.
+func MonitorLogIDLTE(v int) predicate.TAServer {
+	return predicate.TAServer(sql.FieldLTE(FieldMonitorLogID, v))
 }
 
 // IsActiveEQ applies the EQ predicate on the "is_active" field.

@@ -41,6 +41,12 @@ func (tsc *TAServerCreate) SetQuote(s string) *TAServerCreate {
 	return tsc
 }
 
+// SetMonitorLogID sets the "monitor_log_id" field.
+func (tsc *TAServerCreate) SetMonitorLogID(i int) *TAServerCreate {
+	tsc.mutation.SetMonitorLogID(i)
+	return tsc
+}
+
 // SetIsActive sets the "is_active" field.
 func (tsc *TAServerCreate) SetIsActive(b bool) *TAServerCreate {
 	tsc.mutation.SetIsActive(b)
@@ -175,6 +181,9 @@ func (tsc *TAServerCreate) check() error {
 	if _, ok := tsc.mutation.Quote(); !ok {
 		return &ValidationError{Name: "quote", err: errors.New(`ent: missing required field "TAServer.quote"`)}
 	}
+	if _, ok := tsc.mutation.MonitorLogID(); !ok {
+		return &ValidationError{Name: "monitor_log_id", err: errors.New(`ent: missing required field "TAServer.monitor_log_id"`)}
+	}
 	if _, ok := tsc.mutation.IsActive(); !ok {
 		return &ValidationError{Name: "is_active", err: errors.New(`ent: missing required field "TAServer.is_active"`)}
 	}
@@ -215,6 +224,10 @@ func (tsc *TAServerCreate) createSpec() (*TAServer, *sqlgraph.CreateSpec) {
 	if value, ok := tsc.mutation.Quote(); ok {
 		_spec.SetField(taserver.FieldQuote, field.TypeString, value)
 		_node.Quote = value
+	}
+	if value, ok := tsc.mutation.MonitorLogID(); ok {
+		_spec.SetField(taserver.FieldMonitorLogID, field.TypeInt, value)
+		_node.MonitorLogID = value
 	}
 	if value, ok := tsc.mutation.IsActive(); ok {
 		_spec.SetField(taserver.FieldIsActive, field.TypeBool, value)

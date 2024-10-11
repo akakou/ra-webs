@@ -65,6 +65,27 @@ func (tsu *TAServerUpdate) SetNillableQuote(s *string) *TAServerUpdate {
 	return tsu
 }
 
+// SetMonitorLogID sets the "monitor_log_id" field.
+func (tsu *TAServerUpdate) SetMonitorLogID(i int) *TAServerUpdate {
+	tsu.mutation.ResetMonitorLogID()
+	tsu.mutation.SetMonitorLogID(i)
+	return tsu
+}
+
+// SetNillableMonitorLogID sets the "monitor_log_id" field if the given value is not nil.
+func (tsu *TAServerUpdate) SetNillableMonitorLogID(i *int) *TAServerUpdate {
+	if i != nil {
+		tsu.SetMonitorLogID(*i)
+	}
+	return tsu
+}
+
+// AddMonitorLogID adds i to the "monitor_log_id" field.
+func (tsu *TAServerUpdate) AddMonitorLogID(i int) *TAServerUpdate {
+	tsu.mutation.AddMonitorLogID(i)
+	return tsu
+}
+
 // SetIsActive sets the "is_active" field.
 func (tsu *TAServerUpdate) SetIsActive(b bool) *TAServerUpdate {
 	tsu.mutation.SetIsActive(b)
@@ -250,6 +271,12 @@ func (tsu *TAServerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tsu.mutation.Quote(); ok {
 		_spec.SetField(taserver.FieldQuote, field.TypeString, value)
+	}
+	if value, ok := tsu.mutation.MonitorLogID(); ok {
+		_spec.SetField(taserver.FieldMonitorLogID, field.TypeInt, value)
+	}
+	if value, ok := tsu.mutation.AddedMonitorLogID(); ok {
+		_spec.AddField(taserver.FieldMonitorLogID, field.TypeInt, value)
 	}
 	if value, ok := tsu.mutation.IsActive(); ok {
 		_spec.SetField(taserver.FieldIsActive, field.TypeBool, value)
@@ -453,6 +480,27 @@ func (tsuo *TAServerUpdateOne) SetNillableQuote(s *string) *TAServerUpdateOne {
 	if s != nil {
 		tsuo.SetQuote(*s)
 	}
+	return tsuo
+}
+
+// SetMonitorLogID sets the "monitor_log_id" field.
+func (tsuo *TAServerUpdateOne) SetMonitorLogID(i int) *TAServerUpdateOne {
+	tsuo.mutation.ResetMonitorLogID()
+	tsuo.mutation.SetMonitorLogID(i)
+	return tsuo
+}
+
+// SetNillableMonitorLogID sets the "monitor_log_id" field if the given value is not nil.
+func (tsuo *TAServerUpdateOne) SetNillableMonitorLogID(i *int) *TAServerUpdateOne {
+	if i != nil {
+		tsuo.SetMonitorLogID(*i)
+	}
+	return tsuo
+}
+
+// AddMonitorLogID adds i to the "monitor_log_id" field.
+func (tsuo *TAServerUpdateOne) AddMonitorLogID(i int) *TAServerUpdateOne {
+	tsuo.mutation.AddMonitorLogID(i)
 	return tsuo
 }
 
@@ -671,6 +719,12 @@ func (tsuo *TAServerUpdateOne) sqlSave(ctx context.Context) (_node *TAServer, er
 	}
 	if value, ok := tsuo.mutation.Quote(); ok {
 		_spec.SetField(taserver.FieldQuote, field.TypeString, value)
+	}
+	if value, ok := tsuo.mutation.MonitorLogID(); ok {
+		_spec.SetField(taserver.FieldMonitorLogID, field.TypeInt, value)
+	}
+	if value, ok := tsuo.mutation.AddedMonitorLogID(); ok {
+		_spec.AddField(taserver.FieldMonitorLogID, field.TypeInt, value)
 	}
 	if value, ok := tsuo.mutation.IsActive(); ok {
 		_spec.SetField(taserver.FieldIsActive, field.TypeBool, value)

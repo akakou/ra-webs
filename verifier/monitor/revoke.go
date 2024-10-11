@@ -5,7 +5,7 @@ import (
 	"github.com/akakou/ra_webs/verifier/ent"
 )
 
-func revoke(id int, serv *ent.TAServer, verifier *core.Verifier) {
+func revoke(serv *ent.TAServer, verifier *core.Verifier) {
 	err := core.NotifierViolation(serv.Domain, verifier)
 	if err != nil {
 		panic(err)
@@ -13,7 +13,6 @@ func revoke(id int, serv *ent.TAServer, verifier *core.Verifier) {
 
 	verifier.DB.Client.TAViolation.Create().
 		SetServer(serv).
-		SetMonitorLogID(id).
 		SaveX(*verifier.DB.Ctx)
 
 	service := serv.QueryService().OnlyX(*verifier.DB.Ctx)

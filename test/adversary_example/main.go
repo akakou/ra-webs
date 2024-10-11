@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -9,11 +10,16 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 )
 
+var VerifierBase = "https://rare-charter-vancouver-many.trycloudflare.com"
+
 func main() {
 	e := echo.New()
 
+	body := "<button onclick=\"window.open('%v/app/verification-status/');\">Verifier Page (https://rare-charter-vancouver-many.trycloudflare.com)</button><br/>"
+	body = fmt.Sprintf(body, VerifierBase)
+
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
+		return c.HTML(http.StatusOK, body)
 	})
 
 	autoTLSManager := autocert.Manager{
