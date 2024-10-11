@@ -127,6 +127,7 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 		SetCode(code).
 		SetPublicKey(req.PublicKey).
 		SetQuote(req.Quote).
+		SetMonitorLogID(0).
 		SetIsActive(false)
 
 	_, err := taServerCreate.Save(*verifier.DB.Ctx)
