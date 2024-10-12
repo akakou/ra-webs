@@ -55,5 +55,5 @@ docker compose -f ta up
 
 The functionality was verified using the following:
 
-Google Chrome 129.0.6668.58
-DC1s v2 (1 vCPU, 4 GiB memory)
+- Google Chrome 129.0.6668.58
+- DC1s v2 (1 vCPU, 4 GiB memory)
