@@ -40,7 +40,5 @@ services:
     restart: unless-stopped
     image: cloudflare/cloudflared
     command: tunnel --url http://verifier:8080 
-    env_file:
-      - test/env/tunnel.env
     profiles:
       - verifier
