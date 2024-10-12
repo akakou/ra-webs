@@ -32,7 +32,7 @@ cp test/env/common.env.template test/env/common.env
 
 
 ```sh
-docker compose -f verifier up
+docker compose -f compose.test.yaml --profile verifier up
 ```
 
 #### 4. Configure the TA Environment Files
@@ -47,7 +47,7 @@ cp test/env/ta.env.template test/env/ta.env
 #### 5. Run the Example TA
 
 ```sh
-docker compose -f ta up
+docker compose -f compose.test.yaml --profile ta up
 ```
 
 
