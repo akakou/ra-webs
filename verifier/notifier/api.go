@@ -1,6 +1,7 @@
 package notifier
 
 import (
+	"errors"
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
@@ -31,17 +32,24 @@ var postSubscribeApi = goutils.EchoRoute[core.Verifier]{
 				return err
 			}
 
-			serv, err := verifier.DB.Client.TAServer.
+			tx, err := verifier.DB.Client.Tx(*verifier.DB.Ctx)
+			if err != nil {
+				return err
+			}
+
+			serv, err := tx.TAServer.
 				Query().
+				Select(taserver.FieldID).
 				Where(taserver.DomainEQ(data.Domain)).
 				Order(ent.Desc(taserver.FieldID)).
 				First(*verifier.DB.Ctx)
 
 			if err != nil {
-				return err
+				rerr := tx.Rollback()
+				return errors.Join(err, rerr)
 			}
 
-			subscription, err := verifier.DB.Client.Subscription.
+			subscription, err := tx.Subscription.
 				Create().
 				SetEndpoint(data.Subscription.Endpoint).
 				SetAuth(data.Subscription.Keys.Auth).
@@ -50,7 +58,15 @@ var postSubscribeApi = goutils.EchoRoute[core.Verifier]{
 				Save(*verifier.DB.Ctx)
 
 			if err != nil {
-				return err
+				rerr := tx.Rollback()
+				return errors.Join(err, rerr)
+			}
+
+			err = tx.Commit()
+
+			if err != nil {
+				rerr := tx.Rollback()
+				return errors.Join(err, rerr)
 			}
 
 			return c.JSON(http.StatusOK, subscription)
