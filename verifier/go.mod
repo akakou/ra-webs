@@ -2,6 +2,14 @@ module github.com/akakou/ra_webs/verifier
 
 go 1.22.4
 
+replace github.com/akakou/go-utils => ../thirdparty/go-utils
+
+replace github.com/akakou/crtsh => ../thirdparty/crtsh
+
+replace github.com/akakou/ctstream => ../thirdparty/ctstream
+
+replace github.com/akakou/extract-embed => ../thirdparty/extract-embed
+
 require (
 	entgo.io/ent v0.12.5
 	github.com/SherClockHolmes/webpush-go v1.3.0
@@ -9,8 +17,8 @@ require (
 	github.com/akakou/ctstream v0.0.36
 	github.com/akakou/extract-embed v0.0.1
 	github.com/akakou/go-utils v0.0.7
-	github.com/akakou/golang-utils v0.0.1
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
+	github.com/edgelesssys/ego v1.5.0
 	github.com/google/certificate-transparency-go v1.2.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/mattn/go-sqlite3 v1.14.22
@@ -29,7 +37,6 @@ require (
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/edgelesssys/ego v1.5.0 // indirect
 	github.com/getsentry/sentry-go v0.27.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect

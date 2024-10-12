@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	golangutils "github.com/akakou/go-utils"
 	goutils "github.com/akakou/go-utils"
-	golangutils "github.com/akakou/golang-utils"
 	"github.com/akakou/ra_webs/verifier/core"
 	"github.com/akakou/ra_webs/verifier/monitor"
 	notifier "github.com/akakou/ra_webs/verifier/notifier"

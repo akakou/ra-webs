@@ -8,7 +8,7 @@ import (
 
 	"testing"
 
-	golangutils "github.com/akakou/golang-utils"
+	golangutils "github.com/akakou/go-utils"
 	rawebscore "github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/verifier/core"
 	"github.com/stretchr/testify/assert"

@@ -10,16 +10,6 @@ github.com/SherClockHolmes/webpush-go v1.3.0 h1:CAu3FvEE9QS4drc3iKNgpBWFfGqNthKl
 github.com/SherClockHolmes/webpush-go v1.3.0/go.mod h1:AxRHmJuYwKGG1PVgYzToik1lphQvDnqFYDqimHvwhIw=
 github.com/agext/levenshtein v1.2.1 h1:QmvMAjj2aEICytGiWzmxoE0x2KZvE0fvmqMOfy2tjT8=
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
-github.com/akakou/crtsh v0.0.4 h1:GGpY8XMjRwTNl6KdHYSJDbmN6napLb0+YN+heNoqrC8=
-github.com/akakou/crtsh v0.0.4/go.mod h1:0oFospryauw/FDhIOqsRcfxDjlW6u2AJqLlU3G63qIc=
-github.com/akakou/ctstream v0.0.36 h1:9ZZvikGwVWI0VQ7YPOmXTQqMX4nHJl8Cfq6+aOe2D7g=
-github.com/akakou/ctstream v0.0.36/go.mod h1:uV9Gcb5w+KKsjC7KbY9zsLey9R56ieUTjHXFNZccF/A=
-github.com/akakou/extract-embed v0.0.1 h1:ZyD2z0PNqJ53OHmD1cgMFic0wF6t8Yu1a7PcSXtqlnQ=
-github.com/akakou/extract-embed v0.0.1/go.mod h1:K6bU3dJXVAMp5NY13kABMAPO3+n/q2mApVBayLhjbbI=
-github.com/akakou/go-utils v0.0.7 h1:8d7bREgYdQztk+fhhMbtdrfbYz5UQTXR1zZhxVEzQSM=
-github.com/akakou/go-utils v0.0.7/go.mod h1:SzaGwCsdvWDAhbTx5nEOggW2E4VAFPTWtVn2oXL3zdA=
-github.com/akakou/golang-utils v0.0.1 h1:edSwI2WtOjJd569ANOTUZU2floH/pM7qPVSHKupe6Ow=
-github.com/akakou/golang-utils v0.0.1/go.mod h1:DgqXEneVs1Xk8ueLYOJ0ZFeUe5vQcO/S/rY2ISnuZGs=
 github.com/andybalholm/cascadia v1.3.1 h1:nhxRkql1kdYCc8Snf7D5/D3spOX+dBgjA6u8x004T2c=
 github.com/andybalholm/cascadia v1.3.1/go.mod h1:R4bJ1UQfqADjvDa4P6HZHLh/3OxWWEqc0Sk8XGwHqvA=
 github.com/apparentlymart/go-textseg/v13 v13.0.0 h1:Y+KvPE1NYz0xl601PVImeQfFyEy6iT90AvPUL1NNfNw=

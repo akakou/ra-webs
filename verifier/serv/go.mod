@@ -6,6 +6,14 @@ replace github.com/akakou/ra_webs/core => ../../core
 
 replace github.com/akakou/ra_webs/verifier => ../
 
+replace github.com/akakou/go-utils => ../../thirdparty/go-utils
+
+replace github.com/akakou/crtsh => ../../thirdparty/crtsh
+
+replace github.com/akakou/ctstream => ../../thirdparty/ctstream
+
+replace github.com/akakou/extract-embed => ../../thirdparty/extract-embed
+
 require (
 	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
 	github.com/akakou/ra_webs/verifier v0.0.0-00010101000000-000000000000
@@ -40,7 +48,6 @@ require (
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/akakou/ctstream v0.0.36 // indirect
 	github.com/akakou/go-utils v0.0.7 // indirect
-	github.com/akakou/golang-utils v0.0.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/edgelesssys/ego v1.5.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
