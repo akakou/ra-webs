@@ -26,7 +26,7 @@ type CrtshMonitor struct {
 	interval   time.Duration
 }
 
-var DefaultInterval = 10 * time.Second
+var DefaultInterval = 10 * time.Minute
 
 func NewCrtshMonitor(interval time.Duration, ctx context.Context) *CrtshMonitor {
 	return &CrtshMonitor{
