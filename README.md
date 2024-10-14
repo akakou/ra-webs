@@ -3,6 +3,8 @@
 
 RA-WEBs is a protocol that enables browsers to verify proof of Remote Attestation while maintaining compatibility.
 
+This [demo](https://demo0-ra-webs.eastus.cloudapp.azure.com/) is deployed example TA.
+
 ### Dependencies
 
 - An Azure instance with Intel SGX (for running the example TA)
