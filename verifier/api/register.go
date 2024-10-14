@@ -139,6 +139,7 @@ func RegisterServer(req *core.ServerRequest, code *ent.TACode, service *ent.Serv
 }
 
 func RegisterCode(output *builder.BuildOutput, req *core.CodeRequest, service *ent.Service, verifier *verifiercore.Verifier) (*ent.TACode, error) {
+	// NOTE: We blind the repository for double blind review
 	blindRepo := "this is hidden for double blind review"
 	codeCreate := verifier.DB.Client.TACode.
 		Create().
