@@ -11,7 +11,6 @@ import (
 	"github.com/akakou/ra_webs/verifier/api"
 	"github.com/akakou/ra_webs/verifier/notifier"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 //go:embed views/*/*.html
@@ -54,7 +53,7 @@ func main() {
 	staticSubFS := echo.MustSubFS(staticEmbedFiles, "static")
 	e.StaticFS("/static", staticSubFS)
 
-	e.Use(middleware.Logger())
+	// e.Use(middleware.Logger())
 	e.Use(InjectSWHeader)
 
 	e.Debug = true
