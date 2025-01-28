@@ -34,38 +34,6 @@ type CTMonitor[T ctcore.CtClient] struct {
 
 var DefaultInterval = 10 * time.Second
 
-func NewCrtshMonitor(interval time.Duration, ctx context.Context) *CTMonitor[*crtsh.CrtshCTClient] {
-	return &CTMonitor[*crtsh.CrtshCTClient]{
-		ctx:      ctx,
-		interval: interval,
-		callback: CTMonitorCallbacks[*crtsh.CrtshCTClient]{
-			defCTClient:  crtsh.NewCTClient,
-			defCTsStream: crtsh.DefaultCTsStream,
-			prepareFast:  loadFirstToCrthshClient,
-		},
-	}
-}
-
-func DefaultCrtshMonitor(ctx context.Context) *CTMonitor[*crtsh.CrtshCTClient] {
-	return NewCrtshMonitor(DefaultInterval, ctx)
-}
-
-func NewSSLMateMonitor(interval time.Duration, ctx context.Context) *CTMonitor[*crtsh.CrtshCTClient] {
-	return &CTMonitor[*crtsh.CrtshCTClient]{
-		ctx:      ctx,
-		interval: interval,
-		callback: CTMonitorCallbacks[*crtsh.CrtshCTClient]{
-			defCTClient:  crtsh.NewCTClient,
-			defCTsStream: crtsh.DefaultCTsStream,
-			prepareFast:  loadFirstToCrthshClient,
-		},
-	}
-}
-
-func DefaultCrtshMonitor(ctx context.Context) *CTMonitor[*crtsh.CrtshCTClient] {
-	return NewCrtshMonitor(DefaultInterval, ctx)
-}
-
 func (a *CTMonitor[T]) Setup(verifier *core.Verifier) error {
 	err := a.loadStream(verifier)
 	if err != nil {

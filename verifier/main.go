@@ -34,7 +34,7 @@ func DefaultVerifier() (*core.Verifier, error) {
 		return nil, fmt.Errorf("%s: %w", core.ERROR_INIT_DB, err)
 	}
 
-	monitor := monitor.DefaultCrtshMonitor(context.Background())
+	monitor := monitor.DefaultSSLMateMonitor(context.Background())
 
 	notifier, err := notifier.DefaultBrowserNotifier()
 	if err != nil {
