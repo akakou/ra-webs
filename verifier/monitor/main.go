@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -16,33 +17,56 @@ import (
 	ctx509 "github.com/google/certificate-transparency-go/x509"
 )
 
-type CrtshStream = ctcore.CTStream[*ctcore.CTClients[*crtsh.CrtshCTClient]]
+type CTMonitorCallbacks[T ctcore.CtClient] struct {
+	defCTClient  ctcore.DefaultCTClient[T]
+	defCTsStream DefaultCTsStream[T]
+	prepareFast  PrepareFastToCTClient[T]
+}
 
-type CrtshMonitor struct {
-	ctstream   *CrtshStream
+type CTMonitor[T ctcore.CtClient] struct {
+	ctstream   *ctcore.CTStream[*ctcore.CTClients[T]]
 	ctx        context.Context
 	lastLogger *goutils.File[int]
 	last       int
 	interval   time.Duration
+	callback   CTMonitorCallbacks[T]
 }
 
 var DefaultInterval = 10 * time.Second
 
-func NewCrtshMonitor(interval time.Duration, ctx context.Context) *CrtshMonitor {
-	return &CrtshMonitor{
+func NewCrtshMonitor(interval time.Duration, ctx context.Context) *CTMonitor[*crtsh.CrtshCTClient] {
+	return &CTMonitor[*crtsh.CrtshCTClient]{
 		ctx:      ctx,
 		interval: interval,
+		callback: CTMonitorCallbacks[*crtsh.CrtshCTClient]{
+			defCTClient:  crtsh.NewCTClient,
+			defCTsStream: crtsh.DefaultCTsStream,
+			prepareFast:  loadFirstToCrthshClient,
+		},
 	}
 }
 
-func DefaultCrtshMonitor(ctx context.Context) *CrtshMonitor {
-	return &CrtshMonitor{
+func DefaultCrtshMonitor(ctx context.Context) *CTMonitor[*crtsh.CrtshCTClient] {
+	return NewCrtshMonitor(DefaultInterval, ctx)
+}
+
+func NewSSLMateMonitor(interval time.Duration, ctx context.Context) *CTMonitor[*crtsh.CrtshCTClient] {
+	return &CTMonitor[*crtsh.CrtshCTClient]{
 		ctx:      ctx,
-		interval: DefaultInterval,
+		interval: interval,
+		callback: CTMonitorCallbacks[*crtsh.CrtshCTClient]{
+			defCTClient:  crtsh.NewCTClient,
+			defCTsStream: crtsh.DefaultCTsStream,
+			prepareFast:  loadFirstToCrthshClient,
+		},
 	}
 }
 
-func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
+func DefaultCrtshMonitor(ctx context.Context) *CTMonitor[*crtsh.CrtshCTClient] {
+	return NewCrtshMonitor(DefaultInterval, ctx)
+}
+
+func (a *CTMonitor[T]) Setup(verifier *core.Verifier) error {
 	err := a.loadStream(verifier)
 	if err != nil {
 		return err
@@ -60,7 +84,7 @@ func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 		return err
 	}
 
-	a.loadFirstToClient()
+	a.callback.prepareFast(a.ctstream.Client.Clients, a.last)
 
 	err = a.ctstream.Init()
 
@@ -71,7 +95,7 @@ func (a *CrtshMonitor) Setup(verifier *core.Verifier) error {
 	return err
 }
 
-func (a *CrtshMonitor) PreCheck(domain string, exist bool, verifier *core.Verifier) error {
+func (a *CTMonitor[T]) PreCheck(domain string, exist bool, verifier *core.Verifier) error {
 	if exist {
 		return nil
 	}
@@ -82,19 +106,19 @@ func (a *CrtshMonitor) PreCheck(domain string, exist bool, verifier *core.Verifi
 	}
 
 	if len(resp) != 0 {
-		return fmt.Errorf(ERROR_FAILED_OTHER_CERTIFICATE_EXISTS)
+		return errors.New(ERROR_FAILED_OTHER_CERTIFICATE_EXISTS)
 	}
 
 	return nil
 
 }
 
-func (a *CrtshMonitor) Register(domain string, exist bool, verifier *core.Verifier) error {
+func (a *CTMonitor[T]) Register(domain string, exist bool, verifier *core.Verifier) error {
 	if exist {
 		return nil
 	}
 
-	client, _, err := crtsh.AddByDomain(domain, a.ctstream.Client)
+	client, _, err := ctcore.AddByDomain(domain, a.callback.defCTClient, a.ctstream.Client, nil)
 	if err != nil {
 		return err
 	}
@@ -110,7 +134,7 @@ func (a *CrtshMonitor) Register(domain string, exist bool, verifier *core.Verifi
 	return err
 }
 
-func (a *CrtshMonitor) updateInterval() {
+func (a *CTMonitor[T]) updateInterval() {
 	l := len(a.ctstream.Client.Clients)
 	if l == 0 {
 		l = 1
@@ -122,7 +146,7 @@ func (a *CrtshMonitor) updateInterval() {
 	fmt.Printf("New Interval: %v \n", a.ctstream.Sleep)
 }
 
-func (a *CrtshMonitor) Run(verifier *core.Verifier) {
+func (a *CTMonitor[T]) Run(verifier *core.Verifier) {
 	a.ctstream.Run(func(cert *ctx509.Certificate, i int, params any, err error) {
 		if err == nil {
 		} else if err.Error() == direct.ERROR_FAILED_TO_NEW {
@@ -143,7 +167,7 @@ func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 
 		clientsLen := len(a.ctstream.Client.Clients)
 		lastClient := a.ctstream.Client.Clients[clientsLen-1]
-		if option.Client.Domain == lastClient.Domain {
+		if option.Client.Domain == lastClient.GetDomain() {
 			err := a.lastLogger.Store(&a.last)
 			if err != nil {
 				panic(err)

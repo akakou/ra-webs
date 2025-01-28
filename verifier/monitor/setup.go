@@ -1,10 +1,12 @@
 package monitor
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/akakou/ctstream/monitor/crtsh"
+	ctcore "github.com/akakou/ctstream/core"
 	goutils "github.com/akakou/go-utils"
+
 	"github.com/akakou/ra_webs/verifier/core"
 	"github.com/akakou/ra_webs/verifier/ent/taserver"
 )
@@ -13,7 +15,10 @@ const LOG_FILE_PATH = "last-log.txt"
 
 const FILE_EMPLTY = "strconv.Atoi: parsing \"\": invalid syntax"
 
-func (a *CrtshMonitor) loadStream(verifier *core.Verifier) error {
+type DefaultCTsStream[T ctcore.CtClient] func([]string, context.Context) (*ctcore.CTStream[*ctcore.CTClients[T]], error)
+type PrepareFastToCTClient[T ctcore.CtClient] func([]T, int)
+
+func (a *CTMonitor[T]) loadStream(verifier *core.Verifier) error {
 	servers, err := verifier.DB.Client.TAServer.Query().Select(taserver.FieldDomain).All(*verifier.DB.Ctx)
 	if err != nil {
 		return fmt.Errorf("%v:%v", ERROR_SELECT_TAS, err)
@@ -24,7 +29,7 @@ func (a *CrtshMonitor) loadStream(verifier *core.Verifier) error {
 		domains = append(domains, serv.Domain)
 	}
 
-	a.ctstream, err = crtsh.DefaultCTsStream(domains, a.ctx)
+	a.ctstream, err = a.callback.defCTsStream(domains, a.ctx)
 	if err != nil {
 		return fmt.Errorf("%v:%v", ERROR_FAILED_TO_NEW_CTSSTREAM, err)
 	}
@@ -32,7 +37,7 @@ func (a *CrtshMonitor) loadStream(verifier *core.Verifier) error {
 	return nil
 }
 
-func (a *CrtshMonitor) loadFileLogger() error {
+func (a *CTMonitor[T]) loadFileLogger() error {
 	lastLogger, err := goutils.OpenIntFile(LOG_FILE_PATH)
 	if err != nil {
 		return err
@@ -43,7 +48,7 @@ func (a *CrtshMonitor) loadFileLogger() error {
 	return nil
 }
 
-func (a *CrtshMonitor) loadFirst() error {
+func (a *CTMonitor[T]) loadFirst() error {
 	first, err := a.lastLogger.Restore()
 
 	if err == nil {
@@ -57,10 +62,4 @@ func (a *CrtshMonitor) loadFirst() error {
 
 	fmt.Printf("First: %v\n", *first)
 	return nil
-}
-
-func (a *CrtshMonitor) loadFirstToClient() {
-	for _, c := range a.ctstream.Client.Clients {
-		c.ID = a.last
-	}
 }
