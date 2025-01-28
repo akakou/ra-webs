@@ -2,11 +2,9 @@ package monitor
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
-	crtapi "github.com/akakou/crtsh"
 	ctcore "github.com/akakou/ctstream/core"
 	"github.com/akakou/ctstream/direct"
 	"github.com/akakou/ctstream/monitor/crtsh"
@@ -21,6 +19,7 @@ type CTMonitorCallbacks[T ctcore.CtClient] struct {
 	defCTClient  ctcore.DefaultCTClient[T]
 	defCTsStream DefaultCTsStream[T]
 	prepareFast  PrepareFastToCTClient[T]
+	precheck     PreCheck
 }
 
 type CTMonitor[T ctcore.CtClient] struct {
@@ -68,17 +67,12 @@ func (a *CTMonitor[T]) PreCheck(domain string, exist bool, verifier *core.Verifi
 		return nil
 	}
 
-	resp, err := crtapi.Fetch(domain, crtapi.EXCLUDE_EXPIRED)
+	err := a.callback.precheck(domain, verifier)
 	if err != nil {
 		return err
 	}
 
-	if len(resp) != 0 {
-		return errors.New(ERROR_FAILED_OTHER_CERTIFICATE_EXISTS)
-	}
-
 	return nil
-
 }
 
 func (a *CTMonitor[T]) Register(domain string, exist bool, verifier *core.Verifier) error {

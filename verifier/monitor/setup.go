@@ -17,6 +17,7 @@ const FILE_EMPLTY = "strconv.Atoi: parsing \"\": invalid syntax"
 
 type DefaultCTsStream[T ctcore.CtClient] func([]string, context.Context) (*ctcore.CTStream[*ctcore.CTClients[T]], error)
 type PrepareFastToCTClient[T ctcore.CtClient] func([]T, int)
+type PreCheck func(domain string, verifier *core.Verifier) error
 
 func (a *CTMonitor[T]) loadStream(verifier *core.Verifier) error {
 	servers, err := verifier.DB.Client.TAServer.Query().Select(taserver.FieldDomain).All(*verifier.DB.Ctx)

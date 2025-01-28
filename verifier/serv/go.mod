@@ -16,7 +16,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
 	github.com/akakou/crtsh v0.0.4 // indirect
 	github.com/akakou/extract-embed v0.0.1 // indirect
-	github.com/akakou/sslmate-cert-search-api v0.0.4 // indirect
+	github.com/akakou/sslmate-cert-search-api v0.0.14 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/cockroachdb/errors v1.11.3 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
