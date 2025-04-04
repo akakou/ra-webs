@@ -152,7 +152,6 @@ func (a *CrtshMonitor) Run(verifier *core.Verifier) {
 
 		serv, err := verifier.DB.Client.TAServer.
 			Query().
-			Where(taserver.DomainEQ(domain)).
 			Order(ent.Desc(taserver.FieldID)).
 			First(*verifier.DB.Ctx)
 

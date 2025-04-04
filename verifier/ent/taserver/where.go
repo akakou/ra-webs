@@ -53,11 +53,6 @@ func IDLTE(id int) predicate.TAServer {
 	return predicate.TAServer(sql.FieldLTE(FieldID, id))
 }
 
-// Domain applies equality check predicate on the "domain" field. It's identical to DomainEQ.
-func Domain(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldDomain, v))
-}
-
 // PublicKey applies equality check predicate on the "public_key" field. It's identical to PublicKeyEQ.
 func PublicKey(v []byte) predicate.TAServer {
 	return predicate.TAServer(sql.FieldEQ(FieldPublicKey, v))
@@ -76,71 +71,6 @@ func MonitorLogID(v int) predicate.TAServer {
 // IsActive applies equality check predicate on the "is_active" field. It's identical to IsActiveEQ.
 func IsActive(v bool) predicate.TAServer {
 	return predicate.TAServer(sql.FieldEQ(FieldIsActive, v))
-}
-
-// DomainEQ applies the EQ predicate on the "domain" field.
-func DomainEQ(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEQ(FieldDomain, v))
-}
-
-// DomainNEQ applies the NEQ predicate on the "domain" field.
-func DomainNEQ(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldNEQ(FieldDomain, v))
-}
-
-// DomainIn applies the In predicate on the "domain" field.
-func DomainIn(vs ...string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldIn(FieldDomain, vs...))
-}
-
-// DomainNotIn applies the NotIn predicate on the "domain" field.
-func DomainNotIn(vs ...string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldNotIn(FieldDomain, vs...))
-}
-
-// DomainGT applies the GT predicate on the "domain" field.
-func DomainGT(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldGT(FieldDomain, v))
-}
-
-// DomainGTE applies the GTE predicate on the "domain" field.
-func DomainGTE(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldGTE(FieldDomain, v))
-}
-
-// DomainLT applies the LT predicate on the "domain" field.
-func DomainLT(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldLT(FieldDomain, v))
-}
-
-// DomainLTE applies the LTE predicate on the "domain" field.
-func DomainLTE(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldLTE(FieldDomain, v))
-}
-
-// DomainContains applies the Contains predicate on the "domain" field.
-func DomainContains(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldContains(FieldDomain, v))
-}
-
-// DomainHasPrefix applies the HasPrefix predicate on the "domain" field.
-func DomainHasPrefix(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldHasPrefix(FieldDomain, v))
-}
-
-// DomainHasSuffix applies the HasSuffix predicate on the "domain" field.
-func DomainHasSuffix(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldHasSuffix(FieldDomain, v))
-}
-
-// DomainEqualFold applies the EqualFold predicate on the "domain" field.
-func DomainEqualFold(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldEqualFold(FieldDomain, v))
-}
-
-// DomainContainsFold applies the ContainsFold predicate on the "domain" field.
-func DomainContainsFold(v string) predicate.TAServer {
-	return predicate.TAServer(sql.FieldContainsFold(FieldDomain, v))
 }
 
 // PublicKeyEQ applies the EQ predicate on the "public_key" field.

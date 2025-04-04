@@ -1792,7 +1792,6 @@ type TAServerMutation struct {
 	op                  Op
 	typ                 string
 	id                  *int
-	domain              *string
 	public_key          *[]byte
 	quote               *string
 	monitor_log_id      *int
@@ -1910,42 +1909,6 @@ func (m *TAServerMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetDomain sets the "domain" field.
-func (m *TAServerMutation) SetDomain(s string) {
-	m.domain = &s
-}
-
-// Domain returns the value of the "domain" field in the mutation.
-func (m *TAServerMutation) Domain() (r string, exists bool) {
-	v := m.domain
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDomain returns the old "domain" field's value of the TAServer entity.
-// If the TAServer object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAServerMutation) OldDomain(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDomain is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDomain requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDomain: %w", err)
-	}
-	return oldValue.Domain, nil
-}
-
-// ResetDomain resets all changes to the "domain" field.
-func (m *TAServerMutation) ResetDomain() {
-	m.domain = nil
 }
 
 // SetPublicKey sets the "public_key" field.
@@ -2332,10 +2295,7 @@ func (m *TAServerMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TAServerMutation) Fields() []string {
-	fields := make([]string, 0, 5)
-	if m.domain != nil {
-		fields = append(fields, taserver.FieldDomain)
-	}
+	fields := make([]string, 0, 4)
 	if m.public_key != nil {
 		fields = append(fields, taserver.FieldPublicKey)
 	}
@@ -2356,8 +2316,6 @@ func (m *TAServerMutation) Fields() []string {
 // schema.
 func (m *TAServerMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case taserver.FieldDomain:
-		return m.Domain()
 	case taserver.FieldPublicKey:
 		return m.PublicKey()
 	case taserver.FieldQuote:
@@ -2375,8 +2333,6 @@ func (m *TAServerMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *TAServerMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case taserver.FieldDomain:
-		return m.OldDomain(ctx)
 	case taserver.FieldPublicKey:
 		return m.OldPublicKey(ctx)
 	case taserver.FieldQuote:
@@ -2394,13 +2350,6 @@ func (m *TAServerMutation) OldField(ctx context.Context, name string) (ent.Value
 // type.
 func (m *TAServerMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case taserver.FieldDomain:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDomain(v)
-		return nil
 	case taserver.FieldPublicKey:
 		v, ok := value.([]byte)
 		if !ok {
@@ -2493,9 +2442,6 @@ func (m *TAServerMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *TAServerMutation) ResetField(name string) error {
 	switch name {
-	case taserver.FieldDomain:
-		m.ResetDomain()
-		return nil
 	case taserver.FieldPublicKey:
 		m.ResetPublicKey()
 		return nil

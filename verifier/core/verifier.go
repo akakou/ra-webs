@@ -7,6 +7,7 @@ type Verifier struct {
 	Monitor    Monitor
 	Notifier   Notifier
 	AdminToken string
+	Domain     string
 }
 
 func NewVerifier(db *DB, monitor Monitor, notifier Notifier, adminToken string) (*Verifier, error) {

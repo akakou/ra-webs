@@ -14,7 +14,6 @@ type TAServer struct {
 // Fields of the TA.
 func (TAServer) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("domain"),
 		field.Bytes("public_key"),
 		field.String("quote"),
 		field.Int("monitor_log_id"),

@@ -407,12 +407,12 @@ func (tsq *TAServerQuery) WithSubscription(opts ...func(*SubscriptionQuery)) *TA
 // Example:
 //
 //	var v []struct {
-//		Domain string `json:"domain,omitempty"`
+//		PublicKey []byte `json:"public_key,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.TAServer.Query().
-//		GroupBy(taserver.FieldDomain).
+//		GroupBy(taserver.FieldPublicKey).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (tsq *TAServerQuery) GroupBy(field string, fields ...string) *TAServerGroupBy {
@@ -430,11 +430,11 @@ func (tsq *TAServerQuery) GroupBy(field string, fields ...string) *TAServerGroup
 // Example:
 //
 //	var v []struct {
-//		Domain string `json:"domain,omitempty"`
+//		PublicKey []byte `json:"public_key,omitempty"`
 //	}
 //
 //	client.TAServer.Query().
-//		Select(taserver.FieldDomain).
+//		Select(taserver.FieldPublicKey).
 //		Scan(ctx, &v)
 func (tsq *TAServerQuery) Select(fields ...string) *TAServerSelect {
 	tsq.ctx.Fields = append(tsq.ctx.Fields, fields...)

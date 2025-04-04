@@ -31,7 +31,7 @@ func init() {
 	taserverFields := schema.TAServer{}.Fields()
 	_ = taserverFields
 	// taserverDescIsActive is the schema descriptor for is_active field.
-	taserverDescIsActive := taserverFields[4].Descriptor()
+	taserverDescIsActive := taserverFields[3].Descriptor()
 	// taserver.DefaultIsActive holds the default value on creation for the is_active field.
 	taserver.DefaultIsActive = taserverDescIsActive.Default.(bool)
 	taviolationFields := schema.TAViolation{}.Fields()

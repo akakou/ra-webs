@@ -31,20 +31,6 @@ func (tsu *TAServerUpdate) Where(ps ...predicate.TAServer) *TAServerUpdate {
 	return tsu
 }
 
-// SetDomain sets the "domain" field.
-func (tsu *TAServerUpdate) SetDomain(s string) *TAServerUpdate {
-	tsu.mutation.SetDomain(s)
-	return tsu
-}
-
-// SetNillableDomain sets the "domain" field if the given value is not nil.
-func (tsu *TAServerUpdate) SetNillableDomain(s *string) *TAServerUpdate {
-	if s != nil {
-		tsu.SetDomain(*s)
-	}
-	return tsu
-}
-
 // SetPublicKey sets the "public_key" field.
 func (tsu *TAServerUpdate) SetPublicKey(b []byte) *TAServerUpdate {
 	tsu.mutation.SetPublicKey(b)
@@ -263,9 +249,6 @@ func (tsu *TAServerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := tsu.mutation.Domain(); ok {
-		_spec.SetField(taserver.FieldDomain, field.TypeString, value)
-	}
 	if value, ok := tsu.mutation.PublicKey(); ok {
 		_spec.SetField(taserver.FieldPublicKey, field.TypeBytes, value)
 	}
@@ -447,20 +430,6 @@ type TAServerUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *TAServerMutation
-}
-
-// SetDomain sets the "domain" field.
-func (tsuo *TAServerUpdateOne) SetDomain(s string) *TAServerUpdateOne {
-	tsuo.mutation.SetDomain(s)
-	return tsuo
-}
-
-// SetNillableDomain sets the "domain" field if the given value is not nil.
-func (tsuo *TAServerUpdateOne) SetNillableDomain(s *string) *TAServerUpdateOne {
-	if s != nil {
-		tsuo.SetDomain(*s)
-	}
-	return tsuo
 }
 
 // SetPublicKey sets the "public_key" field.
@@ -710,9 +679,6 @@ func (tsuo *TAServerUpdateOne) sqlSave(ctx context.Context) (_node *TAServer, er
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := tsuo.mutation.Domain(); ok {
-		_spec.SetField(taserver.FieldDomain, field.TypeString, value)
 	}
 	if value, ok := tsuo.mutation.PublicKey(); ok {
 		_spec.SetField(taserver.FieldPublicKey, field.TypeBytes, value)

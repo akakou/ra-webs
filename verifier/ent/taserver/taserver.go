@@ -12,8 +12,6 @@ const (
 	Label = "ta_server"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldDomain holds the string denoting the domain field in the database.
-	FieldDomain = "domain"
 	// FieldPublicKey holds the string denoting the public_key field in the database.
 	FieldPublicKey = "public_key"
 	// FieldQuote holds the string denoting the quote field in the database.
@@ -65,7 +63,6 @@ const (
 // Columns holds all SQL columns for taserver fields.
 var Columns = []string{
 	FieldID,
-	FieldDomain,
 	FieldPublicKey,
 	FieldQuote,
 	FieldMonitorLogID,
@@ -105,11 +102,6 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByDomain orders the results by the domain field.
-func ByDomain(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDomain, opts...).ToFunc()
 }
 
 // ByQuote orders the results by the quote field.

@@ -33,7 +33,6 @@ var postSubscribeApi = goutils.EchoRoute[core.Verifier]{
 
 			serv, err := verifier.DB.Client.TAServer.
 				Query().
-				Where(taserver.DomainEQ(data.Domain)).
 				Order(ent.Desc(taserver.FieldID)).
 				First(*verifier.DB.Ctx)
 

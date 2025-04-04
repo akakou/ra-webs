@@ -6,11 +6,7 @@ import (
 )
 
 func Route(e *echo.Group, verifier *verifiercore.Verifier) {
-	RegisterApi.Set(e, verifier)
 	GetServerApi.Set(e, verifier)
-
-	PostServiceByAdmin.Set(e, verifier)
-
 	GetServerFromDomainApi.Set(e, verifier)
 	PostNotifierApi.Set(e, verifier)
 }

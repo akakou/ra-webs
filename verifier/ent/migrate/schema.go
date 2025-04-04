@@ -69,7 +69,6 @@ var (
 	// TaServersColumns holds the columns for the "ta_servers" table.
 	TaServersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "domain", Type: field.TypeString},
 		{Name: "public_key", Type: field.TypeBytes},
 		{Name: "quote", Type: field.TypeString},
 		{Name: "monitor_log_id", Type: field.TypeInt},
@@ -85,13 +84,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ta_servers_ta_codes_code",
-				Columns:    []*schema.Column{TaServersColumns[6]},
+				Columns:    []*schema.Column{TaServersColumns[5]},
 				RefColumns: []*schema.Column{TaCodesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "ta_servers_services_service",
-				Columns:    []*schema.Column{TaServersColumns[7]},
+				Columns:    []*schema.Column{TaServersColumns[6]},
 				RefColumns: []*schema.Column{ServicesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

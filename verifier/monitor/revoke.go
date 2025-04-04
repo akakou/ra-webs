@@ -6,7 +6,7 @@ import (
 )
 
 func revoke(serv *ent.TAServer, verifier *core.Verifier) {
-	err := core.NotifierViolation(serv.Domain, verifier)
+	err := core.NotifierViolation(verifier.Domain, verifier)
 	if err != nil {
 		panic(err)
 	}

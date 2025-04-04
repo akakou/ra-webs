@@ -23,12 +23,6 @@ type TAServerCreate struct {
 	hooks    []Hook
 }
 
-// SetDomain sets the "domain" field.
-func (tsc *TAServerCreate) SetDomain(s string) *TAServerCreate {
-	tsc.mutation.SetDomain(s)
-	return tsc
-}
-
 // SetPublicKey sets the "public_key" field.
 func (tsc *TAServerCreate) SetPublicKey(b []byte) *TAServerCreate {
 	tsc.mutation.SetPublicKey(b)
@@ -172,9 +166,6 @@ func (tsc *TAServerCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tsc *TAServerCreate) check() error {
-	if _, ok := tsc.mutation.Domain(); !ok {
-		return &ValidationError{Name: "domain", err: errors.New(`ent: missing required field "TAServer.domain"`)}
-	}
 	if _, ok := tsc.mutation.PublicKey(); !ok {
 		return &ValidationError{Name: "public_key", err: errors.New(`ent: missing required field "TAServer.public_key"`)}
 	}
@@ -213,10 +204,6 @@ func (tsc *TAServerCreate) createSpec() (*TAServer, *sqlgraph.CreateSpec) {
 		_node = &TAServer{config: tsc.config}
 		_spec = sqlgraph.NewCreateSpec(taserver.Table, sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt))
 	)
-	if value, ok := tsc.mutation.Domain(); ok {
-		_spec.SetField(taserver.FieldDomain, field.TypeString, value)
-		_node.Domain = value
-	}
 	if value, ok := tsc.mutation.PublicKey(); ok {
 		_spec.SetField(taserver.FieldPublicKey, field.TypeBytes, value)
 		_node.PublicKey = value

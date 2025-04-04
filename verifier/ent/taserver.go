@@ -18,8 +18,6 @@ type TAServer struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Domain holds the value of the "domain" field.
-	Domain string `json:"domain,omitempty"`
 	// PublicKey holds the value of the "public_key" field.
 	PublicKey []byte `json:"public_key,omitempty"`
 	// Quote holds the value of the "quote" field.
@@ -106,7 +104,7 @@ func (*TAServer) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case taserver.FieldID, taserver.FieldMonitorLogID:
 			values[i] = new(sql.NullInt64)
-		case taserver.FieldDomain, taserver.FieldQuote:
+		case taserver.FieldQuote:
 			values[i] = new(sql.NullString)
 		case taserver.ForeignKeys[0]: // ta_server_code
 			values[i] = new(sql.NullInt64)
@@ -133,12 +131,6 @@ func (ts *TAServer) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			ts.ID = int(value.Int64)
-		case taserver.FieldDomain:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field domain", values[i])
-			} else if value.Valid {
-				ts.Domain = value.String
-			}
 		case taserver.FieldPublicKey:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field public_key", values[i])
@@ -233,9 +225,6 @@ func (ts *TAServer) String() string {
 	var builder strings.Builder
 	builder.WriteString("TAServer(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ts.ID))
-	builder.WriteString("domain=")
-	builder.WriteString(ts.Domain)
-	builder.WriteString(", ")
 	builder.WriteString("public_key=")
 	builder.WriteString(fmt.Sprintf("%v", ts.PublicKey))
 	builder.WriteString(", ")

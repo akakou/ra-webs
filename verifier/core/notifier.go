@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/akakou/ra_webs/verifier/ent"
-	"github.com/akakou/ra_webs/verifier/ent/taserver"
 	"github.com/labstack/echo/v4"
 )
 
@@ -30,7 +29,7 @@ const ERROR_FAILED_TO_NOTIFY = "failed to notify"
 
 func SelectSubscription(domain string, verifier *Verifier) ([]*ent.Subscription, error) {
 	result := []*ent.Subscription{}
-	servers, err := verifier.DB.Client.TAServer.Query().Where(taserver.DomainEQ(domain)).All(*verifier.DB.Ctx)
+	servers, err := verifier.DB.Client.TAServer.Query().All(*verifier.DB.Ctx)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %v", ERROR_FAILED_TO_NOTIFY, err)
 	}

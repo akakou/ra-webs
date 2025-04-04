@@ -30,8 +30,6 @@ var GetServerFromDomainApi = goutils.EchoRoute[verifiercore.Verifier]{
 	Path:   "/ta/:domain",
 	F: func(verifier *verifiercore.Verifier) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			domain := c.Param("domain")
-
 			type Res struct {
 				TA      []*ent.TAServer `json:"ta"`
 				IsValid bool            `json:"is_valid"`
@@ -49,7 +47,6 @@ var GetServerFromDomainApi = goutils.EchoRoute[verifiercore.Verifier]{
 			// fmt.Printf("domain: %v\n", domain)
 			servs, err := verifier.DB.Client.TAServer.
 				Query().
-				Where(taserver.Domain(domain)).
 				WithViolation().
 				WithCode().
 				WithService().
