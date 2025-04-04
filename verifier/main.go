@@ -8,7 +8,7 @@ import (
 	golangutils "github.com/akakou/golang-utils"
 	"github.com/akakou/ra_webs/verifier/core"
 	"github.com/akakou/ra_webs/verifier/monitor"
-	notifier "github.com/akakou/ra_webs/verifier/notifier"
+	notifier "github.com/akakou/ra_webs/verifier/serv/notifier"
 )
 
 func DefaultVerifier() (*core.Verifier, error) {
