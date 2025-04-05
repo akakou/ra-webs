@@ -73,6 +73,11 @@ func UniqueID(v []byte) predicate.ATLog {
 	return predicate.ATLog(sql.FieldEQ(FieldUniqueID, v))
 }
 
+// Signature applies equality check predicate on the "signature" field. It's identical to SignatureEQ.
+func Signature(v []byte) predicate.ATLog {
+	return predicate.ATLog(sql.FieldEQ(FieldSignature, v))
+}
+
 // IsActive applies equality check predicate on the "is_active" field. It's identical to IsActiveEQ.
 func IsActive(v bool) predicate.ATLog {
 	return predicate.ATLog(sql.FieldEQ(FieldIsActive, v))
@@ -311,6 +316,46 @@ func UniqueIDLT(v []byte) predicate.ATLog {
 // UniqueIDLTE applies the LTE predicate on the "unique_id" field.
 func UniqueIDLTE(v []byte) predicate.ATLog {
 	return predicate.ATLog(sql.FieldLTE(FieldUniqueID, v))
+}
+
+// SignatureEQ applies the EQ predicate on the "signature" field.
+func SignatureEQ(v []byte) predicate.ATLog {
+	return predicate.ATLog(sql.FieldEQ(FieldSignature, v))
+}
+
+// SignatureNEQ applies the NEQ predicate on the "signature" field.
+func SignatureNEQ(v []byte) predicate.ATLog {
+	return predicate.ATLog(sql.FieldNEQ(FieldSignature, v))
+}
+
+// SignatureIn applies the In predicate on the "signature" field.
+func SignatureIn(vs ...[]byte) predicate.ATLog {
+	return predicate.ATLog(sql.FieldIn(FieldSignature, vs...))
+}
+
+// SignatureNotIn applies the NotIn predicate on the "signature" field.
+func SignatureNotIn(vs ...[]byte) predicate.ATLog {
+	return predicate.ATLog(sql.FieldNotIn(FieldSignature, vs...))
+}
+
+// SignatureGT applies the GT predicate on the "signature" field.
+func SignatureGT(v []byte) predicate.ATLog {
+	return predicate.ATLog(sql.FieldGT(FieldSignature, v))
+}
+
+// SignatureGTE applies the GTE predicate on the "signature" field.
+func SignatureGTE(v []byte) predicate.ATLog {
+	return predicate.ATLog(sql.FieldGTE(FieldSignature, v))
+}
+
+// SignatureLT applies the LT predicate on the "signature" field.
+func SignatureLT(v []byte) predicate.ATLog {
+	return predicate.ATLog(sql.FieldLT(FieldSignature, v))
+}
+
+// SignatureLTE applies the LTE predicate on the "signature" field.
+func SignatureLTE(v []byte) predicate.ATLog {
+	return predicate.ATLog(sql.FieldLTE(FieldSignature, v))
 }
 
 // IsActiveEQ applies the EQ predicate on the "is_active" field.

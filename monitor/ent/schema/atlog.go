@@ -18,6 +18,7 @@ func (ATLog) Fields() []ent.Field {
 		field.String("repository"),
 		field.String("commit_id"),
 		field.Bytes("unique_id"),
+		field.Bytes("signature"),
 		field.Bool("is_active").Default(false),
 	}
 }

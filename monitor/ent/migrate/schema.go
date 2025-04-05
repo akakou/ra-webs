@@ -15,6 +15,7 @@ var (
 		{Name: "repository", Type: field.TypeString},
 		{Name: "commit_id", Type: field.TypeString},
 		{Name: "unique_id", Type: field.TypeBytes},
+		{Name: "signature", Type: field.TypeBytes},
 		{Name: "is_active", Type: field.TypeBool, Default: false},
 		{Name: "at_log_ta", Type: field.TypeInt, Nullable: true},
 	}
@@ -26,7 +27,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "at_logs_tas_ta",
-				Columns:    []*schema.Column{AtLogsColumns[6]},
+				Columns:    []*schema.Column{AtLogsColumns[7]},
 				RefColumns: []*schema.Column{TasColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

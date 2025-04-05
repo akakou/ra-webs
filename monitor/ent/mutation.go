@@ -45,6 +45,7 @@ type ATLogMutation struct {
 	repository    *string
 	commit_id     *string
 	unique_id     *[]byte
+	signature     *[]byte
 	is_active     *bool
 	clearedFields map[string]struct{}
 	ta            *int
@@ -296,6 +297,42 @@ func (m *ATLogMutation) ResetUniqueID() {
 	m.unique_id = nil
 }
 
+// SetSignature sets the "signature" field.
+func (m *ATLogMutation) SetSignature(b []byte) {
+	m.signature = &b
+}
+
+// Signature returns the value of the "signature" field in the mutation.
+func (m *ATLogMutation) Signature() (r []byte, exists bool) {
+	v := m.signature
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSignature returns the old "signature" field's value of the ATLog entity.
+// If the ATLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ATLogMutation) OldSignature(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSignature is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSignature requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSignature: %w", err)
+	}
+	return oldValue.Signature, nil
+}
+
+// ResetSignature resets all changes to the "signature" field.
+func (m *ATLogMutation) ResetSignature() {
+	m.signature = nil
+}
+
 // SetIsActive sets the "is_active" field.
 func (m *ATLogMutation) SetIsActive(b bool) {
 	m.is_active = &b
@@ -405,7 +442,7 @@ func (m *ATLogMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ATLogMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.evidence != nil {
 		fields = append(fields, atlog.FieldEvidence)
 	}
@@ -417,6 +454,9 @@ func (m *ATLogMutation) Fields() []string {
 	}
 	if m.unique_id != nil {
 		fields = append(fields, atlog.FieldUniqueID)
+	}
+	if m.signature != nil {
+		fields = append(fields, atlog.FieldSignature)
 	}
 	if m.is_active != nil {
 		fields = append(fields, atlog.FieldIsActive)
@@ -437,6 +477,8 @@ func (m *ATLogMutation) Field(name string) (ent.Value, bool) {
 		return m.CommitID()
 	case atlog.FieldUniqueID:
 		return m.UniqueID()
+	case atlog.FieldSignature:
+		return m.Signature()
 	case atlog.FieldIsActive:
 		return m.IsActive()
 	}
@@ -456,6 +498,8 @@ func (m *ATLogMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldCommitID(ctx)
 	case atlog.FieldUniqueID:
 		return m.OldUniqueID(ctx)
+	case atlog.FieldSignature:
+		return m.OldSignature(ctx)
 	case atlog.FieldIsActive:
 		return m.OldIsActive(ctx)
 	}
@@ -494,6 +538,13 @@ func (m *ATLogMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUniqueID(v)
+		return nil
+	case atlog.FieldSignature:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSignature(v)
 		return nil
 	case atlog.FieldIsActive:
 		v, ok := value.(bool)
@@ -562,6 +613,9 @@ func (m *ATLogMutation) ResetField(name string) error {
 		return nil
 	case atlog.FieldUniqueID:
 		m.ResetUniqueID()
+		return nil
+	case atlog.FieldSignature:
+		m.ResetSignature()
 		return nil
 	case atlog.FieldIsActive:
 		m.ResetIsActive()
