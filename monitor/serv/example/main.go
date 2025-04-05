@@ -9,7 +9,6 @@ import (
 	"github.com/akakou/ra_webs/core"
 	"github.com/akakou/ra_webs/monitor/serv"
 	"github.com/akakou/ra_webs/monitor/serv/api"
-	"github.com/akakou/ra_webs/monitor/serv/notifier"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
