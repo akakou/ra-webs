@@ -6,12 +6,12 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/akakou/ra-webs/log/api/interfacestruct"
+	logio "github.com/akakou/ra-webs/log/api/io"
 )
 
 var schema = "http://"
 
-func (logclient *LogClient) Fetch() ([]*interfacestruct.TA, error) {
+func (logclient *LogClient) Fetch() ([]*logio.TA, error) {
 	resp, err := http.Get(schema + logclient.Domain + "/ta")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch API: %w", err)
@@ -27,7 +27,7 @@ func (logclient *LogClient) Fetch() ([]*interfacestruct.TA, error) {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	var result []*interfacestruct.TA
+	var result []*logio.TA
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}

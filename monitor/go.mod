@@ -7,6 +7,7 @@ replace github.com/akakou/ra-webs/log => ../log
 require (
 	entgo.io/ent v0.14.4
 	github.com/SherClockHolmes/webpush-go v1.3.0
+	github.com/akakou/crtsh v0.0.4
 	github.com/akakou/ctstream v0.0.36
 	github.com/akakou/extract-embed v0.0.1
 	github.com/akakou/go-utils v0.0.7
@@ -15,7 +16,6 @@ require (
 	github.com/akakou/ra-webs/log v0.0.0-00010101000000-000000000000
 	github.com/cockroachdb/errors v1.11.3
 	github.com/edgelesssys/ego v1.5.0
-	github.com/google/certificate-transparency-go v1.2.1
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/mattn/go-sqlite3 v1.14.22
 )
@@ -24,7 +24,6 @@ require (
 	ariga.io/atlas v0.31.1-0.20250212144724-069be8033e83 // indirect
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
-	github.com/akakou/crtsh v0.0.4 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
@@ -36,6 +35,7 @@ require (
 	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	github.com/google/certificate-transparency-go v1.2.1 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect

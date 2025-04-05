@@ -1,4 +1,4 @@
-package interfacestruct
+package io
 
 import "github.com/akakou/ra-webs/log/ent"
 

@@ -1,7 +1,7 @@
 package monitor
 
 import (
-	"github.com/akakou/ra-webs/log/api/interfacestruct"
+	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/monitor/ent"
 )
 
@@ -39,7 +39,7 @@ func (monitor *Monitor) RevokeIncompletedCTLog(ctLogId int) {
 	monitor.Revoke(ta)
 }
 
-func (monitor *Monitor) RevokeIncompletedATLog(log *interfacestruct.TA) {
+func (monitor *Monitor) RevokeIncompletedATLog(log *io.TA) {
 	ta, err := monitor.RegisterTA([]byte(""))
 	if err != nil {
 		panic(err)
@@ -53,7 +53,7 @@ func (monitor *Monitor) RevokeIncompletedATLog(log *interfacestruct.TA) {
 	monitor.Revoke(ta)
 }
 
-func (monitor *Monitor) RevokeATLog(log *interfacestruct.TA) {
+func (monitor *Monitor) RevokeATLog(log *io.TA) {
 	ta, err := monitor.RegisterTA([]byte(""))
 	if err != nil {
 		panic(err)

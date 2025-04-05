@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/akakou/crtsh"
-	"github.com/akakou/ra-webs/log/api/interfacestruct"
+	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 )
@@ -17,7 +17,7 @@ func (monitor *Monitor) Monitor(ctLogs []crtsh.CertificateEntry) {
 	atLogs, err := monitor.LogClient.Fetch()
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
-		monitor.RevokeIncompletedATLog(&interfacestruct.TA{
+		monitor.RevokeIncompletedATLog(&io.TA{
 			Evidence:   "",
 			Signature:  []byte(""),
 			Repository: "",
@@ -36,7 +36,7 @@ func (monitor *Monitor) Monitor(ctLogs []crtsh.CertificateEntry) {
 	}
 }
 
-func (monitor *Monitor) MonitorATLog(log *interfacestruct.TA) {
+func (monitor *Monitor) MonitorATLog(log *io.TA) {
 	var err error
 
 	exist, err := monitor.DB.Client.ATLog.Query().

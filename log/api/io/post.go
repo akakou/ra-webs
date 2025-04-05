@@ -1,4 +1,4 @@
-package interfacestruct
+package io
 
 type PostRequest struct {
 	Repository string `json:"repository"`

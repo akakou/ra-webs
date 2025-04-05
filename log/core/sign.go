@@ -7,17 +7,17 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 
-	"github.com/akakou/ra-webs/log/api/interfacestruct"
+	"github.com/akakou/ra-webs/log/api/io"
 )
 
 type SignTarget struct {
-	*interfacestruct.PostRequest `json:"post_request"`
+	*io.PostRequest `json:"post_request"`
 }
 
 var Sign = sign
 var Verify = verify
 
-func sign(log *Log, req *interfacestruct.PostRequest) ([]byte, error) {
+func sign(log *Log, req *io.PostRequest) ([]byte, error) {
 	target := SignTarget{
 		PostRequest: req,
 	}
@@ -36,7 +36,7 @@ func sign(log *Log, req *interfacestruct.PostRequest) ([]byte, error) {
 	return signature, nil
 }
 
-func verify(signature []byte, domain string, req *interfacestruct.PostRequest, publicKey *rsa.PublicKey) ([]byte, error) {
+func verify(signature []byte, domain string, req *io.PostRequest, publicKey *rsa.PublicKey) ([]byte, error) {
 	target := SignTarget{
 		PostRequest: req,
 	}

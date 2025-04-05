@@ -6,7 +6,7 @@ import (
 
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra-webs/log/api/auth"
-	"github.com/akakou/ra-webs/log/api/interfacestruct"
+	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/log/core"
 	"github.com/labstack/echo/v4"
 )
@@ -16,7 +16,7 @@ var PostApi = goutils.EchoRoute[core.Log]{
 	Path:   "/ta",
 	F: func(log *core.Log) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			var req interfacestruct.PostRequest
+			var req io.PostRequest
 
 			err := auth.Authenticate(log, c)
 			if err != nil {

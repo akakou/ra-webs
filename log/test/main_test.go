@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"github.com/akakou/ra-webs/log/api"
-	"github.com/akakou/ra-webs/log/api/interfacestruct"
+	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/log/core"
 	"github.com/akakou/ra-webs/log/ent"
 	"github.com/labstack/echo/v4"
@@ -36,13 +36,13 @@ var storedData = []ent.TA{
 	},
 }
 
-var reqData = []interfacestruct.PostRequest{
-	interfacestruct.PostRequest{
+var reqData = []io.PostRequest{
+	io.PostRequest{
 		Repository: storedData[0].Repository,
 		CommitId:   storedData[0].CommitID,
 		Evidence:   storedData[0].Evidence,
 	},
-	interfacestruct.PostRequest{
+	io.PostRequest{
 		Repository: storedData[1].Repository,
 		CommitId:   storedData[1].CommitID,
 		Evidence:   storedData[1].Evidence,
@@ -75,7 +75,7 @@ func TestAll(t *testing.T) {
 	e := echo.New()
 	g := e.Group("/")
 
-	core.Sign = func(log *core.Log, req *interfacestruct.PostRequest) ([]byte, error) {
+	core.Sign = func(log *core.Log, req *io.PostRequest) ([]byte, error) {
 		return []byte("hello"), nil
 	}
 
@@ -102,7 +102,7 @@ func TestAll(t *testing.T) {
 	defer log.DB.Close()
 }
 
-func testPost(t *testing.T, counter int, data *interfacestruct.PostRequest, log *core.Log, e *echo.Echo) {
+func testPost(t *testing.T, counter int, data *io.PostRequest, log *core.Log, e *echo.Echo) {
 	reqJson, err := json.Marshal(data)
 	assert.NoError(t, err)
 
@@ -142,7 +142,7 @@ func testGet(t *testing.T, data []ent.TA, log *core.Log, e *echo.Echo) {
 }
 
 func testGetWithStart(t *testing.T, log *core.Log, e *echo.Echo) {
-	var data interfacestruct.GetResponse
+	var data io.GetResponse
 
 	rec := httptest.NewRecorder()
 
@@ -168,7 +168,7 @@ func testGetWithStart(t *testing.T, log *core.Log, e *echo.Echo) {
 }
 
 func testGetWithStartAndEnd(t *testing.T, log *core.Log, e *echo.Echo) {
-	var data interfacestruct.GetResponse
+	var data io.GetResponse
 
 	rec := httptest.NewRecorder()
 

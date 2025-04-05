@@ -9,7 +9,7 @@ import (
 	"github.com/edgelesssys/ego/attestation/tcbstatus"
 
 	core "github.com/akakou/ra-webs/core"
-	"github.com/akakou/ra-webs/log/api/interfacestruct"
+	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/monitor/builder"
 )
 
@@ -52,7 +52,7 @@ func CheckEvidence(quote string) (*attestation.Report, error) {
 	return report, nil
 }
 
-func CheckSourceHash(log *interfacestruct.TA, evidenceUniqueId []byte) error {
+func CheckSourceHash(log *io.TA, evidenceUniqueId []byte) error {
 	uniqueId, err := builder.Build(log.Repository, log.CommitID)
 	if err != nil {
 		return errors.Wrap(errBuildFailed, err.Error())

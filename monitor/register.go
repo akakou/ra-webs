@@ -1,7 +1,7 @@
 package monitor
 
 import (
-	"github.com/akakou/ra-webs/log/api/interfacestruct"
+	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/monitor/ent"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
@@ -56,7 +56,7 @@ func (monitor *Monitor) RegisterCTLog(ctLogId int, ta *ent.TA) (*ent.CTLog, erro
 	return ctLog, nil
 }
 
-func (monitor *Monitor) RegisterATLog(uniqueId []byte, log *interfacestruct.TA, ta *ent.TA) (*ent.ATLog, error) {
+func (monitor *Monitor) RegisterATLog(uniqueId []byte, log *io.TA, ta *ent.TA) (*ent.ATLog, error) {
 	atLogCreate := monitor.DB.Client.ATLog.
 		Create().
 		SetEvidence(log.Evidence).
