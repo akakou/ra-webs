@@ -10,4 +10,6 @@ var (
 	errOpenDB       = errors.New("failed to open DB")
 	errCreateSchema = errors.New("failed to create schema in DB")
 	errCreateAudit  = errors.New("failed to create monitor")
+
+	errDomainEnvironmentVariableIsEmpty = errors.New("domain environment variable is empty")
 )

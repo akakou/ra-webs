@@ -19,13 +19,14 @@ type CrtshMonitor struct {
 	Ctx      context.Context
 	Last     int
 	Interval time.Duration
-	Monitor  *monitor.Monitor
 }
 
 var DefaultInterval = 10 * time.Minute
 
-func New(domain string, interval time.Duration, monitor *monitor.Monitor, ctx context.Context) (*CrtshMonitor, error) {
-	ctclient, err := crtsh.NewCTClient(domain)
+const INITIAL_CT_DOMAIN = "example.com"
+
+func New(interval time.Duration, ctx context.Context) (*CrtshMonitor, error) {
+	ctclient, err := crtsh.NewCTClient(INITIAL_CT_DOMAIN)
 	if err != nil {
 		return nil, err
 	}
@@ -40,15 +41,16 @@ func New(domain string, interval time.Duration, monitor *monitor.Monitor, ctx co
 		Interval: interval,
 		Last:     0,
 		CtStream: ctstream,
-		Monitor:  monitor,
 	}, nil
 }
 
-func Default(domain string, monitor *monitor.Monitor, ctx context.Context) (*CrtshMonitor, error) {
-	return New(domain, DefaultInterval, monitor, ctx)
+func Default(ctx context.Context) (*CrtshMonitor, error) {
+	return New(DefaultInterval, ctx)
 }
 
-func (a *CrtshMonitor) Run() {
+func (a *CrtshMonitor) Run(monitor *monitor.Monitor) {
+	a.CtStream.Client.Domain = monitor.Domain
+
 	a.CtStream.Run(func(cert *ctx509.Certificate, i int, params any, err error) {
 		if err == nil {
 		} else if err.Error() == direct.ERROR_FAILED_TO_NEW {
@@ -61,6 +63,6 @@ func (a *CrtshMonitor) Run() {
 		option := params.(*crtsh.CrtshCTParams)
 		fmt.Printf("[received] crtid: %v", option.ID)
 
-		a.Monitor.Check(cert.PublicKey, option.ID)
+		monitor.Check(cert.PublicKey, option.ID)
 	})
 }

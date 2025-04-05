@@ -4,16 +4,16 @@ import (
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
+	"github.com/akakou/ra-webs/monitor"
 	"github.com/akakou/ra-webs/monitor/ent"
 	"github.com/akakou/ra-webs/monitor/ent/taserver"
-	"github.com/akakou/ra-webs/monitor/serv"
 	"github.com/labstack/echo/v4"
 )
 
-var postSubscribeApi = goutils.EchoRoute[serv.MonitorServer]{
+var postSubscribeApi = goutils.EchoRoute[monitor.Monitor]{
 	Method: goutils.POST,
 	Path:   "/subscription",
-	F: func(server *serv.MonitorServer) goutils.EchoRouteFunc {
+	F: func(monitor *monitor.Monitor) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			var data struct {
 				Domain       string `json:"domain"`
@@ -31,22 +31,22 @@ var postSubscribeApi = goutils.EchoRoute[serv.MonitorServer]{
 				return err
 			}
 
-			serv, err := server.Monitor.DB.Client.TAServer.
+			serv, err := monitor.DB.Client.TAServer.
 				Query().
 				Order(ent.Desc(taserver.FieldID)).
-				First(*server.Monitor.DB.Ctx)
+				First(*monitor.DB.Ctx)
 
 			if err != nil {
 				return err
 			}
 
-			subscription, err := server.Monitor.DB.Client.Subscription.
+			subscription, err := monitor.DB.Client.Subscription.
 				Create().
 				SetEndpoint(data.Subscription.Endpoint).
 				SetAuth(data.Subscription.Keys.Auth).
 				SetP256dh(data.Subscription.Keys.P256dh).
 				SetServer(serv).
-				Save(*server.Monitor.DB.Ctx)
+				Save(*monitor.DB.Ctx)
 
 			if err != nil {
 				return err
@@ -57,11 +57,11 @@ var postSubscribeApi = goutils.EchoRoute[serv.MonitorServer]{
 	},
 }
 
-func getSubscriptionConfigApi(notifier *BrowserNotifier) goutils.EchoRoute[serv.MonitorServer] {
-	return goutils.EchoRoute[serv.MonitorServer]{
+func getSubscriptionConfigApi(notifier *BrowserNotifier) goutils.EchoRoute[monitor.Monitor] {
+	return goutils.EchoRoute[monitor.Monitor]{
 		Method: goutils.GET,
 		Path:   "/config/subscription",
-		F: func(server *serv.MonitorServer) goutils.EchoRouteFunc {
+		F: func(_ *monitor.Monitor) goutils.EchoRouteFunc {
 			return func(c echo.Context) error {
 				VapidPublicKey := notifier.VapidPublicKey
 

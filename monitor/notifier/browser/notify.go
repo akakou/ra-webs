@@ -6,7 +6,6 @@ import (
 	"github.com/SherClockHolmes/webpush-go"
 	"github.com/akakou/ra-webs/monitor"
 	"github.com/akakou/ra-webs/monitor/ent"
-	"github.com/akakou/ra-webs/monitor/serv"
 	"github.com/labstack/echo/v4"
 )
 
@@ -56,8 +55,8 @@ func (notifier *BrowserNotifier) notifyOne(msg []byte, subscription *ent.Subscri
 	return err
 }
 
-func (notifier *BrowserNotifier) SetupApi(e *echo.Group, server *serv.MonitorServer) error {
-	postSubscribeApi.Set(e, server)
-	getSubscriptionConfigApi(notifier).Set(e, server)
+func (notifier *BrowserNotifier) SetupApi(e *echo.Group, monitor *monitor.Monitor) error {
+	postSubscribeApi.Set(e, monitor)
+	getSubscriptionConfigApi(notifier).Set(e, monitor)
 	return nil
 }
