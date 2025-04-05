@@ -32,7 +32,7 @@ type CTLog struct {
 // CTLogEdges holds the relations/edges for other nodes in the graph.
 type CTLogEdges struct {
 	// Violation holds the value of the violation edge.
-	Violation []*TAViolation `json:"violation,omitempty"`
+	Violation []*Violation `json:"violation,omitempty"`
 	// AtLog holds the value of the at_log edge.
 	AtLog *ATLog `json:"at_log,omitempty"`
 	// Subscription holds the value of the subscription edge.
@@ -44,7 +44,7 @@ type CTLogEdges struct {
 
 // ViolationOrErr returns the Violation value or an error if the edge
 // was not loaded in eager-loading.
-func (e CTLogEdges) ViolationOrErr() ([]*TAViolation, error) {
+func (e CTLogEdges) ViolationOrErr() ([]*Violation, error) {
 	if e.loadedTypes[0] {
 		return e.Violation, nil
 	}
@@ -135,7 +135,7 @@ func (cl *CTLog) Value(name string) (ent.Value, error) {
 }
 
 // QueryViolation queries the "violation" edge of the CTLog entity.
-func (cl *CTLog) QueryViolation() *TAViolationQuery {
+func (cl *CTLog) QueryViolation() *ViolationQuery {
 	return NewCTLogClient(cl.config).QueryViolation(cl)
 }
 

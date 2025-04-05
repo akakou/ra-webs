@@ -18,8 +18,8 @@ type Tx struct {
 	CTLog *CTLogClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
-	// TAViolation is the client for interacting with the TAViolation builders.
-	TAViolation *TAViolationClient
+	// Violation is the client for interacting with the Violation builders.
+	Violation *ViolationClient
 
 	// lazily loaded.
 	client     *Client
@@ -154,7 +154,7 @@ func (tx *Tx) init() {
 	tx.ATLog = NewATLogClient(tx.config)
 	tx.CTLog = NewCTLogClient(tx.config)
 	tx.Subscription = NewSubscriptionClient(tx.config)
-	tx.TAViolation = NewTAViolationClient(tx.config)
+	tx.Violation = NewViolationClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

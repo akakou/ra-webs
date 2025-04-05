@@ -9,12 +9,12 @@ import (
 )
 
 // TAViolation holds the schema definition for the TAViolation entity.
-type TAViolation struct {
+type Violation struct {
 	ent.Schema
 }
 
 // Fields of the TA.
-func (TAViolation) Fields() []ent.Field {
+func (Violation) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("created_at").Immutable().Default(func() time.Time {
 			return time.Now()
@@ -23,7 +23,7 @@ func (TAViolation) Fields() []ent.Field {
 }
 
 // Edges of the TA.
-func (TAViolation) Edges() []ent.Edge {
+func (Violation) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("ct_log", CTLog.Type).Unique(),
 	}

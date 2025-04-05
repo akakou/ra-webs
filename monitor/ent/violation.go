@@ -10,25 +10,25 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
-	"github.com/akakou/ra-webs/monitor/ent/taviolation"
+	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
-// TAViolation is the model entity for the TAViolation schema.
-type TAViolation struct {
+// Violation is the model entity for the Violation schema.
+type Violation struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the TAViolationQuery when eager-loading is set.
-	Edges               TAViolationEdges `json:"edges"`
-	ta_violation_ct_log *int
-	selectValues        sql.SelectValues
+	// The values are being populated by the ViolationQuery when eager-loading is set.
+	Edges            ViolationEdges `json:"edges"`
+	violation_ct_log *int
+	selectValues     sql.SelectValues
 }
 
-// TAViolationEdges holds the relations/edges for other nodes in the graph.
-type TAViolationEdges struct {
+// ViolationEdges holds the relations/edges for other nodes in the graph.
+type ViolationEdges struct {
 	// CtLog holds the value of the ct_log edge.
 	CtLog *CTLog `json:"ct_log,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -38,7 +38,7 @@ type TAViolationEdges struct {
 
 // CtLogOrErr returns the CtLog value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e TAViolationEdges) CtLogOrErr() (*CTLog, error) {
+func (e ViolationEdges) CtLogOrErr() (*CTLog, error) {
 	if e.CtLog != nil {
 		return e.CtLog, nil
 	} else if e.loadedTypes[0] {
@@ -48,15 +48,15 @@ func (e TAViolationEdges) CtLogOrErr() (*CTLog, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*TAViolation) scanValues(columns []string) ([]any, error) {
+func (*Violation) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case taviolation.FieldID:
+		case violation.FieldID:
 			values[i] = new(sql.NullInt64)
-		case taviolation.FieldCreatedAt:
+		case violation.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case taviolation.ForeignKeys[0]: // ta_violation_ct_log
+		case violation.ForeignKeys[0]: // violation_ct_log
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -66,78 +66,78 @@ func (*TAViolation) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the TAViolation fields.
-func (tv *TAViolation) assignValues(columns []string, values []any) error {
+// to the Violation fields.
+func (v *Violation) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case taviolation.FieldID:
+		case violation.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			tv.ID = int(value.Int64)
-		case taviolation.FieldCreatedAt:
+			v.ID = int(value.Int64)
+		case violation.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				tv.CreatedAt = value.Time
+				v.CreatedAt = value.Time
 			}
-		case taviolation.ForeignKeys[0]:
+		case violation.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field ta_violation_ct_log", value)
+				return fmt.Errorf("unexpected type %T for edge-field violation_ct_log", value)
 			} else if value.Valid {
-				tv.ta_violation_ct_log = new(int)
-				*tv.ta_violation_ct_log = int(value.Int64)
+				v.violation_ct_log = new(int)
+				*v.violation_ct_log = int(value.Int64)
 			}
 		default:
-			tv.selectValues.Set(columns[i], values[i])
+			v.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the TAViolation.
+// Value returns the ent.Value that was dynamically selected and assigned to the Violation.
 // This includes values selected through modifiers, order, etc.
-func (tv *TAViolation) Value(name string) (ent.Value, error) {
-	return tv.selectValues.Get(name)
+func (v *Violation) Value(name string) (ent.Value, error) {
+	return v.selectValues.Get(name)
 }
 
-// QueryCtLog queries the "ct_log" edge of the TAViolation entity.
-func (tv *TAViolation) QueryCtLog() *CTLogQuery {
-	return NewTAViolationClient(tv.config).QueryCtLog(tv)
+// QueryCtLog queries the "ct_log" edge of the Violation entity.
+func (v *Violation) QueryCtLog() *CTLogQuery {
+	return NewViolationClient(v.config).QueryCtLog(v)
 }
 
-// Update returns a builder for updating this TAViolation.
-// Note that you need to call TAViolation.Unwrap() before calling this method if this TAViolation
+// Update returns a builder for updating this Violation.
+// Note that you need to call Violation.Unwrap() before calling this method if this Violation
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (tv *TAViolation) Update() *TAViolationUpdateOne {
-	return NewTAViolationClient(tv.config).UpdateOne(tv)
+func (v *Violation) Update() *ViolationUpdateOne {
+	return NewViolationClient(v.config).UpdateOne(v)
 }
 
-// Unwrap unwraps the TAViolation entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the Violation entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (tv *TAViolation) Unwrap() *TAViolation {
-	_tx, ok := tv.config.driver.(*txDriver)
+func (v *Violation) Unwrap() *Violation {
+	_tx, ok := v.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: TAViolation is not a transactional entity")
+		panic("ent: Violation is not a transactional entity")
 	}
-	tv.config.driver = _tx.drv
-	return tv
+	v.config.driver = _tx.drv
+	return v
 }
 
 // String implements the fmt.Stringer.
-func (tv *TAViolation) String() string {
+func (v *Violation) String() string {
 	var builder strings.Builder
-	builder.WriteString("TAViolation(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", tv.ID))
+	builder.WriteString("Violation(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", v.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(tv.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(v.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// TAViolations is a parsable slice of TAViolation.
-type TAViolations []*TAViolation
+// Violations is a parsable slice of Violation.
+type Violations []*Violation

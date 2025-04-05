@@ -14,7 +14,7 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
-	"github.com/akakou/ra-webs/monitor/ent/taviolation"
+	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
 // CTLogUpdate is the builder for updating CTLog entities.
@@ -71,17 +71,17 @@ func (clu *CTLogUpdate) SetNillableIsActive(b *bool) *CTLogUpdate {
 	return clu
 }
 
-// AddViolationIDs adds the "violation" edge to the TAViolation entity by IDs.
+// AddViolationIDs adds the "violation" edge to the Violation entity by IDs.
 func (clu *CTLogUpdate) AddViolationIDs(ids ...int) *CTLogUpdate {
 	clu.mutation.AddViolationIDs(ids...)
 	return clu
 }
 
-// AddViolation adds the "violation" edges to the TAViolation entity.
-func (clu *CTLogUpdate) AddViolation(t ...*TAViolation) *CTLogUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// AddViolation adds the "violation" edges to the Violation entity.
+func (clu *CTLogUpdate) AddViolation(v ...*Violation) *CTLogUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return clu.AddViolationIDs(ids...)
 }
@@ -125,23 +125,23 @@ func (clu *CTLogUpdate) Mutation() *CTLogMutation {
 	return clu.mutation
 }
 
-// ClearViolation clears all "violation" edges to the TAViolation entity.
+// ClearViolation clears all "violation" edges to the Violation entity.
 func (clu *CTLogUpdate) ClearViolation() *CTLogUpdate {
 	clu.mutation.ClearViolation()
 	return clu
 }
 
-// RemoveViolationIDs removes the "violation" edge to TAViolation entities by IDs.
+// RemoveViolationIDs removes the "violation" edge to Violation entities by IDs.
 func (clu *CTLogUpdate) RemoveViolationIDs(ids ...int) *CTLogUpdate {
 	clu.mutation.RemoveViolationIDs(ids...)
 	return clu
 }
 
-// RemoveViolation removes "violation" edges to TAViolation entities.
-func (clu *CTLogUpdate) RemoveViolation(t ...*TAViolation) *CTLogUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// RemoveViolation removes "violation" edges to Violation entities.
+func (clu *CTLogUpdate) RemoveViolation(v ...*Violation) *CTLogUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return clu.RemoveViolationIDs(ids...)
 }
@@ -229,7 +229,7 @@ func (clu *CTLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{ctlog.ViolationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taviolation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -242,7 +242,7 @@ func (clu *CTLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{ctlog.ViolationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taviolation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -258,7 +258,7 @@ func (clu *CTLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{ctlog.ViolationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taviolation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -401,17 +401,17 @@ func (cluo *CTLogUpdateOne) SetNillableIsActive(b *bool) *CTLogUpdateOne {
 	return cluo
 }
 
-// AddViolationIDs adds the "violation" edge to the TAViolation entity by IDs.
+// AddViolationIDs adds the "violation" edge to the Violation entity by IDs.
 func (cluo *CTLogUpdateOne) AddViolationIDs(ids ...int) *CTLogUpdateOne {
 	cluo.mutation.AddViolationIDs(ids...)
 	return cluo
 }
 
-// AddViolation adds the "violation" edges to the TAViolation entity.
-func (cluo *CTLogUpdateOne) AddViolation(t ...*TAViolation) *CTLogUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// AddViolation adds the "violation" edges to the Violation entity.
+func (cluo *CTLogUpdateOne) AddViolation(v ...*Violation) *CTLogUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return cluo.AddViolationIDs(ids...)
 }
@@ -455,23 +455,23 @@ func (cluo *CTLogUpdateOne) Mutation() *CTLogMutation {
 	return cluo.mutation
 }
 
-// ClearViolation clears all "violation" edges to the TAViolation entity.
+// ClearViolation clears all "violation" edges to the Violation entity.
 func (cluo *CTLogUpdateOne) ClearViolation() *CTLogUpdateOne {
 	cluo.mutation.ClearViolation()
 	return cluo
 }
 
-// RemoveViolationIDs removes the "violation" edge to TAViolation entities by IDs.
+// RemoveViolationIDs removes the "violation" edge to Violation entities by IDs.
 func (cluo *CTLogUpdateOne) RemoveViolationIDs(ids ...int) *CTLogUpdateOne {
 	cluo.mutation.RemoveViolationIDs(ids...)
 	return cluo
 }
 
-// RemoveViolation removes "violation" edges to TAViolation entities.
-func (cluo *CTLogUpdateOne) RemoveViolation(t ...*TAViolation) *CTLogUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// RemoveViolation removes "violation" edges to Violation entities.
+func (cluo *CTLogUpdateOne) RemoveViolation(v ...*Violation) *CTLogUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return cluo.RemoveViolationIDs(ids...)
 }
@@ -589,7 +589,7 @@ func (cluo *CTLogUpdateOne) sqlSave(ctx context.Context) (_node *CTLog, err erro
 			Columns: []string{ctlog.ViolationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taviolation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -602,7 +602,7 @@ func (cluo *CTLogUpdateOne) sqlSave(ctx context.Context) (_node *CTLog, err erro
 			Columns: []string{ctlog.ViolationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taviolation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -618,7 +618,7 @@ func (cluo *CTLogUpdateOne) sqlSave(ctx context.Context) (_node *CTLog, err erro
 			Columns: []string{ctlog.ViolationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taviolation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

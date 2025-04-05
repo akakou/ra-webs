@@ -16,7 +16,7 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
-	"github.com/akakou/ra-webs/monitor/ent/taviolation"
+	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
 // CTLogQuery is the builder for querying CTLog entities.
@@ -26,7 +26,7 @@ type CTLogQuery struct {
 	order            []ctlog.OrderOption
 	inters           []Interceptor
 	predicates       []predicate.CTLog
-	withViolation    *TAViolationQuery
+	withViolation    *ViolationQuery
 	withAtLog        *ATLogQuery
 	withSubscription *SubscriptionQuery
 	// intermediate query (i.e. traversal path).
@@ -66,8 +66,8 @@ func (clq *CTLogQuery) Order(o ...ctlog.OrderOption) *CTLogQuery {
 }
 
 // QueryViolation chains the current query on the "violation" edge.
-func (clq *CTLogQuery) QueryViolation() *TAViolationQuery {
-	query := (&TAViolationClient{config: clq.config}).Query()
+func (clq *CTLogQuery) QueryViolation() *ViolationQuery {
+	query := (&ViolationClient{config: clq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := clq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -78,7 +78,7 @@ func (clq *CTLogQuery) QueryViolation() *TAViolationQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ctlog.Table, ctlog.FieldID, selector),
-			sqlgraph.To(taviolation.Table, taviolation.FieldID),
+			sqlgraph.To(violation.Table, violation.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, ctlog.ViolationTable, ctlog.ViolationColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(clq.driver.Dialect(), step)
@@ -334,8 +334,8 @@ func (clq *CTLogQuery) Clone() *CTLogQuery {
 
 // WithViolation tells the query-builder to eager-load the nodes that are connected to
 // the "violation" edge. The optional arguments are used to configure the query builder of the edge.
-func (clq *CTLogQuery) WithViolation(opts ...func(*TAViolationQuery)) *CTLogQuery {
-	query := (&TAViolationClient{config: clq.config}).Query()
+func (clq *CTLogQuery) WithViolation(opts ...func(*ViolationQuery)) *CTLogQuery {
+	query := (&ViolationClient{config: clq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -469,8 +469,8 @@ func (clq *CTLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CTLog
 	}
 	if query := clq.withViolation; query != nil {
 		if err := clq.loadViolation(ctx, query, nodes,
-			func(n *CTLog) { n.Edges.Violation = []*TAViolation{} },
-			func(n *CTLog, e *TAViolation) { n.Edges.Violation = append(n.Edges.Violation, e) }); err != nil {
+			func(n *CTLog) { n.Edges.Violation = []*Violation{} },
+			func(n *CTLog, e *Violation) { n.Edges.Violation = append(n.Edges.Violation, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -490,7 +490,7 @@ func (clq *CTLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CTLog
 	return nodes, nil
 }
 
-func (clq *CTLogQuery) loadViolation(ctx context.Context, query *TAViolationQuery, nodes []*CTLog, init func(*CTLog), assign func(*CTLog, *TAViolation)) error {
+func (clq *CTLogQuery) loadViolation(ctx context.Context, query *ViolationQuery, nodes []*CTLog, init func(*CTLog), assign func(*CTLog, *Violation)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*CTLog)
 	for i := range nodes {
@@ -501,7 +501,7 @@ func (clq *CTLogQuery) loadViolation(ctx context.Context, query *TAViolationQuer
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.TAViolation(func(s *sql.Selector) {
+	query.Where(predicate.Violation(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(ctlog.ViolationColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
@@ -509,13 +509,13 @@ func (clq *CTLogQuery) loadViolation(ctx context.Context, query *TAViolationQuer
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.ta_violation_ct_log
+		fk := n.violation_ct_log
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "ta_violation_ct_log" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "violation_ct_log" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "ta_violation_ct_log" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "violation_ct_log" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/schema"
-	"github.com/akakou/ra-webs/monitor/ent/taviolation"
+	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -27,10 +27,10 @@ func init() {
 	ctlogDescIsActive := ctlogFields[2].Descriptor()
 	// ctlog.DefaultIsActive holds the default value on creation for the is_active field.
 	ctlog.DefaultIsActive = ctlogDescIsActive.Default.(bool)
-	taviolationFields := schema.TAViolation{}.Fields()
-	_ = taviolationFields
-	// taviolationDescCreatedAt is the schema descriptor for created_at field.
-	taviolationDescCreatedAt := taviolationFields[0].Descriptor()
-	// taviolation.DefaultCreatedAt holds the default value on creation for the created_at field.
-	taviolation.DefaultCreatedAt = taviolationDescCreatedAt.Default.(func() time.Time)
+	violationFields := schema.Violation{}.Fields()
+	_ = violationFields
+	// violationDescCreatedAt is the schema descriptor for created_at field.
+	violationDescCreatedAt := violationFields[0].Descriptor()
+	// violation.DefaultCreatedAt holds the default value on creation for the created_at field.
+	violation.DefaultCreatedAt = violationDescCreatedAt.Default.(func() time.Time)
 }

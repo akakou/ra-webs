@@ -23,7 +23,7 @@ func (CTLog) Fields() []ent.Field {
 // Edges of the TA.
 func (CTLog) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("violation", TAViolation.Type).Ref("ct_log"),
+		edge.From("violation", Violation.Type).Ref("ct_log"),
 		edge.To("at_log", ATLog.Type).Unique(),
 		edge.From("subscription", Subscription.Type).Ref("ct_log"),
 	}

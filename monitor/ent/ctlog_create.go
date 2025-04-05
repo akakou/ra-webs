@@ -12,7 +12,7 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
-	"github.com/akakou/ra-webs/monitor/ent/taviolation"
+	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
 // CTLogCreate is the builder for creating a CTLog entity.
@@ -48,17 +48,17 @@ func (clc *CTLogCreate) SetNillableIsActive(b *bool) *CTLogCreate {
 	return clc
 }
 
-// AddViolationIDs adds the "violation" edge to the TAViolation entity by IDs.
+// AddViolationIDs adds the "violation" edge to the Violation entity by IDs.
 func (clc *CTLogCreate) AddViolationIDs(ids ...int) *CTLogCreate {
 	clc.mutation.AddViolationIDs(ids...)
 	return clc
 }
 
-// AddViolation adds the "violation" edges to the TAViolation entity.
-func (clc *CTLogCreate) AddViolation(t ...*TAViolation) *CTLogCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// AddViolation adds the "violation" edges to the Violation entity.
+func (clc *CTLogCreate) AddViolation(v ...*Violation) *CTLogCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return clc.AddViolationIDs(ids...)
 }
@@ -195,7 +195,7 @@ func (clc *CTLogCreate) createSpec() (*CTLog, *sqlgraph.CreateSpec) {
 			Columns: []string{ctlog.ViolationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taviolation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

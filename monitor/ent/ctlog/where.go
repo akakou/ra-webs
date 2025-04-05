@@ -170,7 +170,7 @@ func HasViolation() predicate.CTLog {
 }
 
 // HasViolationWith applies the HasEdge predicate on the "violation" edge with a given conditions (other predicates).
-func HasViolationWith(preds ...predicate.TAViolation) predicate.CTLog {
+func HasViolationWith(preds ...predicate.Violation) predicate.CTLog {
 	return predicate.CTLog(func(s *sql.Selector) {
 		step := newViolationStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

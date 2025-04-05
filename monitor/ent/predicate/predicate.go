@@ -15,5 +15,5 @@ type CTLog func(*sql.Selector)
 // Subscription is the predicate function for subscription builders.
 type Subscription func(*sql.Selector)
 
-// TAViolation is the predicate function for taviolation builders.
-type TAViolation func(*sql.Selector)
+// Violation is the predicate function for violation builders.
+type Violation func(*sql.Selector)

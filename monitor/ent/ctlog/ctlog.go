@@ -27,12 +27,12 @@ const (
 	// Table holds the table name of the ctlog in the database.
 	Table = "ct_logs"
 	// ViolationTable is the table that holds the violation relation/edge.
-	ViolationTable = "ta_violations"
-	// ViolationInverseTable is the table name for the TAViolation entity.
-	// It exists in this package in order to avoid circular dependency with the "taviolation" package.
-	ViolationInverseTable = "ta_violations"
+	ViolationTable = "violations"
+	// ViolationInverseTable is the table name for the Violation entity.
+	// It exists in this package in order to avoid circular dependency with the "violation" package.
+	ViolationInverseTable = "violations"
 	// ViolationColumn is the table column denoting the violation relation/edge.
-	ViolationColumn = "ta_violation_ct_log"
+	ViolationColumn = "violation_ct_log"
 	// AtLogTable is the table that holds the at_log relation/edge.
 	AtLogTable = "at_logs"
 	// AtLogInverseTable is the table name for the ATLog entity.

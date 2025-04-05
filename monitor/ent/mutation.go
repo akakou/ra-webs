@@ -15,7 +15,7 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
-	"github.com/akakou/ra-webs/monitor/ent/taviolation"
+	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
 const (
@@ -30,7 +30,7 @@ const (
 	TypeATLog        = "ATLog"
 	TypeCTLog        = "CTLog"
 	TypeSubscription = "Subscription"
-	TypeTAViolation  = "TAViolation"
+	TypeViolation    = "Violation"
 )
 
 // ATLogMutation represents an operation that mutates the ATLog nodes in the graph.
@@ -892,7 +892,7 @@ func (m *CTLogMutation) ResetIsActive() {
 	m.is_active = nil
 }
 
-// AddViolationIDs adds the "violation" edge to the TAViolation entity by ids.
+// AddViolationIDs adds the "violation" edge to the Violation entity by ids.
 func (m *CTLogMutation) AddViolationIDs(ids ...int) {
 	if m.violation == nil {
 		m.violation = make(map[int]struct{})
@@ -902,17 +902,17 @@ func (m *CTLogMutation) AddViolationIDs(ids ...int) {
 	}
 }
 
-// ClearViolation clears the "violation" edge to the TAViolation entity.
+// ClearViolation clears the "violation" edge to the Violation entity.
 func (m *CTLogMutation) ClearViolation() {
 	m.clearedviolation = true
 }
 
-// ViolationCleared reports if the "violation" edge to the TAViolation entity was cleared.
+// ViolationCleared reports if the "violation" edge to the Violation entity was cleared.
 func (m *CTLogMutation) ViolationCleared() bool {
 	return m.clearedviolation
 }
 
-// RemoveViolationIDs removes the "violation" edge to the TAViolation entity by IDs.
+// RemoveViolationIDs removes the "violation" edge to the Violation entity by IDs.
 func (m *CTLogMutation) RemoveViolationIDs(ids ...int) {
 	if m.removedviolation == nil {
 		m.removedviolation = make(map[int]struct{})
@@ -923,7 +923,7 @@ func (m *CTLogMutation) RemoveViolationIDs(ids ...int) {
 	}
 }
 
-// RemovedViolation returns the removed IDs of the "violation" edge to the TAViolation entity.
+// RemovedViolation returns the removed IDs of the "violation" edge to the Violation entity.
 func (m *CTLogMutation) RemovedViolationIDs() (ids []int) {
 	for id := range m.removedviolation {
 		ids = append(ids, id)
@@ -1848,8 +1848,8 @@ func (m *SubscriptionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Subscription edge %s", name)
 }
 
-// TAViolationMutation represents an operation that mutates the TAViolation nodes in the graph.
-type TAViolationMutation struct {
+// ViolationMutation represents an operation that mutates the Violation nodes in the graph.
+type ViolationMutation struct {
 	config
 	op            Op
 	typ           string
@@ -1859,21 +1859,21 @@ type TAViolationMutation struct {
 	ct_log        *int
 	clearedct_log bool
 	done          bool
-	oldValue      func(context.Context) (*TAViolation, error)
-	predicates    []predicate.TAViolation
+	oldValue      func(context.Context) (*Violation, error)
+	predicates    []predicate.Violation
 }
 
-var _ ent.Mutation = (*TAViolationMutation)(nil)
+var _ ent.Mutation = (*ViolationMutation)(nil)
 
-// taviolationOption allows management of the mutation configuration using functional options.
-type taviolationOption func(*TAViolationMutation)
+// violationOption allows management of the mutation configuration using functional options.
+type violationOption func(*ViolationMutation)
 
-// newTAViolationMutation creates new mutation for the TAViolation entity.
-func newTAViolationMutation(c config, op Op, opts ...taviolationOption) *TAViolationMutation {
-	m := &TAViolationMutation{
+// newViolationMutation creates new mutation for the Violation entity.
+func newViolationMutation(c config, op Op, opts ...violationOption) *ViolationMutation {
+	m := &ViolationMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeTAViolation,
+		typ:           TypeViolation,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -1882,20 +1882,20 @@ func newTAViolationMutation(c config, op Op, opts ...taviolationOption) *TAViola
 	return m
 }
 
-// withTAViolationID sets the ID field of the mutation.
-func withTAViolationID(id int) taviolationOption {
-	return func(m *TAViolationMutation) {
+// withViolationID sets the ID field of the mutation.
+func withViolationID(id int) violationOption {
+	return func(m *ViolationMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *TAViolation
+			value *Violation
 		)
-		m.oldValue = func(ctx context.Context) (*TAViolation, error) {
+		m.oldValue = func(ctx context.Context) (*Violation, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().TAViolation.Get(ctx, id)
+					value, err = m.Client().Violation.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -1904,10 +1904,10 @@ func withTAViolationID(id int) taviolationOption {
 	}
 }
 
-// withTAViolation sets the old TAViolation of the mutation.
-func withTAViolation(node *TAViolation) taviolationOption {
-	return func(m *TAViolationMutation) {
-		m.oldValue = func(context.Context) (*TAViolation, error) {
+// withViolation sets the old Violation of the mutation.
+func withViolation(node *Violation) violationOption {
+	return func(m *ViolationMutation) {
+		m.oldValue = func(context.Context) (*Violation, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -1916,7 +1916,7 @@ func withTAViolation(node *TAViolation) taviolationOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m TAViolationMutation) Client() *Client {
+func (m ViolationMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -1924,7 +1924,7 @@ func (m TAViolationMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m TAViolationMutation) Tx() (*Tx, error) {
+func (m ViolationMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -1935,7 +1935,7 @@ func (m TAViolationMutation) Tx() (*Tx, error) {
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *TAViolationMutation) ID() (id int, exists bool) {
+func (m *ViolationMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -1946,7 +1946,7 @@ func (m *TAViolationMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *TAViolationMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *ViolationMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -1955,19 +1955,19 @@ func (m *TAViolationMutation) IDs(ctx context.Context) ([]int, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().TAViolation.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().Violation.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (m *TAViolationMutation) SetCreatedAt(t time.Time) {
+func (m *ViolationMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
 // CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *TAViolationMutation) CreatedAt() (r time.Time, exists bool) {
+func (m *ViolationMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
 		return
@@ -1975,10 +1975,10 @@ func (m *TAViolationMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old "created_at" field's value of the TAViolation entity.
-// If the TAViolation object wasn't provided to the builder, the object is fetched from the database.
+// OldCreatedAt returns the old "created_at" field's value of the Violation entity.
+// If the Violation object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAViolationMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *ViolationMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
@@ -1993,27 +1993,27 @@ func (m *TAViolationMutation) OldCreatedAt(ctx context.Context) (v time.Time, er
 }
 
 // ResetCreatedAt resets all changes to the "created_at" field.
-func (m *TAViolationMutation) ResetCreatedAt() {
+func (m *ViolationMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
 // SetCtLogID sets the "ct_log" edge to the CTLog entity by id.
-func (m *TAViolationMutation) SetCtLogID(id int) {
+func (m *ViolationMutation) SetCtLogID(id int) {
 	m.ct_log = &id
 }
 
 // ClearCtLog clears the "ct_log" edge to the CTLog entity.
-func (m *TAViolationMutation) ClearCtLog() {
+func (m *ViolationMutation) ClearCtLog() {
 	m.clearedct_log = true
 }
 
 // CtLogCleared reports if the "ct_log" edge to the CTLog entity was cleared.
-func (m *TAViolationMutation) CtLogCleared() bool {
+func (m *ViolationMutation) CtLogCleared() bool {
 	return m.clearedct_log
 }
 
 // CtLogID returns the "ct_log" edge ID in the mutation.
-func (m *TAViolationMutation) CtLogID() (id int, exists bool) {
+func (m *ViolationMutation) CtLogID() (id int, exists bool) {
 	if m.ct_log != nil {
 		return *m.ct_log, true
 	}
@@ -2023,7 +2023,7 @@ func (m *TAViolationMutation) CtLogID() (id int, exists bool) {
 // CtLogIDs returns the "ct_log" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // CtLogID instead. It exists only for internal usage by the builders.
-func (m *TAViolationMutation) CtLogIDs() (ids []int) {
+func (m *ViolationMutation) CtLogIDs() (ids []int) {
 	if id := m.ct_log; id != nil {
 		ids = append(ids, *id)
 	}
@@ -2031,20 +2031,20 @@ func (m *TAViolationMutation) CtLogIDs() (ids []int) {
 }
 
 // ResetCtLog resets all changes to the "ct_log" edge.
-func (m *TAViolationMutation) ResetCtLog() {
+func (m *ViolationMutation) ResetCtLog() {
 	m.ct_log = nil
 	m.clearedct_log = false
 }
 
-// Where appends a list predicates to the TAViolationMutation builder.
-func (m *TAViolationMutation) Where(ps ...predicate.TAViolation) {
+// Where appends a list predicates to the ViolationMutation builder.
+func (m *ViolationMutation) Where(ps ...predicate.Violation) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the TAViolationMutation builder. Using this method,
+// WhereP appends storage-level predicates to the ViolationMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *TAViolationMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.TAViolation, len(ps))
+func (m *ViolationMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Violation, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -2052,27 +2052,27 @@ func (m *TAViolationMutation) WhereP(ps ...func(*sql.Selector)) {
 }
 
 // Op returns the operation name.
-func (m *TAViolationMutation) Op() Op {
+func (m *ViolationMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *TAViolationMutation) SetOp(op Op) {
+func (m *ViolationMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (TAViolation).
-func (m *TAViolationMutation) Type() string {
+// Type returns the node type of this mutation (Violation).
+func (m *ViolationMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *TAViolationMutation) Fields() []string {
+func (m *ViolationMutation) Fields() []string {
 	fields := make([]string, 0, 1)
 	if m.created_at != nil {
-		fields = append(fields, taviolation.FieldCreatedAt)
+		fields = append(fields, violation.FieldCreatedAt)
 	}
 	return fields
 }
@@ -2080,9 +2080,9 @@ func (m *TAViolationMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *TAViolationMutation) Field(name string) (ent.Value, bool) {
+func (m *ViolationMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case taviolation.FieldCreatedAt:
+	case violation.FieldCreatedAt:
 		return m.CreatedAt()
 	}
 	return nil, false
@@ -2091,20 +2091,20 @@ func (m *TAViolationMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *TAViolationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *ViolationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case taviolation.FieldCreatedAt:
+	case violation.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	}
-	return nil, fmt.Errorf("unknown TAViolation field %s", name)
+	return nil, fmt.Errorf("unknown Violation field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *TAViolationMutation) SetField(name string, value ent.Value) error {
+func (m *ViolationMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case taviolation.FieldCreatedAt:
+	case violation.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -2112,75 +2112,75 @@ func (m *TAViolationMutation) SetField(name string, value ent.Value) error {
 		m.SetCreatedAt(v)
 		return nil
 	}
-	return fmt.Errorf("unknown TAViolation field %s", name)
+	return fmt.Errorf("unknown Violation field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *TAViolationMutation) AddedFields() []string {
+func (m *ViolationMutation) AddedFields() []string {
 	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *TAViolationMutation) AddedField(name string) (ent.Value, bool) {
+func (m *ViolationMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *TAViolationMutation) AddField(name string, value ent.Value) error {
+func (m *ViolationMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown TAViolation numeric field %s", name)
+	return fmt.Errorf("unknown Violation numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *TAViolationMutation) ClearedFields() []string {
+func (m *ViolationMutation) ClearedFields() []string {
 	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *TAViolationMutation) FieldCleared(name string) bool {
+func (m *ViolationMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *TAViolationMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown TAViolation nullable field %s", name)
+func (m *ViolationMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Violation nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *TAViolationMutation) ResetField(name string) error {
+func (m *ViolationMutation) ResetField(name string) error {
 	switch name {
-	case taviolation.FieldCreatedAt:
+	case violation.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
 	}
-	return fmt.Errorf("unknown TAViolation field %s", name)
+	return fmt.Errorf("unknown Violation field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *TAViolationMutation) AddedEdges() []string {
+func (m *ViolationMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
 	if m.ct_log != nil {
-		edges = append(edges, taviolation.EdgeCtLog)
+		edges = append(edges, violation.EdgeCtLog)
 	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *TAViolationMutation) AddedIDs(name string) []ent.Value {
+func (m *ViolationMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case taviolation.EdgeCtLog:
+	case violation.EdgeCtLog:
 		if id := m.ct_log; id != nil {
 			return []ent.Value{*id}
 		}
@@ -2189,31 +2189,31 @@ func (m *TAViolationMutation) AddedIDs(name string) []ent.Value {
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *TAViolationMutation) RemovedEdges() []string {
+func (m *ViolationMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *TAViolationMutation) RemovedIDs(name string) []ent.Value {
+func (m *ViolationMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *TAViolationMutation) ClearedEdges() []string {
+func (m *ViolationMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
 	if m.clearedct_log {
-		edges = append(edges, taviolation.EdgeCtLog)
+		edges = append(edges, violation.EdgeCtLog)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *TAViolationMutation) EdgeCleared(name string) bool {
+func (m *ViolationMutation) EdgeCleared(name string) bool {
 	switch name {
-	case taviolation.EdgeCtLog:
+	case violation.EdgeCtLog:
 		return m.clearedct_log
 	}
 	return false
@@ -2221,22 +2221,22 @@ func (m *TAViolationMutation) EdgeCleared(name string) bool {
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *TAViolationMutation) ClearEdge(name string) error {
+func (m *ViolationMutation) ClearEdge(name string) error {
 	switch name {
-	case taviolation.EdgeCtLog:
+	case violation.EdgeCtLog:
 		m.ClearCtLog()
 		return nil
 	}
-	return fmt.Errorf("unknown TAViolation unique edge %s", name)
+	return fmt.Errorf("unknown Violation unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *TAViolationMutation) ResetEdge(name string) error {
+func (m *ViolationMutation) ResetEdge(name string) error {
 	switch name {
-	case taviolation.EdgeCtLog:
+	case violation.EdgeCtLog:
 		m.ResetCtLog()
 		return nil
 	}
-	return fmt.Errorf("unknown TAViolation edge %s", name)
+	return fmt.Errorf("unknown Violation edge %s", name)
 }
