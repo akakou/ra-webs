@@ -1,8 +1,13 @@
 package monitor
 
-const (
-	ERROR_INIT_DB         = "failed to initialize DB"
-	ERROR_OPEN_DB         = "failed to open DB"
-	ERROR_CREATE_SCHEMA   = "failed to create schema in DB"
-	ERROR_CREATE_AUDIT    = "failed to create monitor"
+import "errors"
+
+var (
+	errPublicKeyNotRSA   = errors.New("public key is not RSA")
+	errPublicKeyNotMatch = errors.New("public key does not match the server public key")
+
+	errInitDB       = errors.New("failed to initialize DB")
+	errOpenDB       = errors.New("failed to open DB")
+	errCreateSchema = errors.New("failed to create schema in DB")
+	errCreateAudit  = errors.New("failed to create monitor")
 )

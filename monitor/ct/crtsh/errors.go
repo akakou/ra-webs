@@ -1,4 +1,4 @@
-package monitor
+package crtsh
 
 const (
 	ERROR_SELECT_TAS                      = "failed to select tas info from db"

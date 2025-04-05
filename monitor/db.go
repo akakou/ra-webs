@@ -2,9 +2,9 @@ package monitor
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/akakou/ra_webs/monitor/ent"
+	"github.com/cockroachdb/errors"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -21,13 +21,13 @@ type DB struct {
 func NewDB(dbConfig *DBConfig) (*DB, error) {
 	client, err := ent.Open(dbConfig.Type, dbConfig.Config)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", ERROR_OPEN_DB, err)
+		return nil, errors.Wrap(errInitDB, err.Error())
 	}
 
 	ctx := context.Background()
 
 	if err := client.Schema.Create(ctx); err != nil {
-		return nil, fmt.Errorf("%v: %w", ERROR_CREATE_SCHEMA, err)
+		return nil, errors.Wrap(errInitDB, err.Error())
 	}
 
 	return &DB{

@@ -1,11 +1,10 @@
 package monitor
 
 import (
-	"github.com/akakou/ra_webs/monitor"
 	"github.com/akakou/ra_webs/monitor/ent"
 )
 
-func revoke(serv *ent.TAServer, monitor *monitor.Monitor) {
+func (monitor *Monitor) Revoke(serv *ent.TAServer) {
 	// err := core.NotifierViolation(monitor.Domain, monitor)
 	// if err != nil {
 	// 	panic(err)

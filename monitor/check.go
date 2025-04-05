@@ -11,17 +11,19 @@ import (
 
 const TA_SERVER_NOT_FOUND = "ent: ta_server not found"
 
-func Check(pk interface{}, serv *ent.TAServer) error {
+type publicKey interface{}
+
+func (monitor *Monitor) Check(pk publicKey, serv *ent.TAServer) error {
 	unmarshaledPublicKey, isRSA := pk.(*rsa.PublicKey)
 	if !isRSA {
-		return fmt.Errorf("%s", ERROR_PUBLIC_KEY_NOT_RSA)
+		return errPublicKeyNotRSA
 	}
 
 	publicKey := x509.MarshalPKCS1PublicKey(unmarshaledPublicKey)
 	fmt.Printf("compireing public key:\n%v\n!=%v\n\n", serv.PublicKey, publicKey)
 
 	if !bytes.Equal(serv.PublicKey, publicKey) {
-		return fmt.Errorf("%v: %v != %v", ERROR_PUBLIC_KEY_NOT_MATCH, serv.PublicKey, publicKey)
+		return fmt.Errorf("%v: %v != %v", errPublicKeyNotMatch, serv.PublicKey, publicKey)
 	}
 
 	return nil

@@ -7,8 +7,10 @@ import (
 )
 
 type Monitor struct {
-	DB     *DB
-	Domain string
+	Domain   string
+	DB       *DB
+	CT       CTMonitor
+	Notifier Notifier
 }
 
 func New(db *DB) (*Monitor, error) {
@@ -29,7 +31,7 @@ func Default() (*Monitor, error) {
 
 	db, err := NewDB(&dbc)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", ERROR_INIT_DB, err)
+		return nil, err
 	}
 
 	return New(db)

@@ -28,7 +28,7 @@ var PostNotifierApi = goutils.EchoRoute[serv.MonitorServer]{
 				return err
 			}
 
-			err = server.Notifier.Notify([]byte(data.Message), data.Domain, server)
+			err = server.Monitor.Notifier.Notify([]byte(data.Message), data.Domain, server.Monitor)
 			if err != nil {
 				return err
 			}

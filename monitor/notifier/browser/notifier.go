@@ -1,62 +1,40 @@
 package notifier
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/SherClockHolmes/webpush-go"
-	"github.com/akakou/ra_webs/monitor/ent"
-	"github.com/akakou/ra_webs/monitor/serv"
-	"github.com/labstack/echo/v4"
+	"github.com/akakou/ra_webs/monitor"
 )
 
-func (notifier *BrowserNotifier) Notify(msg []byte, domain string, server *serv.MonitorServer) error {
-	subscriptions, err := serv.SelectSubscription(domain, server.Monitor)
-	if err != nil {
-		return err
-	}
+const TTL_MAX = 2419200
+const DEFAULT_SUBSCRIBER = "ra-webs@example.com"
 
-	err = notifier.notifyAll(msg, subscriptions)
-	return err
+type BrowserNotifier struct {
+	VapidPrivateKey, VapidPublicKey string
+	Subscriber                      string
+	TTL                             int
+	Monitor                         *monitor.Monitor
 }
 
-func (notifier *BrowserNotifier) notifyAll(msg []byte, subscription []*ent.Subscription) error {
-	for _, sub := range subscription {
-		err := notifier.notifyOne(msg, sub)
-		if err != nil {
-			return err
-		}
+func New(vapidPrivateKey, vapidPublicKey, Subscriber string, TTL int) *BrowserNotifier {
+	return &BrowserNotifier{
+		VapidPrivateKey: vapidPrivateKey,
+		VapidPublicKey:  vapidPublicKey,
+		Subscriber:      Subscriber,
+		TTL:             TTL,
 	}
-
-	return nil
 }
 
-func (notifier *BrowserNotifier) notifyOne(msg []byte, subscription *ent.Subscription) error {
-	s := webpush.Subscription{
-		Endpoint: subscription.Endpoint,
-		Keys: webpush.Keys{
-			Auth:   subscription.Auth,
-			P256dh: subscription.P256dh,
-		},
+func Default() (*BrowserNotifier, error) {
+	var err error
+
+	publicKey := os.Getenv("RA_WEBS_VAPID_PUBLIC_KEY")
+	privateKey := os.Getenv("RA_WEBS_VAPID_PRIVATE_KEY")
+
+	if publicKey == "" || privateKey == "" {
+		privateKey, publicKey, err = webpush.GenerateVAPIDKeys()
 	}
 
-	resp, err := webpush.SendNotification(msg, &s, &webpush.Options{
-		Subscriber:      notifier.Subscriber,
-		VAPIDPublicKey:  notifier.VapidPublicKey,
-		VAPIDPrivateKey: notifier.VapidPrivateKey,
-		TTL:             notifier.TTL,
-	})
-
-	if err != nil {
-		return fmt.Errorf("%v: %v", ERROR_FAILED_TO_NOTIFY, err)
-	}
-
-	defer resp.Body.Close()
-
-	return err
-}
-
-func (notifier *BrowserNotifier) Setup(e *echo.Group, server *serv.MonitorServer) error {
-	postSubscribeApi.Set(e, server)
-	getSubscriptionConfigApi(notifier).Set(e, server)
-	return nil
+	return New(privateKey, publicKey, DEFAULT_SUBSCRIBER, TTL_MAX), err
 }

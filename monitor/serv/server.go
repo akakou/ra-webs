@@ -14,7 +14,6 @@ var errFailPickupRandom = fmt.Errorf("failed to generate random string")
 type MonitorServer struct {
 	AdminToken string
 	Monitor    *monitor.Monitor
-	Notifier   Notifier
 }
 
 func New(monitor *monitor.Monitor, adminToken string) (*MonitorServer, error) {

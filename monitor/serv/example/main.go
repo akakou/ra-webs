@@ -10,6 +10,7 @@ import (
 	"github.com/akakou/ra_webs/monitor/serv"
 	"github.com/akakou/ra_webs/monitor/serv/api"
 
+	browsernotify "github.com/akakou/ra_webs/monitor/notifier/browser"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -63,7 +64,9 @@ func main() {
 	// panic(err)
 	// }
 
-	fmt.Printf("public: %v\nprivate: %v", s.Notifier.(*notifier.BrowserNotifier).VapidPublicKey, s.Notifier.(*notifier.BrowserNotifier).VapidPrivateKey)
+	fmt.Printf("public: %v\nprivate: %v",
+		s.Monitor.Notifier.(*browsernotify.BrowserNotifier).VapidPublicKey,
+		s.Monitor.Notifier.(*browsernotify.BrowserNotifier).VapidPrivateKey)
 
 	// go s.Monitor.Run(monitor)
 	// fmt.Printf("public: %v\nprivate: %v", monitor.Notifier.(*notifier.BrowserNotifier).VapidPublicKey, monitor.Notifier.(*notifier.BrowserNotifier).VapidPrivateKey)
