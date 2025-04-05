@@ -10,6 +10,7 @@ import (
 	"github.com/akakou/ra-webs/monitor/ct/crtsh"
 	browsernotifier "github.com/akakou/ra-webs/monitor/notifier/browser"
 	"github.com/cockroachdb/errors"
+	"github.com/labstack/echo/v4"
 )
 
 var errFailPickupRandom = fmt.Errorf("failed to generate random string")
@@ -51,4 +52,14 @@ func Default() (*MonitorServer, error) {
 	fmt.Printf("Admin token is: %s\n", adminToken)
 
 	return New(monitor, adminToken)
+}
+
+func (server *MonitorServer) Run(address string, e *echo.Echo) error {
+	go server.Monitor.Run()
+
+	return e.Start(address)
+}
+
+func (server *MonitorServer) Close() {
+	server.Monitor.Close()
 }

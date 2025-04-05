@@ -47,6 +47,8 @@ func main() {
 		panic(err)
 	}
 
+	defer s.Close()
+
 	api.Route(apiGroup, s)
 
 	viewSubFS := echo.MustSubFS(viewEmbedFiles, "views")
@@ -59,17 +61,10 @@ func main() {
 	e.Use(InjectSWHeader)
 
 	e.Debug = true
-	// err = s.Setup(apiGroup)
-	// if err != nil {
-	// panic(err)
-	// }
-
 	fmt.Printf("public: %v\nprivate: %v",
 		s.Monitor.Notifier.(*browsernotify.BrowserNotifier).VapidPublicKey,
 		s.Monitor.Notifier.(*browsernotify.BrowserNotifier).VapidPrivateKey)
 
-	// go s.Monitor.Run(monitor)
-	// fmt.Printf("public: %v\nprivate: %v", monitor.Notifier.(*notifier.BrowserNotifier).VapidPublicKey, monitor.Notifier.(*notifier.BrowserNotifier).VapidPrivateKey)
-
-	e.Logger.Fatal(e.Start(":8080"))
+	err = s.Run(":8080", e)
+	e.Logger.Fatal(err)
 }
