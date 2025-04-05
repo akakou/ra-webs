@@ -1,11 +1,14 @@
 package serv
 
 import (
+	"context"
 	"fmt"
 
 	goutils "github.com/akakou/go-utils"
 	golangutils "github.com/akakou/golang-utils"
 	"github.com/akakou/ra-webs/monitor"
+	"github.com/akakou/ra-webs/monitor/ct/crtsh"
+	browsernotifier "github.com/akakou/ra-webs/monitor/notifier/browser"
 	"github.com/cockroachdb/errors"
 )
 
@@ -24,7 +27,17 @@ func New(monitor *monitor.Monitor, adminToken string) (*MonitorServer, error) {
 }
 
 func Default() (*MonitorServer, error) {
-	monitor, err := monitor.Default()
+	ct, err := crtsh.Default(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	notifier, err := browsernotifier.Default()
+	if err != nil {
+		return nil, err
+	}
+
+	monitor, err := monitor.Default(ct, notifier)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +48,7 @@ func Default() (*MonitorServer, error) {
 	}
 	adminToken = golangutils.GetEnv("ADMIN_TOKEN", adminToken)
 
-	fmt.Printf("Admin token generated: %s\n", adminToken)
+	fmt.Printf("Admin token is: %s\n", adminToken)
 
 	return New(monitor, adminToken)
 }
