@@ -19,12 +19,12 @@ func attestByAzure(data []byte) (string, error) {
 	}
 
 	// publicKeyHash := hashPublicKey(publicKey)
-	token, err := enclave.CreateAzureAttestationToken(data, ATTEST_PROVIDER_URL)
+	evidence, err := enclave.CreateAzureAttestationToken(data, ATTEST_PROVIDER_URL)
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", ERROR_CREATE_ATTESTATION, err)
 	}
 
-	return token, nil
+	return evidence, nil
 }
 
 func verifyByAzure(quote string) (*attestation.Report, error) {

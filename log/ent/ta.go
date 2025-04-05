@@ -17,7 +17,7 @@ type TA struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Evidence holds the value of the "evidence" field.
-	Evidence []byte `json:"evidence,omitempty"`
+	Evidence string `json:"evidence,omitempty"`
 	// Signature holds the value of the "signature" field.
 	Signature []byte `json:"signature,omitempty"`
 	// Repository holds the value of the "repository" field.
@@ -32,11 +32,11 @@ func (*TA) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case ta.FieldEvidence, ta.FieldSignature:
+		case ta.FieldSignature:
 			values[i] = new([]byte)
 		case ta.FieldID:
 			values[i] = new(sql.NullInt64)
-		case ta.FieldRepository, ta.FieldCommitID:
+		case ta.FieldEvidence, ta.FieldRepository, ta.FieldCommitID:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -60,10 +60,10 @@ func (t *TA) assignValues(columns []string, values []any) error {
 			}
 			t.ID = int(value.Int64)
 		case ta.FieldEvidence:
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field evidence", values[i])
-			} else if value != nil {
-				t.Evidence = *value
+			} else if value.Valid {
+				t.Evidence = value.String
 			}
 		case ta.FieldSignature:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -120,7 +120,7 @@ func (t *TA) String() string {
 	builder.WriteString("TA(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("evidence=")
-	builder.WriteString(fmt.Sprintf("%v", t.Evidence))
+	builder.WriteString(t.Evidence)
 	builder.WriteString(", ")
 	builder.WriteString("signature=")
 	builder.WriteString(fmt.Sprintf("%v", t.Signature))

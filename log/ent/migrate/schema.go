@@ -11,7 +11,7 @@ var (
 	// TasColumns holds the columns for the "tas" table.
 	TasColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "evidence", Type: field.TypeBytes},
+		{Name: "evidence", Type: field.TypeString},
 		{Name: "signature", Type: field.TypeBytes},
 		{Name: "repository", Type: field.TypeString},
 		{Name: "commit_id", Type: field.TypeString},

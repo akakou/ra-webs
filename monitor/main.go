@@ -36,7 +36,7 @@ func (monitor *Monitor) MonitorOne(entry crtsh.CertificateEntry) {
 		revoked = true
 	}
 
-	report, err := CheckEvidence(string(log.Evidence))
+	report, err := CheckEvidence(log.Evidence)
 	if err != nil {
 		fmt.Printf("Violation: %v\n", err)
 		revoked = true
@@ -62,7 +62,7 @@ func (monitor *Monitor) MonitorOne(entry crtsh.CertificateEntry) {
 		panic(err)
 	}
 
-	server, err := monitor.RegisterServer(string(log.Evidence), publicKey, code)
+	server, err := monitor.RegisterServer(log.Evidence, publicKey, code)
 	if err != nil {
 		panic(err)
 	}

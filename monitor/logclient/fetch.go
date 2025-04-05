@@ -6,7 +6,7 @@ import (
 
 func (logclient *LogClient) Fetch() (*interfacestruct.TA, error) {
 	result := interfacestruct.TA{
-		Evidence:   []byte(""),
+		Evidence:   "",
 		Signature:  []byte(""),
 		Repository: "",
 		CommitID:   "",

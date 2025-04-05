@@ -262,7 +262,7 @@ func (tq *TAQuery) Clone() *TAQuery {
 // Example:
 //
 //	var v []struct {
-//		Evidence []byte `json:"evidence,omitempty"`
+//		Evidence string `json:"evidence,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -285,7 +285,7 @@ func (tq *TAQuery) GroupBy(field string, fields ...string) *TAGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Evidence []byte `json:"evidence,omitempty"`
+//		Evidence string `json:"evidence,omitempty"`
 //	}
 //
 //	client.TA.Query().

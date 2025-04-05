@@ -53,7 +53,7 @@ func IDLTE(id int) predicate.TA {
 }
 
 // Evidence applies equality check predicate on the "evidence" field. It's identical to EvidenceEQ.
-func Evidence(v []byte) predicate.TA {
+func Evidence(v string) predicate.TA {
 	return predicate.TA(sql.FieldEQ(FieldEvidence, v))
 }
 
@@ -73,43 +73,68 @@ func CommitID(v string) predicate.TA {
 }
 
 // EvidenceEQ applies the EQ predicate on the "evidence" field.
-func EvidenceEQ(v []byte) predicate.TA {
+func EvidenceEQ(v string) predicate.TA {
 	return predicate.TA(sql.FieldEQ(FieldEvidence, v))
 }
 
 // EvidenceNEQ applies the NEQ predicate on the "evidence" field.
-func EvidenceNEQ(v []byte) predicate.TA {
+func EvidenceNEQ(v string) predicate.TA {
 	return predicate.TA(sql.FieldNEQ(FieldEvidence, v))
 }
 
 // EvidenceIn applies the In predicate on the "evidence" field.
-func EvidenceIn(vs ...[]byte) predicate.TA {
+func EvidenceIn(vs ...string) predicate.TA {
 	return predicate.TA(sql.FieldIn(FieldEvidence, vs...))
 }
 
 // EvidenceNotIn applies the NotIn predicate on the "evidence" field.
-func EvidenceNotIn(vs ...[]byte) predicate.TA {
+func EvidenceNotIn(vs ...string) predicate.TA {
 	return predicate.TA(sql.FieldNotIn(FieldEvidence, vs...))
 }
 
 // EvidenceGT applies the GT predicate on the "evidence" field.
-func EvidenceGT(v []byte) predicate.TA {
+func EvidenceGT(v string) predicate.TA {
 	return predicate.TA(sql.FieldGT(FieldEvidence, v))
 }
 
 // EvidenceGTE applies the GTE predicate on the "evidence" field.
-func EvidenceGTE(v []byte) predicate.TA {
+func EvidenceGTE(v string) predicate.TA {
 	return predicate.TA(sql.FieldGTE(FieldEvidence, v))
 }
 
 // EvidenceLT applies the LT predicate on the "evidence" field.
-func EvidenceLT(v []byte) predicate.TA {
+func EvidenceLT(v string) predicate.TA {
 	return predicate.TA(sql.FieldLT(FieldEvidence, v))
 }
 
 // EvidenceLTE applies the LTE predicate on the "evidence" field.
-func EvidenceLTE(v []byte) predicate.TA {
+func EvidenceLTE(v string) predicate.TA {
 	return predicate.TA(sql.FieldLTE(FieldEvidence, v))
+}
+
+// EvidenceContains applies the Contains predicate on the "evidence" field.
+func EvidenceContains(v string) predicate.TA {
+	return predicate.TA(sql.FieldContains(FieldEvidence, v))
+}
+
+// EvidenceHasPrefix applies the HasPrefix predicate on the "evidence" field.
+func EvidenceHasPrefix(v string) predicate.TA {
+	return predicate.TA(sql.FieldHasPrefix(FieldEvidence, v))
+}
+
+// EvidenceHasSuffix applies the HasSuffix predicate on the "evidence" field.
+func EvidenceHasSuffix(v string) predicate.TA {
+	return predicate.TA(sql.FieldHasSuffix(FieldEvidence, v))
+}
+
+// EvidenceEqualFold applies the EqualFold predicate on the "evidence" field.
+func EvidenceEqualFold(v string) predicate.TA {
+	return predicate.TA(sql.FieldEqualFold(FieldEvidence, v))
+}
+
+// EvidenceContainsFold applies the ContainsFold predicate on the "evidence" field.
+func EvidenceContainsFold(v string) predicate.TA {
+	return predicate.TA(sql.FieldContainsFold(FieldEvidence, v))
 }
 
 // SignatureEQ applies the EQ predicate on the "signature" field.

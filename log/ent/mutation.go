@@ -32,7 +32,7 @@ type TAMutation struct {
 	op            Op
 	typ           string
 	id            *int
-	evidence      *[]byte
+	evidence      *string
 	signature     *[]byte
 	repository    *string
 	commit_id     *string
@@ -141,12 +141,12 @@ func (m *TAMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetEvidence sets the "evidence" field.
-func (m *TAMutation) SetEvidence(b []byte) {
-	m.evidence = &b
+func (m *TAMutation) SetEvidence(s string) {
+	m.evidence = &s
 }
 
 // Evidence returns the value of the "evidence" field in the mutation.
-func (m *TAMutation) Evidence() (r []byte, exists bool) {
+func (m *TAMutation) Evidence() (r string, exists bool) {
 	v := m.evidence
 	if v == nil {
 		return
@@ -157,7 +157,7 @@ func (m *TAMutation) Evidence() (r []byte, exists bool) {
 // OldEvidence returns the old "evidence" field's value of the TA entity.
 // If the TA object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAMutation) OldEvidence(ctx context.Context) (v []byte, err error) {
+func (m *TAMutation) OldEvidence(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldEvidence is only allowed on UpdateOne operations")
 	}
@@ -374,7 +374,7 @@ func (m *TAMutation) OldField(ctx context.Context, name string) (ent.Value, erro
 func (m *TAMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case ta.FieldEvidence:
-		v, ok := value.([]byte)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

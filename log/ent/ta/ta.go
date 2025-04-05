@@ -50,6 +50,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByEvidence orders the results by the evidence field.
+func ByEvidence(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEvidence, opts...).ToFunc()
+}
+
 // ByRepository orders the results by the repository field.
 func ByRepository(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRepository, opts...).ToFunc()

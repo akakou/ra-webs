@@ -20,8 +20,8 @@ type TACreate struct {
 }
 
 // SetEvidence sets the "evidence" field.
-func (tc *TACreate) SetEvidence(b []byte) *TACreate {
-	tc.mutation.SetEvidence(b)
+func (tc *TACreate) SetEvidence(s string) *TACreate {
+	tc.mutation.SetEvidence(s)
 	return tc
 }
 
@@ -116,7 +116,7 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(ta.Table, sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt))
 	)
 	if value, ok := tc.mutation.Evidence(); ok {
-		_spec.SetField(ta.FieldEvidence, field.TypeBytes, value)
+		_spec.SetField(ta.FieldEvidence, field.TypeString, value)
 		_node.Evidence = value
 	}
 	if value, ok := tc.mutation.Signature(); ok {

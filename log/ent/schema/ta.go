@@ -13,7 +13,7 @@ type TA struct {
 // Fields of the TA.
 func (TA) Fields() []ent.Field {
 	return []ent.Field{
-		field.Bytes("evidence"),
+		field.String("evidence"),
 		field.Bytes("signature"),
 		field.String("repository"),
 		field.String("commit_id"),

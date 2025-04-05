@@ -28,8 +28,16 @@ func (tu *TAUpdate) Where(ps ...predicate.TA) *TAUpdate {
 }
 
 // SetEvidence sets the "evidence" field.
-func (tu *TAUpdate) SetEvidence(b []byte) *TAUpdate {
-	tu.mutation.SetEvidence(b)
+func (tu *TAUpdate) SetEvidence(s string) *TAUpdate {
+	tu.mutation.SetEvidence(s)
+	return tu
+}
+
+// SetNillableEvidence sets the "evidence" field if the given value is not nil.
+func (tu *TAUpdate) SetNillableEvidence(s *string) *TAUpdate {
+	if s != nil {
+		tu.SetEvidence(*s)
+	}
 	return tu
 }
 
@@ -109,7 +117,7 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := tu.mutation.Evidence(); ok {
-		_spec.SetField(ta.FieldEvidence, field.TypeBytes, value)
+		_spec.SetField(ta.FieldEvidence, field.TypeString, value)
 	}
 	if value, ok := tu.mutation.Signature(); ok {
 		_spec.SetField(ta.FieldSignature, field.TypeBytes, value)
@@ -141,8 +149,16 @@ type TAUpdateOne struct {
 }
 
 // SetEvidence sets the "evidence" field.
-func (tuo *TAUpdateOne) SetEvidence(b []byte) *TAUpdateOne {
-	tuo.mutation.SetEvidence(b)
+func (tuo *TAUpdateOne) SetEvidence(s string) *TAUpdateOne {
+	tuo.mutation.SetEvidence(s)
+	return tuo
+}
+
+// SetNillableEvidence sets the "evidence" field if the given value is not nil.
+func (tuo *TAUpdateOne) SetNillableEvidence(s *string) *TAUpdateOne {
+	if s != nil {
+		tuo.SetEvidence(*s)
+	}
 	return tuo
 }
 
@@ -252,7 +268,7 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 		}
 	}
 	if value, ok := tuo.mutation.Evidence(); ok {
-		_spec.SetField(ta.FieldEvidence, field.TypeBytes, value)
+		_spec.SetField(ta.FieldEvidence, field.TypeString, value)
 	}
 	if value, ok := tuo.mutation.Signature(); ok {
 		_spec.SetField(ta.FieldSignature, field.TypeBytes, value)
