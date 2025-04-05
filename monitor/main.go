@@ -2,11 +2,32 @@ package monitor
 
 import (
 	"fmt"
+
+	"github.com/akakou/crtsh"
+	"github.com/akakou/ra-webs/monitor/ent/taserver"
 )
 
 type publicKey interface{}
 
-func (monitor *Monitor) Monitor(ctPublicKey publicKey, id int) {
+func (monitor *Monitor) MonitorAll(entries []crtsh.CertificateEntry) {
+	for _, entry := range entries {
+		monitor.MonitorOne(entry)
+	}
+}
+
+func (monitor *Monitor) MonitorOne(entry crtsh.CertificateEntry) {
+	exist, err := monitor.DB.Client.TAServer.Query().
+		Where(taserver.MonitorLogIDEQ(entry.ID)).
+		Exist(*monitor.DB.Ctx)
+
+	if err != nil {
+		panic(err)
+	}
+
+	if exist {
+		return
+	}
+
 	revoked := false
 
 	log, err := monitor.LogClient.Fetch()
@@ -30,7 +51,7 @@ func (monitor *Monitor) Monitor(ctPublicKey publicKey, id int) {
 		revoked = true
 	}
 
-	err = CheckPublicKey(ctPublicKey, publicKey)
+	err = CheckPublicKey(entry.Certificate.PublicKey, publicKey)
 	if err != nil {
 		fmt.Printf("Violation: %v\n", err)
 		revoked = true
