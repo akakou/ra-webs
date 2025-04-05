@@ -42,6 +42,6 @@ func (a *CrtshMonitor) Run(monitor *monitor.Monitor) {
 			return
 		}
 
-		monitor.MonitorAll(entries)
+		monitor.Monitor(entries)
 	}
 }

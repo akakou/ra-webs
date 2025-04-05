@@ -2,9 +2,6 @@ package monitor
 
 import (
 	"bytes"
-	"crypto/rsa"
-	"crypto/x509"
-	"fmt"
 
 	"github.com/cockroachdb/errors"
 
@@ -53,22 +50,6 @@ func CheckEvidence(quote string) (*attestation.Report, error) {
 	}
 
 	return report, nil
-}
-
-func CheckPublicKey(ctPublicKey publicKey, logPublicKey []byte) error {
-	unmarshaledPublicKey, isRSA := ctPublicKey.(*rsa.PublicKey)
-	if !isRSA {
-		return errPublicKeyIsNotRSA
-	}
-
-	ctPublicKeyBuf := x509.MarshalPKCS1PublicKey(unmarshaledPublicKey)
-	fmt.Printf("compireing public key:\n%v\n!=%v\n\n", ctPublicKeyBuf, logPublicKey)
-
-	if !bytes.Equal(ctPublicKeyBuf, logPublicKey) {
-		return errPublicKeyNotMatched
-	}
-
-	return nil
 }
 
 func CheckSourceHash(log *interfacestruct.TA, evidenceUniqueId []byte) error {

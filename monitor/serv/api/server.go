@@ -13,12 +13,13 @@ import (
 
 var GetServerFromDomainApi = goutils.EchoRoute[serv.MonitorServer]{
 	Method: goutils.GET,
-	Path:   "/log",
+	Path:   "/ta",
 	F: func(server *serv.MonitorServer) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			servs, err := server.Monitor.DB.Client.CTLog.
+			servs, err := server.Monitor.DB.Client.TA.
 				Query().
 				WithAtLog().
+				WithCtLog().
 				WithViolation().
 				Order(ent.Desc(ctlog.FieldID)).
 				All(*server.Monitor.DB.Ctx)
