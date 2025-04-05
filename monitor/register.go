@@ -42,22 +42,22 @@ func (monitor *Monitor) RegisterTA(publicKey []byte) (*ent.TA, error) {
 }
 
 func (monitor *Monitor) RegisterCTLog(ctLogId int, ta *ent.TA) (*ent.CTLog, error) {
-	taServerCreate := monitor.DB.Client.CTLog.
+	ctLogCreate := monitor.DB.Client.CTLog.
 		Create().
 		SetMonitorLogID(ctLogId).
 		SetTa(ta).
 		SetIsActive(true)
 
-	server, err := taServerCreate.Save(*monitor.DB.Ctx)
+	ctLog, err := ctLogCreate.Save(*monitor.DB.Ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return server, nil
+	return ctLog, nil
 }
 
 func (monitor *Monitor) RegisterATLog(uniqueId []byte, log *interfacestruct.TA, ta *ent.TA) (*ent.ATLog, error) {
-	codeCreate := monitor.DB.Client.ATLog.
+	atLogCreate := monitor.DB.Client.ATLog.
 		Create().
 		SetEvidence(log.Evidence).
 		SetRepository(log.Repository).
@@ -66,11 +66,11 @@ func (monitor *Monitor) RegisterATLog(uniqueId []byte, log *interfacestruct.TA, 
 		SetTa(ta).
 		SetIsActive(true)
 
-	code, err := codeCreate.Save(*monitor.DB.Ctx)
+	atLog, err := atLogCreate.Save(*monitor.DB.Ctx)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return code, nil
+	return atLog, nil
 }
