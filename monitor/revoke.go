@@ -32,6 +32,9 @@ func (monitor *Monitor) RevokeIncompletedCTLog(ctLogId int) {
 	}
 
 	_, err = monitor.RegisterCTLog(ctLogId, ta)
+	if err != nil {
+		panic(err)
+	}
 
 	monitor.Revoke(ta)
 }
@@ -43,6 +46,9 @@ func (monitor *Monitor) RevokeIncompletedATLog(log *interfacestruct.TA) {
 	}
 
 	_, err = monitor.RegisterATLog([]byte{}, log, ta)
+	if err != nil {
+		panic(err)
+	}
 
 	monitor.Revoke(ta)
 }
@@ -54,6 +60,9 @@ func (monitor *Monitor) RevokeATLog(log *interfacestruct.TA) {
 	}
 
 	_, err = monitor.RegisterATLog([]byte{}, log, ta)
+	if err != nil {
+		panic(err)
+	}
 
 	monitor.Revoke(ta)
 }
