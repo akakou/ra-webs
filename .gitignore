@@ -19,8 +19,6 @@
 
 # Go workspace file
 go.work
-/monitor/monitor
-/monitor/serv/serv
 ta/certificate.pem
 ta/private.key
 ta/example/example
