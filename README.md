@@ -18,21 +18,21 @@ cd RA-WEBs
 ```
 
 
-#### 2. Configure the Verifier Environment Files
+#### 2. Configure the Monitor Environment Files
 
 Copy the templates and fill in each parameter.
 
 ```sh
-cp test/env/verifier.env.template test/env/verifier.env
+cp test/env/monitorenv.template test/env/mmonitornv
 cp test/env/common.env.template test/env/common.env
 ```
 
 
-#### 3. Run the Verifier
+#### 3. Run the Monitor
 
 
 ```sh
-docker compose -f compose.test.yaml --profile verifier up
+docker compose -f compose.test.yaml --profile monitorup
 ```
 
 #### 4. Configure the TA Environment Files

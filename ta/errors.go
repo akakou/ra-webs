@@ -7,7 +7,7 @@ const (
 	ERROR_REQUEST_FAILED        = "request failed"
 	ERROR_READ_BODY             = "read body failed"
 	ERROR_STATUS_NOT_OK         = "status not ok"
-	ERROR_VERIFIER_BASE_PARSE   = "verifier base parse failed"
+	ERROR_VERIFIER_BASE_PARSE   = "monitor base parse failed"
 	ERROR_REPOSITORY_NOT_SET    = "failed to read RA_WEBS_TA_REPOSITORY"
 	ERROR_TOKEN_NOT_SET         = "failed to read RA_WEBS_SERVICE_TOKEN"
 	ERROR_DOMAIN_NOT_SET        = "failed to read RA_WEBS_TA_DOMAIN"

@@ -14,7 +14,7 @@ import (
 var AcmeURL = autocert.DefaultACMEDirectory
 
 type TAConfig struct {
-	Verifiers  []string
+	Monitors   []string
 	Token      string
 	Repository string
 	Domain     string
@@ -31,7 +31,7 @@ func DefaultConfig() (*TAConfig, error) {
 	repository := os.Getenv("RA_WEBS_TA_REPOSITORY")
 	domain := os.Getenv("RA_WEBS_TA_DOMAIN")
 	email := os.Getenv("RA_WEBS_SERVICE_EMAIL")
-	verifierBaseEnv := os.Getenv("RA_WEBS_VERIFIER_BASES")
+	monitorBaseEnv := os.Getenv("RA_WEBS_VERIFIER_BASES")
 
 	if token == "" {
 		return nil, fmt.Errorf("%v", ERROR_TOKEN_NOT_SET)
@@ -45,17 +45,17 @@ func DefaultConfig() (*TAConfig, error) {
 		return nil, fmt.Errorf("%v", ERROR_EMAIL_NOT_SET)
 	}
 
-	if verifierBaseEnv == "" {
-		verifierBaseEnv = "http://localhost" + core.VerifierPort
-		fmt.Printf("RA_WEBS_VERIFIER_BASES is not set: so use %v\n", verifierBaseEnv)
+	if monitorBaseEnv == "" {
+		monitorBaseEnv = "http://localhost" + core.MonitorPort
+		fmt.Printf("RA_WEBS_VERIFIER_BASES is not set: so use %v\n", monitorBaseEnv)
 	}
-	verifiers := strings.Split(verifierBaseEnv, ",")
+	monitors := strings.Split(monitorBaseEnv, ",")
 
 	return &TAConfig{
 		Token:      token,
 		Repository: repository,
 		Domain:     domain,
-		Verifiers:  verifiers,
+		Monitors:   monitors,
 	}, nil
 }
 

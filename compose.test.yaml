@@ -20,25 +20,25 @@ services:
     profiles:
       - ta
 
-  verifier:
+  monitor:
     build: ./docker
     volumes:
-      - ./verifier:/verifier
+      - ./monitor:/monitor
       - ./core:/core
       - /var/run/docker.sock:/var/run/docker.sock
-    working_dir: /verifier/serv
+    working_dir: /monitor/serv
     command: bash -c 'go mod tidy && go run main.go'
     env_file:
-      - test/env/verifier.env
+      - test/env/monitor.env
       - test/env/common.env
     privileged: true
     tty: true
     profiles:
-      - verifier
+      - monitor
 
   tunnel:
     restart: unless-stopped
     image: cloudflare/cloudflared
-    command: tunnel --url http://verifier:8080 
+    command: tunnel --url http://monitor:8080 
     profiles:
-      - verifier
+      - monitor

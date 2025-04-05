@@ -25,8 +25,8 @@ func main() {
 
 		fmt.Fprintln(w, "Hello from TA running on TEE :)<br/>")
 
-		for _, v := range config.Verifiers {
-			fmt.Fprintf(w, `<button onclick="window.open('%s');">Verifier Page (%s)</button><br/>`, v+VERIFIER_PATH, v)
+		for _, v := range config.Monitors {
+			fmt.Fprintf(w, `<button onclick="window.open('%s');">Monitor Page (%s)</button><br/>`, v+VERIFIER_PATH, v)
 		}
 	}
 

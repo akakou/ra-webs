@@ -1,4 +1,4 @@
-module github.com/akakou/ra_webs/verifier/example
+module github.com/akakou/ra_webs/monitor/example
 
 go 1.21.4
 
