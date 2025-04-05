@@ -235,10 +235,10 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.CtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   ta.CtLogTable,
-			Columns: ta.CtLogPrimaryKey,
+			Columns: []string{ta.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
@@ -248,10 +248,10 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tu.mutation.RemovedCtLogIDs(); len(nodes) > 0 && !tu.mutation.CtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   ta.CtLogTable,
-			Columns: ta.CtLogPrimaryKey,
+			Columns: []string{ta.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
@@ -264,10 +264,10 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tu.mutation.CtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   ta.CtLogTable,
-			Columns: ta.CtLogPrimaryKey,
+			Columns: []string{ta.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
@@ -280,10 +280,10 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.AtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   ta.AtLogTable,
-			Columns: ta.AtLogPrimaryKey,
+			Columns: []string{ta.AtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
@@ -293,10 +293,10 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tu.mutation.RemovedAtLogIDs(); len(nodes) > 0 && !tu.mutation.AtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   ta.AtLogTable,
-			Columns: ta.AtLogPrimaryKey,
+			Columns: []string{ta.AtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
@@ -309,10 +309,10 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tu.mutation.AtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   ta.AtLogTable,
-			Columns: ta.AtLogPrimaryKey,
+			Columns: []string{ta.AtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
@@ -578,10 +578,10 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 	}
 	if tuo.mutation.CtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   ta.CtLogTable,
-			Columns: ta.CtLogPrimaryKey,
+			Columns: []string{ta.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
@@ -591,10 +591,10 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 	}
 	if nodes := tuo.mutation.RemovedCtLogIDs(); len(nodes) > 0 && !tuo.mutation.CtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   ta.CtLogTable,
-			Columns: ta.CtLogPrimaryKey,
+			Columns: []string{ta.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
@@ -607,10 +607,10 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 	}
 	if nodes := tuo.mutation.CtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   ta.CtLogTable,
-			Columns: ta.CtLogPrimaryKey,
+			Columns: []string{ta.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
@@ -623,10 +623,10 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 	}
 	if tuo.mutation.AtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   ta.AtLogTable,
-			Columns: ta.AtLogPrimaryKey,
+			Columns: []string{ta.AtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
@@ -636,10 +636,10 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 	}
 	if nodes := tuo.mutation.RemovedAtLogIDs(); len(nodes) > 0 && !tuo.mutation.AtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   ta.AtLogTable,
-			Columns: ta.AtLogPrimaryKey,
+			Columns: []string{ta.AtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
@@ -652,10 +652,10 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 	}
 	if nodes := tuo.mutation.AtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   ta.AtLogTable,
-			Columns: ta.AtLogPrimaryKey,
+			Columns: []string{ta.AtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),

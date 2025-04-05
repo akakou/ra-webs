@@ -353,7 +353,7 @@ func (c *ATLogClient) QueryTa(al *ATLog) *TAQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(atlog.Table, atlog.FieldID, id),
 			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, atlog.TaTable, atlog.TaPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, atlog.TaTable, atlog.TaColumn),
 		)
 		fromV = sqlgraph.Neighbors(al.driver.Dialect(), step)
 		return fromV, nil
@@ -502,7 +502,7 @@ func (c *CTLogClient) QueryTa(cl *CTLog) *TAQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ctlog.Table, ctlog.FieldID, id),
 			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, ctlog.TaTable, ctlog.TaPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, ctlog.TaTable, ctlog.TaColumn),
 		)
 		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
 		return fromV, nil
@@ -800,7 +800,7 @@ func (c *TAClient) QueryCtLog(t *TA) *CTLogQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ta.Table, ta.FieldID, id),
 			sqlgraph.To(ctlog.Table, ctlog.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, ta.CtLogTable, ta.CtLogPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, ta.CtLogTable, ta.CtLogColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -816,7 +816,7 @@ func (c *TAClient) QueryAtLog(t *TA) *ATLogQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ta.Table, ta.FieldID, id),
 			sqlgraph.To(atlog.Table, atlog.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, ta.AtLogTable, ta.AtLogPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, ta.AtLogTable, ta.AtLogColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil

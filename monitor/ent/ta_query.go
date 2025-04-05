@@ -101,7 +101,7 @@ func (tq *TAQuery) QueryCtLog() *CTLogQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ta.Table, ta.FieldID, selector),
 			sqlgraph.To(ctlog.Table, ctlog.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, ta.CtLogTable, ta.CtLogPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, ta.CtLogTable, ta.CtLogColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -123,7 +123,7 @@ func (tq *TAQuery) QueryAtLog() *ATLogQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ta.Table, ta.FieldID, selector),
 			sqlgraph.To(atlog.Table, atlog.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, ta.AtLogTable, ta.AtLogPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, ta.AtLogTable, ta.AtLogColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -523,124 +523,64 @@ func (tq *TAQuery) loadViolation(ctx context.Context, query *ViolationQuery, nod
 	return nil
 }
 func (tq *TAQuery) loadCtLog(ctx context.Context, query *CTLogQuery, nodes []*TA, init func(*TA), assign func(*TA, *CTLog)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*TA)
-	nids := make(map[int]map[*TA]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*TA)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
 		if init != nil {
-			init(node)
+			init(nodes[i])
 		}
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(ta.CtLogTable)
-		s.Join(joinT).On(s.C(ctlog.FieldID), joinT.C(ta.CtLogPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(ta.CtLogPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(ta.CtLogPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*TA]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*CTLog](ctx, query, qr, query.inters)
+	query.withFKs = true
+	query.Where(predicate.CTLog(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(ta.CtLogColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		fk := n.ct_log_ta
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "ct_log_ta" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected "ct_log" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "ct_log_ta" returned %v for node %v`, *fk, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
+		assign(node, n)
 	}
 	return nil
 }
 func (tq *TAQuery) loadAtLog(ctx context.Context, query *ATLogQuery, nodes []*TA, init func(*TA), assign func(*TA, *ATLog)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*TA)
-	nids := make(map[int]map[*TA]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*TA)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
 		if init != nil {
-			init(node)
+			init(nodes[i])
 		}
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(ta.AtLogTable)
-		s.Join(joinT).On(s.C(atlog.FieldID), joinT.C(ta.AtLogPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(ta.AtLogPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(ta.AtLogPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*TA]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*ATLog](ctx, query, qr, query.inters)
+	query.withFKs = true
+	query.Where(predicate.ATLog(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(ta.AtLogColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		fk := n.at_log_ta
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "at_log_ta" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected "at_log" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "at_log_ta" returned %v for node %v`, *fk, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
+		assign(node, n)
 	}
 	return nil
 }

@@ -16,12 +16,21 @@ var (
 		{Name: "commit_id", Type: field.TypeString},
 		{Name: "unique_id", Type: field.TypeBytes},
 		{Name: "is_active", Type: field.TypeBool, Default: false},
+		{Name: "at_log_ta", Type: field.TypeInt, Nullable: true},
 	}
 	// AtLogsTable holds the schema information for the "at_logs" table.
 	AtLogsTable = &schema.Table{
 		Name:       "at_logs",
 		Columns:    AtLogsColumns,
 		PrimaryKey: []*schema.Column{AtLogsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "at_logs_tas_ta",
+				Columns:    []*schema.Column{AtLogsColumns[6]},
+				RefColumns: []*schema.Column{TasColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// CtLogsColumns holds the columns for the "ct_logs" table.
 	CtLogsColumns = []*schema.Column{
@@ -29,12 +38,21 @@ var (
 		{Name: "public_key", Type: field.TypeBytes},
 		{Name: "monitor_log_id", Type: field.TypeInt},
 		{Name: "is_active", Type: field.TypeBool, Default: false},
+		{Name: "ct_log_ta", Type: field.TypeInt, Nullable: true},
 	}
 	// CtLogsTable holds the schema information for the "ct_logs" table.
 	CtLogsTable = &schema.Table{
 		Name:       "ct_logs",
 		Columns:    CtLogsColumns,
 		PrimaryKey: []*schema.Column{CtLogsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ct_logs_tas_ta",
+				Columns:    []*schema.Column{CtLogsColumns[4]},
+				RefColumns: []*schema.Column{TasColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// SubscriptionsColumns holds the columns for the "subscriptions" table.
 	SubscriptionsColumns = []*schema.Column{
@@ -80,56 +98,6 @@ var (
 			},
 		},
 	}
-	// AtLogTaColumns holds the columns for the "at_log_ta" table.
-	AtLogTaColumns = []*schema.Column{
-		{Name: "at_log_id", Type: field.TypeInt},
-		{Name: "ta_id", Type: field.TypeInt},
-	}
-	// AtLogTaTable holds the schema information for the "at_log_ta" table.
-	AtLogTaTable = &schema.Table{
-		Name:       "at_log_ta",
-		Columns:    AtLogTaColumns,
-		PrimaryKey: []*schema.Column{AtLogTaColumns[0], AtLogTaColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "at_log_ta_at_log_id",
-				Columns:    []*schema.Column{AtLogTaColumns[0]},
-				RefColumns: []*schema.Column{AtLogsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "at_log_ta_ta_id",
-				Columns:    []*schema.Column{AtLogTaColumns[1]},
-				RefColumns: []*schema.Column{TasColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
-	// CtLogTaColumns holds the columns for the "ct_log_ta" table.
-	CtLogTaColumns = []*schema.Column{
-		{Name: "ct_log_id", Type: field.TypeInt},
-		{Name: "ta_id", Type: field.TypeInt},
-	}
-	// CtLogTaTable holds the schema information for the "ct_log_ta" table.
-	CtLogTaTable = &schema.Table{
-		Name:       "ct_log_ta",
-		Columns:    CtLogTaColumns,
-		PrimaryKey: []*schema.Column{CtLogTaColumns[0], CtLogTaColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "ct_log_ta_ct_log_id",
-				Columns:    []*schema.Column{CtLogTaColumns[0]},
-				RefColumns: []*schema.Column{CtLogsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "ct_log_ta_ta_id",
-				Columns:    []*schema.Column{CtLogTaColumns[1]},
-				RefColumns: []*schema.Column{TasColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AtLogsTable,
@@ -137,15 +105,11 @@ var (
 		SubscriptionsTable,
 		TasTable,
 		ViolationsTable,
-		AtLogTaTable,
-		CtLogTaTable,
 	}
 )
 
 func init() {
+	AtLogsTable.ForeignKeys[0].RefTable = TasTable
+	CtLogsTable.ForeignKeys[0].RefTable = TasTable
 	ViolationsTable.ForeignKeys[0].RefTable = TasTable
-	AtLogTaTable.ForeignKeys[0].RefTable = AtLogsTable
-	AtLogTaTable.ForeignKeys[1].RefTable = TasTable
-	CtLogTaTable.ForeignKeys[0].RefTable = CtLogsTable
-	CtLogTaTable.ForeignKeys[1].RefTable = TasTable
 }

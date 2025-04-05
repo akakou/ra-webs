@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -25,6 +24,7 @@ type CTLogQuery struct {
 	inters     []Interceptor
 	predicates []predicate.CTLog
 	withTa     *TAQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,7 +75,7 @@ func (clq *CTLogQuery) QueryTa() *TAQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ctlog.Table, ctlog.FieldID, selector),
 			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, ctlog.TaTable, ctlog.TaPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, ctlog.TaTable, ctlog.TaColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(clq.driver.Dialect(), step)
 		return fromU, nil
@@ -370,11 +370,18 @@ func (clq *CTLogQuery) prepareQuery(ctx context.Context) error {
 func (clq *CTLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CTLog, error) {
 	var (
 		nodes       = []*CTLog{}
+		withFKs     = clq.withFKs
 		_spec       = clq.querySpec()
 		loadedTypes = [1]bool{
 			clq.withTa != nil,
 		}
 	)
+	if clq.withTa != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, ctlog.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*CTLog).scanValues(nil, columns)
 	}
@@ -394,9 +401,8 @@ func (clq *CTLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CTLog
 		return nodes, nil
 	}
 	if query := clq.withTa; query != nil {
-		if err := clq.loadTa(ctx, query, nodes,
-			func(n *CTLog) { n.Edges.Ta = []*TA{} },
-			func(n *CTLog, e *TA) { n.Edges.Ta = append(n.Edges.Ta, e) }); err != nil {
+		if err := clq.loadTa(ctx, query, nodes, nil,
+			func(n *CTLog, e *TA) { n.Edges.Ta = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -404,62 +410,33 @@ func (clq *CTLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CTLog
 }
 
 func (clq *CTLogQuery) loadTa(ctx context.Context, query *TAQuery, nodes []*CTLog, init func(*CTLog), assign func(*CTLog, *TA)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*CTLog)
-	nids := make(map[int]map[*CTLog]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*CTLog)
+	for i := range nodes {
+		if nodes[i].ct_log_ta == nil {
+			continue
 		}
+		fk := *nodes[i].ct_log_ta
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(ctlog.TaTable)
-		s.Join(joinT).On(s.C(ta.FieldID), joinT.C(ctlog.TaPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(ctlog.TaPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(ctlog.TaPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
+	if len(ids) == 0 {
+		return nil
 	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*CTLog]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*TA](ctx, query, qr, query.inters)
+	query.Where(ta.IDIn(ids...))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "ta" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "ct_log_ta" returned %v`, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
 	return nil

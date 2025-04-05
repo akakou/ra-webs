@@ -23,6 +23,6 @@ func (CTLog) Fields() []ent.Field {
 // Edges of the TA.
 func (CTLog) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("ta", TA.Type),
+		edge.To("ta", TA.Type).Unique(),
 	}
 }

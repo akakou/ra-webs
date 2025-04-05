@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
+	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
 
 // CTLog is the model entity for the CTLog schema.
@@ -25,23 +26,26 @@ type CTLog struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CTLogQuery when eager-loading is set.
 	Edges        CTLogEdges `json:"edges"`
+	ct_log_ta    *int
 	selectValues sql.SelectValues
 }
 
 // CTLogEdges holds the relations/edges for other nodes in the graph.
 type CTLogEdges struct {
 	// Ta holds the value of the ta edge.
-	Ta []*TA `json:"ta,omitempty"`
+	Ta *TA `json:"ta,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
 // TaOrErr returns the Ta value or an error if the edge
-// was not loaded in eager-loading.
-func (e CTLogEdges) TaOrErr() ([]*TA, error) {
-	if e.loadedTypes[0] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e CTLogEdges) TaOrErr() (*TA, error) {
+	if e.Ta != nil {
 		return e.Ta, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: ta.Label}
 	}
 	return nil, &NotLoadedError{edge: "ta"}
 }
@@ -56,6 +60,8 @@ func (*CTLog) scanValues(columns []string) ([]any, error) {
 		case ctlog.FieldIsActive:
 			values[i] = new(sql.NullBool)
 		case ctlog.FieldID, ctlog.FieldMonitorLogID:
+			values[i] = new(sql.NullInt64)
+		case ctlog.ForeignKeys[0]: // ct_log_ta
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -95,6 +101,13 @@ func (cl *CTLog) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field is_active", values[i])
 			} else if value.Valid {
 				cl.IsActive = value.Bool
+			}
+		case ctlog.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field ct_log_ta", value)
+			} else if value.Valid {
+				cl.ct_log_ta = new(int)
+				*cl.ct_log_ta = int(value.Int64)
 			}
 		default:
 			cl.selectValues.Set(columns[i], values[i])

@@ -90,19 +90,23 @@ func (alu *ATLogUpdate) SetNillableIsActive(b *bool) *ATLogUpdate {
 	return alu
 }
 
-// AddTumIDs adds the "ta" edge to the TA entity by IDs.
-func (alu *ATLogUpdate) AddTumIDs(ids ...int) *ATLogUpdate {
-	alu.mutation.AddTumIDs(ids...)
+// SetTaID sets the "ta" edge to the TA entity by ID.
+func (alu *ATLogUpdate) SetTaID(id int) *ATLogUpdate {
+	alu.mutation.SetTaID(id)
 	return alu
 }
 
-// AddTa adds the "ta" edges to the TA entity.
-func (alu *ATLogUpdate) AddTa(t ...*TA) *ATLogUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableTaID sets the "ta" edge to the TA entity by ID if the given value is not nil.
+func (alu *ATLogUpdate) SetNillableTaID(id *int) *ATLogUpdate {
+	if id != nil {
+		alu = alu.SetTaID(*id)
 	}
-	return alu.AddTumIDs(ids...)
+	return alu
+}
+
+// SetTa sets the "ta" edge to the TA entity.
+func (alu *ATLogUpdate) SetTa(t *TA) *ATLogUpdate {
+	return alu.SetTaID(t.ID)
 }
 
 // Mutation returns the ATLogMutation object of the builder.
@@ -110,25 +114,10 @@ func (alu *ATLogUpdate) Mutation() *ATLogMutation {
 	return alu.mutation
 }
 
-// ClearTa clears all "ta" edges to the TA entity.
+// ClearTa clears the "ta" edge to the TA entity.
 func (alu *ATLogUpdate) ClearTa() *ATLogUpdate {
 	alu.mutation.ClearTa()
 	return alu
-}
-
-// RemoveTumIDs removes the "ta" edge to TA entities by IDs.
-func (alu *ATLogUpdate) RemoveTumIDs(ids ...int) *ATLogUpdate {
-	alu.mutation.RemoveTumIDs(ids...)
-	return alu
-}
-
-// RemoveTa removes "ta" edges to TA entities.
-func (alu *ATLogUpdate) RemoveTa(t ...*TA) *ATLogUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return alu.RemoveTumIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -184,39 +173,23 @@ func (alu *ATLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if alu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   atlog.TaTable,
-			Columns: atlog.TaPrimaryKey,
+			Columns: []string{atlog.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := alu.mutation.RemovedTaIDs(); len(nodes) > 0 && !alu.mutation.TaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   atlog.TaTable,
-			Columns: atlog.TaPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := alu.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   atlog.TaTable,
-			Columns: atlog.TaPrimaryKey,
+			Columns: []string{atlog.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
@@ -309,19 +282,23 @@ func (aluo *ATLogUpdateOne) SetNillableIsActive(b *bool) *ATLogUpdateOne {
 	return aluo
 }
 
-// AddTumIDs adds the "ta" edge to the TA entity by IDs.
-func (aluo *ATLogUpdateOne) AddTumIDs(ids ...int) *ATLogUpdateOne {
-	aluo.mutation.AddTumIDs(ids...)
+// SetTaID sets the "ta" edge to the TA entity by ID.
+func (aluo *ATLogUpdateOne) SetTaID(id int) *ATLogUpdateOne {
+	aluo.mutation.SetTaID(id)
 	return aluo
 }
 
-// AddTa adds the "ta" edges to the TA entity.
-func (aluo *ATLogUpdateOne) AddTa(t ...*TA) *ATLogUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableTaID sets the "ta" edge to the TA entity by ID if the given value is not nil.
+func (aluo *ATLogUpdateOne) SetNillableTaID(id *int) *ATLogUpdateOne {
+	if id != nil {
+		aluo = aluo.SetTaID(*id)
 	}
-	return aluo.AddTumIDs(ids...)
+	return aluo
+}
+
+// SetTa sets the "ta" edge to the TA entity.
+func (aluo *ATLogUpdateOne) SetTa(t *TA) *ATLogUpdateOne {
+	return aluo.SetTaID(t.ID)
 }
 
 // Mutation returns the ATLogMutation object of the builder.
@@ -329,25 +306,10 @@ func (aluo *ATLogUpdateOne) Mutation() *ATLogMutation {
 	return aluo.mutation
 }
 
-// ClearTa clears all "ta" edges to the TA entity.
+// ClearTa clears the "ta" edge to the TA entity.
 func (aluo *ATLogUpdateOne) ClearTa() *ATLogUpdateOne {
 	aluo.mutation.ClearTa()
 	return aluo
-}
-
-// RemoveTumIDs removes the "ta" edge to TA entities by IDs.
-func (aluo *ATLogUpdateOne) RemoveTumIDs(ids ...int) *ATLogUpdateOne {
-	aluo.mutation.RemoveTumIDs(ids...)
-	return aluo
-}
-
-// RemoveTa removes "ta" edges to TA entities.
-func (aluo *ATLogUpdateOne) RemoveTa(t ...*TA) *ATLogUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return aluo.RemoveTumIDs(ids...)
 }
 
 // Where appends a list predicates to the ATLogUpdate builder.
@@ -433,39 +395,23 @@ func (aluo *ATLogUpdateOne) sqlSave(ctx context.Context) (_node *ATLog, err erro
 	}
 	if aluo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   atlog.TaTable,
-			Columns: atlog.TaPrimaryKey,
+			Columns: []string{atlog.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := aluo.mutation.RemovedTaIDs(); len(nodes) > 0 && !aluo.mutation.TaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   atlog.TaTable,
-			Columns: atlog.TaPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := aluo.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   atlog.TaTable,
-			Columns: atlog.TaPrimaryKey,
+			Columns: []string{atlog.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),

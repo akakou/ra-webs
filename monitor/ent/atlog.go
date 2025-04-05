@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/akakou/ra-webs/monitor/ent/atlog"
+	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
 
 // ATLog is the model entity for the ATLog schema.
@@ -29,23 +30,26 @@ type ATLog struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ATLogQuery when eager-loading is set.
 	Edges        ATLogEdges `json:"edges"`
+	at_log_ta    *int
 	selectValues sql.SelectValues
 }
 
 // ATLogEdges holds the relations/edges for other nodes in the graph.
 type ATLogEdges struct {
 	// Ta holds the value of the ta edge.
-	Ta []*TA `json:"ta,omitempty"`
+	Ta *TA `json:"ta,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
 // TaOrErr returns the Ta value or an error if the edge
-// was not loaded in eager-loading.
-func (e ATLogEdges) TaOrErr() ([]*TA, error) {
-	if e.loadedTypes[0] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ATLogEdges) TaOrErr() (*TA, error) {
+	if e.Ta != nil {
 		return e.Ta, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: ta.Label}
 	}
 	return nil, &NotLoadedError{edge: "ta"}
 }
@@ -63,6 +67,8 @@ func (*ATLog) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case atlog.FieldEvidence, atlog.FieldRepository, atlog.FieldCommitID:
 			values[i] = new(sql.NullString)
+		case atlog.ForeignKeys[0]: // at_log_ta
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -113,6 +119,13 @@ func (al *ATLog) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field is_active", values[i])
 			} else if value.Valid {
 				al.IsActive = value.Bool
+			}
+		case atlog.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field at_log_ta", value)
+			} else if value.Valid {
+				al.at_log_ta = new(int)
+				*al.at_log_ta = int(value.Int64)
 			}
 		default:
 			al.selectValues.Set(columns[i], values[i])

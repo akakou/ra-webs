@@ -29,16 +29,20 @@ const (
 	ViolationInverseTable = "violations"
 	// ViolationColumn is the table column denoting the violation relation/edge.
 	ViolationColumn = "violation_ta"
-	// CtLogTable is the table that holds the ct_log relation/edge. The primary key declared below.
-	CtLogTable = "ct_log_ta"
+	// CtLogTable is the table that holds the ct_log relation/edge.
+	CtLogTable = "ct_logs"
 	// CtLogInverseTable is the table name for the CTLog entity.
 	// It exists in this package in order to avoid circular dependency with the "ctlog" package.
 	CtLogInverseTable = "ct_logs"
-	// AtLogTable is the table that holds the at_log relation/edge. The primary key declared below.
-	AtLogTable = "at_log_ta"
+	// CtLogColumn is the table column denoting the ct_log relation/edge.
+	CtLogColumn = "ct_log_ta"
+	// AtLogTable is the table that holds the at_log relation/edge.
+	AtLogTable = "at_logs"
 	// AtLogInverseTable is the table name for the ATLog entity.
 	// It exists in this package in order to avoid circular dependency with the "atlog" package.
 	AtLogInverseTable = "at_logs"
+	// AtLogColumn is the table column denoting the at_log relation/edge.
+	AtLogColumn = "at_log_ta"
 )
 
 // Columns holds all SQL columns for ta fields.
@@ -46,15 +50,6 @@ var Columns = []string{
 	FieldID,
 	FieldPublicKey,
 }
-
-var (
-	// CtLogPrimaryKey and CtLogColumn2 are the table columns denoting the
-	// primary key for the ct_log relation (M2M).
-	CtLogPrimaryKey = []string{"ct_log_id", "ta_id"}
-	// AtLogPrimaryKey and AtLogColumn2 are the table columns denoting the
-	// primary key for the at_log relation (M2M).
-	AtLogPrimaryKey = []string{"at_log_id", "ta_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -126,13 +121,13 @@ func newCtLogStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CtLogInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, CtLogTable, CtLogPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, true, CtLogTable, CtLogColumn),
 	)
 }
 func newAtLogStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AtLogInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, AtLogTable, AtLogPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, true, AtLogTable, AtLogColumn),
 	)
 }

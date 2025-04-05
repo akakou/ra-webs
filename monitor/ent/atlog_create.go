@@ -58,19 +58,23 @@ func (alc *ATLogCreate) SetNillableIsActive(b *bool) *ATLogCreate {
 	return alc
 }
 
-// AddTumIDs adds the "ta" edge to the TA entity by IDs.
-func (alc *ATLogCreate) AddTumIDs(ids ...int) *ATLogCreate {
-	alc.mutation.AddTumIDs(ids...)
+// SetTaID sets the "ta" edge to the TA entity by ID.
+func (alc *ATLogCreate) SetTaID(id int) *ATLogCreate {
+	alc.mutation.SetTaID(id)
 	return alc
 }
 
-// AddTa adds the "ta" edges to the TA entity.
-func (alc *ATLogCreate) AddTa(t ...*TA) *ATLogCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableTaID sets the "ta" edge to the TA entity by ID if the given value is not nil.
+func (alc *ATLogCreate) SetNillableTaID(id *int) *ATLogCreate {
+	if id != nil {
+		alc = alc.SetTaID(*id)
 	}
-	return alc.AddTumIDs(ids...)
+	return alc
+}
+
+// SetTa sets the "ta" edge to the TA entity.
+func (alc *ATLogCreate) SetTa(t *TA) *ATLogCreate {
+	return alc.SetTaID(t.ID)
 }
 
 // Mutation returns the ATLogMutation object of the builder.
@@ -179,10 +183,10 @@ func (alc *ATLogCreate) createSpec() (*ATLog, *sqlgraph.CreateSpec) {
 	}
 	if nodes := alc.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   atlog.TaTable,
-			Columns: atlog.TaPrimaryKey,
+			Columns: []string{atlog.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
@@ -191,6 +195,7 @@ func (alc *ATLogCreate) createSpec() (*ATLog, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.at_log_ta = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

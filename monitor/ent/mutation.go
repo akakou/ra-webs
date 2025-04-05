@@ -47,8 +47,7 @@ type ATLogMutation struct {
 	unique_id     *[]byte
 	is_active     *bool
 	clearedFields map[string]struct{}
-	ta            map[int]struct{}
-	removedta     map[int]struct{}
+	ta            *int
 	clearedta     bool
 	done          bool
 	oldValue      func(context.Context) (*ATLog, error)
@@ -333,14 +332,9 @@ func (m *ATLogMutation) ResetIsActive() {
 	m.is_active = nil
 }
 
-// AddTumIDs adds the "ta" edge to the TA entity by ids.
-func (m *ATLogMutation) AddTumIDs(ids ...int) {
-	if m.ta == nil {
-		m.ta = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.ta[ids[i]] = struct{}{}
-	}
+// SetTaID sets the "ta" edge to the TA entity by id.
+func (m *ATLogMutation) SetTaID(id int) {
+	m.ta = &id
 }
 
 // ClearTa clears the "ta" edge to the TA entity.
@@ -353,29 +347,20 @@ func (m *ATLogMutation) TaCleared() bool {
 	return m.clearedta
 }
 
-// RemoveTumIDs removes the "ta" edge to the TA entity by IDs.
-func (m *ATLogMutation) RemoveTumIDs(ids ...int) {
-	if m.removedta == nil {
-		m.removedta = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.ta, ids[i])
-		m.removedta[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedTa returns the removed IDs of the "ta" edge to the TA entity.
-func (m *ATLogMutation) RemovedTaIDs() (ids []int) {
-	for id := range m.removedta {
-		ids = append(ids, id)
+// TaID returns the "ta" edge ID in the mutation.
+func (m *ATLogMutation) TaID() (id int, exists bool) {
+	if m.ta != nil {
+		return *m.ta, true
 	}
 	return
 }
 
 // TaIDs returns the "ta" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TaID instead. It exists only for internal usage by the builders.
 func (m *ATLogMutation) TaIDs() (ids []int) {
-	for id := range m.ta {
-		ids = append(ids, id)
+	if id := m.ta; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -384,7 +369,6 @@ func (m *ATLogMutation) TaIDs() (ids []int) {
 func (m *ATLogMutation) ResetTa() {
 	m.ta = nil
 	m.clearedta = false
-	m.removedta = nil
 }
 
 // Where appends a list predicates to the ATLogMutation builder.
@@ -600,11 +584,9 @@ func (m *ATLogMutation) AddedEdges() []string {
 func (m *ATLogMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case atlog.EdgeTa:
-		ids := make([]ent.Value, 0, len(m.ta))
-		for id := range m.ta {
-			ids = append(ids, id)
+		if id := m.ta; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -612,23 +594,12 @@ func (m *ATLogMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ATLogMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedta != nil {
-		edges = append(edges, atlog.EdgeTa)
-	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ATLogMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case atlog.EdgeTa:
-		ids := make([]ent.Value, 0, len(m.removedta))
-		for id := range m.removedta {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
@@ -655,6 +626,9 @@ func (m *ATLogMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *ATLogMutation) ClearEdge(name string) error {
 	switch name {
+	case atlog.EdgeTa:
+		m.ClearTa()
+		return nil
 	}
 	return fmt.Errorf("unknown ATLog unique edge %s", name)
 }
@@ -681,8 +655,7 @@ type CTLogMutation struct {
 	addmonitor_log_id *int
 	is_active         *bool
 	clearedFields     map[string]struct{}
-	ta                map[int]struct{}
-	removedta         map[int]struct{}
+	ta                *int
 	clearedta         bool
 	done              bool
 	oldValue          func(context.Context) (*CTLog, error)
@@ -915,14 +888,9 @@ func (m *CTLogMutation) ResetIsActive() {
 	m.is_active = nil
 }
 
-// AddTumIDs adds the "ta" edge to the TA entity by ids.
-func (m *CTLogMutation) AddTumIDs(ids ...int) {
-	if m.ta == nil {
-		m.ta = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.ta[ids[i]] = struct{}{}
-	}
+// SetTaID sets the "ta" edge to the TA entity by id.
+func (m *CTLogMutation) SetTaID(id int) {
+	m.ta = &id
 }
 
 // ClearTa clears the "ta" edge to the TA entity.
@@ -935,29 +903,20 @@ func (m *CTLogMutation) TaCleared() bool {
 	return m.clearedta
 }
 
-// RemoveTumIDs removes the "ta" edge to the TA entity by IDs.
-func (m *CTLogMutation) RemoveTumIDs(ids ...int) {
-	if m.removedta == nil {
-		m.removedta = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.ta, ids[i])
-		m.removedta[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedTa returns the removed IDs of the "ta" edge to the TA entity.
-func (m *CTLogMutation) RemovedTaIDs() (ids []int) {
-	for id := range m.removedta {
-		ids = append(ids, id)
+// TaID returns the "ta" edge ID in the mutation.
+func (m *CTLogMutation) TaID() (id int, exists bool) {
+	if m.ta != nil {
+		return *m.ta, true
 	}
 	return
 }
 
 // TaIDs returns the "ta" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TaID instead. It exists only for internal usage by the builders.
 func (m *CTLogMutation) TaIDs() (ids []int) {
-	for id := range m.ta {
-		ids = append(ids, id)
+	if id := m.ta; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -966,7 +925,6 @@ func (m *CTLogMutation) TaIDs() (ids []int) {
 func (m *CTLogMutation) ResetTa() {
 	m.ta = nil
 	m.clearedta = false
-	m.removedta = nil
 }
 
 // Where appends a list predicates to the CTLogMutation builder.
@@ -1163,11 +1121,9 @@ func (m *CTLogMutation) AddedEdges() []string {
 func (m *CTLogMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case ctlog.EdgeTa:
-		ids := make([]ent.Value, 0, len(m.ta))
-		for id := range m.ta {
-			ids = append(ids, id)
+		if id := m.ta; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -1175,23 +1131,12 @@ func (m *CTLogMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CTLogMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedta != nil {
-		edges = append(edges, ctlog.EdgeTa)
-	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *CTLogMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case ctlog.EdgeTa:
-		ids := make([]ent.Value, 0, len(m.removedta))
-		for id := range m.removedta {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
@@ -1218,6 +1163,9 @@ func (m *CTLogMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *CTLogMutation) ClearEdge(name string) error {
 	switch name {
+	case ctlog.EdgeTa:
+		m.ClearTa()
+		return nil
 	}
 	return fmt.Errorf("unknown CTLog unique edge %s", name)
 }

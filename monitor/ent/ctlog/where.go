@@ -163,7 +163,7 @@ func HasTa() predicate.CTLog {
 	return predicate.CTLog(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, TaTable, TaPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, TaTable, TaColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

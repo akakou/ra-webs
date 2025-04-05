@@ -46,19 +46,23 @@ func (clc *CTLogCreate) SetNillableIsActive(b *bool) *CTLogCreate {
 	return clc
 }
 
-// AddTumIDs adds the "ta" edge to the TA entity by IDs.
-func (clc *CTLogCreate) AddTumIDs(ids ...int) *CTLogCreate {
-	clc.mutation.AddTumIDs(ids...)
+// SetTaID sets the "ta" edge to the TA entity by ID.
+func (clc *CTLogCreate) SetTaID(id int) *CTLogCreate {
+	clc.mutation.SetTaID(id)
 	return clc
 }
 
-// AddTa adds the "ta" edges to the TA entity.
-func (clc *CTLogCreate) AddTa(t ...*TA) *CTLogCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableTaID sets the "ta" edge to the TA entity by ID if the given value is not nil.
+func (clc *CTLogCreate) SetNillableTaID(id *int) *CTLogCreate {
+	if id != nil {
+		clc = clc.SetTaID(*id)
 	}
-	return clc.AddTumIDs(ids...)
+	return clc
+}
+
+// SetTa sets the "ta" edge to the TA entity.
+func (clc *CTLogCreate) SetTa(t *TA) *CTLogCreate {
+	return clc.SetTaID(t.ID)
 }
 
 // Mutation returns the CTLogMutation object of the builder.
@@ -153,10 +157,10 @@ func (clc *CTLogCreate) createSpec() (*CTLog, *sqlgraph.CreateSpec) {
 	}
 	if nodes := clc.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ctlog.TaTable,
-			Columns: ctlog.TaPrimaryKey,
+			Columns: []string{ctlog.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
@@ -165,6 +169,7 @@ func (clc *CTLogCreate) createSpec() (*CTLog, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.ct_log_ta = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

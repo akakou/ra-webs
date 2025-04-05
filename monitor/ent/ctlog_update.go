@@ -69,19 +69,23 @@ func (clu *CTLogUpdate) SetNillableIsActive(b *bool) *CTLogUpdate {
 	return clu
 }
 
-// AddTumIDs adds the "ta" edge to the TA entity by IDs.
-func (clu *CTLogUpdate) AddTumIDs(ids ...int) *CTLogUpdate {
-	clu.mutation.AddTumIDs(ids...)
+// SetTaID sets the "ta" edge to the TA entity by ID.
+func (clu *CTLogUpdate) SetTaID(id int) *CTLogUpdate {
+	clu.mutation.SetTaID(id)
 	return clu
 }
 
-// AddTa adds the "ta" edges to the TA entity.
-func (clu *CTLogUpdate) AddTa(t ...*TA) *CTLogUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableTaID sets the "ta" edge to the TA entity by ID if the given value is not nil.
+func (clu *CTLogUpdate) SetNillableTaID(id *int) *CTLogUpdate {
+	if id != nil {
+		clu = clu.SetTaID(*id)
 	}
-	return clu.AddTumIDs(ids...)
+	return clu
+}
+
+// SetTa sets the "ta" edge to the TA entity.
+func (clu *CTLogUpdate) SetTa(t *TA) *CTLogUpdate {
+	return clu.SetTaID(t.ID)
 }
 
 // Mutation returns the CTLogMutation object of the builder.
@@ -89,25 +93,10 @@ func (clu *CTLogUpdate) Mutation() *CTLogMutation {
 	return clu.mutation
 }
 
-// ClearTa clears all "ta" edges to the TA entity.
+// ClearTa clears the "ta" edge to the TA entity.
 func (clu *CTLogUpdate) ClearTa() *CTLogUpdate {
 	clu.mutation.ClearTa()
 	return clu
-}
-
-// RemoveTumIDs removes the "ta" edge to TA entities by IDs.
-func (clu *CTLogUpdate) RemoveTumIDs(ids ...int) *CTLogUpdate {
-	clu.mutation.RemoveTumIDs(ids...)
-	return clu
-}
-
-// RemoveTa removes "ta" edges to TA entities.
-func (clu *CTLogUpdate) RemoveTa(t ...*TA) *CTLogUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return clu.RemoveTumIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -160,39 +149,23 @@ func (clu *CTLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if clu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ctlog.TaTable,
-			Columns: ctlog.TaPrimaryKey,
+			Columns: []string{ctlog.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := clu.mutation.RemovedTaIDs(); len(nodes) > 0 && !clu.mutation.TaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   ctlog.TaTable,
-			Columns: ctlog.TaPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := clu.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ctlog.TaTable,
-			Columns: ctlog.TaPrimaryKey,
+			Columns: []string{ctlog.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
@@ -264,19 +237,23 @@ func (cluo *CTLogUpdateOne) SetNillableIsActive(b *bool) *CTLogUpdateOne {
 	return cluo
 }
 
-// AddTumIDs adds the "ta" edge to the TA entity by IDs.
-func (cluo *CTLogUpdateOne) AddTumIDs(ids ...int) *CTLogUpdateOne {
-	cluo.mutation.AddTumIDs(ids...)
+// SetTaID sets the "ta" edge to the TA entity by ID.
+func (cluo *CTLogUpdateOne) SetTaID(id int) *CTLogUpdateOne {
+	cluo.mutation.SetTaID(id)
 	return cluo
 }
 
-// AddTa adds the "ta" edges to the TA entity.
-func (cluo *CTLogUpdateOne) AddTa(t ...*TA) *CTLogUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableTaID sets the "ta" edge to the TA entity by ID if the given value is not nil.
+func (cluo *CTLogUpdateOne) SetNillableTaID(id *int) *CTLogUpdateOne {
+	if id != nil {
+		cluo = cluo.SetTaID(*id)
 	}
-	return cluo.AddTumIDs(ids...)
+	return cluo
+}
+
+// SetTa sets the "ta" edge to the TA entity.
+func (cluo *CTLogUpdateOne) SetTa(t *TA) *CTLogUpdateOne {
+	return cluo.SetTaID(t.ID)
 }
 
 // Mutation returns the CTLogMutation object of the builder.
@@ -284,25 +261,10 @@ func (cluo *CTLogUpdateOne) Mutation() *CTLogMutation {
 	return cluo.mutation
 }
 
-// ClearTa clears all "ta" edges to the TA entity.
+// ClearTa clears the "ta" edge to the TA entity.
 func (cluo *CTLogUpdateOne) ClearTa() *CTLogUpdateOne {
 	cluo.mutation.ClearTa()
 	return cluo
-}
-
-// RemoveTumIDs removes the "ta" edge to TA entities by IDs.
-func (cluo *CTLogUpdateOne) RemoveTumIDs(ids ...int) *CTLogUpdateOne {
-	cluo.mutation.RemoveTumIDs(ids...)
-	return cluo
-}
-
-// RemoveTa removes "ta" edges to TA entities.
-func (cluo *CTLogUpdateOne) RemoveTa(t ...*TA) *CTLogUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return cluo.RemoveTumIDs(ids...)
 }
 
 // Where appends a list predicates to the CTLogUpdate builder.
@@ -385,39 +347,23 @@ func (cluo *CTLogUpdateOne) sqlSave(ctx context.Context) (_node *CTLog, err erro
 	}
 	if cluo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ctlog.TaTable,
-			Columns: ctlog.TaPrimaryKey,
+			Columns: []string{ctlog.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cluo.mutation.RemovedTaIDs(); len(nodes) > 0 && !cluo.mutation.TaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   ctlog.TaTable,
-			Columns: ctlog.TaPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := cluo.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   ctlog.TaTable,
-			Columns: ctlog.TaPrimaryKey,
+			Columns: []string{ctlog.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),

@@ -26,11 +26,13 @@ const (
 	EdgeTa = "ta"
 	// Table holds the table name of the atlog in the database.
 	Table = "at_logs"
-	// TaTable is the table that holds the ta relation/edge. The primary key declared below.
-	TaTable = "at_log_ta"
+	// TaTable is the table that holds the ta relation/edge.
+	TaTable = "at_logs"
 	// TaInverseTable is the table name for the TA entity.
 	// It exists in this package in order to avoid circular dependency with the "ta" package.
 	TaInverseTable = "tas"
+	// TaColumn is the table column denoting the ta relation/edge.
+	TaColumn = "at_log_ta"
 )
 
 // Columns holds all SQL columns for atlog fields.
@@ -43,16 +45,21 @@ var Columns = []string{
 	FieldIsActive,
 }
 
-var (
-	// TaPrimaryKey and TaColumn2 are the table columns denoting the
-	// primary key for the ta relation (M2M).
-	TaPrimaryKey = []string{"at_log_id", "ta_id"}
-)
+// ForeignKeys holds the SQL foreign-keys that are owned by the "at_logs"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"at_log_ta",
+}
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -92,23 +99,16 @@ func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsActive, opts...).ToFunc()
 }
 
-// ByTaCount orders the results by ta count.
-func ByTaCount(opts ...sql.OrderTermOption) OrderOption {
+// ByTaField orders the results by ta field.
+func ByTaField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTaStep(), opts...)
-	}
-}
-
-// ByTa orders the results by ta terms.
-func ByTa(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTaStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newTaStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newTaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TaInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, TaTable, TaPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2O, false, TaTable, TaColumn),
 	)
 }

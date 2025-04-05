@@ -158,10 +158,10 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 	}
 	if nodes := tc.mutation.CtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   ta.CtLogTable,
-			Columns: ta.CtLogPrimaryKey,
+			Columns: []string{ta.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
@@ -174,10 +174,10 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 	}
 	if nodes := tc.mutation.AtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   ta.AtLogTable,
-			Columns: ta.AtLogPrimaryKey,
+			Columns: []string{ta.AtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),

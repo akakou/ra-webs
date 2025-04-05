@@ -126,7 +126,7 @@ func HasCtLog() predicate.TA {
 	return predicate.TA(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, CtLogTable, CtLogPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, CtLogTable, CtLogColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -149,7 +149,7 @@ func HasAtLog() predicate.TA {
 	return predicate.TA(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, AtLogTable, AtLogPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, AtLogTable, AtLogColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
