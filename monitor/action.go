@@ -10,7 +10,7 @@ func (monitor *Monitor) Revoke(serv *ent.CTLog) {
 		panic(err)
 	}
 
-	monitor.DB.Client.TAViolation.Create().
+	monitor.DB.Client.Violation.Create().
 		SetCtLog(serv).
 		SaveX(*monitor.DB.Ctx)
 }
