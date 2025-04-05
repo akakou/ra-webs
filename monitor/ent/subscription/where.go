@@ -4,7 +4,6 @@ package subscription
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
 )
 
@@ -261,29 +260,6 @@ func AuthEqualFold(v string) predicate.Subscription {
 // AuthContainsFold applies the ContainsFold predicate on the "auth" field.
 func AuthContainsFold(v string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldContainsFold(FieldAuth, v))
-}
-
-// HasCtLog applies the HasEdge predicate on the "ct_log" edge.
-func HasCtLog() predicate.Subscription {
-	return predicate.Subscription(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, CtLogTable, CtLogColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasCtLogWith applies the HasEdge predicate on the "ct_log" edge with a given conditions (other predicates).
-func HasCtLogWith(preds ...predicate.CTLog) predicate.Subscription {
-	return predicate.Subscription(func(s *sql.Selector) {
-		step := newCtLogStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

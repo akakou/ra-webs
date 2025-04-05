@@ -25,6 +25,6 @@ func (Violation) Fields() []ent.Field {
 // Edges of the TA.
 func (Violation) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("ct_log", CTLog.Type).Unique(),
+		edge.To("ta", TA.Type).Unique(),
 	}
 }

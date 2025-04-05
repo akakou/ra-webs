@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra-webs/monitor/ent/atlog"
-	"github.com/akakou/ra-webs/monitor/ent/ctlog"
+	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
 
 // ATLogCreate is the builder for creating a ATLog entity.
@@ -58,23 +58,19 @@ func (alc *ATLogCreate) SetNillableIsActive(b *bool) *ATLogCreate {
 	return alc
 }
 
-// SetCtLogID sets the "ct_log" edge to the CTLog entity by ID.
-func (alc *ATLogCreate) SetCtLogID(id int) *ATLogCreate {
-	alc.mutation.SetCtLogID(id)
+// AddTumIDs adds the "ta" edge to the TA entity by IDs.
+func (alc *ATLogCreate) AddTumIDs(ids ...int) *ATLogCreate {
+	alc.mutation.AddTumIDs(ids...)
 	return alc
 }
 
-// SetNillableCtLogID sets the "ct_log" edge to the CTLog entity by ID if the given value is not nil.
-func (alc *ATLogCreate) SetNillableCtLogID(id *int) *ATLogCreate {
-	if id != nil {
-		alc = alc.SetCtLogID(*id)
+// AddTa adds the "ta" edges to the TA entity.
+func (alc *ATLogCreate) AddTa(t ...*TA) *ATLogCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return alc
-}
-
-// SetCtLog sets the "ct_log" edge to the CTLog entity.
-func (alc *ATLogCreate) SetCtLog(c *CTLog) *ATLogCreate {
-	return alc.SetCtLogID(c.ID)
+	return alc.AddTumIDs(ids...)
 }
 
 // Mutation returns the ATLogMutation object of the builder.
@@ -181,21 +177,20 @@ func (alc *ATLogCreate) createSpec() (*ATLog, *sqlgraph.CreateSpec) {
 		_spec.SetField(atlog.FieldIsActive, field.TypeBool, value)
 		_node.IsActive = value
 	}
-	if nodes := alc.mutation.CtLogIDs(); len(nodes) > 0 {
+	if nodes := alc.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   atlog.CtLogTable,
-			Columns: []string{atlog.CtLogColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   atlog.TaTable,
+			Columns: atlog.TaPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.ct_log_at_log = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

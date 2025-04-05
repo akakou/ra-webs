@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
 )
 
@@ -36,25 +35,6 @@ func (sc *SubscriptionCreate) SetP256dh(s string) *SubscriptionCreate {
 func (sc *SubscriptionCreate) SetAuth(s string) *SubscriptionCreate {
 	sc.mutation.SetAuth(s)
 	return sc
-}
-
-// SetCtLogID sets the "ct_log" edge to the CTLog entity by ID.
-func (sc *SubscriptionCreate) SetCtLogID(id int) *SubscriptionCreate {
-	sc.mutation.SetCtLogID(id)
-	return sc
-}
-
-// SetNillableCtLogID sets the "ct_log" edge to the CTLog entity by ID if the given value is not nil.
-func (sc *SubscriptionCreate) SetNillableCtLogID(id *int) *SubscriptionCreate {
-	if id != nil {
-		sc = sc.SetCtLogID(*id)
-	}
-	return sc
-}
-
-// SetCtLog sets the "ct_log" edge to the CTLog entity.
-func (sc *SubscriptionCreate) SetCtLog(c *CTLog) *SubscriptionCreate {
-	return sc.SetCtLogID(c.ID)
 }
 
 // Mutation returns the SubscriptionMutation object of the builder.
@@ -137,23 +117,6 @@ func (sc *SubscriptionCreate) createSpec() (*Subscription, *sqlgraph.CreateSpec)
 	if value, ok := sc.mutation.Auth(); ok {
 		_spec.SetField(subscription.FieldAuth, field.TypeString, value)
 		_node.Auth = value
-	}
-	if nodes := sc.mutation.CtLogIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   subscription.CtLogTable,
-			Columns: []string{subscription.CtLogColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.subscription_ct_log = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

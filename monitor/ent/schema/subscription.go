@@ -2,7 +2,6 @@ package schema
 
 import (
 	"entgo.io/ent"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -22,7 +21,5 @@ func (Subscription) Fields() []ent.Field {
 
 // Edges of the TA.
 func (Subscription) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.To("ct_log", CTLog.Type).Unique(),
-	}
+	return []ent.Edge{}
 }

@@ -9,7 +9,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/akakou/ra-webs/monitor/ent/atlog"
-	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 )
 
 // ATLog is the model entity for the ATLog schema.
@@ -29,29 +28,26 @@ type ATLog struct {
 	IsActive bool `json:"is_active,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ATLogQuery when eager-loading is set.
-	Edges         ATLogEdges `json:"edges"`
-	ct_log_at_log *int
-	selectValues  sql.SelectValues
+	Edges        ATLogEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // ATLogEdges holds the relations/edges for other nodes in the graph.
 type ATLogEdges struct {
-	// CtLog holds the value of the ct_log edge.
-	CtLog *CTLog `json:"ct_log,omitempty"`
+	// Ta holds the value of the ta edge.
+	Ta []*TA `json:"ta,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// CtLogOrErr returns the CtLog value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e ATLogEdges) CtLogOrErr() (*CTLog, error) {
-	if e.CtLog != nil {
-		return e.CtLog, nil
-	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: ctlog.Label}
+// TaOrErr returns the Ta value or an error if the edge
+// was not loaded in eager-loading.
+func (e ATLogEdges) TaOrErr() ([]*TA, error) {
+	if e.loadedTypes[0] {
+		return e.Ta, nil
 	}
-	return nil, &NotLoadedError{edge: "ct_log"}
+	return nil, &NotLoadedError{edge: "ta"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -67,8 +63,6 @@ func (*ATLog) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case atlog.FieldEvidence, atlog.FieldRepository, atlog.FieldCommitID:
 			values[i] = new(sql.NullString)
-		case atlog.ForeignKeys[0]: // ct_log_at_log
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -120,13 +114,6 @@ func (al *ATLog) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				al.IsActive = value.Bool
 			}
-		case atlog.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field ct_log_at_log", value)
-			} else if value.Valid {
-				al.ct_log_at_log = new(int)
-				*al.ct_log_at_log = int(value.Int64)
-			}
 		default:
 			al.selectValues.Set(columns[i], values[i])
 		}
@@ -140,9 +127,9 @@ func (al *ATLog) Value(name string) (ent.Value, error) {
 	return al.selectValues.Get(name)
 }
 
-// QueryCtLog queries the "ct_log" edge of the ATLog entity.
-func (al *ATLog) QueryCtLog() *CTLogQuery {
-	return NewATLogClient(al.config).QueryCtLog(al)
+// QueryTa queries the "ta" edge of the ATLog entity.
+func (al *ATLog) QueryTa() *TAQuery {
+	return NewATLogClient(al.config).QueryTa(al)
 }
 
 // Update returns a builder for updating this ATLog.

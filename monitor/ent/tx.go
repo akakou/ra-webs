@@ -18,6 +18,8 @@ type Tx struct {
 	CTLog *CTLogClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
+	// TA is the client for interacting with the TA builders.
+	TA *TAClient
 	// Violation is the client for interacting with the Violation builders.
 	Violation *ViolationClient
 
@@ -154,6 +156,7 @@ func (tx *Tx) init() {
 	tx.ATLog = NewATLogClient(tx.config)
 	tx.CTLog = NewCTLogClient(tx.config)
 	tx.Subscription = NewSubscriptionClient(tx.config)
+	tx.TA = NewTAClient(tx.config)
 	tx.Violation = NewViolationClient(tx.config)
 }
 

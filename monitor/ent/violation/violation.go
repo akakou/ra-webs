@@ -16,17 +16,17 @@ const (
 	FieldID = "id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
-	// EdgeCtLog holds the string denoting the ct_log edge name in mutations.
-	EdgeCtLog = "ct_log"
+	// EdgeTa holds the string denoting the ta edge name in mutations.
+	EdgeTa = "ta"
 	// Table holds the table name of the violation in the database.
 	Table = "violations"
-	// CtLogTable is the table that holds the ct_log relation/edge.
-	CtLogTable = "violations"
-	// CtLogInverseTable is the table name for the CTLog entity.
-	// It exists in this package in order to avoid circular dependency with the "ctlog" package.
-	CtLogInverseTable = "ct_logs"
-	// CtLogColumn is the table column denoting the ct_log relation/edge.
-	CtLogColumn = "violation_ct_log"
+	// TaTable is the table that holds the ta relation/edge.
+	TaTable = "violations"
+	// TaInverseTable is the table name for the TA entity.
+	// It exists in this package in order to avoid circular dependency with the "ta" package.
+	TaInverseTable = "tas"
+	// TaColumn is the table column denoting the ta relation/edge.
+	TaColumn = "violation_ta"
 )
 
 // Columns holds all SQL columns for violation fields.
@@ -38,7 +38,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "violations"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"violation_ct_log",
+	"violation_ta",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -74,16 +74,16 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
-// ByCtLogField orders the results by ct_log field.
-func ByCtLogField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByTaField orders the results by ta field.
+func ByTaField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newCtLogStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newTaStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newCtLogStep() *sqlgraph.Step {
+func newTaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(CtLogInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, CtLogTable, CtLogColumn),
+		sqlgraph.To(TaInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, TaTable, TaColumn),
 	)
 }

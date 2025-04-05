@@ -4,7 +4,6 @@ package subscription
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -18,17 +17,8 @@ const (
 	FieldP256dh = "p256dh"
 	// FieldAuth holds the string denoting the auth field in the database.
 	FieldAuth = "auth"
-	// EdgeCtLog holds the string denoting the ct_log edge name in mutations.
-	EdgeCtLog = "ct_log"
 	// Table holds the table name of the subscription in the database.
 	Table = "subscriptions"
-	// CtLogTable is the table that holds the ct_log relation/edge.
-	CtLogTable = "subscriptions"
-	// CtLogInverseTable is the table name for the CTLog entity.
-	// It exists in this package in order to avoid circular dependency with the "ctlog" package.
-	CtLogInverseTable = "ct_logs"
-	// CtLogColumn is the table column denoting the ct_log relation/edge.
-	CtLogColumn = "subscription_ct_log"
 )
 
 // Columns holds all SQL columns for subscription fields.
@@ -39,21 +29,10 @@ var Columns = []string{
 	FieldAuth,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "subscriptions"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"subscription_ct_log",
-}
-
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -81,18 +60,4 @@ func ByP256dh(opts ...sql.OrderTermOption) OrderOption {
 // ByAuth orders the results by the auth field.
 func ByAuth(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAuth, opts...).ToFunc()
-}
-
-// ByCtLogField orders the results by ct_log field.
-func ByCtLogField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newCtLogStep(), sql.OrderByField(field, opts...))
-	}
-}
-func newCtLogStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(CtLogInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, CtLogTable, CtLogColumn),
-	)
 }

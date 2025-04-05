@@ -12,23 +12,19 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
-	"github.com/akakou/ra-webs/monitor/ent/subscription"
-	"github.com/akakou/ra-webs/monitor/ent/violation"
+	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
 
 // CTLogQuery is the builder for querying CTLog entities.
 type CTLogQuery struct {
 	config
-	ctx              *QueryContext
-	order            []ctlog.OrderOption
-	inters           []Interceptor
-	predicates       []predicate.CTLog
-	withViolation    *ViolationQuery
-	withAtLog        *ATLogQuery
-	withSubscription *SubscriptionQuery
+	ctx        *QueryContext
+	order      []ctlog.OrderOption
+	inters     []Interceptor
+	predicates []predicate.CTLog
+	withTa     *TAQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -65,9 +61,9 @@ func (clq *CTLogQuery) Order(o ...ctlog.OrderOption) *CTLogQuery {
 	return clq
 }
 
-// QueryViolation chains the current query on the "violation" edge.
-func (clq *CTLogQuery) QueryViolation() *ViolationQuery {
-	query := (&ViolationClient{config: clq.config}).Query()
+// QueryTa chains the current query on the "ta" edge.
+func (clq *CTLogQuery) QueryTa() *TAQuery {
+	query := (&TAClient{config: clq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := clq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -78,52 +74,8 @@ func (clq *CTLogQuery) QueryViolation() *ViolationQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ctlog.Table, ctlog.FieldID, selector),
-			sqlgraph.To(violation.Table, violation.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, ctlog.ViolationTable, ctlog.ViolationColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(clq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryAtLog chains the current query on the "at_log" edge.
-func (clq *CTLogQuery) QueryAtLog() *ATLogQuery {
-	query := (&ATLogClient{config: clq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := clq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := clq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ctlog.Table, ctlog.FieldID, selector),
-			sqlgraph.To(atlog.Table, atlog.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, ctlog.AtLogTable, ctlog.AtLogColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(clq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QuerySubscription chains the current query on the "subscription" edge.
-func (clq *CTLogQuery) QuerySubscription() *SubscriptionQuery {
-	query := (&SubscriptionClient{config: clq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := clq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := clq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ctlog.Table, ctlog.FieldID, selector),
-			sqlgraph.To(subscription.Table, subscription.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, ctlog.SubscriptionTable, ctlog.SubscriptionColumn),
+			sqlgraph.To(ta.Table, ta.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, ctlog.TaTable, ctlog.TaPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(clq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,50 +270,26 @@ func (clq *CTLogQuery) Clone() *CTLogQuery {
 		return nil
 	}
 	return &CTLogQuery{
-		config:           clq.config,
-		ctx:              clq.ctx.Clone(),
-		order:            append([]ctlog.OrderOption{}, clq.order...),
-		inters:           append([]Interceptor{}, clq.inters...),
-		predicates:       append([]predicate.CTLog{}, clq.predicates...),
-		withViolation:    clq.withViolation.Clone(),
-		withAtLog:        clq.withAtLog.Clone(),
-		withSubscription: clq.withSubscription.Clone(),
+		config:     clq.config,
+		ctx:        clq.ctx.Clone(),
+		order:      append([]ctlog.OrderOption{}, clq.order...),
+		inters:     append([]Interceptor{}, clq.inters...),
+		predicates: append([]predicate.CTLog{}, clq.predicates...),
+		withTa:     clq.withTa.Clone(),
 		// clone intermediate query.
 		sql:  clq.sql.Clone(),
 		path: clq.path,
 	}
 }
 
-// WithViolation tells the query-builder to eager-load the nodes that are connected to
-// the "violation" edge. The optional arguments are used to configure the query builder of the edge.
-func (clq *CTLogQuery) WithViolation(opts ...func(*ViolationQuery)) *CTLogQuery {
-	query := (&ViolationClient{config: clq.config}).Query()
+// WithTa tells the query-builder to eager-load the nodes that are connected to
+// the "ta" edge. The optional arguments are used to configure the query builder of the edge.
+func (clq *CTLogQuery) WithTa(opts ...func(*TAQuery)) *CTLogQuery {
+	query := (&TAClient{config: clq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	clq.withViolation = query
-	return clq
-}
-
-// WithAtLog tells the query-builder to eager-load the nodes that are connected to
-// the "at_log" edge. The optional arguments are used to configure the query builder of the edge.
-func (clq *CTLogQuery) WithAtLog(opts ...func(*ATLogQuery)) *CTLogQuery {
-	query := (&ATLogClient{config: clq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	clq.withAtLog = query
-	return clq
-}
-
-// WithSubscription tells the query-builder to eager-load the nodes that are connected to
-// the "subscription" edge. The optional arguments are used to configure the query builder of the edge.
-func (clq *CTLogQuery) WithSubscription(opts ...func(*SubscriptionQuery)) *CTLogQuery {
-	query := (&SubscriptionClient{config: clq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	clq.withSubscription = query
+	clq.withTa = query
 	return clq
 }
 
@@ -443,10 +371,8 @@ func (clq *CTLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CTLog
 	var (
 		nodes       = []*CTLog{}
 		_spec       = clq.querySpec()
-		loadedTypes = [3]bool{
-			clq.withViolation != nil,
-			clq.withAtLog != nil,
-			clq.withSubscription != nil,
+		loadedTypes = [1]bool{
+			clq.withTa != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -467,116 +393,74 @@ func (clq *CTLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CTLog
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := clq.withViolation; query != nil {
-		if err := clq.loadViolation(ctx, query, nodes,
-			func(n *CTLog) { n.Edges.Violation = []*Violation{} },
-			func(n *CTLog, e *Violation) { n.Edges.Violation = append(n.Edges.Violation, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := clq.withAtLog; query != nil {
-		if err := clq.loadAtLog(ctx, query, nodes, nil,
-			func(n *CTLog, e *ATLog) { n.Edges.AtLog = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := clq.withSubscription; query != nil {
-		if err := clq.loadSubscription(ctx, query, nodes,
-			func(n *CTLog) { n.Edges.Subscription = []*Subscription{} },
-			func(n *CTLog, e *Subscription) { n.Edges.Subscription = append(n.Edges.Subscription, e) }); err != nil {
+	if query := clq.withTa; query != nil {
+		if err := clq.loadTa(ctx, query, nodes,
+			func(n *CTLog) { n.Edges.Ta = []*TA{} },
+			func(n *CTLog, e *TA) { n.Edges.Ta = append(n.Edges.Ta, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (clq *CTLogQuery) loadViolation(ctx context.Context, query *ViolationQuery, nodes []*CTLog, init func(*CTLog), assign func(*CTLog, *Violation)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*CTLog)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
+func (clq *CTLogQuery) loadTa(ctx context.Context, query *TAQuery, nodes []*CTLog, init func(*CTLog), assign func(*CTLog, *TA)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*CTLog)
+	nids := make(map[int]map[*CTLog]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
 		if init != nil {
-			init(nodes[i])
+			init(node)
 		}
 	}
-	query.withFKs = true
-	query.Where(predicate.Violation(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(ctlog.ViolationColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(ctlog.TaTable)
+		s.Join(joinT).On(s.C(ta.FieldID), joinT.C(ctlog.TaPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(ctlog.TaPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(ctlog.TaPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*CTLog]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*TA](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.violation_ct_log
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "violation_ct_log" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "violation_ct_log" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected "ta" node returned %v`, n.ID)
 		}
-		assign(node, n)
-	}
-	return nil
-}
-func (clq *CTLogQuery) loadAtLog(ctx context.Context, query *ATLogQuery, nodes []*CTLog, init func(*CTLog), assign func(*CTLog, *ATLog)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*CTLog)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.withFKs = true
-	query.Where(predicate.ATLog(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(ctlog.AtLogColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.ct_log_at_log
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "ct_log_at_log" is nil for node %v`, n.ID)
+		for kn := range nodes {
+			assign(kn, n)
 		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "ct_log_at_log" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-func (clq *CTLogQuery) loadSubscription(ctx context.Context, query *SubscriptionQuery, nodes []*CTLog, init func(*CTLog), assign func(*CTLog, *Subscription)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*CTLog)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.withFKs = true
-	query.Where(predicate.Subscription(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(ctlog.SubscriptionColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.subscription_ct_log
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "subscription_ct_log" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "subscription_ct_log" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
 	}
 	return nil
 }

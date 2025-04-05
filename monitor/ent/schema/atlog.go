@@ -25,6 +25,6 @@ func (ATLog) Fields() []ent.Field {
 // Edges of the TA.
 func (ATLog) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("ct_log", CTLog.Type).Ref("at_log").Unique(),
+		edge.To("ta", TA.Type),
 	}
 }

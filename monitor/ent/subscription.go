@@ -8,7 +8,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
 )
 
@@ -22,32 +21,8 @@ type Subscription struct {
 	// P256dh holds the value of the "p256dh" field.
 	P256dh string `json:"p256dh,omitempty"`
 	// Auth holds the value of the "auth" field.
-	Auth string `json:"auth,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the SubscriptionQuery when eager-loading is set.
-	Edges               SubscriptionEdges `json:"edges"`
-	subscription_ct_log *int
-	selectValues        sql.SelectValues
-}
-
-// SubscriptionEdges holds the relations/edges for other nodes in the graph.
-type SubscriptionEdges struct {
-	// CtLog holds the value of the ct_log edge.
-	CtLog *CTLog `json:"ct_log,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-}
-
-// CtLogOrErr returns the CtLog value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e SubscriptionEdges) CtLogOrErr() (*CTLog, error) {
-	if e.CtLog != nil {
-		return e.CtLog, nil
-	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: ctlog.Label}
-	}
-	return nil, &NotLoadedError{edge: "ct_log"}
+	Auth         string `json:"auth,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -59,8 +34,6 @@ func (*Subscription) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case subscription.FieldEndpoint, subscription.FieldP256dh, subscription.FieldAuth:
 			values[i] = new(sql.NullString)
-		case subscription.ForeignKeys[0]: // subscription_ct_log
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -100,13 +73,6 @@ func (s *Subscription) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				s.Auth = value.String
 			}
-		case subscription.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field subscription_ct_log", value)
-			} else if value.Valid {
-				s.subscription_ct_log = new(int)
-				*s.subscription_ct_log = int(value.Int64)
-			}
 		default:
 			s.selectValues.Set(columns[i], values[i])
 		}
@@ -118,11 +84,6 @@ func (s *Subscription) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (s *Subscription) Value(name string) (ent.Value, error) {
 	return s.selectValues.Get(name)
-}
-
-// QueryCtLog queries the "ct_log" edge of the Subscription entity.
-func (s *Subscription) QueryCtLog() *CTLogQuery {
-	return NewSubscriptionClient(s.config).QueryCtLog(s)
 }
 
 // Update returns a builder for updating this Subscription.

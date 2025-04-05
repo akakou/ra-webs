@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra-webs/monitor/ent/atlog"
-	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
+	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
 
 // ATLogUpdate is the builder for updating ATLog entities.
@@ -90,23 +90,19 @@ func (alu *ATLogUpdate) SetNillableIsActive(b *bool) *ATLogUpdate {
 	return alu
 }
 
-// SetCtLogID sets the "ct_log" edge to the CTLog entity by ID.
-func (alu *ATLogUpdate) SetCtLogID(id int) *ATLogUpdate {
-	alu.mutation.SetCtLogID(id)
+// AddTumIDs adds the "ta" edge to the TA entity by IDs.
+func (alu *ATLogUpdate) AddTumIDs(ids ...int) *ATLogUpdate {
+	alu.mutation.AddTumIDs(ids...)
 	return alu
 }
 
-// SetNillableCtLogID sets the "ct_log" edge to the CTLog entity by ID if the given value is not nil.
-func (alu *ATLogUpdate) SetNillableCtLogID(id *int) *ATLogUpdate {
-	if id != nil {
-		alu = alu.SetCtLogID(*id)
+// AddTa adds the "ta" edges to the TA entity.
+func (alu *ATLogUpdate) AddTa(t ...*TA) *ATLogUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return alu
-}
-
-// SetCtLog sets the "ct_log" edge to the CTLog entity.
-func (alu *ATLogUpdate) SetCtLog(c *CTLog) *ATLogUpdate {
-	return alu.SetCtLogID(c.ID)
+	return alu.AddTumIDs(ids...)
 }
 
 // Mutation returns the ATLogMutation object of the builder.
@@ -114,10 +110,25 @@ func (alu *ATLogUpdate) Mutation() *ATLogMutation {
 	return alu.mutation
 }
 
-// ClearCtLog clears the "ct_log" edge to the CTLog entity.
-func (alu *ATLogUpdate) ClearCtLog() *ATLogUpdate {
-	alu.mutation.ClearCtLog()
+// ClearTa clears all "ta" edges to the TA entity.
+func (alu *ATLogUpdate) ClearTa() *ATLogUpdate {
+	alu.mutation.ClearTa()
 	return alu
+}
+
+// RemoveTumIDs removes the "ta" edge to TA entities by IDs.
+func (alu *ATLogUpdate) RemoveTumIDs(ids ...int) *ATLogUpdate {
+	alu.mutation.RemoveTumIDs(ids...)
+	return alu
+}
+
+// RemoveTa removes "ta" edges to TA entities.
+func (alu *ATLogUpdate) RemoveTa(t ...*TA) *ATLogUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return alu.RemoveTumIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -171,28 +182,44 @@ func (alu *ATLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := alu.mutation.IsActive(); ok {
 		_spec.SetField(atlog.FieldIsActive, field.TypeBool, value)
 	}
-	if alu.mutation.CtLogCleared() {
+	if alu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   atlog.CtLogTable,
-			Columns: []string{atlog.CtLogColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   atlog.TaTable,
+			Columns: atlog.TaPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := alu.mutation.CtLogIDs(); len(nodes) > 0 {
+	if nodes := alu.mutation.RemovedTaIDs(); len(nodes) > 0 && !alu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   atlog.CtLogTable,
-			Columns: []string{atlog.CtLogColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   atlog.TaTable,
+			Columns: atlog.TaPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := alu.mutation.TaIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   atlog.TaTable,
+			Columns: atlog.TaPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -282,23 +309,19 @@ func (aluo *ATLogUpdateOne) SetNillableIsActive(b *bool) *ATLogUpdateOne {
 	return aluo
 }
 
-// SetCtLogID sets the "ct_log" edge to the CTLog entity by ID.
-func (aluo *ATLogUpdateOne) SetCtLogID(id int) *ATLogUpdateOne {
-	aluo.mutation.SetCtLogID(id)
+// AddTumIDs adds the "ta" edge to the TA entity by IDs.
+func (aluo *ATLogUpdateOne) AddTumIDs(ids ...int) *ATLogUpdateOne {
+	aluo.mutation.AddTumIDs(ids...)
 	return aluo
 }
 
-// SetNillableCtLogID sets the "ct_log" edge to the CTLog entity by ID if the given value is not nil.
-func (aluo *ATLogUpdateOne) SetNillableCtLogID(id *int) *ATLogUpdateOne {
-	if id != nil {
-		aluo = aluo.SetCtLogID(*id)
+// AddTa adds the "ta" edges to the TA entity.
+func (aluo *ATLogUpdateOne) AddTa(t ...*TA) *ATLogUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return aluo
-}
-
-// SetCtLog sets the "ct_log" edge to the CTLog entity.
-func (aluo *ATLogUpdateOne) SetCtLog(c *CTLog) *ATLogUpdateOne {
-	return aluo.SetCtLogID(c.ID)
+	return aluo.AddTumIDs(ids...)
 }
 
 // Mutation returns the ATLogMutation object of the builder.
@@ -306,10 +329,25 @@ func (aluo *ATLogUpdateOne) Mutation() *ATLogMutation {
 	return aluo.mutation
 }
 
-// ClearCtLog clears the "ct_log" edge to the CTLog entity.
-func (aluo *ATLogUpdateOne) ClearCtLog() *ATLogUpdateOne {
-	aluo.mutation.ClearCtLog()
+// ClearTa clears all "ta" edges to the TA entity.
+func (aluo *ATLogUpdateOne) ClearTa() *ATLogUpdateOne {
+	aluo.mutation.ClearTa()
 	return aluo
+}
+
+// RemoveTumIDs removes the "ta" edge to TA entities by IDs.
+func (aluo *ATLogUpdateOne) RemoveTumIDs(ids ...int) *ATLogUpdateOne {
+	aluo.mutation.RemoveTumIDs(ids...)
+	return aluo
+}
+
+// RemoveTa removes "ta" edges to TA entities.
+func (aluo *ATLogUpdateOne) RemoveTa(t ...*TA) *ATLogUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return aluo.RemoveTumIDs(ids...)
 }
 
 // Where appends a list predicates to the ATLogUpdate builder.
@@ -393,28 +431,44 @@ func (aluo *ATLogUpdateOne) sqlSave(ctx context.Context) (_node *ATLog, err erro
 	if value, ok := aluo.mutation.IsActive(); ok {
 		_spec.SetField(atlog.FieldIsActive, field.TypeBool, value)
 	}
-	if aluo.mutation.CtLogCleared() {
+	if aluo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   atlog.CtLogTable,
-			Columns: []string{atlog.CtLogColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   atlog.TaTable,
+			Columns: atlog.TaPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := aluo.mutation.CtLogIDs(); len(nodes) > 0 {
+	if nodes := aluo.mutation.RemovedTaIDs(); len(nodes) > 0 && !aluo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   atlog.CtLogTable,
-			Columns: []string{atlog.CtLogColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   atlog.TaTable,
+			Columns: atlog.TaPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := aluo.mutation.TaIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   atlog.TaTable,
+			Columns: atlog.TaPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

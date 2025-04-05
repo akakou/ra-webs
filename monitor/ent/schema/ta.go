@@ -7,22 +7,22 @@ import (
 )
 
 // TA holds the schema definition for the TA entity.
-type CTLog struct {
+type TA struct {
 	ent.Schema
 }
 
 // Fields of the TA.
-func (CTLog) Fields() []ent.Field {
+func (TA) Fields() []ent.Field {
 	return []ent.Field{
 		field.Bytes("public_key"),
-		field.Int("monitor_log_id"),
-		field.Bool("is_active").Default(false),
 	}
 }
 
 // Edges of the TA.
-func (CTLog) Edges() []ent.Edge {
+func (TA) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("ta", TA.Type),
+		edge.From("violation", Violation.Type).Ref("ta"),
+		edge.From("ct_log", CTLog.Type).Ref("ta"),
+		edge.From("at_log", ATLog.Type).Ref("ta"),
 	}
 }

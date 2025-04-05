@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
+	"github.com/akakou/ra-webs/monitor/ent/ta"
 	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
@@ -28,23 +28,23 @@ func (vu *ViolationUpdate) Where(ps ...predicate.Violation) *ViolationUpdate {
 	return vu
 }
 
-// SetCtLogID sets the "ct_log" edge to the CTLog entity by ID.
-func (vu *ViolationUpdate) SetCtLogID(id int) *ViolationUpdate {
-	vu.mutation.SetCtLogID(id)
+// SetTaID sets the "ta" edge to the TA entity by ID.
+func (vu *ViolationUpdate) SetTaID(id int) *ViolationUpdate {
+	vu.mutation.SetTaID(id)
 	return vu
 }
 
-// SetNillableCtLogID sets the "ct_log" edge to the CTLog entity by ID if the given value is not nil.
-func (vu *ViolationUpdate) SetNillableCtLogID(id *int) *ViolationUpdate {
+// SetNillableTaID sets the "ta" edge to the TA entity by ID if the given value is not nil.
+func (vu *ViolationUpdate) SetNillableTaID(id *int) *ViolationUpdate {
 	if id != nil {
-		vu = vu.SetCtLogID(*id)
+		vu = vu.SetTaID(*id)
 	}
 	return vu
 }
 
-// SetCtLog sets the "ct_log" edge to the CTLog entity.
-func (vu *ViolationUpdate) SetCtLog(c *CTLog) *ViolationUpdate {
-	return vu.SetCtLogID(c.ID)
+// SetTa sets the "ta" edge to the TA entity.
+func (vu *ViolationUpdate) SetTa(t *TA) *ViolationUpdate {
+	return vu.SetTaID(t.ID)
 }
 
 // Mutation returns the ViolationMutation object of the builder.
@@ -52,9 +52,9 @@ func (vu *ViolationUpdate) Mutation() *ViolationMutation {
 	return vu.mutation
 }
 
-// ClearCtLog clears the "ct_log" edge to the CTLog entity.
-func (vu *ViolationUpdate) ClearCtLog() *ViolationUpdate {
-	vu.mutation.ClearCtLog()
+// ClearTa clears the "ta" edge to the TA entity.
+func (vu *ViolationUpdate) ClearTa() *ViolationUpdate {
+	vu.mutation.ClearTa()
 	return vu
 }
 
@@ -94,28 +94,28 @@ func (vu *ViolationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if vu.mutation.CtLogCleared() {
+	if vu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   violation.CtLogTable,
-			Columns: []string{violation.CtLogColumn},
+			Table:   violation.TaTable,
+			Columns: []string{violation.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := vu.mutation.CtLogIDs(); len(nodes) > 0 {
+	if nodes := vu.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   violation.CtLogTable,
-			Columns: []string{violation.CtLogColumn},
+			Table:   violation.TaTable,
+			Columns: []string{violation.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -143,23 +143,23 @@ type ViolationUpdateOne struct {
 	mutation *ViolationMutation
 }
 
-// SetCtLogID sets the "ct_log" edge to the CTLog entity by ID.
-func (vuo *ViolationUpdateOne) SetCtLogID(id int) *ViolationUpdateOne {
-	vuo.mutation.SetCtLogID(id)
+// SetTaID sets the "ta" edge to the TA entity by ID.
+func (vuo *ViolationUpdateOne) SetTaID(id int) *ViolationUpdateOne {
+	vuo.mutation.SetTaID(id)
 	return vuo
 }
 
-// SetNillableCtLogID sets the "ct_log" edge to the CTLog entity by ID if the given value is not nil.
-func (vuo *ViolationUpdateOne) SetNillableCtLogID(id *int) *ViolationUpdateOne {
+// SetNillableTaID sets the "ta" edge to the TA entity by ID if the given value is not nil.
+func (vuo *ViolationUpdateOne) SetNillableTaID(id *int) *ViolationUpdateOne {
 	if id != nil {
-		vuo = vuo.SetCtLogID(*id)
+		vuo = vuo.SetTaID(*id)
 	}
 	return vuo
 }
 
-// SetCtLog sets the "ct_log" edge to the CTLog entity.
-func (vuo *ViolationUpdateOne) SetCtLog(c *CTLog) *ViolationUpdateOne {
-	return vuo.SetCtLogID(c.ID)
+// SetTa sets the "ta" edge to the TA entity.
+func (vuo *ViolationUpdateOne) SetTa(t *TA) *ViolationUpdateOne {
+	return vuo.SetTaID(t.ID)
 }
 
 // Mutation returns the ViolationMutation object of the builder.
@@ -167,9 +167,9 @@ func (vuo *ViolationUpdateOne) Mutation() *ViolationMutation {
 	return vuo.mutation
 }
 
-// ClearCtLog clears the "ct_log" edge to the CTLog entity.
-func (vuo *ViolationUpdateOne) ClearCtLog() *ViolationUpdateOne {
-	vuo.mutation.ClearCtLog()
+// ClearTa clears the "ta" edge to the TA entity.
+func (vuo *ViolationUpdateOne) ClearTa() *ViolationUpdateOne {
+	vuo.mutation.ClearTa()
 	return vuo
 }
 
@@ -239,28 +239,28 @@ func (vuo *ViolationUpdateOne) sqlSave(ctx context.Context) (_node *Violation, e
 			}
 		}
 	}
-	if vuo.mutation.CtLogCleared() {
+	if vuo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   violation.CtLogTable,
-			Columns: []string{violation.CtLogColumn},
+			Table:   violation.TaTable,
+			Columns: []string{violation.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := vuo.mutation.CtLogIDs(); len(nodes) > 0 {
+	if nodes := vuo.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   violation.CtLogTable,
-			Columns: []string{violation.CtLogColumn},
+			Table:   violation.TaTable,
+			Columns: []string{violation.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

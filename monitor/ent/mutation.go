@@ -15,6 +15,7 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
+	"github.com/akakou/ra-webs/monitor/ent/ta"
 	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
@@ -30,6 +31,7 @@ const (
 	TypeATLog        = "ATLog"
 	TypeCTLog        = "CTLog"
 	TypeSubscription = "Subscription"
+	TypeTA           = "TA"
 	TypeViolation    = "Violation"
 )
 
@@ -45,8 +47,9 @@ type ATLogMutation struct {
 	unique_id     *[]byte
 	is_active     *bool
 	clearedFields map[string]struct{}
-	ct_log        *int
-	clearedct_log bool
+	ta            map[int]struct{}
+	removedta     map[int]struct{}
+	clearedta     bool
 	done          bool
 	oldValue      func(context.Context) (*ATLog, error)
 	predicates    []predicate.ATLog
@@ -330,43 +333,58 @@ func (m *ATLogMutation) ResetIsActive() {
 	m.is_active = nil
 }
 
-// SetCtLogID sets the "ct_log" edge to the CTLog entity by id.
-func (m *ATLogMutation) SetCtLogID(id int) {
-	m.ct_log = &id
+// AddTumIDs adds the "ta" edge to the TA entity by ids.
+func (m *ATLogMutation) AddTumIDs(ids ...int) {
+	if m.ta == nil {
+		m.ta = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.ta[ids[i]] = struct{}{}
+	}
 }
 
-// ClearCtLog clears the "ct_log" edge to the CTLog entity.
-func (m *ATLogMutation) ClearCtLog() {
-	m.clearedct_log = true
+// ClearTa clears the "ta" edge to the TA entity.
+func (m *ATLogMutation) ClearTa() {
+	m.clearedta = true
 }
 
-// CtLogCleared reports if the "ct_log" edge to the CTLog entity was cleared.
-func (m *ATLogMutation) CtLogCleared() bool {
-	return m.clearedct_log
+// TaCleared reports if the "ta" edge to the TA entity was cleared.
+func (m *ATLogMutation) TaCleared() bool {
+	return m.clearedta
 }
 
-// CtLogID returns the "ct_log" edge ID in the mutation.
-func (m *ATLogMutation) CtLogID() (id int, exists bool) {
-	if m.ct_log != nil {
-		return *m.ct_log, true
+// RemoveTumIDs removes the "ta" edge to the TA entity by IDs.
+func (m *ATLogMutation) RemoveTumIDs(ids ...int) {
+	if m.removedta == nil {
+		m.removedta = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.ta, ids[i])
+		m.removedta[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTa returns the removed IDs of the "ta" edge to the TA entity.
+func (m *ATLogMutation) RemovedTaIDs() (ids []int) {
+	for id := range m.removedta {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// CtLogIDs returns the "ct_log" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// CtLogID instead. It exists only for internal usage by the builders.
-func (m *ATLogMutation) CtLogIDs() (ids []int) {
-	if id := m.ct_log; id != nil {
-		ids = append(ids, *id)
+// TaIDs returns the "ta" edge IDs in the mutation.
+func (m *ATLogMutation) TaIDs() (ids []int) {
+	for id := range m.ta {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetCtLog resets all changes to the "ct_log" edge.
-func (m *ATLogMutation) ResetCtLog() {
-	m.ct_log = nil
-	m.clearedct_log = false
+// ResetTa resets all changes to the "ta" edge.
+func (m *ATLogMutation) ResetTa() {
+	m.ta = nil
+	m.clearedta = false
+	m.removedta = nil
 }
 
 // Where appends a list predicates to the ATLogMutation builder.
@@ -571,8 +589,8 @@ func (m *ATLogMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ATLogMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.ct_log != nil {
-		edges = append(edges, atlog.EdgeCtLog)
+	if m.ta != nil {
+		edges = append(edges, atlog.EdgeTa)
 	}
 	return edges
 }
@@ -581,10 +599,12 @@ func (m *ATLogMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *ATLogMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case atlog.EdgeCtLog:
-		if id := m.ct_log; id != nil {
-			return []ent.Value{*id}
+	case atlog.EdgeTa:
+		ids := make([]ent.Value, 0, len(m.ta))
+		for id := range m.ta {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -592,20 +612,31 @@ func (m *ATLogMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ATLogMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.removedta != nil {
+		edges = append(edges, atlog.EdgeTa)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ATLogMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case atlog.EdgeTa:
+		ids := make([]ent.Value, 0, len(m.removedta))
+		for id := range m.removedta {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ATLogMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedct_log {
-		edges = append(edges, atlog.EdgeCtLog)
+	if m.clearedta {
+		edges = append(edges, atlog.EdgeTa)
 	}
 	return edges
 }
@@ -614,8 +645,8 @@ func (m *ATLogMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *ATLogMutation) EdgeCleared(name string) bool {
 	switch name {
-	case atlog.EdgeCtLog:
-		return m.clearedct_log
+	case atlog.EdgeTa:
+		return m.clearedta
 	}
 	return false
 }
@@ -624,9 +655,6 @@ func (m *ATLogMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *ATLogMutation) ClearEdge(name string) error {
 	switch name {
-	case atlog.EdgeCtLog:
-		m.ClearCtLog()
-		return nil
 	}
 	return fmt.Errorf("unknown ATLog unique edge %s", name)
 }
@@ -635,8 +663,8 @@ func (m *ATLogMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ATLogMutation) ResetEdge(name string) error {
 	switch name {
-	case atlog.EdgeCtLog:
-		m.ResetCtLog()
+	case atlog.EdgeTa:
+		m.ResetTa()
 		return nil
 	}
 	return fmt.Errorf("unknown ATLog edge %s", name)
@@ -645,25 +673,20 @@ func (m *ATLogMutation) ResetEdge(name string) error {
 // CTLogMutation represents an operation that mutates the CTLog nodes in the graph.
 type CTLogMutation struct {
 	config
-	op                  Op
-	typ                 string
-	id                  *int
-	public_key          *[]byte
-	monitor_log_id      *int
-	addmonitor_log_id   *int
-	is_active           *bool
-	clearedFields       map[string]struct{}
-	violation           map[int]struct{}
-	removedviolation    map[int]struct{}
-	clearedviolation    bool
-	at_log              *int
-	clearedat_log       bool
-	subscription        map[int]struct{}
-	removedsubscription map[int]struct{}
-	clearedsubscription bool
-	done                bool
-	oldValue            func(context.Context) (*CTLog, error)
-	predicates          []predicate.CTLog
+	op                Op
+	typ               string
+	id                *int
+	public_key        *[]byte
+	monitor_log_id    *int
+	addmonitor_log_id *int
+	is_active         *bool
+	clearedFields     map[string]struct{}
+	ta                map[int]struct{}
+	removedta         map[int]struct{}
+	clearedta         bool
+	done              bool
+	oldValue          func(context.Context) (*CTLog, error)
+	predicates        []predicate.CTLog
 }
 
 var _ ent.Mutation = (*CTLogMutation)(nil)
@@ -892,151 +915,58 @@ func (m *CTLogMutation) ResetIsActive() {
 	m.is_active = nil
 }
 
-// AddViolationIDs adds the "violation" edge to the Violation entity by ids.
-func (m *CTLogMutation) AddViolationIDs(ids ...int) {
-	if m.violation == nil {
-		m.violation = make(map[int]struct{})
+// AddTumIDs adds the "ta" edge to the TA entity by ids.
+func (m *CTLogMutation) AddTumIDs(ids ...int) {
+	if m.ta == nil {
+		m.ta = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.violation[ids[i]] = struct{}{}
+		m.ta[ids[i]] = struct{}{}
 	}
 }
 
-// ClearViolation clears the "violation" edge to the Violation entity.
-func (m *CTLogMutation) ClearViolation() {
-	m.clearedviolation = true
+// ClearTa clears the "ta" edge to the TA entity.
+func (m *CTLogMutation) ClearTa() {
+	m.clearedta = true
 }
 
-// ViolationCleared reports if the "violation" edge to the Violation entity was cleared.
-func (m *CTLogMutation) ViolationCleared() bool {
-	return m.clearedviolation
+// TaCleared reports if the "ta" edge to the TA entity was cleared.
+func (m *CTLogMutation) TaCleared() bool {
+	return m.clearedta
 }
 
-// RemoveViolationIDs removes the "violation" edge to the Violation entity by IDs.
-func (m *CTLogMutation) RemoveViolationIDs(ids ...int) {
-	if m.removedviolation == nil {
-		m.removedviolation = make(map[int]struct{})
+// RemoveTumIDs removes the "ta" edge to the TA entity by IDs.
+func (m *CTLogMutation) RemoveTumIDs(ids ...int) {
+	if m.removedta == nil {
+		m.removedta = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.violation, ids[i])
-		m.removedviolation[ids[i]] = struct{}{}
+		delete(m.ta, ids[i])
+		m.removedta[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedViolation returns the removed IDs of the "violation" edge to the Violation entity.
-func (m *CTLogMutation) RemovedViolationIDs() (ids []int) {
-	for id := range m.removedviolation {
+// RemovedTa returns the removed IDs of the "ta" edge to the TA entity.
+func (m *CTLogMutation) RemovedTaIDs() (ids []int) {
+	for id := range m.removedta {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ViolationIDs returns the "violation" edge IDs in the mutation.
-func (m *CTLogMutation) ViolationIDs() (ids []int) {
-	for id := range m.violation {
+// TaIDs returns the "ta" edge IDs in the mutation.
+func (m *CTLogMutation) TaIDs() (ids []int) {
+	for id := range m.ta {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetViolation resets all changes to the "violation" edge.
-func (m *CTLogMutation) ResetViolation() {
-	m.violation = nil
-	m.clearedviolation = false
-	m.removedviolation = nil
-}
-
-// SetAtLogID sets the "at_log" edge to the ATLog entity by id.
-func (m *CTLogMutation) SetAtLogID(id int) {
-	m.at_log = &id
-}
-
-// ClearAtLog clears the "at_log" edge to the ATLog entity.
-func (m *CTLogMutation) ClearAtLog() {
-	m.clearedat_log = true
-}
-
-// AtLogCleared reports if the "at_log" edge to the ATLog entity was cleared.
-func (m *CTLogMutation) AtLogCleared() bool {
-	return m.clearedat_log
-}
-
-// AtLogID returns the "at_log" edge ID in the mutation.
-func (m *CTLogMutation) AtLogID() (id int, exists bool) {
-	if m.at_log != nil {
-		return *m.at_log, true
-	}
-	return
-}
-
-// AtLogIDs returns the "at_log" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// AtLogID instead. It exists only for internal usage by the builders.
-func (m *CTLogMutation) AtLogIDs() (ids []int) {
-	if id := m.at_log; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetAtLog resets all changes to the "at_log" edge.
-func (m *CTLogMutation) ResetAtLog() {
-	m.at_log = nil
-	m.clearedat_log = false
-}
-
-// AddSubscriptionIDs adds the "subscription" edge to the Subscription entity by ids.
-func (m *CTLogMutation) AddSubscriptionIDs(ids ...int) {
-	if m.subscription == nil {
-		m.subscription = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.subscription[ids[i]] = struct{}{}
-	}
-}
-
-// ClearSubscription clears the "subscription" edge to the Subscription entity.
-func (m *CTLogMutation) ClearSubscription() {
-	m.clearedsubscription = true
-}
-
-// SubscriptionCleared reports if the "subscription" edge to the Subscription entity was cleared.
-func (m *CTLogMutation) SubscriptionCleared() bool {
-	return m.clearedsubscription
-}
-
-// RemoveSubscriptionIDs removes the "subscription" edge to the Subscription entity by IDs.
-func (m *CTLogMutation) RemoveSubscriptionIDs(ids ...int) {
-	if m.removedsubscription == nil {
-		m.removedsubscription = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.subscription, ids[i])
-		m.removedsubscription[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedSubscription returns the removed IDs of the "subscription" edge to the Subscription entity.
-func (m *CTLogMutation) RemovedSubscriptionIDs() (ids []int) {
-	for id := range m.removedsubscription {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// SubscriptionIDs returns the "subscription" edge IDs in the mutation.
-func (m *CTLogMutation) SubscriptionIDs() (ids []int) {
-	for id := range m.subscription {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetSubscription resets all changes to the "subscription" edge.
-func (m *CTLogMutation) ResetSubscription() {
-	m.subscription = nil
-	m.clearedsubscription = false
-	m.removedsubscription = nil
+// ResetTa resets all changes to the "ta" edge.
+func (m *CTLogMutation) ResetTa() {
+	m.ta = nil
+	m.clearedta = false
+	m.removedta = nil
 }
 
 // Where appends a list predicates to the CTLogMutation builder.
@@ -1221,15 +1151,9 @@ func (m *CTLogMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *CTLogMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.violation != nil {
-		edges = append(edges, ctlog.EdgeViolation)
-	}
-	if m.at_log != nil {
-		edges = append(edges, ctlog.EdgeAtLog)
-	}
-	if m.subscription != nil {
-		edges = append(edges, ctlog.EdgeSubscription)
+	edges := make([]string, 0, 1)
+	if m.ta != nil {
+		edges = append(edges, ctlog.EdgeTa)
 	}
 	return edges
 }
@@ -1238,19 +1162,9 @@ func (m *CTLogMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *CTLogMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case ctlog.EdgeViolation:
-		ids := make([]ent.Value, 0, len(m.violation))
-		for id := range m.violation {
-			ids = append(ids, id)
-		}
-		return ids
-	case ctlog.EdgeAtLog:
-		if id := m.at_log; id != nil {
-			return []ent.Value{*id}
-		}
-	case ctlog.EdgeSubscription:
-		ids := make([]ent.Value, 0, len(m.subscription))
-		for id := range m.subscription {
+	case ctlog.EdgeTa:
+		ids := make([]ent.Value, 0, len(m.ta))
+		for id := range m.ta {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1260,12 +1174,9 @@ func (m *CTLogMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CTLogMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.removedviolation != nil {
-		edges = append(edges, ctlog.EdgeViolation)
-	}
-	if m.removedsubscription != nil {
-		edges = append(edges, ctlog.EdgeSubscription)
+	edges := make([]string, 0, 1)
+	if m.removedta != nil {
+		edges = append(edges, ctlog.EdgeTa)
 	}
 	return edges
 }
@@ -1274,15 +1185,9 @@ func (m *CTLogMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *CTLogMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case ctlog.EdgeViolation:
-		ids := make([]ent.Value, 0, len(m.removedviolation))
-		for id := range m.removedviolation {
-			ids = append(ids, id)
-		}
-		return ids
-	case ctlog.EdgeSubscription:
-		ids := make([]ent.Value, 0, len(m.removedsubscription))
-		for id := range m.removedsubscription {
+	case ctlog.EdgeTa:
+		ids := make([]ent.Value, 0, len(m.removedta))
+		for id := range m.removedta {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1292,15 +1197,9 @@ func (m *CTLogMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *CTLogMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.clearedviolation {
-		edges = append(edges, ctlog.EdgeViolation)
-	}
-	if m.clearedat_log {
-		edges = append(edges, ctlog.EdgeAtLog)
-	}
-	if m.clearedsubscription {
-		edges = append(edges, ctlog.EdgeSubscription)
+	edges := make([]string, 0, 1)
+	if m.clearedta {
+		edges = append(edges, ctlog.EdgeTa)
 	}
 	return edges
 }
@@ -1309,12 +1208,8 @@ func (m *CTLogMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *CTLogMutation) EdgeCleared(name string) bool {
 	switch name {
-	case ctlog.EdgeViolation:
-		return m.clearedviolation
-	case ctlog.EdgeAtLog:
-		return m.clearedat_log
-	case ctlog.EdgeSubscription:
-		return m.clearedsubscription
+	case ctlog.EdgeTa:
+		return m.clearedta
 	}
 	return false
 }
@@ -1323,9 +1218,6 @@ func (m *CTLogMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *CTLogMutation) ClearEdge(name string) error {
 	switch name {
-	case ctlog.EdgeAtLog:
-		m.ClearAtLog()
-		return nil
 	}
 	return fmt.Errorf("unknown CTLog unique edge %s", name)
 }
@@ -1334,14 +1226,8 @@ func (m *CTLogMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *CTLogMutation) ResetEdge(name string) error {
 	switch name {
-	case ctlog.EdgeViolation:
-		m.ResetViolation()
-		return nil
-	case ctlog.EdgeAtLog:
-		m.ResetAtLog()
-		return nil
-	case ctlog.EdgeSubscription:
-		m.ResetSubscription()
+	case ctlog.EdgeTa:
+		m.ResetTa()
 		return nil
 	}
 	return fmt.Errorf("unknown CTLog edge %s", name)
@@ -1357,8 +1243,6 @@ type SubscriptionMutation struct {
 	p256dh        *string
 	auth          *string
 	clearedFields map[string]struct{}
-	ct_log        *int
-	clearedct_log bool
 	done          bool
 	oldValue      func(context.Context) (*Subscription, error)
 	predicates    []predicate.Subscription
@@ -1570,45 +1454,6 @@ func (m *SubscriptionMutation) ResetAuth() {
 	m.auth = nil
 }
 
-// SetCtLogID sets the "ct_log" edge to the CTLog entity by id.
-func (m *SubscriptionMutation) SetCtLogID(id int) {
-	m.ct_log = &id
-}
-
-// ClearCtLog clears the "ct_log" edge to the CTLog entity.
-func (m *SubscriptionMutation) ClearCtLog() {
-	m.clearedct_log = true
-}
-
-// CtLogCleared reports if the "ct_log" edge to the CTLog entity was cleared.
-func (m *SubscriptionMutation) CtLogCleared() bool {
-	return m.clearedct_log
-}
-
-// CtLogID returns the "ct_log" edge ID in the mutation.
-func (m *SubscriptionMutation) CtLogID() (id int, exists bool) {
-	if m.ct_log != nil {
-		return *m.ct_log, true
-	}
-	return
-}
-
-// CtLogIDs returns the "ct_log" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// CtLogID instead. It exists only for internal usage by the builders.
-func (m *SubscriptionMutation) CtLogIDs() (ids []int) {
-	if id := m.ct_log; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetCtLog resets all changes to the "ct_log" edge.
-func (m *SubscriptionMutation) ResetCtLog() {
-	m.ct_log = nil
-	m.clearedct_log = false
-}
-
 // Where appends a list predicates to the SubscriptionMutation builder.
 func (m *SubscriptionMutation) Where(ps ...predicate.Subscription) {
 	m.predicates = append(m.predicates, ps...)
@@ -1776,28 +1621,19 @@ func (m *SubscriptionMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SubscriptionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.ct_log != nil {
-		edges = append(edges, subscription.EdgeCtLog)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *SubscriptionMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case subscription.EdgeCtLog:
-		if id := m.ct_log; id != nil {
-			return []ent.Value{*id}
-		}
-	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *SubscriptionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 0)
 	return edges
 }
 
@@ -1809,43 +1645,611 @@ func (m *SubscriptionMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SubscriptionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedct_log {
-		edges = append(edges, subscription.EdgeCtLog)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *SubscriptionMutation) EdgeCleared(name string) bool {
-	switch name {
-	case subscription.EdgeCtLog:
-		return m.clearedct_log
-	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *SubscriptionMutation) ClearEdge(name string) error {
-	switch name {
-	case subscription.EdgeCtLog:
-		m.ClearCtLog()
-		return nil
-	}
 	return fmt.Errorf("unknown Subscription unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *SubscriptionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Subscription edge %s", name)
+}
+
+// TAMutation represents an operation that mutates the TA nodes in the graph.
+type TAMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int
+	public_key       *[]byte
+	clearedFields    map[string]struct{}
+	violation        map[int]struct{}
+	removedviolation map[int]struct{}
+	clearedviolation bool
+	ct_log           map[int]struct{}
+	removedct_log    map[int]struct{}
+	clearedct_log    bool
+	at_log           map[int]struct{}
+	removedat_log    map[int]struct{}
+	clearedat_log    bool
+	done             bool
+	oldValue         func(context.Context) (*TA, error)
+	predicates       []predicate.TA
+}
+
+var _ ent.Mutation = (*TAMutation)(nil)
+
+// taOption allows management of the mutation configuration using functional options.
+type taOption func(*TAMutation)
+
+// newTAMutation creates new mutation for the TA entity.
+func newTAMutation(c config, op Op, opts ...taOption) *TAMutation {
+	m := &TAMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTA,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTAID sets the ID field of the mutation.
+func withTAID(id int) taOption {
+	return func(m *TAMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TA
+		)
+		m.oldValue = func(ctx context.Context) (*TA, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TA.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTA sets the old TA of the mutation.
+func withTA(node *TA) taOption {
+	return func(m *TAMutation) {
+		m.oldValue = func(context.Context) (*TA, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TAMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TAMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TAMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TAMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TA.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPublicKey sets the "public_key" field.
+func (m *TAMutation) SetPublicKey(b []byte) {
+	m.public_key = &b
+}
+
+// PublicKey returns the value of the "public_key" field in the mutation.
+func (m *TAMutation) PublicKey() (r []byte, exists bool) {
+	v := m.public_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPublicKey returns the old "public_key" field's value of the TA entity.
+// If the TA object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TAMutation) OldPublicKey(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPublicKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPublicKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPublicKey: %w", err)
+	}
+	return oldValue.PublicKey, nil
+}
+
+// ResetPublicKey resets all changes to the "public_key" field.
+func (m *TAMutation) ResetPublicKey() {
+	m.public_key = nil
+}
+
+// AddViolationIDs adds the "violation" edge to the Violation entity by ids.
+func (m *TAMutation) AddViolationIDs(ids ...int) {
+	if m.violation == nil {
+		m.violation = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.violation[ids[i]] = struct{}{}
+	}
+}
+
+// ClearViolation clears the "violation" edge to the Violation entity.
+func (m *TAMutation) ClearViolation() {
+	m.clearedviolation = true
+}
+
+// ViolationCleared reports if the "violation" edge to the Violation entity was cleared.
+func (m *TAMutation) ViolationCleared() bool {
+	return m.clearedviolation
+}
+
+// RemoveViolationIDs removes the "violation" edge to the Violation entity by IDs.
+func (m *TAMutation) RemoveViolationIDs(ids ...int) {
+	if m.removedviolation == nil {
+		m.removedviolation = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.violation, ids[i])
+		m.removedviolation[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedViolation returns the removed IDs of the "violation" edge to the Violation entity.
+func (m *TAMutation) RemovedViolationIDs() (ids []int) {
+	for id := range m.removedviolation {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ViolationIDs returns the "violation" edge IDs in the mutation.
+func (m *TAMutation) ViolationIDs() (ids []int) {
+	for id := range m.violation {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetViolation resets all changes to the "violation" edge.
+func (m *TAMutation) ResetViolation() {
+	m.violation = nil
+	m.clearedviolation = false
+	m.removedviolation = nil
+}
+
+// AddCtLogIDs adds the "ct_log" edge to the CTLog entity by ids.
+func (m *TAMutation) AddCtLogIDs(ids ...int) {
+	if m.ct_log == nil {
+		m.ct_log = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.ct_log[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCtLog clears the "ct_log" edge to the CTLog entity.
+func (m *TAMutation) ClearCtLog() {
+	m.clearedct_log = true
+}
+
+// CtLogCleared reports if the "ct_log" edge to the CTLog entity was cleared.
+func (m *TAMutation) CtLogCleared() bool {
+	return m.clearedct_log
+}
+
+// RemoveCtLogIDs removes the "ct_log" edge to the CTLog entity by IDs.
+func (m *TAMutation) RemoveCtLogIDs(ids ...int) {
+	if m.removedct_log == nil {
+		m.removedct_log = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.ct_log, ids[i])
+		m.removedct_log[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCtLog returns the removed IDs of the "ct_log" edge to the CTLog entity.
+func (m *TAMutation) RemovedCtLogIDs() (ids []int) {
+	for id := range m.removedct_log {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CtLogIDs returns the "ct_log" edge IDs in the mutation.
+func (m *TAMutation) CtLogIDs() (ids []int) {
+	for id := range m.ct_log {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCtLog resets all changes to the "ct_log" edge.
+func (m *TAMutation) ResetCtLog() {
+	m.ct_log = nil
+	m.clearedct_log = false
+	m.removedct_log = nil
+}
+
+// AddAtLogIDs adds the "at_log" edge to the ATLog entity by ids.
+func (m *TAMutation) AddAtLogIDs(ids ...int) {
+	if m.at_log == nil {
+		m.at_log = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.at_log[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAtLog clears the "at_log" edge to the ATLog entity.
+func (m *TAMutation) ClearAtLog() {
+	m.clearedat_log = true
+}
+
+// AtLogCleared reports if the "at_log" edge to the ATLog entity was cleared.
+func (m *TAMutation) AtLogCleared() bool {
+	return m.clearedat_log
+}
+
+// RemoveAtLogIDs removes the "at_log" edge to the ATLog entity by IDs.
+func (m *TAMutation) RemoveAtLogIDs(ids ...int) {
+	if m.removedat_log == nil {
+		m.removedat_log = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.at_log, ids[i])
+		m.removedat_log[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAtLog returns the removed IDs of the "at_log" edge to the ATLog entity.
+func (m *TAMutation) RemovedAtLogIDs() (ids []int) {
+	for id := range m.removedat_log {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AtLogIDs returns the "at_log" edge IDs in the mutation.
+func (m *TAMutation) AtLogIDs() (ids []int) {
+	for id := range m.at_log {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAtLog resets all changes to the "at_log" edge.
+func (m *TAMutation) ResetAtLog() {
+	m.at_log = nil
+	m.clearedat_log = false
+	m.removedat_log = nil
+}
+
+// Where appends a list predicates to the TAMutation builder.
+func (m *TAMutation) Where(ps ...predicate.TA) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TAMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TAMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TA, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TAMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TAMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TA).
+func (m *TAMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TAMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.public_key != nil {
+		fields = append(fields, ta.FieldPublicKey)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TAMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case subscription.EdgeCtLog:
-		m.ResetCtLog()
+	case ta.FieldPublicKey:
+		return m.PublicKey()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TAMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case ta.FieldPublicKey:
+		return m.OldPublicKey(ctx)
+	}
+	return nil, fmt.Errorf("unknown TA field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TAMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case ta.FieldPublicKey:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPublicKey(v)
 		return nil
 	}
-	return fmt.Errorf("unknown Subscription edge %s", name)
+	return fmt.Errorf("unknown TA field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TAMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TAMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TAMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown TA numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TAMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TAMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TAMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown TA nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TAMutation) ResetField(name string) error {
+	switch name {
+	case ta.FieldPublicKey:
+		m.ResetPublicKey()
+		return nil
+	}
+	return fmt.Errorf("unknown TA field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TAMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.violation != nil {
+		edges = append(edges, ta.EdgeViolation)
+	}
+	if m.ct_log != nil {
+		edges = append(edges, ta.EdgeCtLog)
+	}
+	if m.at_log != nil {
+		edges = append(edges, ta.EdgeAtLog)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TAMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case ta.EdgeViolation:
+		ids := make([]ent.Value, 0, len(m.violation))
+		for id := range m.violation {
+			ids = append(ids, id)
+		}
+		return ids
+	case ta.EdgeCtLog:
+		ids := make([]ent.Value, 0, len(m.ct_log))
+		for id := range m.ct_log {
+			ids = append(ids, id)
+		}
+		return ids
+	case ta.EdgeAtLog:
+		ids := make([]ent.Value, 0, len(m.at_log))
+		for id := range m.at_log {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TAMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.removedviolation != nil {
+		edges = append(edges, ta.EdgeViolation)
+	}
+	if m.removedct_log != nil {
+		edges = append(edges, ta.EdgeCtLog)
+	}
+	if m.removedat_log != nil {
+		edges = append(edges, ta.EdgeAtLog)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TAMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case ta.EdgeViolation:
+		ids := make([]ent.Value, 0, len(m.removedviolation))
+		for id := range m.removedviolation {
+			ids = append(ids, id)
+		}
+		return ids
+	case ta.EdgeCtLog:
+		ids := make([]ent.Value, 0, len(m.removedct_log))
+		for id := range m.removedct_log {
+			ids = append(ids, id)
+		}
+		return ids
+	case ta.EdgeAtLog:
+		ids := make([]ent.Value, 0, len(m.removedat_log))
+		for id := range m.removedat_log {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TAMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedviolation {
+		edges = append(edges, ta.EdgeViolation)
+	}
+	if m.clearedct_log {
+		edges = append(edges, ta.EdgeCtLog)
+	}
+	if m.clearedat_log {
+		edges = append(edges, ta.EdgeAtLog)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TAMutation) EdgeCleared(name string) bool {
+	switch name {
+	case ta.EdgeViolation:
+		return m.clearedviolation
+	case ta.EdgeCtLog:
+		return m.clearedct_log
+	case ta.EdgeAtLog:
+		return m.clearedat_log
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TAMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown TA unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TAMutation) ResetEdge(name string) error {
+	switch name {
+	case ta.EdgeViolation:
+		m.ResetViolation()
+		return nil
+	case ta.EdgeCtLog:
+		m.ResetCtLog()
+		return nil
+	case ta.EdgeAtLog:
+		m.ResetAtLog()
+		return nil
+	}
+	return fmt.Errorf("unknown TA edge %s", name)
 }
 
 // ViolationMutation represents an operation that mutates the Violation nodes in the graph.
@@ -1856,8 +2260,8 @@ type ViolationMutation struct {
 	id            *int
 	created_at    *time.Time
 	clearedFields map[string]struct{}
-	ct_log        *int
-	clearedct_log bool
+	ta            *int
+	clearedta     bool
 	done          bool
 	oldValue      func(context.Context) (*Violation, error)
 	predicates    []predicate.Violation
@@ -1997,43 +2401,43 @@ func (m *ViolationMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetCtLogID sets the "ct_log" edge to the CTLog entity by id.
-func (m *ViolationMutation) SetCtLogID(id int) {
-	m.ct_log = &id
+// SetTaID sets the "ta" edge to the TA entity by id.
+func (m *ViolationMutation) SetTaID(id int) {
+	m.ta = &id
 }
 
-// ClearCtLog clears the "ct_log" edge to the CTLog entity.
-func (m *ViolationMutation) ClearCtLog() {
-	m.clearedct_log = true
+// ClearTa clears the "ta" edge to the TA entity.
+func (m *ViolationMutation) ClearTa() {
+	m.clearedta = true
 }
 
-// CtLogCleared reports if the "ct_log" edge to the CTLog entity was cleared.
-func (m *ViolationMutation) CtLogCleared() bool {
-	return m.clearedct_log
+// TaCleared reports if the "ta" edge to the TA entity was cleared.
+func (m *ViolationMutation) TaCleared() bool {
+	return m.clearedta
 }
 
-// CtLogID returns the "ct_log" edge ID in the mutation.
-func (m *ViolationMutation) CtLogID() (id int, exists bool) {
-	if m.ct_log != nil {
-		return *m.ct_log, true
+// TaID returns the "ta" edge ID in the mutation.
+func (m *ViolationMutation) TaID() (id int, exists bool) {
+	if m.ta != nil {
+		return *m.ta, true
 	}
 	return
 }
 
-// CtLogIDs returns the "ct_log" edge IDs in the mutation.
+// TaIDs returns the "ta" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// CtLogID instead. It exists only for internal usage by the builders.
-func (m *ViolationMutation) CtLogIDs() (ids []int) {
-	if id := m.ct_log; id != nil {
+// TaID instead. It exists only for internal usage by the builders.
+func (m *ViolationMutation) TaIDs() (ids []int) {
+	if id := m.ta; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetCtLog resets all changes to the "ct_log" edge.
-func (m *ViolationMutation) ResetCtLog() {
-	m.ct_log = nil
-	m.clearedct_log = false
+// ResetTa resets all changes to the "ta" edge.
+func (m *ViolationMutation) ResetTa() {
+	m.ta = nil
+	m.clearedta = false
 }
 
 // Where appends a list predicates to the ViolationMutation builder.
@@ -2170,8 +2574,8 @@ func (m *ViolationMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ViolationMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.ct_log != nil {
-		edges = append(edges, violation.EdgeCtLog)
+	if m.ta != nil {
+		edges = append(edges, violation.EdgeTa)
 	}
 	return edges
 }
@@ -2180,8 +2584,8 @@ func (m *ViolationMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *ViolationMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case violation.EdgeCtLog:
-		if id := m.ct_log; id != nil {
+	case violation.EdgeTa:
+		if id := m.ta; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -2203,8 +2607,8 @@ func (m *ViolationMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ViolationMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedct_log {
-		edges = append(edges, violation.EdgeCtLog)
+	if m.clearedta {
+		edges = append(edges, violation.EdgeTa)
 	}
 	return edges
 }
@@ -2213,8 +2617,8 @@ func (m *ViolationMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *ViolationMutation) EdgeCleared(name string) bool {
 	switch name {
-	case violation.EdgeCtLog:
-		return m.clearedct_log
+	case violation.EdgeTa:
+		return m.clearedta
 	}
 	return false
 }
@@ -2223,8 +2627,8 @@ func (m *ViolationMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *ViolationMutation) ClearEdge(name string) error {
 	switch name {
-	case violation.EdgeCtLog:
-		m.ClearCtLog()
+	case violation.EdgeTa:
+		m.ClearTa()
 		return nil
 	}
 	return fmt.Errorf("unknown Violation unique edge %s", name)
@@ -2234,8 +2638,8 @@ func (m *ViolationMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ViolationMutation) ResetEdge(name string) error {
 	switch name {
-	case violation.EdgeCtLog:
-		m.ResetCtLog()
+	case violation.EdgeTa:
+		m.ResetTa()
 		return nil
 	}
 	return fmt.Errorf("unknown Violation edge %s", name)

@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
 )
@@ -23,8 +22,6 @@ type SubscriptionQuery struct {
 	order      []subscription.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Subscription
-	withCtLog  *CTLogQuery
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -59,28 +56,6 @@ func (sq *SubscriptionQuery) Unique(unique bool) *SubscriptionQuery {
 func (sq *SubscriptionQuery) Order(o ...subscription.OrderOption) *SubscriptionQuery {
 	sq.order = append(sq.order, o...)
 	return sq
-}
-
-// QueryCtLog chains the current query on the "ct_log" edge.
-func (sq *SubscriptionQuery) QueryCtLog() *CTLogQuery {
-	query := (&CTLogClient{config: sq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := sq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := sq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(subscription.Table, subscription.FieldID, selector),
-			sqlgraph.To(ctlog.Table, ctlog.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, subscription.CtLogTable, subscription.CtLogColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // First returns the first Subscription entity from the query.
@@ -275,22 +250,10 @@ func (sq *SubscriptionQuery) Clone() *SubscriptionQuery {
 		order:      append([]subscription.OrderOption{}, sq.order...),
 		inters:     append([]Interceptor{}, sq.inters...),
 		predicates: append([]predicate.Subscription{}, sq.predicates...),
-		withCtLog:  sq.withCtLog.Clone(),
 		// clone intermediate query.
 		sql:  sq.sql.Clone(),
 		path: sq.path,
 	}
-}
-
-// WithCtLog tells the query-builder to eager-load the nodes that are connected to
-// the "ct_log" edge. The optional arguments are used to configure the query builder of the edge.
-func (sq *SubscriptionQuery) WithCtLog(opts ...func(*CTLogQuery)) *SubscriptionQuery {
-	query := (&CTLogClient{config: sq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	sq.withCtLog = query
-	return sq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -369,26 +332,15 @@ func (sq *SubscriptionQuery) prepareQuery(ctx context.Context) error {
 
 func (sq *SubscriptionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Subscription, error) {
 	var (
-		nodes       = []*Subscription{}
-		withFKs     = sq.withFKs
-		_spec       = sq.querySpec()
-		loadedTypes = [1]bool{
-			sq.withCtLog != nil,
-		}
+		nodes = []*Subscription{}
+		_spec = sq.querySpec()
 	)
-	if sq.withCtLog != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, subscription.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Subscription).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Subscription{config: sq.config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -400,46 +352,7 @@ func (sq *SubscriptionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := sq.withCtLog; query != nil {
-		if err := sq.loadCtLog(ctx, query, nodes, nil,
-			func(n *Subscription, e *CTLog) { n.Edges.CtLog = e }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
-}
-
-func (sq *SubscriptionQuery) loadCtLog(ctx context.Context, query *CTLogQuery, nodes []*Subscription, init func(*Subscription), assign func(*Subscription, *CTLog)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Subscription)
-	for i := range nodes {
-		if nodes[i].subscription_ct_log == nil {
-			continue
-		}
-		fk := *nodes[i].subscription_ct_log
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(ctlog.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "subscription_ct_log" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
 }
 
 func (sq *SubscriptionQuery) sqlCount(ctx context.Context) (int, error) {

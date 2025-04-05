@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -12,8 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/akakou/ra-webs/monitor/ent/atlog"
-	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
+	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
 
 // ATLogQuery is the builder for querying ATLog entities.
@@ -23,8 +24,7 @@ type ATLogQuery struct {
 	order      []atlog.OrderOption
 	inters     []Interceptor
 	predicates []predicate.ATLog
-	withCtLog  *CTLogQuery
-	withFKs    bool
+	withTa     *TAQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -61,9 +61,9 @@ func (alq *ATLogQuery) Order(o ...atlog.OrderOption) *ATLogQuery {
 	return alq
 }
 
-// QueryCtLog chains the current query on the "ct_log" edge.
-func (alq *ATLogQuery) QueryCtLog() *CTLogQuery {
-	query := (&CTLogClient{config: alq.config}).Query()
+// QueryTa chains the current query on the "ta" edge.
+func (alq *ATLogQuery) QueryTa() *TAQuery {
+	query := (&TAClient{config: alq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := alq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -74,8 +74,8 @@ func (alq *ATLogQuery) QueryCtLog() *CTLogQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(atlog.Table, atlog.FieldID, selector),
-			sqlgraph.To(ctlog.Table, ctlog.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, atlog.CtLogTable, atlog.CtLogColumn),
+			sqlgraph.To(ta.Table, ta.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, atlog.TaTable, atlog.TaPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(alq.driver.Dialect(), step)
 		return fromU, nil
@@ -275,21 +275,21 @@ func (alq *ATLogQuery) Clone() *ATLogQuery {
 		order:      append([]atlog.OrderOption{}, alq.order...),
 		inters:     append([]Interceptor{}, alq.inters...),
 		predicates: append([]predicate.ATLog{}, alq.predicates...),
-		withCtLog:  alq.withCtLog.Clone(),
+		withTa:     alq.withTa.Clone(),
 		// clone intermediate query.
 		sql:  alq.sql.Clone(),
 		path: alq.path,
 	}
 }
 
-// WithCtLog tells the query-builder to eager-load the nodes that are connected to
-// the "ct_log" edge. The optional arguments are used to configure the query builder of the edge.
-func (alq *ATLogQuery) WithCtLog(opts ...func(*CTLogQuery)) *ATLogQuery {
-	query := (&CTLogClient{config: alq.config}).Query()
+// WithTa tells the query-builder to eager-load the nodes that are connected to
+// the "ta" edge. The optional arguments are used to configure the query builder of the edge.
+func (alq *ATLogQuery) WithTa(opts ...func(*TAQuery)) *ATLogQuery {
+	query := (&TAClient{config: alq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	alq.withCtLog = query
+	alq.withTa = query
 	return alq
 }
 
@@ -370,18 +370,11 @@ func (alq *ATLogQuery) prepareQuery(ctx context.Context) error {
 func (alq *ATLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*ATLog, error) {
 	var (
 		nodes       = []*ATLog{}
-		withFKs     = alq.withFKs
 		_spec       = alq.querySpec()
 		loadedTypes = [1]bool{
-			alq.withCtLog != nil,
+			alq.withTa != nil,
 		}
 	)
-	if alq.withCtLog != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, atlog.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*ATLog).scanValues(nil, columns)
 	}
@@ -400,43 +393,73 @@ func (alq *ATLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*ATLog
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := alq.withCtLog; query != nil {
-		if err := alq.loadCtLog(ctx, query, nodes, nil,
-			func(n *ATLog, e *CTLog) { n.Edges.CtLog = e }); err != nil {
+	if query := alq.withTa; query != nil {
+		if err := alq.loadTa(ctx, query, nodes,
+			func(n *ATLog) { n.Edges.Ta = []*TA{} },
+			func(n *ATLog, e *TA) { n.Edges.Ta = append(n.Edges.Ta, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (alq *ATLogQuery) loadCtLog(ctx context.Context, query *CTLogQuery, nodes []*ATLog, init func(*ATLog), assign func(*ATLog, *CTLog)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*ATLog)
-	for i := range nodes {
-		if nodes[i].ct_log_at_log == nil {
-			continue
+func (alq *ATLogQuery) loadTa(ctx context.Context, query *TAQuery, nodes []*ATLog, init func(*ATLog), assign func(*ATLog, *TA)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*ATLog)
+	nids := make(map[int]map[*ATLog]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
 		}
-		fk := *nodes[i].ct_log_at_log
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	if len(ids) == 0 {
-		return nil
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(atlog.TaTable)
+		s.Join(joinT).On(s.C(ta.FieldID), joinT.C(atlog.TaPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(atlog.TaPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(atlog.TaPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
 	}
-	query.Where(ctlog.IDIn(ids...))
-	neighbors, err := query.All(ctx)
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*ATLog]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*TA](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
+		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "ct_log_at_log" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected "ta" node returned %v`, n.ID)
 		}
-		for i := range nodes {
-			assign(nodes[i], n)
+		for kn := range nodes {
+			assign(kn, n)
 		}
 	}
 	return nil

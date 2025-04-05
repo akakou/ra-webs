@@ -323,21 +323,21 @@ func IsActiveNEQ(v bool) predicate.ATLog {
 	return predicate.ATLog(sql.FieldNEQ(FieldIsActive, v))
 }
 
-// HasCtLog applies the HasEdge predicate on the "ct_log" edge.
-func HasCtLog() predicate.ATLog {
+// HasTa applies the HasEdge predicate on the "ta" edge.
+func HasTa() predicate.ATLog {
 	return predicate.ATLog(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, CtLogTable, CtLogColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, TaTable, TaPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasCtLogWith applies the HasEdge predicate on the "ct_log" edge with a given conditions (other predicates).
-func HasCtLogWith(preds ...predicate.CTLog) predicate.ATLog {
+// HasTaWith applies the HasEdge predicate on the "ta" edge with a given conditions (other predicates).
+func HasTaWith(preds ...predicate.TA) predicate.ATLog {
 	return predicate.ATLog(func(s *sql.Selector) {
-		step := newCtLogStep()
+		step := newTaStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

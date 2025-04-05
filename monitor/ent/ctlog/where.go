@@ -158,67 +158,21 @@ func IsActiveNEQ(v bool) predicate.CTLog {
 	return predicate.CTLog(sql.FieldNEQ(FieldIsActive, v))
 }
 
-// HasViolation applies the HasEdge predicate on the "violation" edge.
-func HasViolation() predicate.CTLog {
+// HasTa applies the HasEdge predicate on the "ta" edge.
+func HasTa() predicate.CTLog {
 	return predicate.CTLog(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, ViolationTable, ViolationColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, TaTable, TaPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasViolationWith applies the HasEdge predicate on the "violation" edge with a given conditions (other predicates).
-func HasViolationWith(preds ...predicate.Violation) predicate.CTLog {
+// HasTaWith applies the HasEdge predicate on the "ta" edge with a given conditions (other predicates).
+func HasTaWith(preds ...predicate.TA) predicate.CTLog {
 	return predicate.CTLog(func(s *sql.Selector) {
-		step := newViolationStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasAtLog applies the HasEdge predicate on the "at_log" edge.
-func HasAtLog() predicate.CTLog {
-	return predicate.CTLog(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, AtLogTable, AtLogColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasAtLogWith applies the HasEdge predicate on the "at_log" edge with a given conditions (other predicates).
-func HasAtLogWith(preds ...predicate.ATLog) predicate.CTLog {
-	return predicate.CTLog(func(s *sql.Selector) {
-		step := newAtLogStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasSubscription applies the HasEdge predicate on the "subscription" edge.
-func HasSubscription() predicate.CTLog {
-	return predicate.CTLog(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, SubscriptionTable, SubscriptionColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasSubscriptionWith applies the HasEdge predicate on the "subscription" edge with a given conditions (other predicates).
-func HasSubscriptionWith(preds ...predicate.Subscription) predicate.CTLog {
-	return predicate.CTLog(func(s *sql.Selector) {
-		step := newSubscriptionStep()
+		step := newTaStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

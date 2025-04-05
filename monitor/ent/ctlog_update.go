@@ -10,11 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
-	"github.com/akakou/ra-webs/monitor/ent/subscription"
-	"github.com/akakou/ra-webs/monitor/ent/violation"
+	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
 
 // CTLogUpdate is the builder for updating CTLog entities.
@@ -71,53 +69,19 @@ func (clu *CTLogUpdate) SetNillableIsActive(b *bool) *CTLogUpdate {
 	return clu
 }
 
-// AddViolationIDs adds the "violation" edge to the Violation entity by IDs.
-func (clu *CTLogUpdate) AddViolationIDs(ids ...int) *CTLogUpdate {
-	clu.mutation.AddViolationIDs(ids...)
+// AddTumIDs adds the "ta" edge to the TA entity by IDs.
+func (clu *CTLogUpdate) AddTumIDs(ids ...int) *CTLogUpdate {
+	clu.mutation.AddTumIDs(ids...)
 	return clu
 }
 
-// AddViolation adds the "violation" edges to the Violation entity.
-func (clu *CTLogUpdate) AddViolation(v ...*Violation) *CTLogUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// AddTa adds the "ta" edges to the TA entity.
+func (clu *CTLogUpdate) AddTa(t ...*TA) *CTLogUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return clu.AddViolationIDs(ids...)
-}
-
-// SetAtLogID sets the "at_log" edge to the ATLog entity by ID.
-func (clu *CTLogUpdate) SetAtLogID(id int) *CTLogUpdate {
-	clu.mutation.SetAtLogID(id)
-	return clu
-}
-
-// SetNillableAtLogID sets the "at_log" edge to the ATLog entity by ID if the given value is not nil.
-func (clu *CTLogUpdate) SetNillableAtLogID(id *int) *CTLogUpdate {
-	if id != nil {
-		clu = clu.SetAtLogID(*id)
-	}
-	return clu
-}
-
-// SetAtLog sets the "at_log" edge to the ATLog entity.
-func (clu *CTLogUpdate) SetAtLog(a *ATLog) *CTLogUpdate {
-	return clu.SetAtLogID(a.ID)
-}
-
-// AddSubscriptionIDs adds the "subscription" edge to the Subscription entity by IDs.
-func (clu *CTLogUpdate) AddSubscriptionIDs(ids ...int) *CTLogUpdate {
-	clu.mutation.AddSubscriptionIDs(ids...)
-	return clu
-}
-
-// AddSubscription adds the "subscription" edges to the Subscription entity.
-func (clu *CTLogUpdate) AddSubscription(s ...*Subscription) *CTLogUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return clu.AddSubscriptionIDs(ids...)
+	return clu.AddTumIDs(ids...)
 }
 
 // Mutation returns the CTLogMutation object of the builder.
@@ -125,52 +89,25 @@ func (clu *CTLogUpdate) Mutation() *CTLogMutation {
 	return clu.mutation
 }
 
-// ClearViolation clears all "violation" edges to the Violation entity.
-func (clu *CTLogUpdate) ClearViolation() *CTLogUpdate {
-	clu.mutation.ClearViolation()
+// ClearTa clears all "ta" edges to the TA entity.
+func (clu *CTLogUpdate) ClearTa() *CTLogUpdate {
+	clu.mutation.ClearTa()
 	return clu
 }
 
-// RemoveViolationIDs removes the "violation" edge to Violation entities by IDs.
-func (clu *CTLogUpdate) RemoveViolationIDs(ids ...int) *CTLogUpdate {
-	clu.mutation.RemoveViolationIDs(ids...)
+// RemoveTumIDs removes the "ta" edge to TA entities by IDs.
+func (clu *CTLogUpdate) RemoveTumIDs(ids ...int) *CTLogUpdate {
+	clu.mutation.RemoveTumIDs(ids...)
 	return clu
 }
 
-// RemoveViolation removes "violation" edges to Violation entities.
-func (clu *CTLogUpdate) RemoveViolation(v ...*Violation) *CTLogUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// RemoveTa removes "ta" edges to TA entities.
+func (clu *CTLogUpdate) RemoveTa(t ...*TA) *CTLogUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return clu.RemoveViolationIDs(ids...)
-}
-
-// ClearAtLog clears the "at_log" edge to the ATLog entity.
-func (clu *CTLogUpdate) ClearAtLog() *CTLogUpdate {
-	clu.mutation.ClearAtLog()
-	return clu
-}
-
-// ClearSubscription clears all "subscription" edges to the Subscription entity.
-func (clu *CTLogUpdate) ClearSubscription() *CTLogUpdate {
-	clu.mutation.ClearSubscription()
-	return clu
-}
-
-// RemoveSubscriptionIDs removes the "subscription" edge to Subscription entities by IDs.
-func (clu *CTLogUpdate) RemoveSubscriptionIDs(ids ...int) *CTLogUpdate {
-	clu.mutation.RemoveSubscriptionIDs(ids...)
-	return clu
-}
-
-// RemoveSubscription removes "subscription" edges to Subscription entities.
-func (clu *CTLogUpdate) RemoveSubscription(s ...*Subscription) *CTLogUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return clu.RemoveSubscriptionIDs(ids...)
+	return clu.RemoveTumIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -221,102 +158,28 @@ func (clu *CTLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := clu.mutation.IsActive(); ok {
 		_spec.SetField(ctlog.FieldIsActive, field.TypeBool, value)
 	}
-	if clu.mutation.ViolationCleared() {
+	if clu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   ctlog.ViolationTable,
-			Columns: []string{ctlog.ViolationColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := clu.mutation.RemovedViolationIDs(); len(nodes) > 0 && !clu.mutation.ViolationCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   ctlog.ViolationTable,
-			Columns: []string{ctlog.ViolationColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := clu.mutation.ViolationIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   ctlog.ViolationTable,
-			Columns: []string{ctlog.ViolationColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if clu.mutation.AtLogCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   ctlog.AtLogTable,
-			Columns: []string{ctlog.AtLogColumn},
+			Table:   ctlog.TaTable,
+			Columns: ctlog.TaPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := clu.mutation.AtLogIDs(); len(nodes) > 0 {
+	if nodes := clu.mutation.RemovedTaIDs(); len(nodes) > 0 && !clu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   ctlog.AtLogTable,
-			Columns: []string{ctlog.AtLogColumn},
+			Table:   ctlog.TaTable,
+			Columns: ctlog.TaPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if clu.mutation.SubscriptionCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   ctlog.SubscriptionTable,
-			Columns: []string{ctlog.SubscriptionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := clu.mutation.RemovedSubscriptionIDs(); len(nodes) > 0 && !clu.mutation.SubscriptionCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   ctlog.SubscriptionTable,
-			Columns: []string{ctlog.SubscriptionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -324,15 +187,15 @@ func (clu *CTLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := clu.mutation.SubscriptionIDs(); len(nodes) > 0 {
+	if nodes := clu.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   ctlog.SubscriptionTable,
-			Columns: []string{ctlog.SubscriptionColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   ctlog.TaTable,
+			Columns: ctlog.TaPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -401,53 +264,19 @@ func (cluo *CTLogUpdateOne) SetNillableIsActive(b *bool) *CTLogUpdateOne {
 	return cluo
 }
 
-// AddViolationIDs adds the "violation" edge to the Violation entity by IDs.
-func (cluo *CTLogUpdateOne) AddViolationIDs(ids ...int) *CTLogUpdateOne {
-	cluo.mutation.AddViolationIDs(ids...)
+// AddTumIDs adds the "ta" edge to the TA entity by IDs.
+func (cluo *CTLogUpdateOne) AddTumIDs(ids ...int) *CTLogUpdateOne {
+	cluo.mutation.AddTumIDs(ids...)
 	return cluo
 }
 
-// AddViolation adds the "violation" edges to the Violation entity.
-func (cluo *CTLogUpdateOne) AddViolation(v ...*Violation) *CTLogUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// AddTa adds the "ta" edges to the TA entity.
+func (cluo *CTLogUpdateOne) AddTa(t ...*TA) *CTLogUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return cluo.AddViolationIDs(ids...)
-}
-
-// SetAtLogID sets the "at_log" edge to the ATLog entity by ID.
-func (cluo *CTLogUpdateOne) SetAtLogID(id int) *CTLogUpdateOne {
-	cluo.mutation.SetAtLogID(id)
-	return cluo
-}
-
-// SetNillableAtLogID sets the "at_log" edge to the ATLog entity by ID if the given value is not nil.
-func (cluo *CTLogUpdateOne) SetNillableAtLogID(id *int) *CTLogUpdateOne {
-	if id != nil {
-		cluo = cluo.SetAtLogID(*id)
-	}
-	return cluo
-}
-
-// SetAtLog sets the "at_log" edge to the ATLog entity.
-func (cluo *CTLogUpdateOne) SetAtLog(a *ATLog) *CTLogUpdateOne {
-	return cluo.SetAtLogID(a.ID)
-}
-
-// AddSubscriptionIDs adds the "subscription" edge to the Subscription entity by IDs.
-func (cluo *CTLogUpdateOne) AddSubscriptionIDs(ids ...int) *CTLogUpdateOne {
-	cluo.mutation.AddSubscriptionIDs(ids...)
-	return cluo
-}
-
-// AddSubscription adds the "subscription" edges to the Subscription entity.
-func (cluo *CTLogUpdateOne) AddSubscription(s ...*Subscription) *CTLogUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return cluo.AddSubscriptionIDs(ids...)
+	return cluo.AddTumIDs(ids...)
 }
 
 // Mutation returns the CTLogMutation object of the builder.
@@ -455,52 +284,25 @@ func (cluo *CTLogUpdateOne) Mutation() *CTLogMutation {
 	return cluo.mutation
 }
 
-// ClearViolation clears all "violation" edges to the Violation entity.
-func (cluo *CTLogUpdateOne) ClearViolation() *CTLogUpdateOne {
-	cluo.mutation.ClearViolation()
+// ClearTa clears all "ta" edges to the TA entity.
+func (cluo *CTLogUpdateOne) ClearTa() *CTLogUpdateOne {
+	cluo.mutation.ClearTa()
 	return cluo
 }
 
-// RemoveViolationIDs removes the "violation" edge to Violation entities by IDs.
-func (cluo *CTLogUpdateOne) RemoveViolationIDs(ids ...int) *CTLogUpdateOne {
-	cluo.mutation.RemoveViolationIDs(ids...)
+// RemoveTumIDs removes the "ta" edge to TA entities by IDs.
+func (cluo *CTLogUpdateOne) RemoveTumIDs(ids ...int) *CTLogUpdateOne {
+	cluo.mutation.RemoveTumIDs(ids...)
 	return cluo
 }
 
-// RemoveViolation removes "violation" edges to Violation entities.
-func (cluo *CTLogUpdateOne) RemoveViolation(v ...*Violation) *CTLogUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// RemoveTa removes "ta" edges to TA entities.
+func (cluo *CTLogUpdateOne) RemoveTa(t ...*TA) *CTLogUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return cluo.RemoveViolationIDs(ids...)
-}
-
-// ClearAtLog clears the "at_log" edge to the ATLog entity.
-func (cluo *CTLogUpdateOne) ClearAtLog() *CTLogUpdateOne {
-	cluo.mutation.ClearAtLog()
-	return cluo
-}
-
-// ClearSubscription clears all "subscription" edges to the Subscription entity.
-func (cluo *CTLogUpdateOne) ClearSubscription() *CTLogUpdateOne {
-	cluo.mutation.ClearSubscription()
-	return cluo
-}
-
-// RemoveSubscriptionIDs removes the "subscription" edge to Subscription entities by IDs.
-func (cluo *CTLogUpdateOne) RemoveSubscriptionIDs(ids ...int) *CTLogUpdateOne {
-	cluo.mutation.RemoveSubscriptionIDs(ids...)
-	return cluo
-}
-
-// RemoveSubscription removes "subscription" edges to Subscription entities.
-func (cluo *CTLogUpdateOne) RemoveSubscription(s ...*Subscription) *CTLogUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return cluo.RemoveSubscriptionIDs(ids...)
+	return cluo.RemoveTumIDs(ids...)
 }
 
 // Where appends a list predicates to the CTLogUpdate builder.
@@ -581,102 +383,28 @@ func (cluo *CTLogUpdateOne) sqlSave(ctx context.Context) (_node *CTLog, err erro
 	if value, ok := cluo.mutation.IsActive(); ok {
 		_spec.SetField(ctlog.FieldIsActive, field.TypeBool, value)
 	}
-	if cluo.mutation.ViolationCleared() {
+	if cluo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   ctlog.ViolationTable,
-			Columns: []string{ctlog.ViolationColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cluo.mutation.RemovedViolationIDs(); len(nodes) > 0 && !cluo.mutation.ViolationCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   ctlog.ViolationTable,
-			Columns: []string{ctlog.ViolationColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cluo.mutation.ViolationIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   ctlog.ViolationTable,
-			Columns: []string{ctlog.ViolationColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if cluo.mutation.AtLogCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   ctlog.AtLogTable,
-			Columns: []string{ctlog.AtLogColumn},
+			Table:   ctlog.TaTable,
+			Columns: ctlog.TaPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cluo.mutation.AtLogIDs(); len(nodes) > 0 {
+	if nodes := cluo.mutation.RemovedTaIDs(); len(nodes) > 0 && !cluo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   ctlog.AtLogTable,
-			Columns: []string{ctlog.AtLogColumn},
+			Table:   ctlog.TaTable,
+			Columns: ctlog.TaPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if cluo.mutation.SubscriptionCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   ctlog.SubscriptionTable,
-			Columns: []string{ctlog.SubscriptionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cluo.mutation.RemovedSubscriptionIDs(); len(nodes) > 0 && !cluo.mutation.SubscriptionCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   ctlog.SubscriptionTable,
-			Columns: []string{ctlog.SubscriptionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -684,15 +412,15 @@ func (cluo *CTLogUpdateOne) sqlSave(ctx context.Context) (_node *CTLog, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cluo.mutation.SubscriptionIDs(); len(nodes) > 0 {
+	if nodes := cluo.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   ctlog.SubscriptionTable,
-			Columns: []string{ctlog.SubscriptionColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   ctlog.TaTable,
+			Columns: ctlog.TaPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -8,7 +8,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 )
 
@@ -31,44 +30,20 @@ type CTLog struct {
 
 // CTLogEdges holds the relations/edges for other nodes in the graph.
 type CTLogEdges struct {
-	// Violation holds the value of the violation edge.
-	Violation []*Violation `json:"violation,omitempty"`
-	// AtLog holds the value of the at_log edge.
-	AtLog *ATLog `json:"at_log,omitempty"`
-	// Subscription holds the value of the subscription edge.
-	Subscription []*Subscription `json:"subscription,omitempty"`
+	// Ta holds the value of the ta edge.
+	Ta []*TA `json:"ta,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [1]bool
 }
 
-// ViolationOrErr returns the Violation value or an error if the edge
+// TaOrErr returns the Ta value or an error if the edge
 // was not loaded in eager-loading.
-func (e CTLogEdges) ViolationOrErr() ([]*Violation, error) {
+func (e CTLogEdges) TaOrErr() ([]*TA, error) {
 	if e.loadedTypes[0] {
-		return e.Violation, nil
+		return e.Ta, nil
 	}
-	return nil, &NotLoadedError{edge: "violation"}
-}
-
-// AtLogOrErr returns the AtLog value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e CTLogEdges) AtLogOrErr() (*ATLog, error) {
-	if e.AtLog != nil {
-		return e.AtLog, nil
-	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: atlog.Label}
-	}
-	return nil, &NotLoadedError{edge: "at_log"}
-}
-
-// SubscriptionOrErr returns the Subscription value or an error if the edge
-// was not loaded in eager-loading.
-func (e CTLogEdges) SubscriptionOrErr() ([]*Subscription, error) {
-	if e.loadedTypes[2] {
-		return e.Subscription, nil
-	}
-	return nil, &NotLoadedError{edge: "subscription"}
+	return nil, &NotLoadedError{edge: "ta"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -134,19 +109,9 @@ func (cl *CTLog) Value(name string) (ent.Value, error) {
 	return cl.selectValues.Get(name)
 }
 
-// QueryViolation queries the "violation" edge of the CTLog entity.
-func (cl *CTLog) QueryViolation() *ViolationQuery {
-	return NewCTLogClient(cl.config).QueryViolation(cl)
-}
-
-// QueryAtLog queries the "at_log" edge of the CTLog entity.
-func (cl *CTLog) QueryAtLog() *ATLogQuery {
-	return NewCTLogClient(cl.config).QueryAtLog(cl)
-}
-
-// QuerySubscription queries the "subscription" edge of the CTLog entity.
-func (cl *CTLog) QuerySubscription() *SubscriptionQuery {
-	return NewCTLogClient(cl.config).QuerySubscription(cl)
+// QueryTa queries the "ta" edge of the CTLog entity.
+func (cl *CTLog) QueryTa() *TAQuery {
+	return NewCTLogClient(cl.config).QueryTa(cl)
 }
 
 // Update returns a builder for updating this CTLog.

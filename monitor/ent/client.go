@@ -18,6 +18,7 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
+	"github.com/akakou/ra-webs/monitor/ent/ta"
 	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
@@ -32,6 +33,8 @@ type Client struct {
 	CTLog *CTLogClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
+	// TA is the client for interacting with the TA builders.
+	TA *TAClient
 	// Violation is the client for interacting with the Violation builders.
 	Violation *ViolationClient
 }
@@ -48,6 +51,7 @@ func (c *Client) init() {
 	c.ATLog = NewATLogClient(c.config)
 	c.CTLog = NewCTLogClient(c.config)
 	c.Subscription = NewSubscriptionClient(c.config)
+	c.TA = NewTAClient(c.config)
 	c.Violation = NewViolationClient(c.config)
 }
 
@@ -144,6 +148,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ATLog:        NewATLogClient(cfg),
 		CTLog:        NewCTLogClient(cfg),
 		Subscription: NewSubscriptionClient(cfg),
+		TA:           NewTAClient(cfg),
 		Violation:    NewViolationClient(cfg),
 	}, nil
 }
@@ -167,6 +172,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ATLog:        NewATLogClient(cfg),
 		CTLog:        NewCTLogClient(cfg),
 		Subscription: NewSubscriptionClient(cfg),
+		TA:           NewTAClient(cfg),
 		Violation:    NewViolationClient(cfg),
 	}, nil
 }
@@ -199,6 +205,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.ATLog.Use(hooks...)
 	c.CTLog.Use(hooks...)
 	c.Subscription.Use(hooks...)
+	c.TA.Use(hooks...)
 	c.Violation.Use(hooks...)
 }
 
@@ -208,6 +215,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.ATLog.Intercept(interceptors...)
 	c.CTLog.Intercept(interceptors...)
 	c.Subscription.Intercept(interceptors...)
+	c.TA.Intercept(interceptors...)
 	c.Violation.Intercept(interceptors...)
 }
 
@@ -220,6 +228,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.CTLog.mutate(ctx, m)
 	case *SubscriptionMutation:
 		return c.Subscription.mutate(ctx, m)
+	case *TAMutation:
+		return c.TA.mutate(ctx, m)
 	case *ViolationMutation:
 		return c.Violation.mutate(ctx, m)
 	default:
@@ -335,15 +345,15 @@ func (c *ATLogClient) GetX(ctx context.Context, id int) *ATLog {
 	return obj
 }
 
-// QueryCtLog queries the ct_log edge of a ATLog.
-func (c *ATLogClient) QueryCtLog(al *ATLog) *CTLogQuery {
-	query := (&CTLogClient{config: c.config}).Query()
+// QueryTa queries the ta edge of a ATLog.
+func (c *ATLogClient) QueryTa(al *ATLog) *TAQuery {
+	query := (&TAClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := al.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(atlog.Table, atlog.FieldID, id),
-			sqlgraph.To(ctlog.Table, ctlog.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, atlog.CtLogTable, atlog.CtLogColumn),
+			sqlgraph.To(ta.Table, ta.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, atlog.TaTable, atlog.TaPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(al.driver.Dialect(), step)
 		return fromV, nil
@@ -484,47 +494,15 @@ func (c *CTLogClient) GetX(ctx context.Context, id int) *CTLog {
 	return obj
 }
 
-// QueryViolation queries the violation edge of a CTLog.
-func (c *CTLogClient) QueryViolation(cl *CTLog) *ViolationQuery {
-	query := (&ViolationClient{config: c.config}).Query()
+// QueryTa queries the ta edge of a CTLog.
+func (c *CTLogClient) QueryTa(cl *CTLog) *TAQuery {
+	query := (&TAClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := cl.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ctlog.Table, ctlog.FieldID, id),
-			sqlgraph.To(violation.Table, violation.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, ctlog.ViolationTable, ctlog.ViolationColumn),
-		)
-		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryAtLog queries the at_log edge of a CTLog.
-func (c *CTLogClient) QueryAtLog(cl *CTLog) *ATLogQuery {
-	query := (&ATLogClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cl.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ctlog.Table, ctlog.FieldID, id),
-			sqlgraph.To(atlog.Table, atlog.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, ctlog.AtLogTable, ctlog.AtLogColumn),
-		)
-		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QuerySubscription queries the subscription edge of a CTLog.
-func (c *CTLogClient) QuerySubscription(cl *CTLog) *SubscriptionQuery {
-	query := (&SubscriptionClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cl.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ctlog.Table, ctlog.FieldID, id),
-			sqlgraph.To(subscription.Table, subscription.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, ctlog.SubscriptionTable, ctlog.SubscriptionColumn),
+			sqlgraph.To(ta.Table, ta.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, ctlog.TaTable, ctlog.TaPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
 		return fromV, nil
@@ -665,22 +643,6 @@ func (c *SubscriptionClient) GetX(ctx context.Context, id int) *Subscription {
 	return obj
 }
 
-// QueryCtLog queries the ct_log edge of a Subscription.
-func (c *SubscriptionClient) QueryCtLog(s *Subscription) *CTLogQuery {
-	query := (&CTLogClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(subscription.Table, subscription.FieldID, id),
-			sqlgraph.To(ctlog.Table, ctlog.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, subscription.CtLogTable, subscription.CtLogColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *SubscriptionClient) Hooks() []Hook {
 	return c.hooks.Subscription
@@ -703,6 +665,187 @@ func (c *SubscriptionClient) mutate(ctx context.Context, m *SubscriptionMutation
 		return (&SubscriptionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Subscription mutation op: %q", m.Op())
+	}
+}
+
+// TAClient is a client for the TA schema.
+type TAClient struct {
+	config
+}
+
+// NewTAClient returns a client for the TA from the given config.
+func NewTAClient(c config) *TAClient {
+	return &TAClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `ta.Hooks(f(g(h())))`.
+func (c *TAClient) Use(hooks ...Hook) {
+	c.hooks.TA = append(c.hooks.TA, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `ta.Intercept(f(g(h())))`.
+func (c *TAClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TA = append(c.inters.TA, interceptors...)
+}
+
+// Create returns a builder for creating a TA entity.
+func (c *TAClient) Create() *TACreate {
+	mutation := newTAMutation(c.config, OpCreate)
+	return &TACreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TA entities.
+func (c *TAClient) CreateBulk(builders ...*TACreate) *TACreateBulk {
+	return &TACreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TAClient) MapCreateBulk(slice any, setFunc func(*TACreate, int)) *TACreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TACreateBulk{err: fmt.Errorf("calling to TAClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TACreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TACreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TA.
+func (c *TAClient) Update() *TAUpdate {
+	mutation := newTAMutation(c.config, OpUpdate)
+	return &TAUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TAClient) UpdateOne(t *TA) *TAUpdateOne {
+	mutation := newTAMutation(c.config, OpUpdateOne, withTA(t))
+	return &TAUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TAClient) UpdateOneID(id int) *TAUpdateOne {
+	mutation := newTAMutation(c.config, OpUpdateOne, withTAID(id))
+	return &TAUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TA.
+func (c *TAClient) Delete() *TADelete {
+	mutation := newTAMutation(c.config, OpDelete)
+	return &TADelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TAClient) DeleteOne(t *TA) *TADeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TAClient) DeleteOneID(id int) *TADeleteOne {
+	builder := c.Delete().Where(ta.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TADeleteOne{builder}
+}
+
+// Query returns a query builder for TA.
+func (c *TAClient) Query() *TAQuery {
+	return &TAQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTA},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TA entity by its id.
+func (c *TAClient) Get(ctx context.Context, id int) (*TA, error) {
+	return c.Query().Where(ta.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TAClient) GetX(ctx context.Context, id int) *TA {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryViolation queries the violation edge of a TA.
+func (c *TAClient) QueryViolation(t *TA) *ViolationQuery {
+	query := (&ViolationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ta.Table, ta.FieldID, id),
+			sqlgraph.To(violation.Table, violation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, ta.ViolationTable, ta.ViolationColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCtLog queries the ct_log edge of a TA.
+func (c *TAClient) QueryCtLog(t *TA) *CTLogQuery {
+	query := (&CTLogClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ta.Table, ta.FieldID, id),
+			sqlgraph.To(ctlog.Table, ctlog.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, ta.CtLogTable, ta.CtLogPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAtLog queries the at_log edge of a TA.
+func (c *TAClient) QueryAtLog(t *TA) *ATLogQuery {
+	query := (&ATLogClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ta.Table, ta.FieldID, id),
+			sqlgraph.To(atlog.Table, atlog.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, ta.AtLogTable, ta.AtLogPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TAClient) Hooks() []Hook {
+	return c.hooks.TA
+}
+
+// Interceptors returns the client interceptors.
+func (c *TAClient) Interceptors() []Interceptor {
+	return c.inters.TA
+}
+
+func (c *TAClient) mutate(ctx context.Context, m *TAMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TACreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TAUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TAUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TADelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TA mutation op: %q", m.Op())
 	}
 }
 
@@ -814,15 +957,15 @@ func (c *ViolationClient) GetX(ctx context.Context, id int) *Violation {
 	return obj
 }
 
-// QueryCtLog queries the ct_log edge of a Violation.
-func (c *ViolationClient) QueryCtLog(v *Violation) *CTLogQuery {
-	query := (&CTLogClient{config: c.config}).Query()
+// QueryTa queries the ta edge of a Violation.
+func (c *ViolationClient) QueryTa(v *Violation) *TAQuery {
+	query := (&TAClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := v.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(violation.Table, violation.FieldID, id),
-			sqlgraph.To(ctlog.Table, ctlog.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, violation.CtLogTable, violation.CtLogColumn),
+			sqlgraph.To(ta.Table, ta.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, violation.TaTable, violation.TaColumn),
 		)
 		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
 		return fromV, nil
@@ -858,9 +1001,9 @@ func (c *ViolationClient) mutate(ctx context.Context, m *ViolationMutation) (Val
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		ATLog, CTLog, Subscription, Violation []ent.Hook
+		ATLog, CTLog, Subscription, TA, Violation []ent.Hook
 	}
 	inters struct {
-		ATLog, CTLog, Subscription, Violation []ent.Interceptor
+		ATLog, CTLog, Subscription, TA, Violation []ent.Interceptor
 	}
 )

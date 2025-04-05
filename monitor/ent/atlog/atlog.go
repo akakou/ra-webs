@@ -22,17 +22,15 @@ const (
 	FieldUniqueID = "unique_id"
 	// FieldIsActive holds the string denoting the is_active field in the database.
 	FieldIsActive = "is_active"
-	// EdgeCtLog holds the string denoting the ct_log edge name in mutations.
-	EdgeCtLog = "ct_log"
+	// EdgeTa holds the string denoting the ta edge name in mutations.
+	EdgeTa = "ta"
 	// Table holds the table name of the atlog in the database.
 	Table = "at_logs"
-	// CtLogTable is the table that holds the ct_log relation/edge.
-	CtLogTable = "at_logs"
-	// CtLogInverseTable is the table name for the CTLog entity.
-	// It exists in this package in order to avoid circular dependency with the "ctlog" package.
-	CtLogInverseTable = "ct_logs"
-	// CtLogColumn is the table column denoting the ct_log relation/edge.
-	CtLogColumn = "ct_log_at_log"
+	// TaTable is the table that holds the ta relation/edge. The primary key declared below.
+	TaTable = "at_log_ta"
+	// TaInverseTable is the table name for the TA entity.
+	// It exists in this package in order to avoid circular dependency with the "ta" package.
+	TaInverseTable = "tas"
 )
 
 // Columns holds all SQL columns for atlog fields.
@@ -45,21 +43,16 @@ var Columns = []string{
 	FieldIsActive,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "at_logs"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"ct_log_at_log",
-}
+var (
+	// TaPrimaryKey and TaColumn2 are the table columns denoting the
+	// primary key for the ta relation (M2M).
+	TaPrimaryKey = []string{"at_log_id", "ta_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -99,16 +92,23 @@ func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsActive, opts...).ToFunc()
 }
 
-// ByCtLogField orders the results by ct_log field.
-func ByCtLogField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByTaCount orders the results by ta count.
+func ByTaCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newCtLogStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborsCount(s, newTaStep(), opts...)
 	}
 }
-func newCtLogStep() *sqlgraph.Step {
+
+// ByTa orders the results by ta terms.
+func ByTa(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTaStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newTaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(CtLogInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, CtLogTable, CtLogColumn),
+		sqlgraph.To(TaInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, TaTable, TaPrimaryKey...),
 	)
 }

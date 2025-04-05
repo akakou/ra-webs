@@ -18,35 +18,15 @@ const (
 	FieldMonitorLogID = "monitor_log_id"
 	// FieldIsActive holds the string denoting the is_active field in the database.
 	FieldIsActive = "is_active"
-	// EdgeViolation holds the string denoting the violation edge name in mutations.
-	EdgeViolation = "violation"
-	// EdgeAtLog holds the string denoting the at_log edge name in mutations.
-	EdgeAtLog = "at_log"
-	// EdgeSubscription holds the string denoting the subscription edge name in mutations.
-	EdgeSubscription = "subscription"
+	// EdgeTa holds the string denoting the ta edge name in mutations.
+	EdgeTa = "ta"
 	// Table holds the table name of the ctlog in the database.
 	Table = "ct_logs"
-	// ViolationTable is the table that holds the violation relation/edge.
-	ViolationTable = "violations"
-	// ViolationInverseTable is the table name for the Violation entity.
-	// It exists in this package in order to avoid circular dependency with the "violation" package.
-	ViolationInverseTable = "violations"
-	// ViolationColumn is the table column denoting the violation relation/edge.
-	ViolationColumn = "violation_ct_log"
-	// AtLogTable is the table that holds the at_log relation/edge.
-	AtLogTable = "at_logs"
-	// AtLogInverseTable is the table name for the ATLog entity.
-	// It exists in this package in order to avoid circular dependency with the "atlog" package.
-	AtLogInverseTable = "at_logs"
-	// AtLogColumn is the table column denoting the at_log relation/edge.
-	AtLogColumn = "ct_log_at_log"
-	// SubscriptionTable is the table that holds the subscription relation/edge.
-	SubscriptionTable = "subscriptions"
-	// SubscriptionInverseTable is the table name for the Subscription entity.
-	// It exists in this package in order to avoid circular dependency with the "subscription" package.
-	SubscriptionInverseTable = "subscriptions"
-	// SubscriptionColumn is the table column denoting the subscription relation/edge.
-	SubscriptionColumn = "subscription_ct_log"
+	// TaTable is the table that holds the ta relation/edge. The primary key declared below.
+	TaTable = "ct_log_ta"
+	// TaInverseTable is the table name for the TA entity.
+	// It exists in this package in order to avoid circular dependency with the "ta" package.
+	TaInverseTable = "tas"
 )
 
 // Columns holds all SQL columns for ctlog fields.
@@ -56,6 +36,12 @@ var Columns = []string{
 	FieldMonitorLogID,
 	FieldIsActive,
 }
+
+var (
+	// TaPrimaryKey and TaColumn2 are the table columns denoting the
+	// primary key for the ta relation (M2M).
+	TaPrimaryKey = []string{"ct_log_id", "ta_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -90,58 +76,23 @@ func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsActive, opts...).ToFunc()
 }
 
-// ByViolationCount orders the results by violation count.
-func ByViolationCount(opts ...sql.OrderTermOption) OrderOption {
+// ByTaCount orders the results by ta count.
+func ByTaCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newViolationStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newTaStep(), opts...)
 	}
 }
 
-// ByViolation orders the results by violation terms.
-func ByViolation(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByTa orders the results by ta terms.
+func ByTa(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newViolationStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newTaStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
-// ByAtLogField orders the results by at_log field.
-func ByAtLogField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newAtLogStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// BySubscriptionCount orders the results by subscription count.
-func BySubscriptionCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newSubscriptionStep(), opts...)
-	}
-}
-
-// BySubscription orders the results by subscription terms.
-func BySubscription(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newSubscriptionStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-func newViolationStep() *sqlgraph.Step {
+func newTaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ViolationInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, ViolationTable, ViolationColumn),
-	)
-}
-func newAtLogStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(AtLogInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, AtLogTable, AtLogColumn),
-	)
-}
-func newSubscriptionStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(SubscriptionInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, SubscriptionTable, SubscriptionColumn),
+		sqlgraph.To(TaInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, TaTable, TaPrimaryKey...),
 	)
 }

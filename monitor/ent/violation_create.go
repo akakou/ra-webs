@@ -10,7 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra-webs/monitor/ent/ctlog"
+	"github.com/akakou/ra-webs/monitor/ent/ta"
 	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
@@ -35,23 +35,23 @@ func (vc *ViolationCreate) SetNillableCreatedAt(t *time.Time) *ViolationCreate {
 	return vc
 }
 
-// SetCtLogID sets the "ct_log" edge to the CTLog entity by ID.
-func (vc *ViolationCreate) SetCtLogID(id int) *ViolationCreate {
-	vc.mutation.SetCtLogID(id)
+// SetTaID sets the "ta" edge to the TA entity by ID.
+func (vc *ViolationCreate) SetTaID(id int) *ViolationCreate {
+	vc.mutation.SetTaID(id)
 	return vc
 }
 
-// SetNillableCtLogID sets the "ct_log" edge to the CTLog entity by ID if the given value is not nil.
-func (vc *ViolationCreate) SetNillableCtLogID(id *int) *ViolationCreate {
+// SetNillableTaID sets the "ta" edge to the TA entity by ID if the given value is not nil.
+func (vc *ViolationCreate) SetNillableTaID(id *int) *ViolationCreate {
 	if id != nil {
-		vc = vc.SetCtLogID(*id)
+		vc = vc.SetTaID(*id)
 	}
 	return vc
 }
 
-// SetCtLog sets the "ct_log" edge to the CTLog entity.
-func (vc *ViolationCreate) SetCtLog(c *CTLog) *ViolationCreate {
-	return vc.SetCtLogID(c.ID)
+// SetTa sets the "ta" edge to the TA entity.
+func (vc *ViolationCreate) SetTa(t *TA) *ViolationCreate {
+	return vc.SetTaID(t.ID)
 }
 
 // Mutation returns the ViolationMutation object of the builder.
@@ -130,21 +130,21 @@ func (vc *ViolationCreate) createSpec() (*Violation, *sqlgraph.CreateSpec) {
 		_spec.SetField(violation.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := vc.mutation.CtLogIDs(); len(nodes) > 0 {
+	if nodes := vc.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   violation.CtLogTable,
-			Columns: []string{violation.CtLogColumn},
+			Table:   violation.TaTable,
+			Columns: []string{violation.TaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ta.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.violation_ct_log = &nodes[0]
+		_node.violation_ta = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

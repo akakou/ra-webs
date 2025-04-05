@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
+	"github.com/akakou/ra-webs/monitor/ent/ta"
 	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
@@ -23,7 +23,7 @@ type ViolationQuery struct {
 	order      []violation.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Violation
-	withCtLog  *CTLogQuery
+	withTa     *TAQuery
 	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -61,9 +61,9 @@ func (vq *ViolationQuery) Order(o ...violation.OrderOption) *ViolationQuery {
 	return vq
 }
 
-// QueryCtLog chains the current query on the "ct_log" edge.
-func (vq *ViolationQuery) QueryCtLog() *CTLogQuery {
-	query := (&CTLogClient{config: vq.config}).Query()
+// QueryTa chains the current query on the "ta" edge.
+func (vq *ViolationQuery) QueryTa() *TAQuery {
+	query := (&TAClient{config: vq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := vq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -74,8 +74,8 @@ func (vq *ViolationQuery) QueryCtLog() *CTLogQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(violation.Table, violation.FieldID, selector),
-			sqlgraph.To(ctlog.Table, ctlog.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, violation.CtLogTable, violation.CtLogColumn),
+			sqlgraph.To(ta.Table, ta.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, violation.TaTable, violation.TaColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(vq.driver.Dialect(), step)
 		return fromU, nil
@@ -275,21 +275,21 @@ func (vq *ViolationQuery) Clone() *ViolationQuery {
 		order:      append([]violation.OrderOption{}, vq.order...),
 		inters:     append([]Interceptor{}, vq.inters...),
 		predicates: append([]predicate.Violation{}, vq.predicates...),
-		withCtLog:  vq.withCtLog.Clone(),
+		withTa:     vq.withTa.Clone(),
 		// clone intermediate query.
 		sql:  vq.sql.Clone(),
 		path: vq.path,
 	}
 }
 
-// WithCtLog tells the query-builder to eager-load the nodes that are connected to
-// the "ct_log" edge. The optional arguments are used to configure the query builder of the edge.
-func (vq *ViolationQuery) WithCtLog(opts ...func(*CTLogQuery)) *ViolationQuery {
-	query := (&CTLogClient{config: vq.config}).Query()
+// WithTa tells the query-builder to eager-load the nodes that are connected to
+// the "ta" edge. The optional arguments are used to configure the query builder of the edge.
+func (vq *ViolationQuery) WithTa(opts ...func(*TAQuery)) *ViolationQuery {
+	query := (&TAClient{config: vq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	vq.withCtLog = query
+	vq.withTa = query
 	return vq
 }
 
@@ -373,10 +373,10 @@ func (vq *ViolationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Vi
 		withFKs     = vq.withFKs
 		_spec       = vq.querySpec()
 		loadedTypes = [1]bool{
-			vq.withCtLog != nil,
+			vq.withTa != nil,
 		}
 	)
-	if vq.withCtLog != nil {
+	if vq.withTa != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -400,23 +400,23 @@ func (vq *ViolationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Vi
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := vq.withCtLog; query != nil {
-		if err := vq.loadCtLog(ctx, query, nodes, nil,
-			func(n *Violation, e *CTLog) { n.Edges.CtLog = e }); err != nil {
+	if query := vq.withTa; query != nil {
+		if err := vq.loadTa(ctx, query, nodes, nil,
+			func(n *Violation, e *TA) { n.Edges.Ta = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (vq *ViolationQuery) loadCtLog(ctx context.Context, query *CTLogQuery, nodes []*Violation, init func(*Violation), assign func(*Violation, *CTLog)) error {
+func (vq *ViolationQuery) loadTa(ctx context.Context, query *TAQuery, nodes []*Violation, init func(*Violation), assign func(*Violation, *TA)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Violation)
 	for i := range nodes {
-		if nodes[i].violation_ct_log == nil {
+		if nodes[i].violation_ta == nil {
 			continue
 		}
-		fk := *nodes[i].violation_ct_log
+		fk := *nodes[i].violation_ta
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -425,7 +425,7 @@ func (vq *ViolationQuery) loadCtLog(ctx context.Context, query *CTLogQuery, node
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(ctlog.IDIn(ids...))
+	query.Where(ta.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -433,7 +433,7 @@ func (vq *ViolationQuery) loadCtLog(ctx context.Context, query *CTLogQuery, node
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "violation_ct_log" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "violation_ta" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

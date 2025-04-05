@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra-webs/monitor/ent/ctlog"
+	"github.com/akakou/ra-webs/monitor/ent/ta"
 	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
@@ -22,29 +22,29 @@ type Violation struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ViolationQuery when eager-loading is set.
-	Edges            ViolationEdges `json:"edges"`
-	violation_ct_log *int
-	selectValues     sql.SelectValues
+	Edges        ViolationEdges `json:"edges"`
+	violation_ta *int
+	selectValues sql.SelectValues
 }
 
 // ViolationEdges holds the relations/edges for other nodes in the graph.
 type ViolationEdges struct {
-	// CtLog holds the value of the ct_log edge.
-	CtLog *CTLog `json:"ct_log,omitempty"`
+	// Ta holds the value of the ta edge.
+	Ta *TA `json:"ta,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// CtLogOrErr returns the CtLog value or an error if the edge
+// TaOrErr returns the Ta value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e ViolationEdges) CtLogOrErr() (*CTLog, error) {
-	if e.CtLog != nil {
-		return e.CtLog, nil
+func (e ViolationEdges) TaOrErr() (*TA, error) {
+	if e.Ta != nil {
+		return e.Ta, nil
 	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: ctlog.Label}
+		return nil, &NotFoundError{label: ta.Label}
 	}
-	return nil, &NotLoadedError{edge: "ct_log"}
+	return nil, &NotLoadedError{edge: "ta"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -56,7 +56,7 @@ func (*Violation) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case violation.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case violation.ForeignKeys[0]: // violation_ct_log
+		case violation.ForeignKeys[0]: // violation_ta
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -87,10 +87,10 @@ func (v *Violation) assignValues(columns []string, values []any) error {
 			}
 		case violation.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field violation_ct_log", value)
+				return fmt.Errorf("unexpected type %T for edge-field violation_ta", value)
 			} else if value.Valid {
-				v.violation_ct_log = new(int)
-				*v.violation_ct_log = int(value.Int64)
+				v.violation_ta = new(int)
+				*v.violation_ta = int(value.Int64)
 			}
 		default:
 			v.selectValues.Set(columns[i], values[i])
@@ -105,9 +105,9 @@ func (v *Violation) Value(name string) (ent.Value, error) {
 	return v.selectValues.Get(name)
 }
 
-// QueryCtLog queries the "ct_log" edge of the Violation entity.
-func (v *Violation) QueryCtLog() *CTLogQuery {
-	return NewViolationClient(v.config).QueryCtLog(v)
+// QueryTa queries the "ta" edge of the Violation entity.
+func (v *Violation) QueryTa() *TAQuery {
+	return NewViolationClient(v.config).QueryTa(v)
 }
 
 // Update returns a builder for updating this Violation.

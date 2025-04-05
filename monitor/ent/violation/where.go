@@ -100,21 +100,21 @@ func CreatedAtLTE(v time.Time) predicate.Violation {
 	return predicate.Violation(sql.FieldLTE(FieldCreatedAt, v))
 }
 
-// HasCtLog applies the HasEdge predicate on the "ct_log" edge.
-func HasCtLog() predicate.Violation {
+// HasTa applies the HasEdge predicate on the "ta" edge.
+func HasTa() predicate.Violation {
 	return predicate.Violation(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, CtLogTable, CtLogColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, TaTable, TaColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasCtLogWith applies the HasEdge predicate on the "ct_log" edge with a given conditions (other predicates).
-func HasCtLogWith(preds ...predicate.CTLog) predicate.Violation {
+// HasTaWith applies the HasEdge predicate on the "ta" edge with a given conditions (other predicates).
+func HasTaWith(preds ...predicate.TA) predicate.Violation {
 	return predicate.Violation(func(s *sql.Selector) {
-		step := newCtLogStep()
+		step := newTaStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
 )
@@ -70,34 +69,9 @@ func (su *SubscriptionUpdate) SetNillableAuth(s *string) *SubscriptionUpdate {
 	return su
 }
 
-// SetCtLogID sets the "ct_log" edge to the CTLog entity by ID.
-func (su *SubscriptionUpdate) SetCtLogID(id int) *SubscriptionUpdate {
-	su.mutation.SetCtLogID(id)
-	return su
-}
-
-// SetNillableCtLogID sets the "ct_log" edge to the CTLog entity by ID if the given value is not nil.
-func (su *SubscriptionUpdate) SetNillableCtLogID(id *int) *SubscriptionUpdate {
-	if id != nil {
-		su = su.SetCtLogID(*id)
-	}
-	return su
-}
-
-// SetCtLog sets the "ct_log" edge to the CTLog entity.
-func (su *SubscriptionUpdate) SetCtLog(c *CTLog) *SubscriptionUpdate {
-	return su.SetCtLogID(c.ID)
-}
-
 // Mutation returns the SubscriptionMutation object of the builder.
 func (su *SubscriptionUpdate) Mutation() *SubscriptionMutation {
 	return su.mutation
-}
-
-// ClearCtLog clears the "ct_log" edge to the CTLog entity.
-func (su *SubscriptionUpdate) ClearCtLog() *SubscriptionUpdate {
-	su.mutation.ClearCtLog()
-	return su
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -144,35 +118,6 @@ func (su *SubscriptionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := su.mutation.Auth(); ok {
 		_spec.SetField(subscription.FieldAuth, field.TypeString, value)
-	}
-	if su.mutation.CtLogCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   subscription.CtLogTable,
-			Columns: []string{subscription.CtLogColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := su.mutation.CtLogIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   subscription.CtLogTable,
-			Columns: []string{subscription.CtLogColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, su.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -236,34 +181,9 @@ func (suo *SubscriptionUpdateOne) SetNillableAuth(s *string) *SubscriptionUpdate
 	return suo
 }
 
-// SetCtLogID sets the "ct_log" edge to the CTLog entity by ID.
-func (suo *SubscriptionUpdateOne) SetCtLogID(id int) *SubscriptionUpdateOne {
-	suo.mutation.SetCtLogID(id)
-	return suo
-}
-
-// SetNillableCtLogID sets the "ct_log" edge to the CTLog entity by ID if the given value is not nil.
-func (suo *SubscriptionUpdateOne) SetNillableCtLogID(id *int) *SubscriptionUpdateOne {
-	if id != nil {
-		suo = suo.SetCtLogID(*id)
-	}
-	return suo
-}
-
-// SetCtLog sets the "ct_log" edge to the CTLog entity.
-func (suo *SubscriptionUpdateOne) SetCtLog(c *CTLog) *SubscriptionUpdateOne {
-	return suo.SetCtLogID(c.ID)
-}
-
 // Mutation returns the SubscriptionMutation object of the builder.
 func (suo *SubscriptionUpdateOne) Mutation() *SubscriptionMutation {
 	return suo.mutation
-}
-
-// ClearCtLog clears the "ct_log" edge to the CTLog entity.
-func (suo *SubscriptionUpdateOne) ClearCtLog() *SubscriptionUpdateOne {
-	suo.mutation.ClearCtLog()
-	return suo
 }
 
 // Where appends a list predicates to the SubscriptionUpdate builder.
@@ -340,35 +260,6 @@ func (suo *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscript
 	}
 	if value, ok := suo.mutation.Auth(); ok {
 		_spec.SetField(subscription.FieldAuth, field.TypeString, value)
-	}
-	if suo.mutation.CtLogCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   subscription.CtLogTable,
-			Columns: []string{subscription.CtLogColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := suo.mutation.CtLogIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   subscription.CtLogTable,
-			Columns: []string{subscription.CtLogColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Subscription{config: suo.config}
 	_spec.Assign = _node.assignValues
