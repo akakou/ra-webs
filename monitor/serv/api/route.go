@@ -6,7 +6,6 @@ import (
 )
 
 func Route(e *echo.Group, monitor *serv.MonitorServer) {
-	GetServerApi.Set(e, monitor)
 	GetServerFromDomainApi.Set(e, monitor)
 	PostNotifierApi.Set(e, monitor)
 }

@@ -5,8 +5,6 @@ import (
 
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra-webs/monitor"
-	"github.com/akakou/ra-webs/monitor/ent"
-	"github.com/akakou/ra-webs/monitor/ent/taserver"
 	"github.com/labstack/echo/v4"
 )
 
@@ -31,21 +29,11 @@ var postSubscribeApi = goutils.EchoRoute[monitor.Monitor]{
 				return err
 			}
 
-			serv, err := monitor.DB.Client.TAServer.
-				Query().
-				Order(ent.Desc(taserver.FieldID)).
-				First(*monitor.DB.Ctx)
-
-			if err != nil {
-				return err
-			}
-
 			subscription, err := monitor.DB.Client.Subscription.
 				Create().
 				SetEndpoint(data.Subscription.Endpoint).
 				SetAuth(data.Subscription.Keys.Auth).
 				SetP256dh(data.Subscription.Keys.P256dh).
-				SetServer(serv).
 				Save(*monitor.DB.Ctx)
 
 			if err != nil {

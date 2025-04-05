@@ -4,17 +4,13 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent"
 )
 
-func (monitor *Monitor) Revoke(serv *ent.TAServer) {
+func (monitor *Monitor) Revoke(serv *ent.CTLog) {
 	err := NotifyViolation(monitor.Domain, monitor)
 	if err != nil {
 		panic(err)
 	}
 
 	monitor.DB.Client.TAViolation.Create().
-		SetServer(serv).
+		SetCtLog(serv).
 		SaveX(*monitor.DB.Ctx)
-
-	service := serv.QueryService().OnlyX(*monitor.DB.Ctx)
-
-	service.Update().SetIsActive(false).SaveX(*monitor.DB.Ctx)
 }

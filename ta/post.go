@@ -36,7 +36,7 @@ func (ta *TA) registerOne(monitorBase string) (string, error) {
 	publicKey := ta.privateKey.Public()
 	keyBin := x509.MarshalPKCS1PublicKey(publicKey.(*rsa.PublicKey))
 
-	quote, err := core.AttestServer(keyBin, ta.config.Token)
+	quote, err := core.Attest(keyBin)
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", ERROR_ATTEST_PUBLIC_KEY, err)
 	}

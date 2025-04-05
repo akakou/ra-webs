@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/akakou/crtsh"
-	"github.com/akakou/ra-webs/monitor/ent/taserver"
+	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 )
 
 type publicKey interface{}
@@ -16,8 +16,8 @@ func (monitor *Monitor) MonitorAll(entries []crtsh.CertificateEntry) {
 }
 
 func (monitor *Monitor) MonitorOne(entry crtsh.CertificateEntry) {
-	exist, err := monitor.DB.Client.TAServer.Query().
-		Where(taserver.MonitorLogIDEQ(entry.ID)).
+	exist, err := monitor.DB.Client.CTLog.Query().
+		Where(ctlog.MonitorLogIDEQ(entry.ID)).
 		Exist(*monitor.DB.Ctx)
 
 	if err != nil {
@@ -57,18 +57,18 @@ func (monitor *Monitor) MonitorOne(entry crtsh.CertificateEntry) {
 		revoked = true
 	}
 
-	code, err := monitor.RegisterCode(uniqueId, log)
+	ctLog, err := monitor.RegisterCTLog(log.Evidence, publicKey)
 	if err != nil {
 		panic(err)
 	}
 
-	server, err := monitor.RegisterServer(log.Evidence, publicKey, code)
+	_, err = monitor.RegisterATLog(uniqueId, log, ctLog)
 	if err != nil {
 		panic(err)
 	}
 
 	if revoked {
-		monitor.Revoke(server)
+		monitor.Revoke(ctLog)
 	} else {
 		err = NotifyUpdate(monitor.Domain, monitor)
 		if err != nil {
