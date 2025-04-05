@@ -5,13 +5,15 @@ import (
 	"os"
 
 	golangutils "github.com/akakou/golang-utils"
+	"github.com/akakou/ra-webs/monitor/logclient"
 )
 
 type Monitor struct {
-	Domain   string
-	DB       *DB
-	CT       CT
-	Notifier Notifier
+	Domain    string
+	DB        *DB
+	CT        CT
+	Notifier  Notifier
+	LogClient *logclient.LogClient
 }
 
 func New(domain string, db *DB, ct CT, notifier Notifier) (*Monitor, error) {
@@ -44,6 +46,10 @@ func Default(ct CT, notifier Notifier) (*Monitor, error) {
 	}
 
 	return New(domain, db, ct, notifier)
+}
+
+func (monitor *Monitor) Run() {
+	monitor.CT.Run(monitor)
 }
 
 func (m *Monitor) Close() {

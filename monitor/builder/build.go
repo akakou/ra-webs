@@ -31,36 +31,27 @@ const BUILD_SCRIPT = BASE_REPO_PATH + "build.sh"
 const COMMIT_ID_INDEX = 0
 const UNIQUE_ID_INDEX = 1
 
-const BRANCH = "main"
 const EXECUTABLE = "m"
 
-type BuildOutput struct {
-	CommitId string
-	UniqueId []byte
-}
-
-func build(repo string) (*BuildOutput, error) {
+func build(repo, commitId string) ([]byte, error) {
 	sha256 := sha256.Sum256([]byte(repo))
 	folderName := fmt.Sprintf("%v-%x", time.Now().Unix(), sha256)
 
-	commitId, uniqueIdString, err := buildCode(folderName, repo)
+	uniqueIdString, err := buildCode(folderName, repo, commitId)
 	if err != nil {
 		return nil, err
 	}
 
 	uniqueId, _ := hex.DecodeString(uniqueIdString)
 
-	return &BuildOutput{
-		CommitId: commitId,
-		UniqueId: uniqueId,
-	}, nil
+	return uniqueId, nil
 }
 
-func buildCode(name, repo string) (string, string, error) {
+func buildCode(name, repo, commitId string) (string, error) {
 	extractembed.Extract(BASE_REPO_PATH, &embedFiles)
 
 	var outBuf, errBuf bytes.Buffer
-	cmd := exec.Command("bash", BUILD_SCRIPT, name, repo, BASE_REPO_PATH, BRANCH, BASE_PROGRAM_PATH, EXECUTABLE)
+	cmd := exec.Command("bash", BUILD_SCRIPT, name, repo, commitId, BASE_REPO_PATH, BASE_PROGRAM_PATH, EXECUTABLE)
 
 	fmt.Printf("Running command: %v\n", cmd.String())
 
@@ -71,13 +62,20 @@ func buildCode(name, repo string) (string, string, error) {
 	fmt.Print(errBuf.String())
 
 	if err != nil {
-		return "", "", fmt.Errorf("%v: %v", ERROR_RUNNING_CMD, err)
+		return "", fmt.Errorf("%v: %v", ERROR_RUNNING_CMD, err)
 	}
 
 	lines := strings.Split(outBuf.String(), "\n")
 	if len(lines) != 3 {
-		return "", "", fmt.Errorf("%v: expected 2 lines, but got %v", ERROR_OUTPUT_SIZE_WRONG, len(lines))
+		return "", fmt.Errorf("%v: expected 2 lines, but got %v", ERROR_OUTPUT_SIZE_WRONG, len(lines))
 	}
 
-	return lines[COMMIT_ID_INDEX], lines[UNIQUE_ID_INDEX], nil
+	actualCommitId := lines[COMMIT_ID_INDEX]
+	uniqueId := lines[UNIQUE_ID_INDEX]
+
+	if actualCommitId != commitId {
+		return "", fmt.Errorf("expected commit id %v, but got %v", commitId, actualCommitId)
+	}
+
+	return uniqueId, nil
 }

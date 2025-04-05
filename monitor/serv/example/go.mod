@@ -1,10 +1,10 @@
 module github.com/akakou/ra-webs/monitor/serv/example
 
-go 1.23.0
-
-toolchain go1.23.6
+go 1.23.6
 
 replace github.com/akakou/ra-webs/core => ../../../core/
+
+replace github.com/akakou/ra-webs/log => ../../../log
 
 replace github.com/akakou/ra-webs/monitor => ../../
 
@@ -19,6 +19,8 @@ require (
 	github.com/SherClockHolmes/webpush-go v1.4.0 // indirect
 	github.com/akakou/crtsh v0.0.4 // indirect
 	github.com/akakou/ctstream v0.0.36 // indirect
+	github.com/akakou/extract-embed v0.0.1 // indirect
+	github.com/akakou/ra-webs/log v0.0.0-00010101000000-000000000000 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect

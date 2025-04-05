@@ -1,7 +1,6 @@
 package core
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 
@@ -11,20 +10,8 @@ import (
 
 const SECURITY_VERSION = 1
 
-var AttestByAzure = attestByAzure
-var VerifyByAzure = verifyByAzure
-
-func AttestServer(publicKey []byte, token string) (string, error) {
-	buf := append([]byte(token), publicKey...)
-	quote, err := AttestByAzure(buf)
-	return quote, err
-}
-
-func VerifyServer(quote string, publicKey []byte, token string) (*attestation.Report, error) {
-	buf := append([]byte(token), publicKey...)
-	report, err := VerifyByAzure(quote, []byte(buf))
-	return report, err
-}
+var Attest = attestByAzure
+var Verify = verifyByAzure
 
 func attestByAzure(data []byte) (string, error) {
 	if DEBUG {
@@ -40,7 +27,7 @@ func attestByAzure(data []byte) (string, error) {
 	return token, nil
 }
 
-func verifyByAzure(quote string, data []byte) (*attestation.Report, error) {
+func verifyByAzure(quote string) (*attestation.Report, error) {
 	report, err := attestation.VerifyAzureAttestationToken(quote, ATTEST_PROVIDER_URL)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", ERROR_VERIFY_ATTESTATION, err)
@@ -48,10 +35,6 @@ func verifyByAzure(quote string, data []byte) (*attestation.Report, error) {
 
 	if report.SecurityVersion < SECURITY_VERSION {
 		return nil, errors.New(ERROR_INVALID_SECURITY_VERSION_IN_ATTESTATION)
-	}
-
-	if !bytes.Equal(report.Data, data) {
-		return nil, errors.New(ERROR_INVALID_REPORT_DATA_IN_ATTESTATION)
 	}
 
 	return &report, nil

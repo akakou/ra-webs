@@ -6,7 +6,7 @@ func debugAttestByAzure(data []byte) (string, error) {
 	return "", nil
 }
 
-func debugVerifyByAzure(token string, data []byte) (*attestation.Report, error) {
+func debugVerifyByAzure(evudence string) (*attestation.Report, error) {
 	return &attestation.Report{
 		UniqueID: []byte{1, 2, 3},
 		Data:     []byte{4, 5, 6},
@@ -18,6 +18,6 @@ const DEBUG_TOKEN = "this-is-ra-webs-debug-token-138484039348"
 func EnableDebug() {
 	DEBUG = true
 
-	AttestByAzure = debugAttestByAzure
-	VerifyByAzure = debugVerifyByAzure
+	Attest = debugAttestByAzure
+	Verify = debugVerifyByAzure
 }

@@ -63,6 +63,6 @@ func (a *CrtshMonitor) Run(monitor *monitor.Monitor) {
 		option := params.(*crtsh.CrtshCTParams)
 		fmt.Printf("[received] crtid: %v", option.ID)
 
-		monitor.Check(cert.PublicKey, option.ID)
+		monitor.Monitor(cert.PublicKey, option.ID)
 	})
 }

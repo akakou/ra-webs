@@ -12,7 +12,6 @@ import (
 
 type SignTarget struct {
 	*interfacestruct.PostRequest `json:"post_request"`
-	Domain                       string `json:"domain"`
 }
 
 var Sign = sign
@@ -21,7 +20,6 @@ var Verify = verify
 func sign(log *Log, req *interfacestruct.PostRequest) ([]byte, error) {
 	target := SignTarget{
 		PostRequest: req,
-		Domain:      log.Domain,
 	}
 
 	targetData, err := json.Marshal(target)
@@ -41,7 +39,6 @@ func sign(log *Log, req *interfacestruct.PostRequest) ([]byte, error) {
 func verify(signature []byte, domain string, req *interfacestruct.PostRequest, publicKey *rsa.PublicKey) ([]byte, error) {
 	target := SignTarget{
 		PostRequest: req,
-		Domain:      domain,
 	}
 
 	targetData, err := json.Marshal(target)

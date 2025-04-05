@@ -6,42 +6,80 @@ import (
 	"crypto/x509"
 	"fmt"
 
-	"github.com/akakou/ra-webs/monitor/ent"
-	"github.com/akakou/ra-webs/monitor/ent/taserver"
+	"github.com/cockroachdb/errors"
+
+	"github.com/edgelesssys/ego/attestation"
+	"github.com/edgelesssys/ego/attestation/tcbstatus"
+
+	core "github.com/akakou/ra-webs/core"
+	"github.com/akakou/ra-webs/log/api/interfacestruct"
+	"github.com/akakou/ra-webs/monitor/builder"
 )
 
-type publicKey interface{}
+var (
+	errEnclaveIsDebugMode          = errors.New("enclave is in debug mode")
+	errTCBStatusNotUpToDate        = errors.New("TCB status is not up to date")
+	errUniqueIDInEvidenceMismatch  = errors.New("unique ID in evidence mismatch")
+	errUniqueIDMadeByBuildMismatch = errors.New("unique ID made by build mismatch")
+	errPublicKeyNotMatched         = errors.New("public key not matched")
+	errPublicKeyIsNotRSA           = errors.New("public key is not RSA")
+	errBuildFailed                 = errors.New("build failed")
+)
 
-func (monitor *Monitor) Check(pk publicKey, id int) {
-	serv, err := monitor.DB.Client.TAServer.
-		Query().
-		Order(ent.Desc(taserver.FieldID)).
-		First(*monitor.DB.Ctx)
-
+func CheckEvidence(quote string) (*attestation.Report, error) {
+	report, err := core.Verify(quote)
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+		return &attestation.Report{
+			UniqueID:  []byte{},
+			Debug:     false,
+			TCBStatus: tcbstatus.Unknown,
+		}, err
 	}
 
-	serv.Update().SetMonitorLogID(id).Save(*monitor.DB.Ctx)
+	if report.Debug {
+		return &attestation.Report{
+			UniqueID:  []byte{},
+			Debug:     true,
+			TCBStatus: tcbstatus.Unknown,
+		}, errEnclaveIsDebugMode
+	}
 
-	unmarshaledPublicKey, isRSA := pk.(*rsa.PublicKey)
+	if report.TCBStatus != tcbstatus.UpToDate {
+		return &attestation.Report{
+			UniqueID:  []byte{},
+			Debug:     false,
+			TCBStatus: tcbstatus.UpToDate,
+		}, errTCBStatusNotUpToDate
+	}
+
+	return report, nil
+}
+
+func CheckPublicKey(ctPublicKey publicKey, logPublicKey []byte) error {
+	unmarshaledPublicKey, isRSA := ctPublicKey.(*rsa.PublicKey)
 	if !isRSA {
-		fmt.Printf("Violation: %v\n", errPublicKeyNotRSA)
-		monitor.Revoke(serv)
-		return
+		return errPublicKeyIsNotRSA
 	}
 
-	publicKey := x509.MarshalPKCS1PublicKey(unmarshaledPublicKey)
-	fmt.Printf("compireing public key:\n%v\n!=%v\n\n", serv.PublicKey, publicKey)
+	ctPublicKeyBuf := x509.MarshalPKCS1PublicKey(unmarshaledPublicKey)
+	fmt.Printf("compireing public key:\n%v\n!=%v\n\n", ctPublicKeyBuf, logPublicKey)
 
-	if !bytes.Equal(serv.PublicKey, publicKey) {
-		fmt.Printf("Violation: %v: %v != %v", errPublicKeyNotMatch, serv.PublicKey, publicKey)
-		monitor.Revoke(serv)
-		return
+	if !bytes.Equal(ctPublicKeyBuf, logPublicKey) {
+		return errPublicKeyNotMatched
 	}
 
-	if !serv.IsActive {
-		monitor.Activate(serv)
+	return nil
+}
+
+func CheckSourceHash(log *interfacestruct.TA, evidenceUniqueId []byte) error {
+	uniqueId, err := builder.Build(log.Repository, log.CommitID)
+	if err != nil {
+		return errors.Wrap(errBuildFailed, err.Error())
 	}
+
+	if !bytes.Equal(uniqueId, evidenceUniqueId) {
+		return errUniqueIDInEvidenceMismatch
+	}
+
+	return nil
 }
