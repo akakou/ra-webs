@@ -7,25 +7,24 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
-	"github.com/akakou/ra-webs/monitor/ent/service"
-	"github.com/akakou/ra-webs/monitor/ent/taserver"
 	"github.com/akakou/ra-webs/monitor/ent/taviolation"
 )
 
 // TAViolationQuery is the builder for querying TAViolation entities.
 type TAViolationQuery struct {
 	config
-	ctx         *QueryContext
-	order       []taviolation.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.TAViolation
-	withServer  *TAServerQuery
-	withService *ServiceQuery
-	withFKs     bool
+	ctx        *QueryContext
+	order      []taviolation.OrderOption
+	inters     []Interceptor
+	predicates []predicate.TAViolation
+	withCtLog  *CTLogQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -62,9 +61,9 @@ func (tvq *TAViolationQuery) Order(o ...taviolation.OrderOption) *TAViolationQue
 	return tvq
 }
 
-// QueryServer chains the current query on the "server" edge.
-func (tvq *TAViolationQuery) QueryServer() *TAServerQuery {
-	query := (&TAServerClient{config: tvq.config}).Query()
+// QueryCtLog chains the current query on the "ct_log" edge.
+func (tvq *TAViolationQuery) QueryCtLog() *CTLogQuery {
+	query := (&CTLogClient{config: tvq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tvq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -75,30 +74,8 @@ func (tvq *TAViolationQuery) QueryServer() *TAServerQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(taviolation.Table, taviolation.FieldID, selector),
-			sqlgraph.To(taserver.Table, taserver.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, taviolation.ServerTable, taviolation.ServerColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(tvq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryService chains the current query on the "service" edge.
-func (tvq *TAViolationQuery) QueryService() *ServiceQuery {
-	query := (&ServiceClient{config: tvq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tvq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := tvq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(taviolation.Table, taviolation.FieldID, selector),
-			sqlgraph.To(service.Table, service.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, taviolation.ServiceTable, taviolation.ServiceColumn),
+			sqlgraph.To(ctlog.Table, ctlog.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, taviolation.CtLogTable, taviolation.CtLogColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tvq.driver.Dialect(), step)
 		return fromU, nil
@@ -109,7 +86,7 @@ func (tvq *TAViolationQuery) QueryService() *ServiceQuery {
 // First returns the first TAViolation entity from the query.
 // Returns a *NotFoundError when no TAViolation was found.
 func (tvq *TAViolationQuery) First(ctx context.Context) (*TAViolation, error) {
-	nodes, err := tvq.Limit(1).All(setContextOp(ctx, tvq.ctx, "First"))
+	nodes, err := tvq.Limit(1).All(setContextOp(ctx, tvq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +109,7 @@ func (tvq *TAViolationQuery) FirstX(ctx context.Context) *TAViolation {
 // Returns a *NotFoundError when no TAViolation ID was found.
 func (tvq *TAViolationQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = tvq.Limit(1).IDs(setContextOp(ctx, tvq.ctx, "FirstID")); err != nil {
+	if ids, err = tvq.Limit(1).IDs(setContextOp(ctx, tvq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -155,7 +132,7 @@ func (tvq *TAViolationQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one TAViolation entity is found.
 // Returns a *NotFoundError when no TAViolation entities are found.
 func (tvq *TAViolationQuery) Only(ctx context.Context) (*TAViolation, error) {
-	nodes, err := tvq.Limit(2).All(setContextOp(ctx, tvq.ctx, "Only"))
+	nodes, err := tvq.Limit(2).All(setContextOp(ctx, tvq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +160,7 @@ func (tvq *TAViolationQuery) OnlyX(ctx context.Context) *TAViolation {
 // Returns a *NotFoundError when no entities are found.
 func (tvq *TAViolationQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = tvq.Limit(2).IDs(setContextOp(ctx, tvq.ctx, "OnlyID")); err != nil {
+	if ids, err = tvq.Limit(2).IDs(setContextOp(ctx, tvq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -208,7 +185,7 @@ func (tvq *TAViolationQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of TAViolations.
 func (tvq *TAViolationQuery) All(ctx context.Context) ([]*TAViolation, error) {
-	ctx = setContextOp(ctx, tvq.ctx, "All")
+	ctx = setContextOp(ctx, tvq.ctx, ent.OpQueryAll)
 	if err := tvq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -230,7 +207,7 @@ func (tvq *TAViolationQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if tvq.ctx.Unique == nil && tvq.path != nil {
 		tvq.Unique(true)
 	}
-	ctx = setContextOp(ctx, tvq.ctx, "IDs")
+	ctx = setContextOp(ctx, tvq.ctx, ent.OpQueryIDs)
 	if err = tvq.Select(taviolation.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -248,7 +225,7 @@ func (tvq *TAViolationQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (tvq *TAViolationQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, tvq.ctx, "Count")
+	ctx = setContextOp(ctx, tvq.ctx, ent.OpQueryCount)
 	if err := tvq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -266,7 +243,7 @@ func (tvq *TAViolationQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (tvq *TAViolationQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, tvq.ctx, "Exist")
+	ctx = setContextOp(ctx, tvq.ctx, ent.OpQueryExist)
 	switch _, err := tvq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -293,38 +270,26 @@ func (tvq *TAViolationQuery) Clone() *TAViolationQuery {
 		return nil
 	}
 	return &TAViolationQuery{
-		config:      tvq.config,
-		ctx:         tvq.ctx.Clone(),
-		order:       append([]taviolation.OrderOption{}, tvq.order...),
-		inters:      append([]Interceptor{}, tvq.inters...),
-		predicates:  append([]predicate.TAViolation{}, tvq.predicates...),
-		withServer:  tvq.withServer.Clone(),
-		withService: tvq.withService.Clone(),
+		config:     tvq.config,
+		ctx:        tvq.ctx.Clone(),
+		order:      append([]taviolation.OrderOption{}, tvq.order...),
+		inters:     append([]Interceptor{}, tvq.inters...),
+		predicates: append([]predicate.TAViolation{}, tvq.predicates...),
+		withCtLog:  tvq.withCtLog.Clone(),
 		// clone intermediate query.
 		sql:  tvq.sql.Clone(),
 		path: tvq.path,
 	}
 }
 
-// WithServer tells the query-builder to eager-load the nodes that are connected to
-// the "server" edge. The optional arguments are used to configure the query builder of the edge.
-func (tvq *TAViolationQuery) WithServer(opts ...func(*TAServerQuery)) *TAViolationQuery {
-	query := (&TAServerClient{config: tvq.config}).Query()
+// WithCtLog tells the query-builder to eager-load the nodes that are connected to
+// the "ct_log" edge. The optional arguments are used to configure the query builder of the edge.
+func (tvq *TAViolationQuery) WithCtLog(opts ...func(*CTLogQuery)) *TAViolationQuery {
+	query := (&CTLogClient{config: tvq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tvq.withServer = query
-	return tvq
-}
-
-// WithService tells the query-builder to eager-load the nodes that are connected to
-// the "service" edge. The optional arguments are used to configure the query builder of the edge.
-func (tvq *TAViolationQuery) WithService(opts ...func(*ServiceQuery)) *TAViolationQuery {
-	query := (&ServiceClient{config: tvq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	tvq.withService = query
+	tvq.withCtLog = query
 	return tvq
 }
 
@@ -407,12 +372,11 @@ func (tvq *TAViolationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		nodes       = []*TAViolation{}
 		withFKs     = tvq.withFKs
 		_spec       = tvq.querySpec()
-		loadedTypes = [2]bool{
-			tvq.withServer != nil,
-			tvq.withService != nil,
+		loadedTypes = [1]bool{
+			tvq.withCtLog != nil,
 		}
 	)
-	if tvq.withServer != nil || tvq.withService != nil {
+	if tvq.withCtLog != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -436,29 +400,23 @@ func (tvq *TAViolationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := tvq.withServer; query != nil {
-		if err := tvq.loadServer(ctx, query, nodes, nil,
-			func(n *TAViolation, e *TAServer) { n.Edges.Server = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := tvq.withService; query != nil {
-		if err := tvq.loadService(ctx, query, nodes, nil,
-			func(n *TAViolation, e *Service) { n.Edges.Service = e }); err != nil {
+	if query := tvq.withCtLog; query != nil {
+		if err := tvq.loadCtLog(ctx, query, nodes, nil,
+			func(n *TAViolation, e *CTLog) { n.Edges.CtLog = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (tvq *TAViolationQuery) loadServer(ctx context.Context, query *TAServerQuery, nodes []*TAViolation, init func(*TAViolation), assign func(*TAViolation, *TAServer)) error {
+func (tvq *TAViolationQuery) loadCtLog(ctx context.Context, query *CTLogQuery, nodes []*TAViolation, init func(*TAViolation), assign func(*TAViolation, *CTLog)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*TAViolation)
 	for i := range nodes {
-		if nodes[i].ta_violation_server == nil {
+		if nodes[i].ta_violation_ct_log == nil {
 			continue
 		}
-		fk := *nodes[i].ta_violation_server
+		fk := *nodes[i].ta_violation_ct_log
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -467,7 +425,7 @@ func (tvq *TAViolationQuery) loadServer(ctx context.Context, query *TAServerQuer
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(taserver.IDIn(ids...))
+	query.Where(ctlog.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -475,39 +433,7 @@ func (tvq *TAViolationQuery) loadServer(ctx context.Context, query *TAServerQuer
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "ta_violation_server" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-func (tvq *TAViolationQuery) loadService(ctx context.Context, query *ServiceQuery, nodes []*TAViolation, init func(*TAViolation), assign func(*TAViolation, *Service)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*TAViolation)
-	for i := range nodes {
-		if nodes[i].ta_violation_service == nil {
-			continue
-		}
-		fk := *nodes[i].ta_violation_service
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(service.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "ta_violation_service" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "ta_violation_ct_log" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -611,7 +537,7 @@ func (tvgb *TAViolationGroupBy) Aggregate(fns ...AggregateFunc) *TAViolationGrou
 
 // Scan applies the selector query and scans the result into the given value.
 func (tvgb *TAViolationGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, tvgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, tvgb.build.ctx, ent.OpQueryGroupBy)
 	if err := tvgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -659,7 +585,7 @@ func (tvs *TAViolationSelect) Aggregate(fns ...AggregateFunc) *TAViolationSelect
 
 // Scan applies the selector query and scans the result into the given value.
 func (tvs *TAViolationSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, tvs.ctx, "Select")
+	ctx = setContextOp(ctx, tvs.ctx, ent.OpQuerySelect)
 	if err := tvs.prepareQuery(ctx); err != nil {
 		return err
 	}

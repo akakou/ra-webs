@@ -23,6 +23,6 @@ func (Subscription) Fields() []ent.Field {
 // Edges of the TA.
 func (Subscription) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("server", TAServer.Type).Unique(),
+		edge.To("ct_log", CTLog.Type).Unique(),
 	}
 }

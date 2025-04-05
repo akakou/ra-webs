@@ -5,10 +5,9 @@ package ent
 import (
 	"time"
 
+	"github.com/akakou/ra-webs/monitor/ent/atlog"
+	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/schema"
-	"github.com/akakou/ra-webs/monitor/ent/service"
-	"github.com/akakou/ra-webs/monitor/ent/tacode"
-	"github.com/akakou/ra-webs/monitor/ent/taserver"
 	"github.com/akakou/ra-webs/monitor/ent/taviolation"
 )
 
@@ -16,24 +15,18 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	serviceFields := schema.Service{}.Fields()
-	_ = serviceFields
-	// serviceDescIsActive is the schema descriptor for is_active field.
-	serviceDescIsActive := serviceFields[2].Descriptor()
-	// service.DefaultIsActive holds the default value on creation for the is_active field.
-	service.DefaultIsActive = serviceDescIsActive.Default.(bool)
-	tacodeFields := schema.TACode{}.Fields()
-	_ = tacodeFields
-	// tacodeDescIsActive is the schema descriptor for is_active field.
-	tacodeDescIsActive := tacodeFields[3].Descriptor()
-	// tacode.DefaultIsActive holds the default value on creation for the is_active field.
-	tacode.DefaultIsActive = tacodeDescIsActive.Default.(bool)
-	taserverFields := schema.TAServer{}.Fields()
-	_ = taserverFields
-	// taserverDescIsActive is the schema descriptor for is_active field.
-	taserverDescIsActive := taserverFields[3].Descriptor()
-	// taserver.DefaultIsActive holds the default value on creation for the is_active field.
-	taserver.DefaultIsActive = taserverDescIsActive.Default.(bool)
+	atlogFields := schema.ATLog{}.Fields()
+	_ = atlogFields
+	// atlogDescIsActive is the schema descriptor for is_active field.
+	atlogDescIsActive := atlogFields[4].Descriptor()
+	// atlog.DefaultIsActive holds the default value on creation for the is_active field.
+	atlog.DefaultIsActive = atlogDescIsActive.Default.(bool)
+	ctlogFields := schema.CTLog{}.Fields()
+	_ = ctlogFields
+	// ctlogDescIsActive is the schema descriptor for is_active field.
+	ctlogDescIsActive := ctlogFields[2].Descriptor()
+	// ctlog.DefaultIsActive holds the default value on creation for the is_active field.
+	ctlog.DefaultIsActive = ctlogDescIsActive.Default.(bool)
 	taviolationFields := schema.TAViolation{}.Fields()
 	_ = taviolationFields
 	// taviolationDescCreatedAt is the schema descriptor for created_at field.

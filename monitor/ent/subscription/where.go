@@ -263,21 +263,21 @@ func AuthContainsFold(v string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldContainsFold(FieldAuth, v))
 }
 
-// HasServer applies the HasEdge predicate on the "server" edge.
-func HasServer() predicate.Subscription {
+// HasCtLog applies the HasEdge predicate on the "ct_log" edge.
+func HasCtLog() predicate.Subscription {
 	return predicate.Subscription(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, ServerTable, ServerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, CtLogTable, CtLogColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasServerWith applies the HasEdge predicate on the "server" edge with a given conditions (other predicates).
-func HasServerWith(preds ...predicate.TAServer) predicate.Subscription {
+// HasCtLogWith applies the HasEdge predicate on the "ct_log" edge with a given conditions (other predicates).
+func HasCtLogWith(preds ...predicate.CTLog) predicate.Subscription {
 	return predicate.Subscription(func(s *sql.Selector) {
-		step := newServerStep()
+		step := newCtLogStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

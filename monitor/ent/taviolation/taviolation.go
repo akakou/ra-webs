@@ -16,26 +16,17 @@ const (
 	FieldID = "id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
-	// EdgeServer holds the string denoting the server edge name in mutations.
-	EdgeServer = "server"
-	// EdgeService holds the string denoting the service edge name in mutations.
-	EdgeService = "service"
+	// EdgeCtLog holds the string denoting the ct_log edge name in mutations.
+	EdgeCtLog = "ct_log"
 	// Table holds the table name of the taviolation in the database.
 	Table = "ta_violations"
-	// ServerTable is the table that holds the server relation/edge.
-	ServerTable = "ta_violations"
-	// ServerInverseTable is the table name for the TAServer entity.
-	// It exists in this package in order to avoid circular dependency with the "taserver" package.
-	ServerInverseTable = "ta_servers"
-	// ServerColumn is the table column denoting the server relation/edge.
-	ServerColumn = "ta_violation_server"
-	// ServiceTable is the table that holds the service relation/edge.
-	ServiceTable = "ta_violations"
-	// ServiceInverseTable is the table name for the Service entity.
-	// It exists in this package in order to avoid circular dependency with the "service" package.
-	ServiceInverseTable = "services"
-	// ServiceColumn is the table column denoting the service relation/edge.
-	ServiceColumn = "ta_violation_service"
+	// CtLogTable is the table that holds the ct_log relation/edge.
+	CtLogTable = "ta_violations"
+	// CtLogInverseTable is the table name for the CTLog entity.
+	// It exists in this package in order to avoid circular dependency with the "ctlog" package.
+	CtLogInverseTable = "ct_logs"
+	// CtLogColumn is the table column denoting the ct_log relation/edge.
+	CtLogColumn = "ta_violation_ct_log"
 )
 
 // Columns holds all SQL columns for taviolation fields.
@@ -47,8 +38,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "ta_violations"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"ta_violation_server",
-	"ta_violation_service",
+	"ta_violation_ct_log",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -84,30 +74,16 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
-// ByServerField orders the results by server field.
-func ByServerField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByCtLogField orders the results by ct_log field.
+func ByCtLogField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newServerStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newCtLogStep(), sql.OrderByField(field, opts...))
 	}
 }
-
-// ByServiceField orders the results by service field.
-func ByServiceField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newServiceStep(), sql.OrderByField(field, opts...))
-	}
-}
-func newServerStep() *sqlgraph.Step {
+func newCtLogStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ServerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, ServerTable, ServerColumn),
-	)
-}
-func newServiceStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ServiceInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, ServiceTable, ServiceColumn),
+		sqlgraph.To(CtLogInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, CtLogTable, CtLogColumn),
 	)
 }

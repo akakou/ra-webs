@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
-	"github.com/akakou/ra-webs/monitor/ent/taserver"
 )
 
 // SubscriptionCreate is the builder for creating a Subscription entity.
@@ -38,23 +38,23 @@ func (sc *SubscriptionCreate) SetAuth(s string) *SubscriptionCreate {
 	return sc
 }
 
-// SetServerID sets the "server" edge to the TAServer entity by ID.
-func (sc *SubscriptionCreate) SetServerID(id int) *SubscriptionCreate {
-	sc.mutation.SetServerID(id)
+// SetCtLogID sets the "ct_log" edge to the CTLog entity by ID.
+func (sc *SubscriptionCreate) SetCtLogID(id int) *SubscriptionCreate {
+	sc.mutation.SetCtLogID(id)
 	return sc
 }
 
-// SetNillableServerID sets the "server" edge to the TAServer entity by ID if the given value is not nil.
-func (sc *SubscriptionCreate) SetNillableServerID(id *int) *SubscriptionCreate {
+// SetNillableCtLogID sets the "ct_log" edge to the CTLog entity by ID if the given value is not nil.
+func (sc *SubscriptionCreate) SetNillableCtLogID(id *int) *SubscriptionCreate {
 	if id != nil {
-		sc = sc.SetServerID(*id)
+		sc = sc.SetCtLogID(*id)
 	}
 	return sc
 }
 
-// SetServer sets the "server" edge to the TAServer entity.
-func (sc *SubscriptionCreate) SetServer(t *TAServer) *SubscriptionCreate {
-	return sc.SetServerID(t.ID)
+// SetCtLog sets the "ct_log" edge to the CTLog entity.
+func (sc *SubscriptionCreate) SetCtLog(c *CTLog) *SubscriptionCreate {
+	return sc.SetCtLogID(c.ID)
 }
 
 // Mutation returns the SubscriptionMutation object of the builder.
@@ -138,21 +138,21 @@ func (sc *SubscriptionCreate) createSpec() (*Subscription, *sqlgraph.CreateSpec)
 		_spec.SetField(subscription.FieldAuth, field.TypeString, value)
 		_node.Auth = value
 	}
-	if nodes := sc.mutation.ServerIDs(); len(nodes) > 0 {
+	if nodes := sc.mutation.CtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   subscription.ServerTable,
-			Columns: []string{subscription.ServerColumn},
+			Table:   subscription.CtLogTable,
+			Columns: []string{subscription.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.subscription_server = &nodes[0]
+		_node.subscription_ct_log = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

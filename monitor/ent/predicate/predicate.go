@@ -6,17 +6,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Service is the predicate function for service builders.
-type Service func(*sql.Selector)
+// ATLog is the predicate function for atlog builders.
+type ATLog func(*sql.Selector)
+
+// CTLog is the predicate function for ctlog builders.
+type CTLog func(*sql.Selector)
 
 // Subscription is the predicate function for subscription builders.
 type Subscription func(*sql.Selector)
-
-// TACode is the predicate function for tacode builders.
-type TACode func(*sql.Selector)
-
-// TAServer is the predicate function for taserver builders.
-type TAServer func(*sql.Selector)
 
 // TAViolation is the predicate function for taviolation builders.
 type TAViolation func(*sql.Selector)

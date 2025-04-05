@@ -7,12 +7,13 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
-	"github.com/akakou/ra-webs/monitor/ent/taserver"
 )
 
 // SubscriptionQuery is the builder for querying Subscription entities.
@@ -22,7 +23,7 @@ type SubscriptionQuery struct {
 	order      []subscription.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Subscription
-	withServer *TAServerQuery
+	withCtLog  *CTLogQuery
 	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -60,9 +61,9 @@ func (sq *SubscriptionQuery) Order(o ...subscription.OrderOption) *SubscriptionQ
 	return sq
 }
 
-// QueryServer chains the current query on the "server" edge.
-func (sq *SubscriptionQuery) QueryServer() *TAServerQuery {
-	query := (&TAServerClient{config: sq.config}).Query()
+// QueryCtLog chains the current query on the "ct_log" edge.
+func (sq *SubscriptionQuery) QueryCtLog() *CTLogQuery {
+	query := (&CTLogClient{config: sq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := sq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -73,8 +74,8 @@ func (sq *SubscriptionQuery) QueryServer() *TAServerQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(subscription.Table, subscription.FieldID, selector),
-			sqlgraph.To(taserver.Table, taserver.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, subscription.ServerTable, subscription.ServerColumn),
+			sqlgraph.To(ctlog.Table, ctlog.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, subscription.CtLogTable, subscription.CtLogColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
 		return fromU, nil
@@ -85,7 +86,7 @@ func (sq *SubscriptionQuery) QueryServer() *TAServerQuery {
 // First returns the first Subscription entity from the query.
 // Returns a *NotFoundError when no Subscription was found.
 func (sq *SubscriptionQuery) First(ctx context.Context) (*Subscription, error) {
-	nodes, err := sq.Limit(1).All(setContextOp(ctx, sq.ctx, "First"))
+	nodes, err := sq.Limit(1).All(setContextOp(ctx, sq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +109,7 @@ func (sq *SubscriptionQuery) FirstX(ctx context.Context) *Subscription {
 // Returns a *NotFoundError when no Subscription ID was found.
 func (sq *SubscriptionQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sq.Limit(1).IDs(setContextOp(ctx, sq.ctx, "FirstID")); err != nil {
+	if ids, err = sq.Limit(1).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -131,7 +132,7 @@ func (sq *SubscriptionQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Subscription entity is found.
 // Returns a *NotFoundError when no Subscription entities are found.
 func (sq *SubscriptionQuery) Only(ctx context.Context) (*Subscription, error) {
-	nodes, err := sq.Limit(2).All(setContextOp(ctx, sq.ctx, "Only"))
+	nodes, err := sq.Limit(2).All(setContextOp(ctx, sq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +160,7 @@ func (sq *SubscriptionQuery) OnlyX(ctx context.Context) *Subscription {
 // Returns a *NotFoundError when no entities are found.
 func (sq *SubscriptionQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sq.Limit(2).IDs(setContextOp(ctx, sq.ctx, "OnlyID")); err != nil {
+	if ids, err = sq.Limit(2).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -184,7 +185,7 @@ func (sq *SubscriptionQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Subscriptions.
 func (sq *SubscriptionQuery) All(ctx context.Context) ([]*Subscription, error) {
-	ctx = setContextOp(ctx, sq.ctx, "All")
+	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryAll)
 	if err := sq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -206,7 +207,7 @@ func (sq *SubscriptionQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if sq.ctx.Unique == nil && sq.path != nil {
 		sq.Unique(true)
 	}
-	ctx = setContextOp(ctx, sq.ctx, "IDs")
+	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryIDs)
 	if err = sq.Select(subscription.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -224,7 +225,7 @@ func (sq *SubscriptionQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (sq *SubscriptionQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, sq.ctx, "Count")
+	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryCount)
 	if err := sq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -242,7 +243,7 @@ func (sq *SubscriptionQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (sq *SubscriptionQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, sq.ctx, "Exist")
+	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryExist)
 	switch _, err := sq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -274,21 +275,21 @@ func (sq *SubscriptionQuery) Clone() *SubscriptionQuery {
 		order:      append([]subscription.OrderOption{}, sq.order...),
 		inters:     append([]Interceptor{}, sq.inters...),
 		predicates: append([]predicate.Subscription{}, sq.predicates...),
-		withServer: sq.withServer.Clone(),
+		withCtLog:  sq.withCtLog.Clone(),
 		// clone intermediate query.
 		sql:  sq.sql.Clone(),
 		path: sq.path,
 	}
 }
 
-// WithServer tells the query-builder to eager-load the nodes that are connected to
-// the "server" edge. The optional arguments are used to configure the query builder of the edge.
-func (sq *SubscriptionQuery) WithServer(opts ...func(*TAServerQuery)) *SubscriptionQuery {
-	query := (&TAServerClient{config: sq.config}).Query()
+// WithCtLog tells the query-builder to eager-load the nodes that are connected to
+// the "ct_log" edge. The optional arguments are used to configure the query builder of the edge.
+func (sq *SubscriptionQuery) WithCtLog(opts ...func(*CTLogQuery)) *SubscriptionQuery {
+	query := (&CTLogClient{config: sq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	sq.withServer = query
+	sq.withCtLog = query
 	return sq
 }
 
@@ -372,10 +373,10 @@ func (sq *SubscriptionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		withFKs     = sq.withFKs
 		_spec       = sq.querySpec()
 		loadedTypes = [1]bool{
-			sq.withServer != nil,
+			sq.withCtLog != nil,
 		}
 	)
-	if sq.withServer != nil {
+	if sq.withCtLog != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -399,23 +400,23 @@ func (sq *SubscriptionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := sq.withServer; query != nil {
-		if err := sq.loadServer(ctx, query, nodes, nil,
-			func(n *Subscription, e *TAServer) { n.Edges.Server = e }); err != nil {
+	if query := sq.withCtLog; query != nil {
+		if err := sq.loadCtLog(ctx, query, nodes, nil,
+			func(n *Subscription, e *CTLog) { n.Edges.CtLog = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (sq *SubscriptionQuery) loadServer(ctx context.Context, query *TAServerQuery, nodes []*Subscription, init func(*Subscription), assign func(*Subscription, *TAServer)) error {
+func (sq *SubscriptionQuery) loadCtLog(ctx context.Context, query *CTLogQuery, nodes []*Subscription, init func(*Subscription), assign func(*Subscription, *CTLog)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Subscription)
 	for i := range nodes {
-		if nodes[i].subscription_server == nil {
+		if nodes[i].subscription_ct_log == nil {
 			continue
 		}
-		fk := *nodes[i].subscription_server
+		fk := *nodes[i].subscription_ct_log
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -424,7 +425,7 @@ func (sq *SubscriptionQuery) loadServer(ctx context.Context, query *TAServerQuer
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(taserver.IDIn(ids...))
+	query.Where(ctlog.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -432,7 +433,7 @@ func (sq *SubscriptionQuery) loadServer(ctx context.Context, query *TAServerQuer
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "subscription_server" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "subscription_ct_log" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -536,7 +537,7 @@ func (sgb *SubscriptionGroupBy) Aggregate(fns ...AggregateFunc) *SubscriptionGro
 
 // Scan applies the selector query and scans the result into the given value.
 func (sgb *SubscriptionGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, sgb.build.ctx, ent.OpQueryGroupBy)
 	if err := sgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -584,7 +585,7 @@ func (ss *SubscriptionSelect) Aggregate(fns ...AggregateFunc) *SubscriptionSelec
 
 // Scan applies the selector query and scans the result into the given value.
 func (ss *SubscriptionSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ss.ctx, "Select")
+	ctx = setContextOp(ctx, ss.ctx, ent.OpQuerySelect)
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}

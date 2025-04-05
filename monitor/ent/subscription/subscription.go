@@ -18,17 +18,17 @@ const (
 	FieldP256dh = "p256dh"
 	// FieldAuth holds the string denoting the auth field in the database.
 	FieldAuth = "auth"
-	// EdgeServer holds the string denoting the server edge name in mutations.
-	EdgeServer = "server"
+	// EdgeCtLog holds the string denoting the ct_log edge name in mutations.
+	EdgeCtLog = "ct_log"
 	// Table holds the table name of the subscription in the database.
 	Table = "subscriptions"
-	// ServerTable is the table that holds the server relation/edge.
-	ServerTable = "subscriptions"
-	// ServerInverseTable is the table name for the TAServer entity.
-	// It exists in this package in order to avoid circular dependency with the "taserver" package.
-	ServerInverseTable = "ta_servers"
-	// ServerColumn is the table column denoting the server relation/edge.
-	ServerColumn = "subscription_server"
+	// CtLogTable is the table that holds the ct_log relation/edge.
+	CtLogTable = "subscriptions"
+	// CtLogInverseTable is the table name for the CTLog entity.
+	// It exists in this package in order to avoid circular dependency with the "ctlog" package.
+	CtLogInverseTable = "ct_logs"
+	// CtLogColumn is the table column denoting the ct_log relation/edge.
+	CtLogColumn = "subscription_ct_log"
 )
 
 // Columns holds all SQL columns for subscription fields.
@@ -42,7 +42,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "subscriptions"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"subscription_server",
+	"subscription_ct_log",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -83,16 +83,16 @@ func ByAuth(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAuth, opts...).ToFunc()
 }
 
-// ByServerField orders the results by server field.
-func ByServerField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByCtLogField orders the results by ct_log field.
+func ByCtLogField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newServerStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newCtLogStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newServerStep() *sqlgraph.Step {
+func newCtLogStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ServerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, ServerTable, ServerColumn),
+		sqlgraph.To(CtLogInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, CtLogTable, CtLogColumn),
 	)
 }

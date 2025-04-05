@@ -12,10 +12,9 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/akakou/ra-webs/monitor/ent/service"
+	"github.com/akakou/ra-webs/monitor/ent/atlog"
+	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
-	"github.com/akakou/ra-webs/monitor/ent/tacode"
-	"github.com/akakou/ra-webs/monitor/ent/taserver"
 	"github.com/akakou/ra-webs/monitor/ent/taviolation"
 )
 
@@ -73,14 +72,13 @@ var (
 	columnCheck sql.ColumnCheck
 )
 
-// columnChecker checks if the column exists in the given table.
+// checkColumn checks if the column exists in the given table.
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			service.Table:      service.ValidColumn,
+			atlog.Table:        atlog.ValidColumn,
+			ctlog.Table:        ctlog.ValidColumn,
 			subscription.Table: subscription.ValidColumn,
-			tacode.Table:       tacode.ValidColumn,
-			taserver.Table:     taserver.ValidColumn,
 			taviolation.Table:  taviolation.ValidColumn,
 		})
 	})

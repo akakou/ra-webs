@@ -9,16 +9,28 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent"
 )
 
-// The ServiceFunc type is an adapter to allow the use of ordinary
-// function as Service mutator.
-type ServiceFunc func(context.Context, *ent.ServiceMutation) (ent.Value, error)
+// The ATLogFunc type is an adapter to allow the use of ordinary
+// function as ATLog mutator.
+type ATLogFunc func(context.Context, *ent.ATLogMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f ServiceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.ServiceMutation); ok {
+func (f ATLogFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ATLogMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ServiceMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ATLogMutation", m)
+}
+
+// The CTLogFunc type is an adapter to allow the use of ordinary
+// function as CTLog mutator.
+type CTLogFunc func(context.Context, *ent.CTLogMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CTLogFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CTLogMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CTLogMutation", m)
 }
 
 // The SubscriptionFunc type is an adapter to allow the use of ordinary
@@ -31,30 +43,6 @@ func (f SubscriptionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubscriptionMutation", m)
-}
-
-// The TACodeFunc type is an adapter to allow the use of ordinary
-// function as TACode mutator.
-type TACodeFunc func(context.Context, *ent.TACodeMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f TACodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.TACodeMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TACodeMutation", m)
-}
-
-// The TAServerFunc type is an adapter to allow the use of ordinary
-// function as TAServer mutator.
-type TAServerFunc func(context.Context, *ent.TAServerMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f TAServerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.TAServerMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TAServerMutation", m)
 }
 
 // The TAViolationFunc type is an adapter to allow the use of ordinary

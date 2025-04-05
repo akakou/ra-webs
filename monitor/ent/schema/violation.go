@@ -25,7 +25,6 @@ func (TAViolation) Fields() []ent.Field {
 // Edges of the TA.
 func (TAViolation) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("server", TAServer.Type).Unique(),
-		edge.To("service", Service.Type).Unique(),
+		edge.To("ct_log", CTLog.Type).Unique(),
 	}
 }

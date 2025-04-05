@@ -10,8 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra-webs/monitor/ent/service"
-	"github.com/akakou/ra-webs/monitor/ent/taserver"
+	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/taviolation"
 )
 
@@ -36,42 +35,23 @@ func (tvc *TAViolationCreate) SetNillableCreatedAt(t *time.Time) *TAViolationCre
 	return tvc
 }
 
-// SetServerID sets the "server" edge to the TAServer entity by ID.
-func (tvc *TAViolationCreate) SetServerID(id int) *TAViolationCreate {
-	tvc.mutation.SetServerID(id)
+// SetCtLogID sets the "ct_log" edge to the CTLog entity by ID.
+func (tvc *TAViolationCreate) SetCtLogID(id int) *TAViolationCreate {
+	tvc.mutation.SetCtLogID(id)
 	return tvc
 }
 
-// SetNillableServerID sets the "server" edge to the TAServer entity by ID if the given value is not nil.
-func (tvc *TAViolationCreate) SetNillableServerID(id *int) *TAViolationCreate {
+// SetNillableCtLogID sets the "ct_log" edge to the CTLog entity by ID if the given value is not nil.
+func (tvc *TAViolationCreate) SetNillableCtLogID(id *int) *TAViolationCreate {
 	if id != nil {
-		tvc = tvc.SetServerID(*id)
+		tvc = tvc.SetCtLogID(*id)
 	}
 	return tvc
 }
 
-// SetServer sets the "server" edge to the TAServer entity.
-func (tvc *TAViolationCreate) SetServer(t *TAServer) *TAViolationCreate {
-	return tvc.SetServerID(t.ID)
-}
-
-// SetServiceID sets the "service" edge to the Service entity by ID.
-func (tvc *TAViolationCreate) SetServiceID(id int) *TAViolationCreate {
-	tvc.mutation.SetServiceID(id)
-	return tvc
-}
-
-// SetNillableServiceID sets the "service" edge to the Service entity by ID if the given value is not nil.
-func (tvc *TAViolationCreate) SetNillableServiceID(id *int) *TAViolationCreate {
-	if id != nil {
-		tvc = tvc.SetServiceID(*id)
-	}
-	return tvc
-}
-
-// SetService sets the "service" edge to the Service entity.
-func (tvc *TAViolationCreate) SetService(s *Service) *TAViolationCreate {
-	return tvc.SetServiceID(s.ID)
+// SetCtLog sets the "ct_log" edge to the CTLog entity.
+func (tvc *TAViolationCreate) SetCtLog(c *CTLog) *TAViolationCreate {
+	return tvc.SetCtLogID(c.ID)
 }
 
 // Mutation returns the TAViolationMutation object of the builder.
@@ -150,38 +130,21 @@ func (tvc *TAViolationCreate) createSpec() (*TAViolation, *sqlgraph.CreateSpec) 
 		_spec.SetField(taviolation.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := tvc.mutation.ServerIDs(); len(nodes) > 0 {
+	if nodes := tvc.mutation.CtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   taviolation.ServerTable,
-			Columns: []string{taviolation.ServerColumn},
+			Table:   taviolation.CtLogTable,
+			Columns: []string{taviolation.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.ta_violation_server = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := tvc.mutation.ServiceIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   taviolation.ServiceTable,
-			Columns: []string{taviolation.ServiceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(service.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.ta_violation_service = &nodes[0]
+		_node.ta_violation_ct_log = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

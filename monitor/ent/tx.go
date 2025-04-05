@@ -12,14 +12,12 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// Service is the client for interacting with the Service builders.
-	Service *ServiceClient
+	// ATLog is the client for interacting with the ATLog builders.
+	ATLog *ATLogClient
+	// CTLog is the client for interacting with the CTLog builders.
+	CTLog *CTLogClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
-	// TACode is the client for interacting with the TACode builders.
-	TACode *TACodeClient
-	// TAServer is the client for interacting with the TAServer builders.
-	TAServer *TAServerClient
 	// TAViolation is the client for interacting with the TAViolation builders.
 	TAViolation *TAViolationClient
 
@@ -153,10 +151,9 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.Service = NewServiceClient(tx.config)
+	tx.ATLog = NewATLogClient(tx.config)
+	tx.CTLog = NewCTLogClient(tx.config)
 	tx.Subscription = NewSubscriptionClient(tx.config)
-	tx.TACode = NewTACodeClient(tx.config)
-	tx.TAServer = NewTAServerClient(tx.config)
 	tx.TAViolation = NewTAViolationClient(tx.config)
 }
 
@@ -167,7 +164,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Service.QueryXXX(), the query will be executed
+// applies a query, for example: ATLog.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

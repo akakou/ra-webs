@@ -11,11 +11,10 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/akakou/ra-webs/monitor/ent/atlog"
+	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
-	"github.com/akakou/ra-webs/monitor/ent/service"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
-	"github.com/akakou/ra-webs/monitor/ent/tacode"
-	"github.com/akakou/ra-webs/monitor/ent/taserver"
 	"github.com/akakou/ra-webs/monitor/ent/taviolation"
 )
 
@@ -28,45 +27,42 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeService      = "Service"
+	TypeATLog        = "ATLog"
+	TypeCTLog        = "CTLog"
 	TypeSubscription = "Subscription"
-	TypeTACode       = "TACode"
-	TypeTAServer     = "TAServer"
 	TypeTAViolation  = "TAViolation"
 )
 
-// ServiceMutation represents an operation that mutates the Service nodes in the graph.
-type ServiceMutation struct {
+// ATLogMutation represents an operation that mutates the ATLog nodes in the graph.
+type ATLogMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *int
-	name            *string
-	token           *string
-	is_active       *bool
-	clearedFields   map[string]struct{}
-	taserver        map[int]struct{}
-	removedtaserver map[int]struct{}
-	clearedtaserver bool
-	tacode          map[int]struct{}
-	removedtacode   map[int]struct{}
-	clearedtacode   bool
-	done            bool
-	oldValue        func(context.Context) (*Service, error)
-	predicates      []predicate.Service
+	op            Op
+	typ           string
+	id            *int
+	evidence      *string
+	repository    *string
+	commit_id     *string
+	unique_id     *[]byte
+	is_active     *bool
+	clearedFields map[string]struct{}
+	ct_log        *int
+	clearedct_log bool
+	done          bool
+	oldValue      func(context.Context) (*ATLog, error)
+	predicates    []predicate.ATLog
 }
 
-var _ ent.Mutation = (*ServiceMutation)(nil)
+var _ ent.Mutation = (*ATLogMutation)(nil)
 
-// serviceOption allows management of the mutation configuration using functional options.
-type serviceOption func(*ServiceMutation)
+// atlogOption allows management of the mutation configuration using functional options.
+type atlogOption func(*ATLogMutation)
 
-// newServiceMutation creates new mutation for the Service entity.
-func newServiceMutation(c config, op Op, opts ...serviceOption) *ServiceMutation {
-	m := &ServiceMutation{
+// newATLogMutation creates new mutation for the ATLog entity.
+func newATLogMutation(c config, op Op, opts ...atlogOption) *ATLogMutation {
+	m := &ATLogMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeService,
+		typ:           TypeATLog,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -75,20 +71,20 @@ func newServiceMutation(c config, op Op, opts ...serviceOption) *ServiceMutation
 	return m
 }
 
-// withServiceID sets the ID field of the mutation.
-func withServiceID(id int) serviceOption {
-	return func(m *ServiceMutation) {
+// withATLogID sets the ID field of the mutation.
+func withATLogID(id int) atlogOption {
+	return func(m *ATLogMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *Service
+			value *ATLog
 		)
-		m.oldValue = func(ctx context.Context) (*Service, error) {
+		m.oldValue = func(ctx context.Context) (*ATLog, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().Service.Get(ctx, id)
+					value, err = m.Client().ATLog.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -97,10 +93,10 @@ func withServiceID(id int) serviceOption {
 	}
 }
 
-// withService sets the old Service of the mutation.
-func withService(node *Service) serviceOption {
-	return func(m *ServiceMutation) {
-		m.oldValue = func(context.Context) (*Service, error) {
+// withATLog sets the old ATLog of the mutation.
+func withATLog(node *ATLog) atlogOption {
+	return func(m *ATLogMutation) {
+		m.oldValue = func(context.Context) (*ATLog, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -109,7 +105,7 @@ func withService(node *Service) serviceOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m ServiceMutation) Client() *Client {
+func (m ATLogMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -117,7 +113,7 @@ func (m ServiceMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m ServiceMutation) Tx() (*Tx, error) {
+func (m ATLogMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -128,7 +124,7 @@ func (m ServiceMutation) Tx() (*Tx, error) {
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *ServiceMutation) ID() (id int, exists bool) {
+func (m *ATLogMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -139,7 +135,7 @@ func (m *ServiceMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *ServiceMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *ATLogMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -148,91 +144,163 @@ func (m *ServiceMutation) IDs(ctx context.Context) ([]int, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Service.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().ATLog.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
-// SetName sets the "name" field.
-func (m *ServiceMutation) SetName(s string) {
-	m.name = &s
+// SetEvidence sets the "evidence" field.
+func (m *ATLogMutation) SetEvidence(s string) {
+	m.evidence = &s
 }
 
-// Name returns the value of the "name" field in the mutation.
-func (m *ServiceMutation) Name() (r string, exists bool) {
-	v := m.name
+// Evidence returns the value of the "evidence" field in the mutation.
+func (m *ATLogMutation) Evidence() (r string, exists bool) {
+	v := m.evidence
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the Service entity.
-// If the Service object wasn't provided to the builder, the object is fetched from the database.
+// OldEvidence returns the old "evidence" field's value of the ATLog entity.
+// If the ATLog object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ServiceMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *ATLogMutation) OldEvidence(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
+		return v, errors.New("OldEvidence is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
+		return v, errors.New("OldEvidence requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldEvidence: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.Evidence, nil
 }
 
-// ResetName resets all changes to the "name" field.
-func (m *ServiceMutation) ResetName() {
-	m.name = nil
+// ResetEvidence resets all changes to the "evidence" field.
+func (m *ATLogMutation) ResetEvidence() {
+	m.evidence = nil
 }
 
-// SetToken sets the "token" field.
-func (m *ServiceMutation) SetToken(s string) {
-	m.token = &s
+// SetRepository sets the "repository" field.
+func (m *ATLogMutation) SetRepository(s string) {
+	m.repository = &s
 }
 
-// Token returns the value of the "token" field in the mutation.
-func (m *ServiceMutation) Token() (r string, exists bool) {
-	v := m.token
+// Repository returns the value of the "repository" field in the mutation.
+func (m *ATLogMutation) Repository() (r string, exists bool) {
+	v := m.repository
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldToken returns the old "token" field's value of the Service entity.
-// If the Service object wasn't provided to the builder, the object is fetched from the database.
+// OldRepository returns the old "repository" field's value of the ATLog entity.
+// If the ATLog object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ServiceMutation) OldToken(ctx context.Context) (v string, err error) {
+func (m *ATLogMutation) OldRepository(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldToken is only allowed on UpdateOne operations")
+		return v, errors.New("OldRepository is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldToken requires an ID field in the mutation")
+		return v, errors.New("OldRepository requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldToken: %w", err)
+		return v, fmt.Errorf("querying old value for OldRepository: %w", err)
 	}
-	return oldValue.Token, nil
+	return oldValue.Repository, nil
 }
 
-// ResetToken resets all changes to the "token" field.
-func (m *ServiceMutation) ResetToken() {
-	m.token = nil
+// ResetRepository resets all changes to the "repository" field.
+func (m *ATLogMutation) ResetRepository() {
+	m.repository = nil
+}
+
+// SetCommitID sets the "commit_id" field.
+func (m *ATLogMutation) SetCommitID(s string) {
+	m.commit_id = &s
+}
+
+// CommitID returns the value of the "commit_id" field in the mutation.
+func (m *ATLogMutation) CommitID() (r string, exists bool) {
+	v := m.commit_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCommitID returns the old "commit_id" field's value of the ATLog entity.
+// If the ATLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ATLogMutation) OldCommitID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCommitID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCommitID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCommitID: %w", err)
+	}
+	return oldValue.CommitID, nil
+}
+
+// ResetCommitID resets all changes to the "commit_id" field.
+func (m *ATLogMutation) ResetCommitID() {
+	m.commit_id = nil
+}
+
+// SetUniqueID sets the "unique_id" field.
+func (m *ATLogMutation) SetUniqueID(b []byte) {
+	m.unique_id = &b
+}
+
+// UniqueID returns the value of the "unique_id" field in the mutation.
+func (m *ATLogMutation) UniqueID() (r []byte, exists bool) {
+	v := m.unique_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUniqueID returns the old "unique_id" field's value of the ATLog entity.
+// If the ATLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ATLogMutation) OldUniqueID(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUniqueID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUniqueID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUniqueID: %w", err)
+	}
+	return oldValue.UniqueID, nil
+}
+
+// ResetUniqueID resets all changes to the "unique_id" field.
+func (m *ATLogMutation) ResetUniqueID() {
+	m.unique_id = nil
 }
 
 // SetIsActive sets the "is_active" field.
-func (m *ServiceMutation) SetIsActive(b bool) {
+func (m *ATLogMutation) SetIsActive(b bool) {
 	m.is_active = &b
 }
 
 // IsActive returns the value of the "is_active" field in the mutation.
-func (m *ServiceMutation) IsActive() (r bool, exists bool) {
+func (m *ATLogMutation) IsActive() (r bool, exists bool) {
 	v := m.is_active
 	if v == nil {
 		return
@@ -240,10 +308,10 @@ func (m *ServiceMutation) IsActive() (r bool, exists bool) {
 	return *v, true
 }
 
-// OldIsActive returns the old "is_active" field's value of the Service entity.
-// If the Service object wasn't provided to the builder, the object is fetched from the database.
+// OldIsActive returns the old "is_active" field's value of the ATLog entity.
+// If the ATLog object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ServiceMutation) OldIsActive(ctx context.Context) (v bool, err error) {
+func (m *ATLogMutation) OldIsActive(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldIsActive is only allowed on UpdateOne operations")
 	}
@@ -258,127 +326,58 @@ func (m *ServiceMutation) OldIsActive(ctx context.Context) (v bool, err error) {
 }
 
 // ResetIsActive resets all changes to the "is_active" field.
-func (m *ServiceMutation) ResetIsActive() {
+func (m *ATLogMutation) ResetIsActive() {
 	m.is_active = nil
 }
 
-// AddTaserverIDs adds the "taserver" edge to the TAServer entity by ids.
-func (m *ServiceMutation) AddTaserverIDs(ids ...int) {
-	if m.taserver == nil {
-		m.taserver = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.taserver[ids[i]] = struct{}{}
-	}
+// SetCtLogID sets the "ct_log" edge to the CTLog entity by id.
+func (m *ATLogMutation) SetCtLogID(id int) {
+	m.ct_log = &id
 }
 
-// ClearTaserver clears the "taserver" edge to the TAServer entity.
-func (m *ServiceMutation) ClearTaserver() {
-	m.clearedtaserver = true
+// ClearCtLog clears the "ct_log" edge to the CTLog entity.
+func (m *ATLogMutation) ClearCtLog() {
+	m.clearedct_log = true
 }
 
-// TaserverCleared reports if the "taserver" edge to the TAServer entity was cleared.
-func (m *ServiceMutation) TaserverCleared() bool {
-	return m.clearedtaserver
+// CtLogCleared reports if the "ct_log" edge to the CTLog entity was cleared.
+func (m *ATLogMutation) CtLogCleared() bool {
+	return m.clearedct_log
 }
 
-// RemoveTaserverIDs removes the "taserver" edge to the TAServer entity by IDs.
-func (m *ServiceMutation) RemoveTaserverIDs(ids ...int) {
-	if m.removedtaserver == nil {
-		m.removedtaserver = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.taserver, ids[i])
-		m.removedtaserver[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedTaserver returns the removed IDs of the "taserver" edge to the TAServer entity.
-func (m *ServiceMutation) RemovedTaserverIDs() (ids []int) {
-	for id := range m.removedtaserver {
-		ids = append(ids, id)
+// CtLogID returns the "ct_log" edge ID in the mutation.
+func (m *ATLogMutation) CtLogID() (id int, exists bool) {
+	if m.ct_log != nil {
+		return *m.ct_log, true
 	}
 	return
 }
 
-// TaserverIDs returns the "taserver" edge IDs in the mutation.
-func (m *ServiceMutation) TaserverIDs() (ids []int) {
-	for id := range m.taserver {
-		ids = append(ids, id)
+// CtLogIDs returns the "ct_log" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CtLogID instead. It exists only for internal usage by the builders.
+func (m *ATLogMutation) CtLogIDs() (ids []int) {
+	if id := m.ct_log; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetTaserver resets all changes to the "taserver" edge.
-func (m *ServiceMutation) ResetTaserver() {
-	m.taserver = nil
-	m.clearedtaserver = false
-	m.removedtaserver = nil
+// ResetCtLog resets all changes to the "ct_log" edge.
+func (m *ATLogMutation) ResetCtLog() {
+	m.ct_log = nil
+	m.clearedct_log = false
 }
 
-// AddTacodeIDs adds the "tacode" edge to the TACode entity by ids.
-func (m *ServiceMutation) AddTacodeIDs(ids ...int) {
-	if m.tacode == nil {
-		m.tacode = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.tacode[ids[i]] = struct{}{}
-	}
-}
-
-// ClearTacode clears the "tacode" edge to the TACode entity.
-func (m *ServiceMutation) ClearTacode() {
-	m.clearedtacode = true
-}
-
-// TacodeCleared reports if the "tacode" edge to the TACode entity was cleared.
-func (m *ServiceMutation) TacodeCleared() bool {
-	return m.clearedtacode
-}
-
-// RemoveTacodeIDs removes the "tacode" edge to the TACode entity by IDs.
-func (m *ServiceMutation) RemoveTacodeIDs(ids ...int) {
-	if m.removedtacode == nil {
-		m.removedtacode = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.tacode, ids[i])
-		m.removedtacode[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedTacode returns the removed IDs of the "tacode" edge to the TACode entity.
-func (m *ServiceMutation) RemovedTacodeIDs() (ids []int) {
-	for id := range m.removedtacode {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// TacodeIDs returns the "tacode" edge IDs in the mutation.
-func (m *ServiceMutation) TacodeIDs() (ids []int) {
-	for id := range m.tacode {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetTacode resets all changes to the "tacode" edge.
-func (m *ServiceMutation) ResetTacode() {
-	m.tacode = nil
-	m.clearedtacode = false
-	m.removedtacode = nil
-}
-
-// Where appends a list predicates to the ServiceMutation builder.
-func (m *ServiceMutation) Where(ps ...predicate.Service) {
+// Where appends a list predicates to the ATLogMutation builder.
+func (m *ATLogMutation) Where(ps ...predicate.ATLog) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the ServiceMutation builder. Using this method,
+// WhereP appends storage-level predicates to the ATLogMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *ServiceMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.Service, len(ps))
+func (m *ATLogMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ATLog, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -386,33 +385,39 @@ func (m *ServiceMutation) WhereP(ps ...func(*sql.Selector)) {
 }
 
 // Op returns the operation name.
-func (m *ServiceMutation) Op() Op {
+func (m *ATLogMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *ServiceMutation) SetOp(op Op) {
+func (m *ATLogMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (Service).
-func (m *ServiceMutation) Type() string {
+// Type returns the node type of this mutation (ATLog).
+func (m *ATLogMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *ServiceMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.name != nil {
-		fields = append(fields, service.FieldName)
+func (m *ATLogMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.evidence != nil {
+		fields = append(fields, atlog.FieldEvidence)
 	}
-	if m.token != nil {
-		fields = append(fields, service.FieldToken)
+	if m.repository != nil {
+		fields = append(fields, atlog.FieldRepository)
+	}
+	if m.commit_id != nil {
+		fields = append(fields, atlog.FieldCommitID)
+	}
+	if m.unique_id != nil {
+		fields = append(fields, atlog.FieldUniqueID)
 	}
 	if m.is_active != nil {
-		fields = append(fields, service.FieldIsActive)
+		fields = append(fields, atlog.FieldIsActive)
 	}
 	return fields
 }
@@ -420,13 +425,17 @@ func (m *ServiceMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *ServiceMutation) Field(name string) (ent.Value, bool) {
+func (m *ATLogMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case service.FieldName:
-		return m.Name()
-	case service.FieldToken:
-		return m.Token()
-	case service.FieldIsActive:
+	case atlog.FieldEvidence:
+		return m.Evidence()
+	case atlog.FieldRepository:
+		return m.Repository()
+	case atlog.FieldCommitID:
+		return m.CommitID()
+	case atlog.FieldUniqueID:
+		return m.UniqueID()
+	case atlog.FieldIsActive:
 		return m.IsActive()
 	}
 	return nil, false
@@ -435,38 +444,56 @@ func (m *ServiceMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *ServiceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *ATLogMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case service.FieldName:
-		return m.OldName(ctx)
-	case service.FieldToken:
-		return m.OldToken(ctx)
-	case service.FieldIsActive:
+	case atlog.FieldEvidence:
+		return m.OldEvidence(ctx)
+	case atlog.FieldRepository:
+		return m.OldRepository(ctx)
+	case atlog.FieldCommitID:
+		return m.OldCommitID(ctx)
+	case atlog.FieldUniqueID:
+		return m.OldUniqueID(ctx)
+	case atlog.FieldIsActive:
 		return m.OldIsActive(ctx)
 	}
-	return nil, fmt.Errorf("unknown Service field %s", name)
+	return nil, fmt.Errorf("unknown ATLog field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *ServiceMutation) SetField(name string, value ent.Value) error {
+func (m *ATLogMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case service.FieldName:
+	case atlog.FieldEvidence:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetEvidence(v)
 		return nil
-	case service.FieldToken:
+	case atlog.FieldRepository:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetToken(v)
+		m.SetRepository(v)
 		return nil
-	case service.FieldIsActive:
+	case atlog.FieldCommitID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCommitID(v)
+		return nil
+	case atlog.FieldUniqueID:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUniqueID(v)
+		return nil
+	case atlog.FieldIsActive:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -474,92 +501,756 @@ func (m *ServiceMutation) SetField(name string, value ent.Value) error {
 		m.SetIsActive(v)
 		return nil
 	}
-	return fmt.Errorf("unknown Service field %s", name)
+	return fmt.Errorf("unknown ATLog field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *ServiceMutation) AddedFields() []string {
+func (m *ATLogMutation) AddedFields() []string {
 	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *ServiceMutation) AddedField(name string) (ent.Value, bool) {
+func (m *ATLogMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *ServiceMutation) AddField(name string, value ent.Value) error {
+func (m *ATLogMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown Service numeric field %s", name)
+	return fmt.Errorf("unknown ATLog numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *ServiceMutation) ClearedFields() []string {
+func (m *ATLogMutation) ClearedFields() []string {
 	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *ServiceMutation) FieldCleared(name string) bool {
+func (m *ATLogMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *ServiceMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Service nullable field %s", name)
+func (m *ATLogMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown ATLog nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *ServiceMutation) ResetField(name string) error {
+func (m *ATLogMutation) ResetField(name string) error {
 	switch name {
-	case service.FieldName:
-		m.ResetName()
+	case atlog.FieldEvidence:
+		m.ResetEvidence()
 		return nil
-	case service.FieldToken:
-		m.ResetToken()
+	case atlog.FieldRepository:
+		m.ResetRepository()
 		return nil
-	case service.FieldIsActive:
+	case atlog.FieldCommitID:
+		m.ResetCommitID()
+		return nil
+	case atlog.FieldUniqueID:
+		m.ResetUniqueID()
+		return nil
+	case atlog.FieldIsActive:
 		m.ResetIsActive()
 		return nil
 	}
-	return fmt.Errorf("unknown Service field %s", name)
+	return fmt.Errorf("unknown ATLog field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *ServiceMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.taserver != nil {
-		edges = append(edges, service.EdgeTaserver)
-	}
-	if m.tacode != nil {
-		edges = append(edges, service.EdgeTacode)
+func (m *ATLogMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.ct_log != nil {
+		edges = append(edges, atlog.EdgeCtLog)
 	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *ServiceMutation) AddedIDs(name string) []ent.Value {
+func (m *ATLogMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case service.EdgeTaserver:
-		ids := make([]ent.Value, 0, len(m.taserver))
-		for id := range m.taserver {
+	case atlog.EdgeCtLog:
+		if id := m.ct_log; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ATLogMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ATLogMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ATLogMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedct_log {
+		edges = append(edges, atlog.EdgeCtLog)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ATLogMutation) EdgeCleared(name string) bool {
+	switch name {
+	case atlog.EdgeCtLog:
+		return m.clearedct_log
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ATLogMutation) ClearEdge(name string) error {
+	switch name {
+	case atlog.EdgeCtLog:
+		m.ClearCtLog()
+		return nil
+	}
+	return fmt.Errorf("unknown ATLog unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ATLogMutation) ResetEdge(name string) error {
+	switch name {
+	case atlog.EdgeCtLog:
+		m.ResetCtLog()
+		return nil
+	}
+	return fmt.Errorf("unknown ATLog edge %s", name)
+}
+
+// CTLogMutation represents an operation that mutates the CTLog nodes in the graph.
+type CTLogMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *int
+	public_key          *[]byte
+	monitor_log_id      *int
+	addmonitor_log_id   *int
+	is_active           *bool
+	clearedFields       map[string]struct{}
+	violation           map[int]struct{}
+	removedviolation    map[int]struct{}
+	clearedviolation    bool
+	at_log              *int
+	clearedat_log       bool
+	subscription        map[int]struct{}
+	removedsubscription map[int]struct{}
+	clearedsubscription bool
+	done                bool
+	oldValue            func(context.Context) (*CTLog, error)
+	predicates          []predicate.CTLog
+}
+
+var _ ent.Mutation = (*CTLogMutation)(nil)
+
+// ctlogOption allows management of the mutation configuration using functional options.
+type ctlogOption func(*CTLogMutation)
+
+// newCTLogMutation creates new mutation for the CTLog entity.
+func newCTLogMutation(c config, op Op, opts ...ctlogOption) *CTLogMutation {
+	m := &CTLogMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCTLog,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCTLogID sets the ID field of the mutation.
+func withCTLogID(id int) ctlogOption {
+	return func(m *CTLogMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CTLog
+		)
+		m.oldValue = func(ctx context.Context) (*CTLog, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CTLog.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCTLog sets the old CTLog of the mutation.
+func withCTLog(node *CTLog) ctlogOption {
+	return func(m *CTLogMutation) {
+		m.oldValue = func(context.Context) (*CTLog, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CTLogMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CTLogMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CTLogMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CTLogMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CTLog.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPublicKey sets the "public_key" field.
+func (m *CTLogMutation) SetPublicKey(b []byte) {
+	m.public_key = &b
+}
+
+// PublicKey returns the value of the "public_key" field in the mutation.
+func (m *CTLogMutation) PublicKey() (r []byte, exists bool) {
+	v := m.public_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPublicKey returns the old "public_key" field's value of the CTLog entity.
+// If the CTLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CTLogMutation) OldPublicKey(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPublicKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPublicKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPublicKey: %w", err)
+	}
+	return oldValue.PublicKey, nil
+}
+
+// ResetPublicKey resets all changes to the "public_key" field.
+func (m *CTLogMutation) ResetPublicKey() {
+	m.public_key = nil
+}
+
+// SetMonitorLogID sets the "monitor_log_id" field.
+func (m *CTLogMutation) SetMonitorLogID(i int) {
+	m.monitor_log_id = &i
+	m.addmonitor_log_id = nil
+}
+
+// MonitorLogID returns the value of the "monitor_log_id" field in the mutation.
+func (m *CTLogMutation) MonitorLogID() (r int, exists bool) {
+	v := m.monitor_log_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMonitorLogID returns the old "monitor_log_id" field's value of the CTLog entity.
+// If the CTLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CTLogMutation) OldMonitorLogID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMonitorLogID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMonitorLogID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMonitorLogID: %w", err)
+	}
+	return oldValue.MonitorLogID, nil
+}
+
+// AddMonitorLogID adds i to the "monitor_log_id" field.
+func (m *CTLogMutation) AddMonitorLogID(i int) {
+	if m.addmonitor_log_id != nil {
+		*m.addmonitor_log_id += i
+	} else {
+		m.addmonitor_log_id = &i
+	}
+}
+
+// AddedMonitorLogID returns the value that was added to the "monitor_log_id" field in this mutation.
+func (m *CTLogMutation) AddedMonitorLogID() (r int, exists bool) {
+	v := m.addmonitor_log_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMonitorLogID resets all changes to the "monitor_log_id" field.
+func (m *CTLogMutation) ResetMonitorLogID() {
+	m.monitor_log_id = nil
+	m.addmonitor_log_id = nil
+}
+
+// SetIsActive sets the "is_active" field.
+func (m *CTLogMutation) SetIsActive(b bool) {
+	m.is_active = &b
+}
+
+// IsActive returns the value of the "is_active" field in the mutation.
+func (m *CTLogMutation) IsActive() (r bool, exists bool) {
+	v := m.is_active
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsActive returns the old "is_active" field's value of the CTLog entity.
+// If the CTLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CTLogMutation) OldIsActive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsActive: %w", err)
+	}
+	return oldValue.IsActive, nil
+}
+
+// ResetIsActive resets all changes to the "is_active" field.
+func (m *CTLogMutation) ResetIsActive() {
+	m.is_active = nil
+}
+
+// AddViolationIDs adds the "violation" edge to the TAViolation entity by ids.
+func (m *CTLogMutation) AddViolationIDs(ids ...int) {
+	if m.violation == nil {
+		m.violation = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.violation[ids[i]] = struct{}{}
+	}
+}
+
+// ClearViolation clears the "violation" edge to the TAViolation entity.
+func (m *CTLogMutation) ClearViolation() {
+	m.clearedviolation = true
+}
+
+// ViolationCleared reports if the "violation" edge to the TAViolation entity was cleared.
+func (m *CTLogMutation) ViolationCleared() bool {
+	return m.clearedviolation
+}
+
+// RemoveViolationIDs removes the "violation" edge to the TAViolation entity by IDs.
+func (m *CTLogMutation) RemoveViolationIDs(ids ...int) {
+	if m.removedviolation == nil {
+		m.removedviolation = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.violation, ids[i])
+		m.removedviolation[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedViolation returns the removed IDs of the "violation" edge to the TAViolation entity.
+func (m *CTLogMutation) RemovedViolationIDs() (ids []int) {
+	for id := range m.removedviolation {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ViolationIDs returns the "violation" edge IDs in the mutation.
+func (m *CTLogMutation) ViolationIDs() (ids []int) {
+	for id := range m.violation {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetViolation resets all changes to the "violation" edge.
+func (m *CTLogMutation) ResetViolation() {
+	m.violation = nil
+	m.clearedviolation = false
+	m.removedviolation = nil
+}
+
+// SetAtLogID sets the "at_log" edge to the ATLog entity by id.
+func (m *CTLogMutation) SetAtLogID(id int) {
+	m.at_log = &id
+}
+
+// ClearAtLog clears the "at_log" edge to the ATLog entity.
+func (m *CTLogMutation) ClearAtLog() {
+	m.clearedat_log = true
+}
+
+// AtLogCleared reports if the "at_log" edge to the ATLog entity was cleared.
+func (m *CTLogMutation) AtLogCleared() bool {
+	return m.clearedat_log
+}
+
+// AtLogID returns the "at_log" edge ID in the mutation.
+func (m *CTLogMutation) AtLogID() (id int, exists bool) {
+	if m.at_log != nil {
+		return *m.at_log, true
+	}
+	return
+}
+
+// AtLogIDs returns the "at_log" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AtLogID instead. It exists only for internal usage by the builders.
+func (m *CTLogMutation) AtLogIDs() (ids []int) {
+	if id := m.at_log; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetAtLog resets all changes to the "at_log" edge.
+func (m *CTLogMutation) ResetAtLog() {
+	m.at_log = nil
+	m.clearedat_log = false
+}
+
+// AddSubscriptionIDs adds the "subscription" edge to the Subscription entity by ids.
+func (m *CTLogMutation) AddSubscriptionIDs(ids ...int) {
+	if m.subscription == nil {
+		m.subscription = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.subscription[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSubscription clears the "subscription" edge to the Subscription entity.
+func (m *CTLogMutation) ClearSubscription() {
+	m.clearedsubscription = true
+}
+
+// SubscriptionCleared reports if the "subscription" edge to the Subscription entity was cleared.
+func (m *CTLogMutation) SubscriptionCleared() bool {
+	return m.clearedsubscription
+}
+
+// RemoveSubscriptionIDs removes the "subscription" edge to the Subscription entity by IDs.
+func (m *CTLogMutation) RemoveSubscriptionIDs(ids ...int) {
+	if m.removedsubscription == nil {
+		m.removedsubscription = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.subscription, ids[i])
+		m.removedsubscription[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSubscription returns the removed IDs of the "subscription" edge to the Subscription entity.
+func (m *CTLogMutation) RemovedSubscriptionIDs() (ids []int) {
+	for id := range m.removedsubscription {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SubscriptionIDs returns the "subscription" edge IDs in the mutation.
+func (m *CTLogMutation) SubscriptionIDs() (ids []int) {
+	for id := range m.subscription {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSubscription resets all changes to the "subscription" edge.
+func (m *CTLogMutation) ResetSubscription() {
+	m.subscription = nil
+	m.clearedsubscription = false
+	m.removedsubscription = nil
+}
+
+// Where appends a list predicates to the CTLogMutation builder.
+func (m *CTLogMutation) Where(ps ...predicate.CTLog) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CTLogMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CTLogMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CTLog, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CTLogMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CTLogMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CTLog).
+func (m *CTLogMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CTLogMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.public_key != nil {
+		fields = append(fields, ctlog.FieldPublicKey)
+	}
+	if m.monitor_log_id != nil {
+		fields = append(fields, ctlog.FieldMonitorLogID)
+	}
+	if m.is_active != nil {
+		fields = append(fields, ctlog.FieldIsActive)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CTLogMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case ctlog.FieldPublicKey:
+		return m.PublicKey()
+	case ctlog.FieldMonitorLogID:
+		return m.MonitorLogID()
+	case ctlog.FieldIsActive:
+		return m.IsActive()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CTLogMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case ctlog.FieldPublicKey:
+		return m.OldPublicKey(ctx)
+	case ctlog.FieldMonitorLogID:
+		return m.OldMonitorLogID(ctx)
+	case ctlog.FieldIsActive:
+		return m.OldIsActive(ctx)
+	}
+	return nil, fmt.Errorf("unknown CTLog field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CTLogMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case ctlog.FieldPublicKey:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPublicKey(v)
+		return nil
+	case ctlog.FieldMonitorLogID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMonitorLogID(v)
+		return nil
+	case ctlog.FieldIsActive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsActive(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CTLog field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CTLogMutation) AddedFields() []string {
+	var fields []string
+	if m.addmonitor_log_id != nil {
+		fields = append(fields, ctlog.FieldMonitorLogID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CTLogMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case ctlog.FieldMonitorLogID:
+		return m.AddedMonitorLogID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CTLogMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case ctlog.FieldMonitorLogID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMonitorLogID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CTLog numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CTLogMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CTLogMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CTLogMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown CTLog nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CTLogMutation) ResetField(name string) error {
+	switch name {
+	case ctlog.FieldPublicKey:
+		m.ResetPublicKey()
+		return nil
+	case ctlog.FieldMonitorLogID:
+		m.ResetMonitorLogID()
+		return nil
+	case ctlog.FieldIsActive:
+		m.ResetIsActive()
+		return nil
+	}
+	return fmt.Errorf("unknown CTLog field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CTLogMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.violation != nil {
+		edges = append(edges, ctlog.EdgeViolation)
+	}
+	if m.at_log != nil {
+		edges = append(edges, ctlog.EdgeAtLog)
+	}
+	if m.subscription != nil {
+		edges = append(edges, ctlog.EdgeSubscription)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CTLogMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case ctlog.EdgeViolation:
+		ids := make([]ent.Value, 0, len(m.violation))
+		for id := range m.violation {
 			ids = append(ids, id)
 		}
 		return ids
-	case service.EdgeTacode:
-		ids := make([]ent.Value, 0, len(m.tacode))
-		for id := range m.tacode {
+	case ctlog.EdgeAtLog:
+		if id := m.at_log; id != nil {
+			return []ent.Value{*id}
+		}
+	case ctlog.EdgeSubscription:
+		ids := make([]ent.Value, 0, len(m.subscription))
+		for id := range m.subscription {
 			ids = append(ids, id)
 		}
 		return ids
@@ -568,30 +1259,30 @@ func (m *ServiceMutation) AddedIDs(name string) []ent.Value {
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *ServiceMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedtaserver != nil {
-		edges = append(edges, service.EdgeTaserver)
+func (m *CTLogMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.removedviolation != nil {
+		edges = append(edges, ctlog.EdgeViolation)
 	}
-	if m.removedtacode != nil {
-		edges = append(edges, service.EdgeTacode)
+	if m.removedsubscription != nil {
+		edges = append(edges, ctlog.EdgeSubscription)
 	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *ServiceMutation) RemovedIDs(name string) []ent.Value {
+func (m *CTLogMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case service.EdgeTaserver:
-		ids := make([]ent.Value, 0, len(m.removedtaserver))
-		for id := range m.removedtaserver {
+	case ctlog.EdgeViolation:
+		ids := make([]ent.Value, 0, len(m.removedviolation))
+		for id := range m.removedviolation {
 			ids = append(ids, id)
 		}
 		return ids
-	case service.EdgeTacode:
-		ids := make([]ent.Value, 0, len(m.removedtacode))
-		for id := range m.removedtacode {
+	case ctlog.EdgeSubscription:
+		ids := make([]ent.Value, 0, len(m.removedsubscription))
+		for id := range m.removedsubscription {
 			ids = append(ids, id)
 		}
 		return ids
@@ -600,49 +1291,60 @@ func (m *ServiceMutation) RemovedIDs(name string) []ent.Value {
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *ServiceMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedtaserver {
-		edges = append(edges, service.EdgeTaserver)
+func (m *CTLogMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedviolation {
+		edges = append(edges, ctlog.EdgeViolation)
 	}
-	if m.clearedtacode {
-		edges = append(edges, service.EdgeTacode)
+	if m.clearedat_log {
+		edges = append(edges, ctlog.EdgeAtLog)
+	}
+	if m.clearedsubscription {
+		edges = append(edges, ctlog.EdgeSubscription)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *ServiceMutation) EdgeCleared(name string) bool {
+func (m *CTLogMutation) EdgeCleared(name string) bool {
 	switch name {
-	case service.EdgeTaserver:
-		return m.clearedtaserver
-	case service.EdgeTacode:
-		return m.clearedtacode
+	case ctlog.EdgeViolation:
+		return m.clearedviolation
+	case ctlog.EdgeAtLog:
+		return m.clearedat_log
+	case ctlog.EdgeSubscription:
+		return m.clearedsubscription
 	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *ServiceMutation) ClearEdge(name string) error {
+func (m *CTLogMutation) ClearEdge(name string) error {
 	switch name {
+	case ctlog.EdgeAtLog:
+		m.ClearAtLog()
+		return nil
 	}
-	return fmt.Errorf("unknown Service unique edge %s", name)
+	return fmt.Errorf("unknown CTLog unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *ServiceMutation) ResetEdge(name string) error {
+func (m *CTLogMutation) ResetEdge(name string) error {
 	switch name {
-	case service.EdgeTaserver:
-		m.ResetTaserver()
+	case ctlog.EdgeViolation:
+		m.ResetViolation()
 		return nil
-	case service.EdgeTacode:
-		m.ResetTacode()
+	case ctlog.EdgeAtLog:
+		m.ResetAtLog()
+		return nil
+	case ctlog.EdgeSubscription:
+		m.ResetSubscription()
 		return nil
 	}
-	return fmt.Errorf("unknown Service edge %s", name)
+	return fmt.Errorf("unknown CTLog edge %s", name)
 }
 
 // SubscriptionMutation represents an operation that mutates the Subscription nodes in the graph.
@@ -655,8 +1357,8 @@ type SubscriptionMutation struct {
 	p256dh        *string
 	auth          *string
 	clearedFields map[string]struct{}
-	server        *int
-	clearedserver bool
+	ct_log        *int
+	clearedct_log bool
 	done          bool
 	oldValue      func(context.Context) (*Subscription, error)
 	predicates    []predicate.Subscription
@@ -868,43 +1570,43 @@ func (m *SubscriptionMutation) ResetAuth() {
 	m.auth = nil
 }
 
-// SetServerID sets the "server" edge to the TAServer entity by id.
-func (m *SubscriptionMutation) SetServerID(id int) {
-	m.server = &id
+// SetCtLogID sets the "ct_log" edge to the CTLog entity by id.
+func (m *SubscriptionMutation) SetCtLogID(id int) {
+	m.ct_log = &id
 }
 
-// ClearServer clears the "server" edge to the TAServer entity.
-func (m *SubscriptionMutation) ClearServer() {
-	m.clearedserver = true
+// ClearCtLog clears the "ct_log" edge to the CTLog entity.
+func (m *SubscriptionMutation) ClearCtLog() {
+	m.clearedct_log = true
 }
 
-// ServerCleared reports if the "server" edge to the TAServer entity was cleared.
-func (m *SubscriptionMutation) ServerCleared() bool {
-	return m.clearedserver
+// CtLogCleared reports if the "ct_log" edge to the CTLog entity was cleared.
+func (m *SubscriptionMutation) CtLogCleared() bool {
+	return m.clearedct_log
 }
 
-// ServerID returns the "server" edge ID in the mutation.
-func (m *SubscriptionMutation) ServerID() (id int, exists bool) {
-	if m.server != nil {
-		return *m.server, true
+// CtLogID returns the "ct_log" edge ID in the mutation.
+func (m *SubscriptionMutation) CtLogID() (id int, exists bool) {
+	if m.ct_log != nil {
+		return *m.ct_log, true
 	}
 	return
 }
 
-// ServerIDs returns the "server" edge IDs in the mutation.
+// CtLogIDs returns the "ct_log" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ServerID instead. It exists only for internal usage by the builders.
-func (m *SubscriptionMutation) ServerIDs() (ids []int) {
-	if id := m.server; id != nil {
+// CtLogID instead. It exists only for internal usage by the builders.
+func (m *SubscriptionMutation) CtLogIDs() (ids []int) {
+	if id := m.ct_log; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetServer resets all changes to the "server" edge.
-func (m *SubscriptionMutation) ResetServer() {
-	m.server = nil
-	m.clearedserver = false
+// ResetCtLog resets all changes to the "ct_log" edge.
+func (m *SubscriptionMutation) ResetCtLog() {
+	m.ct_log = nil
+	m.clearedct_log = false
 }
 
 // Where appends a list predicates to the SubscriptionMutation builder.
@@ -1075,8 +1777,8 @@ func (m *SubscriptionMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SubscriptionMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.server != nil {
-		edges = append(edges, subscription.EdgeServer)
+	if m.ct_log != nil {
+		edges = append(edges, subscription.EdgeCtLog)
 	}
 	return edges
 }
@@ -1085,8 +1787,8 @@ func (m *SubscriptionMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *SubscriptionMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case subscription.EdgeServer:
-		if id := m.server; id != nil {
+	case subscription.EdgeCtLog:
+		if id := m.ct_log; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -1108,8 +1810,8 @@ func (m *SubscriptionMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SubscriptionMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedserver {
-		edges = append(edges, subscription.EdgeServer)
+	if m.clearedct_log {
+		edges = append(edges, subscription.EdgeCtLog)
 	}
 	return edges
 }
@@ -1118,8 +1820,8 @@ func (m *SubscriptionMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *SubscriptionMutation) EdgeCleared(name string) bool {
 	switch name {
-	case subscription.EdgeServer:
-		return m.clearedserver
+	case subscription.EdgeCtLog:
+		return m.clearedct_log
 	}
 	return false
 }
@@ -1128,8 +1830,8 @@ func (m *SubscriptionMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *SubscriptionMutation) ClearEdge(name string) error {
 	switch name {
-	case subscription.EdgeServer:
-		m.ClearServer()
+	case subscription.EdgeCtLog:
+		m.ClearCtLog()
 		return nil
 	}
 	return fmt.Errorf("unknown Subscription unique edge %s", name)
@@ -1139,1486 +1841,26 @@ func (m *SubscriptionMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *SubscriptionMutation) ResetEdge(name string) error {
 	switch name {
-	case subscription.EdgeServer:
-		m.ResetServer()
+	case subscription.EdgeCtLog:
+		m.ResetCtLog()
 		return nil
 	}
 	return fmt.Errorf("unknown Subscription edge %s", name)
 }
 
-// TACodeMutation represents an operation that mutates the TACode nodes in the graph.
-type TACodeMutation struct {
-	config
-	op             Op
-	typ            string
-	id             *int
-	repository     *string
-	commit_id      *string
-	unique_id      *[]byte
-	is_active      *bool
-	clearedFields  map[string]struct{}
-	server         map[int]struct{}
-	removedserver  map[int]struct{}
-	clearedserver  bool
-	service        *int
-	clearedservice bool
-	done           bool
-	oldValue       func(context.Context) (*TACode, error)
-	predicates     []predicate.TACode
-}
-
-var _ ent.Mutation = (*TACodeMutation)(nil)
-
-// tacodeOption allows management of the mutation configuration using functional options.
-type tacodeOption func(*TACodeMutation)
-
-// newTACodeMutation creates new mutation for the TACode entity.
-func newTACodeMutation(c config, op Op, opts ...tacodeOption) *TACodeMutation {
-	m := &TACodeMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeTACode,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withTACodeID sets the ID field of the mutation.
-func withTACodeID(id int) tacodeOption {
-	return func(m *TACodeMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *TACode
-		)
-		m.oldValue = func(ctx context.Context) (*TACode, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().TACode.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withTACode sets the old TACode of the mutation.
-func withTACode(node *TACode) tacodeOption {
-	return func(m *TACodeMutation) {
-		m.oldValue = func(context.Context) (*TACode, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m TACodeMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m TACodeMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *TACodeMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *TACodeMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().TACode.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetRepository sets the "repository" field.
-func (m *TACodeMutation) SetRepository(s string) {
-	m.repository = &s
-}
-
-// Repository returns the value of the "repository" field in the mutation.
-func (m *TACodeMutation) Repository() (r string, exists bool) {
-	v := m.repository
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldRepository returns the old "repository" field's value of the TACode entity.
-// If the TACode object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TACodeMutation) OldRepository(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRepository is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRepository requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRepository: %w", err)
-	}
-	return oldValue.Repository, nil
-}
-
-// ResetRepository resets all changes to the "repository" field.
-func (m *TACodeMutation) ResetRepository() {
-	m.repository = nil
-}
-
-// SetCommitID sets the "commit_id" field.
-func (m *TACodeMutation) SetCommitID(s string) {
-	m.commit_id = &s
-}
-
-// CommitID returns the value of the "commit_id" field in the mutation.
-func (m *TACodeMutation) CommitID() (r string, exists bool) {
-	v := m.commit_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCommitID returns the old "commit_id" field's value of the TACode entity.
-// If the TACode object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TACodeMutation) OldCommitID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCommitID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCommitID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCommitID: %w", err)
-	}
-	return oldValue.CommitID, nil
-}
-
-// ResetCommitID resets all changes to the "commit_id" field.
-func (m *TACodeMutation) ResetCommitID() {
-	m.commit_id = nil
-}
-
-// SetUniqueID sets the "unique_id" field.
-func (m *TACodeMutation) SetUniqueID(b []byte) {
-	m.unique_id = &b
-}
-
-// UniqueID returns the value of the "unique_id" field in the mutation.
-func (m *TACodeMutation) UniqueID() (r []byte, exists bool) {
-	v := m.unique_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUniqueID returns the old "unique_id" field's value of the TACode entity.
-// If the TACode object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TACodeMutation) OldUniqueID(ctx context.Context) (v []byte, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUniqueID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUniqueID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUniqueID: %w", err)
-	}
-	return oldValue.UniqueID, nil
-}
-
-// ResetUniqueID resets all changes to the "unique_id" field.
-func (m *TACodeMutation) ResetUniqueID() {
-	m.unique_id = nil
-}
-
-// SetIsActive sets the "is_active" field.
-func (m *TACodeMutation) SetIsActive(b bool) {
-	m.is_active = &b
-}
-
-// IsActive returns the value of the "is_active" field in the mutation.
-func (m *TACodeMutation) IsActive() (r bool, exists bool) {
-	v := m.is_active
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIsActive returns the old "is_active" field's value of the TACode entity.
-// If the TACode object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TACodeMutation) OldIsActive(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIsActive is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIsActive requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIsActive: %w", err)
-	}
-	return oldValue.IsActive, nil
-}
-
-// ResetIsActive resets all changes to the "is_active" field.
-func (m *TACodeMutation) ResetIsActive() {
-	m.is_active = nil
-}
-
-// AddServerIDs adds the "server" edge to the TAServer entity by ids.
-func (m *TACodeMutation) AddServerIDs(ids ...int) {
-	if m.server == nil {
-		m.server = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.server[ids[i]] = struct{}{}
-	}
-}
-
-// ClearServer clears the "server" edge to the TAServer entity.
-func (m *TACodeMutation) ClearServer() {
-	m.clearedserver = true
-}
-
-// ServerCleared reports if the "server" edge to the TAServer entity was cleared.
-func (m *TACodeMutation) ServerCleared() bool {
-	return m.clearedserver
-}
-
-// RemoveServerIDs removes the "server" edge to the TAServer entity by IDs.
-func (m *TACodeMutation) RemoveServerIDs(ids ...int) {
-	if m.removedserver == nil {
-		m.removedserver = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.server, ids[i])
-		m.removedserver[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedServer returns the removed IDs of the "server" edge to the TAServer entity.
-func (m *TACodeMutation) RemovedServerIDs() (ids []int) {
-	for id := range m.removedserver {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ServerIDs returns the "server" edge IDs in the mutation.
-func (m *TACodeMutation) ServerIDs() (ids []int) {
-	for id := range m.server {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetServer resets all changes to the "server" edge.
-func (m *TACodeMutation) ResetServer() {
-	m.server = nil
-	m.clearedserver = false
-	m.removedserver = nil
-}
-
-// SetServiceID sets the "service" edge to the Service entity by id.
-func (m *TACodeMutation) SetServiceID(id int) {
-	m.service = &id
-}
-
-// ClearService clears the "service" edge to the Service entity.
-func (m *TACodeMutation) ClearService() {
-	m.clearedservice = true
-}
-
-// ServiceCleared reports if the "service" edge to the Service entity was cleared.
-func (m *TACodeMutation) ServiceCleared() bool {
-	return m.clearedservice
-}
-
-// ServiceID returns the "service" edge ID in the mutation.
-func (m *TACodeMutation) ServiceID() (id int, exists bool) {
-	if m.service != nil {
-		return *m.service, true
-	}
-	return
-}
-
-// ServiceIDs returns the "service" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ServiceID instead. It exists only for internal usage by the builders.
-func (m *TACodeMutation) ServiceIDs() (ids []int) {
-	if id := m.service; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetService resets all changes to the "service" edge.
-func (m *TACodeMutation) ResetService() {
-	m.service = nil
-	m.clearedservice = false
-}
-
-// Where appends a list predicates to the TACodeMutation builder.
-func (m *TACodeMutation) Where(ps ...predicate.TACode) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the TACodeMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *TACodeMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.TACode, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *TACodeMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *TACodeMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (TACode).
-func (m *TACodeMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *TACodeMutation) Fields() []string {
-	fields := make([]string, 0, 4)
-	if m.repository != nil {
-		fields = append(fields, tacode.FieldRepository)
-	}
-	if m.commit_id != nil {
-		fields = append(fields, tacode.FieldCommitID)
-	}
-	if m.unique_id != nil {
-		fields = append(fields, tacode.FieldUniqueID)
-	}
-	if m.is_active != nil {
-		fields = append(fields, tacode.FieldIsActive)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *TACodeMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case tacode.FieldRepository:
-		return m.Repository()
-	case tacode.FieldCommitID:
-		return m.CommitID()
-	case tacode.FieldUniqueID:
-		return m.UniqueID()
-	case tacode.FieldIsActive:
-		return m.IsActive()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *TACodeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case tacode.FieldRepository:
-		return m.OldRepository(ctx)
-	case tacode.FieldCommitID:
-		return m.OldCommitID(ctx)
-	case tacode.FieldUniqueID:
-		return m.OldUniqueID(ctx)
-	case tacode.FieldIsActive:
-		return m.OldIsActive(ctx)
-	}
-	return nil, fmt.Errorf("unknown TACode field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *TACodeMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case tacode.FieldRepository:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetRepository(v)
-		return nil
-	case tacode.FieldCommitID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCommitID(v)
-		return nil
-	case tacode.FieldUniqueID:
-		v, ok := value.([]byte)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUniqueID(v)
-		return nil
-	case tacode.FieldIsActive:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIsActive(v)
-		return nil
-	}
-	return fmt.Errorf("unknown TACode field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *TACodeMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *TACodeMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *TACodeMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown TACode numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *TACodeMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *TACodeMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *TACodeMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown TACode nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *TACodeMutation) ResetField(name string) error {
-	switch name {
-	case tacode.FieldRepository:
-		m.ResetRepository()
-		return nil
-	case tacode.FieldCommitID:
-		m.ResetCommitID()
-		return nil
-	case tacode.FieldUniqueID:
-		m.ResetUniqueID()
-		return nil
-	case tacode.FieldIsActive:
-		m.ResetIsActive()
-		return nil
-	}
-	return fmt.Errorf("unknown TACode field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *TACodeMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.server != nil {
-		edges = append(edges, tacode.EdgeServer)
-	}
-	if m.service != nil {
-		edges = append(edges, tacode.EdgeService)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *TACodeMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case tacode.EdgeServer:
-		ids := make([]ent.Value, 0, len(m.server))
-		for id := range m.server {
-			ids = append(ids, id)
-		}
-		return ids
-	case tacode.EdgeService:
-		if id := m.service; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *TACodeMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedserver != nil {
-		edges = append(edges, tacode.EdgeServer)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *TACodeMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case tacode.EdgeServer:
-		ids := make([]ent.Value, 0, len(m.removedserver))
-		for id := range m.removedserver {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *TACodeMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedserver {
-		edges = append(edges, tacode.EdgeServer)
-	}
-	if m.clearedservice {
-		edges = append(edges, tacode.EdgeService)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *TACodeMutation) EdgeCleared(name string) bool {
-	switch name {
-	case tacode.EdgeServer:
-		return m.clearedserver
-	case tacode.EdgeService:
-		return m.clearedservice
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *TACodeMutation) ClearEdge(name string) error {
-	switch name {
-	case tacode.EdgeService:
-		m.ClearService()
-		return nil
-	}
-	return fmt.Errorf("unknown TACode unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *TACodeMutation) ResetEdge(name string) error {
-	switch name {
-	case tacode.EdgeServer:
-		m.ResetServer()
-		return nil
-	case tacode.EdgeService:
-		m.ResetService()
-		return nil
-	}
-	return fmt.Errorf("unknown TACode edge %s", name)
-}
-
-// TAServerMutation represents an operation that mutates the TAServer nodes in the graph.
-type TAServerMutation struct {
-	config
-	op                  Op
-	typ                 string
-	id                  *int
-	public_key          *[]byte
-	quote               *string
-	monitor_log_id      *int
-	addmonitor_log_id   *int
-	is_active           *bool
-	clearedFields       map[string]struct{}
-	violation           map[int]struct{}
-	removedviolation    map[int]struct{}
-	clearedviolation    bool
-	code                *int
-	clearedcode         bool
-	service             *int
-	clearedservice      bool
-	subscription        map[int]struct{}
-	removedsubscription map[int]struct{}
-	clearedsubscription bool
-	done                bool
-	oldValue            func(context.Context) (*TAServer, error)
-	predicates          []predicate.TAServer
-}
-
-var _ ent.Mutation = (*TAServerMutation)(nil)
-
-// taserverOption allows management of the mutation configuration using functional options.
-type taserverOption func(*TAServerMutation)
-
-// newTAServerMutation creates new mutation for the TAServer entity.
-func newTAServerMutation(c config, op Op, opts ...taserverOption) *TAServerMutation {
-	m := &TAServerMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeTAServer,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withTAServerID sets the ID field of the mutation.
-func withTAServerID(id int) taserverOption {
-	return func(m *TAServerMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *TAServer
-		)
-		m.oldValue = func(ctx context.Context) (*TAServer, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().TAServer.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withTAServer sets the old TAServer of the mutation.
-func withTAServer(node *TAServer) taserverOption {
-	return func(m *TAServerMutation) {
-		m.oldValue = func(context.Context) (*TAServer, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m TAServerMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m TAServerMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *TAServerMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *TAServerMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().TAServer.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetPublicKey sets the "public_key" field.
-func (m *TAServerMutation) SetPublicKey(b []byte) {
-	m.public_key = &b
-}
-
-// PublicKey returns the value of the "public_key" field in the mutation.
-func (m *TAServerMutation) PublicKey() (r []byte, exists bool) {
-	v := m.public_key
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPublicKey returns the old "public_key" field's value of the TAServer entity.
-// If the TAServer object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAServerMutation) OldPublicKey(ctx context.Context) (v []byte, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPublicKey is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPublicKey requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPublicKey: %w", err)
-	}
-	return oldValue.PublicKey, nil
-}
-
-// ResetPublicKey resets all changes to the "public_key" field.
-func (m *TAServerMutation) ResetPublicKey() {
-	m.public_key = nil
-}
-
-// SetQuote sets the "quote" field.
-func (m *TAServerMutation) SetQuote(s string) {
-	m.quote = &s
-}
-
-// Quote returns the value of the "quote" field in the mutation.
-func (m *TAServerMutation) Quote() (r string, exists bool) {
-	v := m.quote
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldQuote returns the old "quote" field's value of the TAServer entity.
-// If the TAServer object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAServerMutation) OldQuote(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldQuote is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldQuote requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldQuote: %w", err)
-	}
-	return oldValue.Quote, nil
-}
-
-// ResetQuote resets all changes to the "quote" field.
-func (m *TAServerMutation) ResetQuote() {
-	m.quote = nil
-}
-
-// SetMonitorLogID sets the "monitor_log_id" field.
-func (m *TAServerMutation) SetMonitorLogID(i int) {
-	m.monitor_log_id = &i
-	m.addmonitor_log_id = nil
-}
-
-// MonitorLogID returns the value of the "monitor_log_id" field in the mutation.
-func (m *TAServerMutation) MonitorLogID() (r int, exists bool) {
-	v := m.monitor_log_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldMonitorLogID returns the old "monitor_log_id" field's value of the TAServer entity.
-// If the TAServer object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAServerMutation) OldMonitorLogID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMonitorLogID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMonitorLogID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMonitorLogID: %w", err)
-	}
-	return oldValue.MonitorLogID, nil
-}
-
-// AddMonitorLogID adds i to the "monitor_log_id" field.
-func (m *TAServerMutation) AddMonitorLogID(i int) {
-	if m.addmonitor_log_id != nil {
-		*m.addmonitor_log_id += i
-	} else {
-		m.addmonitor_log_id = &i
-	}
-}
-
-// AddedMonitorLogID returns the value that was added to the "monitor_log_id" field in this mutation.
-func (m *TAServerMutation) AddedMonitorLogID() (r int, exists bool) {
-	v := m.addmonitor_log_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetMonitorLogID resets all changes to the "monitor_log_id" field.
-func (m *TAServerMutation) ResetMonitorLogID() {
-	m.monitor_log_id = nil
-	m.addmonitor_log_id = nil
-}
-
-// SetIsActive sets the "is_active" field.
-func (m *TAServerMutation) SetIsActive(b bool) {
-	m.is_active = &b
-}
-
-// IsActive returns the value of the "is_active" field in the mutation.
-func (m *TAServerMutation) IsActive() (r bool, exists bool) {
-	v := m.is_active
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIsActive returns the old "is_active" field's value of the TAServer entity.
-// If the TAServer object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAServerMutation) OldIsActive(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIsActive is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIsActive requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIsActive: %w", err)
-	}
-	return oldValue.IsActive, nil
-}
-
-// ResetIsActive resets all changes to the "is_active" field.
-func (m *TAServerMutation) ResetIsActive() {
-	m.is_active = nil
-}
-
-// AddViolationIDs adds the "violation" edge to the TAViolation entity by ids.
-func (m *TAServerMutation) AddViolationIDs(ids ...int) {
-	if m.violation == nil {
-		m.violation = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.violation[ids[i]] = struct{}{}
-	}
-}
-
-// ClearViolation clears the "violation" edge to the TAViolation entity.
-func (m *TAServerMutation) ClearViolation() {
-	m.clearedviolation = true
-}
-
-// ViolationCleared reports if the "violation" edge to the TAViolation entity was cleared.
-func (m *TAServerMutation) ViolationCleared() bool {
-	return m.clearedviolation
-}
-
-// RemoveViolationIDs removes the "violation" edge to the TAViolation entity by IDs.
-func (m *TAServerMutation) RemoveViolationIDs(ids ...int) {
-	if m.removedviolation == nil {
-		m.removedviolation = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.violation, ids[i])
-		m.removedviolation[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedViolation returns the removed IDs of the "violation" edge to the TAViolation entity.
-func (m *TAServerMutation) RemovedViolationIDs() (ids []int) {
-	for id := range m.removedviolation {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ViolationIDs returns the "violation" edge IDs in the mutation.
-func (m *TAServerMutation) ViolationIDs() (ids []int) {
-	for id := range m.violation {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetViolation resets all changes to the "violation" edge.
-func (m *TAServerMutation) ResetViolation() {
-	m.violation = nil
-	m.clearedviolation = false
-	m.removedviolation = nil
-}
-
-// SetCodeID sets the "code" edge to the TACode entity by id.
-func (m *TAServerMutation) SetCodeID(id int) {
-	m.code = &id
-}
-
-// ClearCode clears the "code" edge to the TACode entity.
-func (m *TAServerMutation) ClearCode() {
-	m.clearedcode = true
-}
-
-// CodeCleared reports if the "code" edge to the TACode entity was cleared.
-func (m *TAServerMutation) CodeCleared() bool {
-	return m.clearedcode
-}
-
-// CodeID returns the "code" edge ID in the mutation.
-func (m *TAServerMutation) CodeID() (id int, exists bool) {
-	if m.code != nil {
-		return *m.code, true
-	}
-	return
-}
-
-// CodeIDs returns the "code" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// CodeID instead. It exists only for internal usage by the builders.
-func (m *TAServerMutation) CodeIDs() (ids []int) {
-	if id := m.code; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetCode resets all changes to the "code" edge.
-func (m *TAServerMutation) ResetCode() {
-	m.code = nil
-	m.clearedcode = false
-}
-
-// SetServiceID sets the "service" edge to the Service entity by id.
-func (m *TAServerMutation) SetServiceID(id int) {
-	m.service = &id
-}
-
-// ClearService clears the "service" edge to the Service entity.
-func (m *TAServerMutation) ClearService() {
-	m.clearedservice = true
-}
-
-// ServiceCleared reports if the "service" edge to the Service entity was cleared.
-func (m *TAServerMutation) ServiceCleared() bool {
-	return m.clearedservice
-}
-
-// ServiceID returns the "service" edge ID in the mutation.
-func (m *TAServerMutation) ServiceID() (id int, exists bool) {
-	if m.service != nil {
-		return *m.service, true
-	}
-	return
-}
-
-// ServiceIDs returns the "service" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ServiceID instead. It exists only for internal usage by the builders.
-func (m *TAServerMutation) ServiceIDs() (ids []int) {
-	if id := m.service; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetService resets all changes to the "service" edge.
-func (m *TAServerMutation) ResetService() {
-	m.service = nil
-	m.clearedservice = false
-}
-
-// AddSubscriptionIDs adds the "subscription" edge to the Subscription entity by ids.
-func (m *TAServerMutation) AddSubscriptionIDs(ids ...int) {
-	if m.subscription == nil {
-		m.subscription = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.subscription[ids[i]] = struct{}{}
-	}
-}
-
-// ClearSubscription clears the "subscription" edge to the Subscription entity.
-func (m *TAServerMutation) ClearSubscription() {
-	m.clearedsubscription = true
-}
-
-// SubscriptionCleared reports if the "subscription" edge to the Subscription entity was cleared.
-func (m *TAServerMutation) SubscriptionCleared() bool {
-	return m.clearedsubscription
-}
-
-// RemoveSubscriptionIDs removes the "subscription" edge to the Subscription entity by IDs.
-func (m *TAServerMutation) RemoveSubscriptionIDs(ids ...int) {
-	if m.removedsubscription == nil {
-		m.removedsubscription = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.subscription, ids[i])
-		m.removedsubscription[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedSubscription returns the removed IDs of the "subscription" edge to the Subscription entity.
-func (m *TAServerMutation) RemovedSubscriptionIDs() (ids []int) {
-	for id := range m.removedsubscription {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// SubscriptionIDs returns the "subscription" edge IDs in the mutation.
-func (m *TAServerMutation) SubscriptionIDs() (ids []int) {
-	for id := range m.subscription {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetSubscription resets all changes to the "subscription" edge.
-func (m *TAServerMutation) ResetSubscription() {
-	m.subscription = nil
-	m.clearedsubscription = false
-	m.removedsubscription = nil
-}
-
-// Where appends a list predicates to the TAServerMutation builder.
-func (m *TAServerMutation) Where(ps ...predicate.TAServer) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the TAServerMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *TAServerMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.TAServer, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *TAServerMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *TAServerMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (TAServer).
-func (m *TAServerMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *TAServerMutation) Fields() []string {
-	fields := make([]string, 0, 4)
-	if m.public_key != nil {
-		fields = append(fields, taserver.FieldPublicKey)
-	}
-	if m.quote != nil {
-		fields = append(fields, taserver.FieldQuote)
-	}
-	if m.monitor_log_id != nil {
-		fields = append(fields, taserver.FieldMonitorLogID)
-	}
-	if m.is_active != nil {
-		fields = append(fields, taserver.FieldIsActive)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *TAServerMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case taserver.FieldPublicKey:
-		return m.PublicKey()
-	case taserver.FieldQuote:
-		return m.Quote()
-	case taserver.FieldMonitorLogID:
-		return m.MonitorLogID()
-	case taserver.FieldIsActive:
-		return m.IsActive()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *TAServerMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case taserver.FieldPublicKey:
-		return m.OldPublicKey(ctx)
-	case taserver.FieldQuote:
-		return m.OldQuote(ctx)
-	case taserver.FieldMonitorLogID:
-		return m.OldMonitorLogID(ctx)
-	case taserver.FieldIsActive:
-		return m.OldIsActive(ctx)
-	}
-	return nil, fmt.Errorf("unknown TAServer field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *TAServerMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case taserver.FieldPublicKey:
-		v, ok := value.([]byte)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPublicKey(v)
-		return nil
-	case taserver.FieldQuote:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetQuote(v)
-		return nil
-	case taserver.FieldMonitorLogID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetMonitorLogID(v)
-		return nil
-	case taserver.FieldIsActive:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIsActive(v)
-		return nil
-	}
-	return fmt.Errorf("unknown TAServer field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *TAServerMutation) AddedFields() []string {
-	var fields []string
-	if m.addmonitor_log_id != nil {
-		fields = append(fields, taserver.FieldMonitorLogID)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *TAServerMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case taserver.FieldMonitorLogID:
-		return m.AddedMonitorLogID()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *TAServerMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case taserver.FieldMonitorLogID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddMonitorLogID(v)
-		return nil
-	}
-	return fmt.Errorf("unknown TAServer numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *TAServerMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *TAServerMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *TAServerMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown TAServer nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *TAServerMutation) ResetField(name string) error {
-	switch name {
-	case taserver.FieldPublicKey:
-		m.ResetPublicKey()
-		return nil
-	case taserver.FieldQuote:
-		m.ResetQuote()
-		return nil
-	case taserver.FieldMonitorLogID:
-		m.ResetMonitorLogID()
-		return nil
-	case taserver.FieldIsActive:
-		m.ResetIsActive()
-		return nil
-	}
-	return fmt.Errorf("unknown TAServer field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *TAServerMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
-	if m.violation != nil {
-		edges = append(edges, taserver.EdgeViolation)
-	}
-	if m.code != nil {
-		edges = append(edges, taserver.EdgeCode)
-	}
-	if m.service != nil {
-		edges = append(edges, taserver.EdgeService)
-	}
-	if m.subscription != nil {
-		edges = append(edges, taserver.EdgeSubscription)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *TAServerMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case taserver.EdgeViolation:
-		ids := make([]ent.Value, 0, len(m.violation))
-		for id := range m.violation {
-			ids = append(ids, id)
-		}
-		return ids
-	case taserver.EdgeCode:
-		if id := m.code; id != nil {
-			return []ent.Value{*id}
-		}
-	case taserver.EdgeService:
-		if id := m.service; id != nil {
-			return []ent.Value{*id}
-		}
-	case taserver.EdgeSubscription:
-		ids := make([]ent.Value, 0, len(m.subscription))
-		for id := range m.subscription {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *TAServerMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
-	if m.removedviolation != nil {
-		edges = append(edges, taserver.EdgeViolation)
-	}
-	if m.removedsubscription != nil {
-		edges = append(edges, taserver.EdgeSubscription)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *TAServerMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case taserver.EdgeViolation:
-		ids := make([]ent.Value, 0, len(m.removedviolation))
-		for id := range m.removedviolation {
-			ids = append(ids, id)
-		}
-		return ids
-	case taserver.EdgeSubscription:
-		ids := make([]ent.Value, 0, len(m.removedsubscription))
-		for id := range m.removedsubscription {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *TAServerMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
-	if m.clearedviolation {
-		edges = append(edges, taserver.EdgeViolation)
-	}
-	if m.clearedcode {
-		edges = append(edges, taserver.EdgeCode)
-	}
-	if m.clearedservice {
-		edges = append(edges, taserver.EdgeService)
-	}
-	if m.clearedsubscription {
-		edges = append(edges, taserver.EdgeSubscription)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *TAServerMutation) EdgeCleared(name string) bool {
-	switch name {
-	case taserver.EdgeViolation:
-		return m.clearedviolation
-	case taserver.EdgeCode:
-		return m.clearedcode
-	case taserver.EdgeService:
-		return m.clearedservice
-	case taserver.EdgeSubscription:
-		return m.clearedsubscription
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *TAServerMutation) ClearEdge(name string) error {
-	switch name {
-	case taserver.EdgeCode:
-		m.ClearCode()
-		return nil
-	case taserver.EdgeService:
-		m.ClearService()
-		return nil
-	}
-	return fmt.Errorf("unknown TAServer unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *TAServerMutation) ResetEdge(name string) error {
-	switch name {
-	case taserver.EdgeViolation:
-		m.ResetViolation()
-		return nil
-	case taserver.EdgeCode:
-		m.ResetCode()
-		return nil
-	case taserver.EdgeService:
-		m.ResetService()
-		return nil
-	case taserver.EdgeSubscription:
-		m.ResetSubscription()
-		return nil
-	}
-	return fmt.Errorf("unknown TAServer edge %s", name)
-}
-
 // TAViolationMutation represents an operation that mutates the TAViolation nodes in the graph.
 type TAViolationMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *int
-	created_at     *time.Time
-	clearedFields  map[string]struct{}
-	server         *int
-	clearedserver  bool
-	service        *int
-	clearedservice bool
-	done           bool
-	oldValue       func(context.Context) (*TAViolation, error)
-	predicates     []predicate.TAViolation
+	op            Op
+	typ           string
+	id            *int
+	created_at    *time.Time
+	clearedFields map[string]struct{}
+	ct_log        *int
+	clearedct_log bool
+	done          bool
+	oldValue      func(context.Context) (*TAViolation, error)
+	predicates    []predicate.TAViolation
 }
 
 var _ ent.Mutation = (*TAViolationMutation)(nil)
@@ -2755,82 +1997,43 @@ func (m *TAViolationMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetServerID sets the "server" edge to the TAServer entity by id.
-func (m *TAViolationMutation) SetServerID(id int) {
-	m.server = &id
+// SetCtLogID sets the "ct_log" edge to the CTLog entity by id.
+func (m *TAViolationMutation) SetCtLogID(id int) {
+	m.ct_log = &id
 }
 
-// ClearServer clears the "server" edge to the TAServer entity.
-func (m *TAViolationMutation) ClearServer() {
-	m.clearedserver = true
+// ClearCtLog clears the "ct_log" edge to the CTLog entity.
+func (m *TAViolationMutation) ClearCtLog() {
+	m.clearedct_log = true
 }
 
-// ServerCleared reports if the "server" edge to the TAServer entity was cleared.
-func (m *TAViolationMutation) ServerCleared() bool {
-	return m.clearedserver
+// CtLogCleared reports if the "ct_log" edge to the CTLog entity was cleared.
+func (m *TAViolationMutation) CtLogCleared() bool {
+	return m.clearedct_log
 }
 
-// ServerID returns the "server" edge ID in the mutation.
-func (m *TAViolationMutation) ServerID() (id int, exists bool) {
-	if m.server != nil {
-		return *m.server, true
+// CtLogID returns the "ct_log" edge ID in the mutation.
+func (m *TAViolationMutation) CtLogID() (id int, exists bool) {
+	if m.ct_log != nil {
+		return *m.ct_log, true
 	}
 	return
 }
 
-// ServerIDs returns the "server" edge IDs in the mutation.
+// CtLogIDs returns the "ct_log" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ServerID instead. It exists only for internal usage by the builders.
-func (m *TAViolationMutation) ServerIDs() (ids []int) {
-	if id := m.server; id != nil {
+// CtLogID instead. It exists only for internal usage by the builders.
+func (m *TAViolationMutation) CtLogIDs() (ids []int) {
+	if id := m.ct_log; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetServer resets all changes to the "server" edge.
-func (m *TAViolationMutation) ResetServer() {
-	m.server = nil
-	m.clearedserver = false
-}
-
-// SetServiceID sets the "service" edge to the Service entity by id.
-func (m *TAViolationMutation) SetServiceID(id int) {
-	m.service = &id
-}
-
-// ClearService clears the "service" edge to the Service entity.
-func (m *TAViolationMutation) ClearService() {
-	m.clearedservice = true
-}
-
-// ServiceCleared reports if the "service" edge to the Service entity was cleared.
-func (m *TAViolationMutation) ServiceCleared() bool {
-	return m.clearedservice
-}
-
-// ServiceID returns the "service" edge ID in the mutation.
-func (m *TAViolationMutation) ServiceID() (id int, exists bool) {
-	if m.service != nil {
-		return *m.service, true
-	}
-	return
-}
-
-// ServiceIDs returns the "service" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ServiceID instead. It exists only for internal usage by the builders.
-func (m *TAViolationMutation) ServiceIDs() (ids []int) {
-	if id := m.service; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetService resets all changes to the "service" edge.
-func (m *TAViolationMutation) ResetService() {
-	m.service = nil
-	m.clearedservice = false
+// ResetCtLog resets all changes to the "ct_log" edge.
+func (m *TAViolationMutation) ResetCtLog() {
+	m.ct_log = nil
+	m.clearedct_log = false
 }
 
 // Where appends a list predicates to the TAViolationMutation builder.
@@ -2966,12 +2169,9 @@ func (m *TAViolationMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TAViolationMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.server != nil {
-		edges = append(edges, taviolation.EdgeServer)
-	}
-	if m.service != nil {
-		edges = append(edges, taviolation.EdgeService)
+	edges := make([]string, 0, 1)
+	if m.ct_log != nil {
+		edges = append(edges, taviolation.EdgeCtLog)
 	}
 	return edges
 }
@@ -2980,12 +2180,8 @@ func (m *TAViolationMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *TAViolationMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case taviolation.EdgeServer:
-		if id := m.server; id != nil {
-			return []ent.Value{*id}
-		}
-	case taviolation.EdgeService:
-		if id := m.service; id != nil {
+	case taviolation.EdgeCtLog:
+		if id := m.ct_log; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -2994,7 +2190,7 @@ func (m *TAViolationMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TAViolationMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -3006,12 +2202,9 @@ func (m *TAViolationMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TAViolationMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedserver {
-		edges = append(edges, taviolation.EdgeServer)
-	}
-	if m.clearedservice {
-		edges = append(edges, taviolation.EdgeService)
+	edges := make([]string, 0, 1)
+	if m.clearedct_log {
+		edges = append(edges, taviolation.EdgeCtLog)
 	}
 	return edges
 }
@@ -3020,10 +2213,8 @@ func (m *TAViolationMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *TAViolationMutation) EdgeCleared(name string) bool {
 	switch name {
-	case taviolation.EdgeServer:
-		return m.clearedserver
-	case taviolation.EdgeService:
-		return m.clearedservice
+	case taviolation.EdgeCtLog:
+		return m.clearedct_log
 	}
 	return false
 }
@@ -3032,11 +2223,8 @@ func (m *TAViolationMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *TAViolationMutation) ClearEdge(name string) error {
 	switch name {
-	case taviolation.EdgeServer:
-		m.ClearServer()
-		return nil
-	case taviolation.EdgeService:
-		m.ClearService()
+	case taviolation.EdgeCtLog:
+		m.ClearCtLog()
 		return nil
 	}
 	return fmt.Errorf("unknown TAViolation unique edge %s", name)
@@ -3046,11 +2234,8 @@ func (m *TAViolationMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *TAViolationMutation) ResetEdge(name string) error {
 	switch name {
-	case taviolation.EdgeServer:
-		m.ResetServer()
-		return nil
-	case taviolation.EdgeService:
-		m.ResetService()
+	case taviolation.EdgeCtLog:
+		m.ResetCtLog()
 		return nil
 	}
 	return fmt.Errorf("unknown TAViolation edge %s", name)

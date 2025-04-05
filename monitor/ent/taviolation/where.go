@@ -100,44 +100,21 @@ func CreatedAtLTE(v time.Time) predicate.TAViolation {
 	return predicate.TAViolation(sql.FieldLTE(FieldCreatedAt, v))
 }
 
-// HasServer applies the HasEdge predicate on the "server" edge.
-func HasServer() predicate.TAViolation {
+// HasCtLog applies the HasEdge predicate on the "ct_log" edge.
+func HasCtLog() predicate.TAViolation {
 	return predicate.TAViolation(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, ServerTable, ServerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, CtLogTable, CtLogColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasServerWith applies the HasEdge predicate on the "server" edge with a given conditions (other predicates).
-func HasServerWith(preds ...predicate.TAServer) predicate.TAViolation {
+// HasCtLogWith applies the HasEdge predicate on the "ct_log" edge with a given conditions (other predicates).
+func HasCtLogWith(preds ...predicate.CTLog) predicate.TAViolation {
 	return predicate.TAViolation(func(s *sql.Selector) {
-		step := newServerStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasService applies the HasEdge predicate on the "service" edge.
-func HasService() predicate.TAViolation {
-	return predicate.TAViolation(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, ServiceTable, ServiceColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasServiceWith applies the HasEdge predicate on the "service" edge with a given conditions (other predicates).
-func HasServiceWith(preds ...predicate.Service) predicate.TAViolation {
-	return predicate.TAViolation(func(s *sql.Selector) {
-		step := newServiceStep()
+		step := newCtLogStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

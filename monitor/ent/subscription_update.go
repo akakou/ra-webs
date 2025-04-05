@@ -10,9 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
-	"github.com/akakou/ra-webs/monitor/ent/taserver"
 )
 
 // SubscriptionUpdate is the builder for updating Subscription entities.
@@ -70,23 +70,23 @@ func (su *SubscriptionUpdate) SetNillableAuth(s *string) *SubscriptionUpdate {
 	return su
 }
 
-// SetServerID sets the "server" edge to the TAServer entity by ID.
-func (su *SubscriptionUpdate) SetServerID(id int) *SubscriptionUpdate {
-	su.mutation.SetServerID(id)
+// SetCtLogID sets the "ct_log" edge to the CTLog entity by ID.
+func (su *SubscriptionUpdate) SetCtLogID(id int) *SubscriptionUpdate {
+	su.mutation.SetCtLogID(id)
 	return su
 }
 
-// SetNillableServerID sets the "server" edge to the TAServer entity by ID if the given value is not nil.
-func (su *SubscriptionUpdate) SetNillableServerID(id *int) *SubscriptionUpdate {
+// SetNillableCtLogID sets the "ct_log" edge to the CTLog entity by ID if the given value is not nil.
+func (su *SubscriptionUpdate) SetNillableCtLogID(id *int) *SubscriptionUpdate {
 	if id != nil {
-		su = su.SetServerID(*id)
+		su = su.SetCtLogID(*id)
 	}
 	return su
 }
 
-// SetServer sets the "server" edge to the TAServer entity.
-func (su *SubscriptionUpdate) SetServer(t *TAServer) *SubscriptionUpdate {
-	return su.SetServerID(t.ID)
+// SetCtLog sets the "ct_log" edge to the CTLog entity.
+func (su *SubscriptionUpdate) SetCtLog(c *CTLog) *SubscriptionUpdate {
+	return su.SetCtLogID(c.ID)
 }
 
 // Mutation returns the SubscriptionMutation object of the builder.
@@ -94,9 +94,9 @@ func (su *SubscriptionUpdate) Mutation() *SubscriptionMutation {
 	return su.mutation
 }
 
-// ClearServer clears the "server" edge to the TAServer entity.
-func (su *SubscriptionUpdate) ClearServer() *SubscriptionUpdate {
-	su.mutation.ClearServer()
+// ClearCtLog clears the "ct_log" edge to the CTLog entity.
+func (su *SubscriptionUpdate) ClearCtLog() *SubscriptionUpdate {
+	su.mutation.ClearCtLog()
 	return su
 }
 
@@ -145,28 +145,28 @@ func (su *SubscriptionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := su.mutation.Auth(); ok {
 		_spec.SetField(subscription.FieldAuth, field.TypeString, value)
 	}
-	if su.mutation.ServerCleared() {
+	if su.mutation.CtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   subscription.ServerTable,
-			Columns: []string{subscription.ServerColumn},
+			Table:   subscription.CtLogTable,
+			Columns: []string{subscription.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := su.mutation.ServerIDs(); len(nodes) > 0 {
+	if nodes := su.mutation.CtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   subscription.ServerTable,
-			Columns: []string{subscription.ServerColumn},
+			Table:   subscription.CtLogTable,
+			Columns: []string{subscription.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -236,23 +236,23 @@ func (suo *SubscriptionUpdateOne) SetNillableAuth(s *string) *SubscriptionUpdate
 	return suo
 }
 
-// SetServerID sets the "server" edge to the TAServer entity by ID.
-func (suo *SubscriptionUpdateOne) SetServerID(id int) *SubscriptionUpdateOne {
-	suo.mutation.SetServerID(id)
+// SetCtLogID sets the "ct_log" edge to the CTLog entity by ID.
+func (suo *SubscriptionUpdateOne) SetCtLogID(id int) *SubscriptionUpdateOne {
+	suo.mutation.SetCtLogID(id)
 	return suo
 }
 
-// SetNillableServerID sets the "server" edge to the TAServer entity by ID if the given value is not nil.
-func (suo *SubscriptionUpdateOne) SetNillableServerID(id *int) *SubscriptionUpdateOne {
+// SetNillableCtLogID sets the "ct_log" edge to the CTLog entity by ID if the given value is not nil.
+func (suo *SubscriptionUpdateOne) SetNillableCtLogID(id *int) *SubscriptionUpdateOne {
 	if id != nil {
-		suo = suo.SetServerID(*id)
+		suo = suo.SetCtLogID(*id)
 	}
 	return suo
 }
 
-// SetServer sets the "server" edge to the TAServer entity.
-func (suo *SubscriptionUpdateOne) SetServer(t *TAServer) *SubscriptionUpdateOne {
-	return suo.SetServerID(t.ID)
+// SetCtLog sets the "ct_log" edge to the CTLog entity.
+func (suo *SubscriptionUpdateOne) SetCtLog(c *CTLog) *SubscriptionUpdateOne {
+	return suo.SetCtLogID(c.ID)
 }
 
 // Mutation returns the SubscriptionMutation object of the builder.
@@ -260,9 +260,9 @@ func (suo *SubscriptionUpdateOne) Mutation() *SubscriptionMutation {
 	return suo.mutation
 }
 
-// ClearServer clears the "server" edge to the TAServer entity.
-func (suo *SubscriptionUpdateOne) ClearServer() *SubscriptionUpdateOne {
-	suo.mutation.ClearServer()
+// ClearCtLog clears the "ct_log" edge to the CTLog entity.
+func (suo *SubscriptionUpdateOne) ClearCtLog() *SubscriptionUpdateOne {
+	suo.mutation.ClearCtLog()
 	return suo
 }
 
@@ -341,28 +341,28 @@ func (suo *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscript
 	if value, ok := suo.mutation.Auth(); ok {
 		_spec.SetField(subscription.FieldAuth, field.TypeString, value)
 	}
-	if suo.mutation.ServerCleared() {
+	if suo.mutation.CtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   subscription.ServerTable,
-			Columns: []string{subscription.ServerColumn},
+			Table:   subscription.CtLogTable,
+			Columns: []string{subscription.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := suo.mutation.ServerIDs(); len(nodes) > 0 {
+	if nodes := suo.mutation.CtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   subscription.ServerTable,
-			Columns: []string{subscription.ServerColumn},
+			Table:   subscription.CtLogTable,
+			Columns: []string{subscription.CtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(taserver.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
