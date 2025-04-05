@@ -39,3 +39,4 @@ ta/example/public.pem
 monitor/serv/last.log
 monitor/serv/first-log.txt
 monitor/serv/example/example
+monitor/client/example/example
