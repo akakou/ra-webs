@@ -18,3 +18,12 @@ func (monitor *Monitor) Revoke(serv *ent.TAServer) {
 
 	service.Update().SetIsActive(false).SaveX(*monitor.DB.Ctx)
 }
+
+func (monitor *Monitor) Activate(serv *ent.TAServer) {
+	err := NotifyUpdate(monitor.Domain, monitor)
+	if err != nil {
+		panic(err)
+	}
+
+	serv.Update().SetIsActive(true).SaveX(*monitor.DB.Ctx)
+}

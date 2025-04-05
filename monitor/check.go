@@ -42,6 +42,6 @@ func (monitor *Monitor) Check(pk publicKey, id int) {
 	}
 
 	if !serv.IsActive {
-		serv.Update().SetIsActive(true).Save(*monitor.DB.Ctx)
+		monitor.Activate(serv)
 	}
 }
