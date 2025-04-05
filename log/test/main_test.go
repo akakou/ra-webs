@@ -24,14 +24,14 @@ var storedData = []ent.TA{
 		ID:         1,
 		Repository: "test",
 		CommitID:   "test",
-		Evidence:   []byte("test"),
+		Evidence:   "test",
 		Signature:  []byte("hello"),
 	},
 	ent.TA{
 		ID:         2,
 		Repository: "test",
 		CommitID:   "test",
-		Evidence:   []byte("test"),
+		Evidence:   "test",
 		Signature:  []byte("hello"),
 	},
 }
@@ -91,7 +91,7 @@ func TestAll(t *testing.T) {
 		log.DB.Client.TA.Create().
 			SetRepository("test").
 			SetCommitID("test").
-			SetEvidence([]byte("test")).
+			SetEvidence("test").
 			SetSignature([]byte("hello")).
 			SaveX(*log.DB.Ctx)
 	}
