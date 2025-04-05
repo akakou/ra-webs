@@ -1,7 +1,7 @@
 package monitor
 
 import (
-	"github.com/akakou/ra_webs/monitor/ent"
+	"github.com/akakou/ra-webs/monitor/ent"
 )
 
 func (monitor *Monitor) Revoke(serv *ent.TAServer) {

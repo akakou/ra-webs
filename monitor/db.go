@@ -3,7 +3,7 @@ package monitor
 import (
 	"context"
 
-	"github.com/akakou/ra_webs/monitor/ent"
+	"github.com/akakou/ra-webs/monitor/ent"
 	"github.com/cockroachdb/errors"
 	_ "github.com/mattn/go-sqlite3"
 )

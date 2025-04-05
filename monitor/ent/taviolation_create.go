@@ -10,9 +10,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra_webs/monitor/ent/service"
-	"github.com/akakou/ra_webs/monitor/ent/taserver"
-	"github.com/akakou/ra_webs/monitor/ent/taviolation"
+	"github.com/akakou/ra-webs/monitor/ent/service"
+	"github.com/akakou/ra-webs/monitor/ent/taserver"
+	"github.com/akakou/ra-webs/monitor/ent/taviolation"
 )
 
 // TAViolationCreate is the builder for creating a TAViolation entity.

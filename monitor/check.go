@@ -5,7 +5,7 @@ import (
 	"crypto/rsa"
 	"fmt"
 
-	"github.com/akakou/ra_webs/monitor/ent"
+	"github.com/akakou/ra-webs/monitor/ent"
 	"github.com/google/certificate-transparency-go/x509"
 )
 

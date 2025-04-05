@@ -8,8 +8,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra_webs/monitor/ent/subscription"
-	"github.com/akakou/ra_webs/monitor/ent/taserver"
+	"github.com/akakou/ra-webs/monitor/ent/subscription"
+	"github.com/akakou/ra-webs/monitor/ent/taserver"
 )
 
 // Subscription is the model entity for the Subscription schema.

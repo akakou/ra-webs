@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/akakou/ra_webs/ta"
+	"github.com/akakou/ra-webs/ta"
 )
 
 const VERIFIER_PATH = "/app/verification-status/"

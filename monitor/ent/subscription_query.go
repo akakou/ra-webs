@@ -10,9 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra_webs/monitor/ent/predicate"
-	"github.com/akakou/ra_webs/monitor/ent/subscription"
-	"github.com/akakou/ra_webs/monitor/ent/taserver"
+	"github.com/akakou/ra-webs/monitor/ent/predicate"
+	"github.com/akakou/ra-webs/monitor/ent/subscription"
+	"github.com/akakou/ra-webs/monitor/ent/taserver"
 )
 
 // SubscriptionQuery is the builder for querying Subscription entities.

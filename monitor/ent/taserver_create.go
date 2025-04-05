@@ -9,11 +9,11 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra_webs/monitor/ent/service"
-	"github.com/akakou/ra_webs/monitor/ent/subscription"
-	"github.com/akakou/ra_webs/monitor/ent/tacode"
-	"github.com/akakou/ra_webs/monitor/ent/taserver"
-	"github.com/akakou/ra_webs/monitor/ent/taviolation"
+	"github.com/akakou/ra-webs/monitor/ent/service"
+	"github.com/akakou/ra-webs/monitor/ent/subscription"
+	"github.com/akakou/ra-webs/monitor/ent/tacode"
+	"github.com/akakou/ra-webs/monitor/ent/taserver"
+	"github.com/akakou/ra-webs/monitor/ent/taviolation"
 )
 
 // TAServerCreate is the builder for creating a TAServer entity.

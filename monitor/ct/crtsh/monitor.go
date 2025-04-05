@@ -8,7 +8,7 @@ import (
 	ctcore "github.com/akakou/ctstream/core"
 	"github.com/akakou/ctstream/direct"
 	"github.com/akakou/ctstream/monitor/crtsh"
-	"github.com/akakou/ra_webs/monitor"
+	"github.com/akakou/ra-webs/monitor"
 	ctx509 "github.com/google/certificate-transparency-go/x509"
 )
 

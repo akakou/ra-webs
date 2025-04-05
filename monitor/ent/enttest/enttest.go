@@ -5,12 +5,12 @@ package enttest
 import (
 	"context"
 
-	"github.com/akakou/ra_webs/monitor/ent"
+	"github.com/akakou/ra-webs/monitor/ent"
 	// required by schema hooks.
-	_ "github.com/akakou/ra_webs/monitor/ent/runtime"
+	_ "github.com/akakou/ra-webs/monitor/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
-	"github.com/akakou/ra_webs/monitor/ent/migrate"
+	"github.com/akakou/ra-webs/monitor/ent/migrate"
 )
 
 type (

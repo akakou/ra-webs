@@ -2,9 +2,9 @@ module github.com/akakou/ra-webs/log
 
 go 1.23.6
 
-replace github.com/akakou/ra_webs/ta => ../
+replace github.com/akakou/ra-webs/ta => ../
 
-replace github.com/akakou/ra_webs/core => ../core
+replace github.com/akakou/ra-webs/core => ../core
 
 require (
 	entgo.io/ent v0.14.4

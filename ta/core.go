@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/akakou/ra_webs/core"
+	"github.com/akakou/ra-webs/core"
 	"golang.org/x/crypto/acme/autocert"
 )
 

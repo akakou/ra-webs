@@ -6,11 +6,11 @@ import (
 	"html/template"
 	"io"
 
-	"github.com/akakou/ra_webs/core"
-	"github.com/akakou/ra_webs/monitor/serv"
-	"github.com/akakou/ra_webs/monitor/serv/api"
+	"github.com/akakou/ra-webs/core"
+	"github.com/akakou/ra-webs/monitor/serv"
+	"github.com/akakou/ra-webs/monitor/serv/api"
 
-	browsernotify "github.com/akakou/ra_webs/monitor/notifier/browser"
+	browsernotify "github.com/akakou/ra-webs/monitor/notifier/browser"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )

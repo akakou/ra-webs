@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/akakou/ra_webs/core"
+	"github.com/akakou/ra-webs/core"
 )
 
 const WAIT = 3

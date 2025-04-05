@@ -5,7 +5,7 @@ package subscription
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/akakou/ra_webs/monitor/ent/predicate"
+	"github.com/akakou/ra-webs/monitor/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

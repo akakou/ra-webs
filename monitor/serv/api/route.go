@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/akakou/ra_webs/monitor/serv"
+	"github.com/akakou/ra-webs/monitor/serv"
 	"github.com/labstack/echo/v4"
 )
 

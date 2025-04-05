@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra_webs/monitor/ent/predicate"
-	"github.com/akakou/ra_webs/monitor/ent/tacode"
+	"github.com/akakou/ra-webs/monitor/ent/predicate"
+	"github.com/akakou/ra-webs/monitor/ent/tacode"
 )
 
 // TACodeDelete is the builder for deleting a TACode entity.

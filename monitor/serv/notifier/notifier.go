@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/SherClockHolmes/webpush-go"
-	"github.com/akakou/ra_webs/monitor/ent"
-	"github.com/akakou/ra_webs/monitor/serv"
+	"github.com/akakou/ra-webs/monitor/ent"
+	"github.com/akakou/ra-webs/monitor/serv"
 	"github.com/labstack/echo/v4"
 )
 

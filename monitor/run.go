@@ -3,8 +3,8 @@ package monitor
 import (
 	"fmt"
 
-	"github.com/akakou/ra_webs/monitor/ent"
-	"github.com/akakou/ra_webs/monitor/ent/taserver"
+	"github.com/akakou/ra-webs/monitor/ent"
+	"github.com/akakou/ra-webs/monitor/ent/taserver"
 )
 
 func (monitor *Monitor) Run(pk publicKey, id int) {

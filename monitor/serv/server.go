@@ -5,7 +5,7 @@ import (
 
 	goutils "github.com/akakou/go-utils"
 	golangutils "github.com/akakou/golang-utils"
-	"github.com/akakou/ra_webs/monitor"
+	"github.com/akakou/ra-webs/monitor"
 	"github.com/cockroachdb/errors"
 )
 

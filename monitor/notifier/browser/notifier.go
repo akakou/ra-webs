@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/SherClockHolmes/webpush-go"
-	"github.com/akakou/ra_webs/monitor"
+	"github.com/akakou/ra-webs/monitor"
 )
 
 const TTL_MAX = 2419200

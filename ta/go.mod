@@ -1,11 +1,11 @@
-module github.com/akakou/ra_webs/ta
+module github.com/akakou/ra-webs/ta
 
 go 1.21.4
 
-replace github.com/akakou/ra_webs/core => ../core
+replace github.com/akakou/ra-webs/core => ../core
 
 require (
-	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
+	github.com/akakou/ra-webs/core v0.0.0-00010101000000-000000000000
 	github.com/go-acme/lego/v4 v4.16.1
 	golang.org/x/crypto v0.22.0
 )

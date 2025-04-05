@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
-	"github.com/akakou/ra_webs/monitor/ent"
-	"github.com/akakou/ra_webs/monitor/ent/taserver"
-	"github.com/akakou/ra_webs/monitor/serv"
+	"github.com/akakou/ra-webs/monitor/ent"
+	"github.com/akakou/ra-webs/monitor/ent/taserver"
+	"github.com/akakou/ra-webs/monitor/serv"
 	"github.com/labstack/echo/v4"
 )
 

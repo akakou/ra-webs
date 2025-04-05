@@ -2,7 +2,7 @@
 
 package runtime
 
-// The schema-stitching logic is generated in github.com/akakou/ra_webs/monitor/ent/runtime.go
+// The schema-stitching logic is generated in github.com/akakou/ra-webs/monitor/ent/runtime.go
 
 const (
 	Version = "v0.12.5"                                         // Version of ent codegen.

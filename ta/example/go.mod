@@ -1,15 +1,15 @@
-module github.com/akakou/ra_webs/monitor/example
+module github.com/akakou/ra-webs/monitor/example
 
 go 1.21.4
 
-replace github.com/akakou/ra_webs/ta => ../
+replace github.com/akakou/ra-webs/ta => ../
 
-replace github.com/akakou/ra_webs/core => ../../core
+replace github.com/akakou/ra-webs/core => ../../core
 
-require github.com/akakou/ra_webs/ta v0.0.0-00010101000000-000000000000
+require github.com/akakou/ra-webs/ta v0.0.0-00010101000000-000000000000
 
 require (
-	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000 // indirect
+	github.com/akakou/ra-webs/core v0.0.0-00010101000000-000000000000 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/edgelesssys/ego v1.5.3 // indirect
 	github.com/go-acme/lego/v4 v4.16.1 // indirect

@@ -3,8 +3,8 @@ package api
 import (
 	"errors"
 
-	"github.com/akakou/ra_webs/monitor"
-	"github.com/akakou/ra_webs/monitor/ent"
+	"github.com/akakou/ra-webs/monitor"
+	"github.com/akakou/ra-webs/monitor/ent"
 )
 
 func checkTAValidity(serv *ent.TAServer, monitor *monitor.Monitor) (bool, error) {

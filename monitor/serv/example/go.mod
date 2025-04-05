@@ -1,16 +1,16 @@
-module github.com/akakou/ra_webs/monitor/serv/example
+module github.com/akakou/ra-webs/monitor/serv/example
 
 go 1.23.0
 
 toolchain go1.23.6
 
-replace github.com/akakou/ra_webs/core => ../../../core/
+replace github.com/akakou/ra-webs/core => ../../../core/
 
-replace github.com/akakou/ra_webs/monitor => ../../
+replace github.com/akakou/ra-webs/monitor => ../../
 
 require (
-	github.com/akakou/ra_webs/core v0.0.0-00010101000000-000000000000
-	github.com/akakou/ra_webs/monitor v0.0.0-00010101000000-000000000000
+	github.com/akakou/ra-webs/core v0.0.0-00010101000000-000000000000
+	github.com/akakou/ra-webs/monitor v0.0.0-00010101000000-000000000000
 	github.com/labstack/echo/v4 v4.13.3
 )
 
