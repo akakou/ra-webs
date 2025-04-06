@@ -1,4 +1,4 @@
-package core
+package attest
 
 import (
 	"errors"
@@ -9,15 +9,12 @@ import (
 )
 
 const SECURITY_VERSION = 1
+const ATTEST_PROVIDER_URL = "https://shareduks.uks.attest.azure.net"
 
 var Attest = attestByAzure
 var Verify = verifyByAzure
 
 func attestByAzure(data []byte) (string, error) {
-	if DEBUG {
-		return "", nil
-	}
-
 	// publicKeyHash := hashPublicKey(publicKey)
 	evidence, err := enclave.CreateAzureAttestationToken(data, ATTEST_PROVIDER_URL)
 	if err != nil {

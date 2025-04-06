@@ -9,6 +9,8 @@ replace github.com/akakou/ra-webs/core => ../core
 require (
 	entgo.io/ent v0.14.4
 	github.com/akakou/go-utils v0.0.7
+	github.com/akakou/ra-webs/core v0.0.0-00010101000000-000000000000
+	github.com/cockroachdb/errors v1.11.3
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/stretchr/testify v1.10.0
@@ -20,7 +22,6 @@ require (
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
-	github.com/cockroachdb/errors v1.11.3 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

@@ -1,4 +1,4 @@
-package core
+package sign
 
 import (
 	"crypto"
@@ -6,22 +6,12 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/json"
-
-	"github.com/akakou/ra-webs/log/api/io"
 )
-
-type SignTarget struct {
-	*io.PostRequest `json:"post_request"`
-}
 
 var Sign = sign
 var Verify = verify
 
-func sign(log *Log, req *io.PostRequest) ([]byte, error) {
-	target := SignTarget{
-		PostRequest: req,
-	}
-
+func sign(target *LogPlain, signKey *rsa.PrivateKey) ([]byte, error) {
 	targetData, err := json.Marshal(target)
 	if err != nil {
 		return nil, err
@@ -29,18 +19,14 @@ func sign(log *Log, req *io.PostRequest) ([]byte, error) {
 
 	hash := sha256.Sum256(targetData)
 
-	signature, err := rsa.SignPKCS1v15(rand.Reader, log.SignKey, crypto.SHA256, hash[:])
+	signature, err := rsa.SignPKCS1v15(rand.Reader, signKey, crypto.SHA256, hash[:])
 	if err != nil {
 		return nil, err
 	}
 	return signature, nil
 }
 
-func verify(signature []byte, domain string, req *io.PostRequest, publicKey *rsa.PublicKey) ([]byte, error) {
-	target := SignTarget{
-		PostRequest: req,
-	}
-
+func verify(signature []byte, target *LogPlain, publicKey *rsa.PublicKey) ([]byte, error) {
 	targetData, err := json.Marshal(target)
 	if err != nil {
 		return nil, err

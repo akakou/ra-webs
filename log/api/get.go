@@ -5,14 +5,14 @@ import (
 	"strconv"
 
 	goutils "github.com/akakou/go-utils"
-	"github.com/akakou/ra-webs/log/core"
+	"github.com/akakou/ra-webs/log"
 	"github.com/labstack/echo/v4"
 )
 
-var GetApi = goutils.EchoRoute[core.Log]{
+var GetApi = goutils.EchoRoute[log.Log]{
 	Method: goutils.GET,
 	Path:   "/ta",
-	F: func(log *core.Log) goutils.EchoRouteFunc {
+	F: func(log *log.Log) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			start := 0
 			end := 0

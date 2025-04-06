@@ -8,7 +8,8 @@ import (
 	"github.com/edgelesssys/ego/attestation"
 	"github.com/edgelesssys/ego/attestation/tcbstatus"
 
-	core "github.com/akakou/ra-webs/core"
+	"github.com/akakou/ra-webs/core/attest"
+
 	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/monitor/builder"
 )
@@ -23,8 +24,8 @@ var (
 	errBuildFailed                 = errors.New("build failed")
 )
 
-func CheckEvidence(quote string) (*attestation.Report, error) {
-	report, err := core.Verify(quote)
+func CheckEvidence(evidence string) (*attestation.Report, error) {
+	report, err := attest.Verify(evidence)
 	if err != nil {
 		return &attestation.Report{
 			UniqueID:  []byte{},

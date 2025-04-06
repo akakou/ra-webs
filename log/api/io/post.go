@@ -1,7 +1,5 @@
 package io
 
-type PostRequest struct {
-	Repository string `json:"repository"`
-	CommitId   string `json:"commit_id"`
-	Evidence   string `json:"evidence"`
-}
+import "github.com/akakou/ra-webs/core/sign"
+
+type PostRequest *sign.LogPlain

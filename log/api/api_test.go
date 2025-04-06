@@ -1,4 +1,4 @@
-package test
+package api
 
 import (
 	"bytes"
@@ -11,9 +11,10 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/akakou/ra-webs/log/api"
+	"github.com/akakou/ra-webs/core/sign"
+	"github.com/akakou/ra-webs/log"
+	core "github.com/akakou/ra-webs/log"
 	"github.com/akakou/ra-webs/log/api/io"
-	"github.com/akakou/ra-webs/log/core"
 	"github.com/akakou/ra-webs/log/ent"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
@@ -37,12 +38,12 @@ var storedData = []ent.TA{
 }
 
 var reqData = []io.PostRequest{
-	io.PostRequest{
+	&sign.LogPlain{
 		Repository: storedData[0].Repository,
 		CommitId:   storedData[0].CommitID,
 		Evidence:   storedData[0].Evidence,
 	},
-	io.PostRequest{
+	&sign.LogPlain{
 		Repository: storedData[1].Repository,
 		CommitId:   storedData[1].CommitID,
 		Evidence:   storedData[1].Evidence,
@@ -52,7 +53,7 @@ var reqData = []io.PostRequest{
 var max = 200
 
 func TestAll(t *testing.T) {
-	db, err := core.NewDB(&core.DBConfig{
+	db, err := log.NewDB(&log.DBConfig{
 		Type:   "sqlite3",
 		Config: ":memory:?_fk=1",
 	})
@@ -62,7 +63,7 @@ func TestAll(t *testing.T) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	assert.NoError(t, err, "Key generation failed")
 
-	log := &core.Log{
+	log := &log.Log{
 		DB:        db,
 		Domain:    "localhost",
 		VerifyKey: &privateKey.PublicKey,
@@ -70,20 +71,18 @@ func TestAll(t *testing.T) {
 		Token:     "token",
 	}
 
-	testSignature(t, log)
-
 	e := echo.New()
 	g := e.Group("/")
 
-	core.Sign = func(log *core.Log, req *io.PostRequest) ([]byte, error) {
+	sign.Sign = func(target *sign.LogPlain, signKey *rsa.PrivateKey) ([]byte, error) {
 		return []byte("hello"), nil
 	}
 
-	api.GetApi.Set(g, log)
-	api.PostApi.Set(g, log)
+	GetApi.Set(g, log)
+	PostApi.Set(g, log)
 
-	testPost(t, 1, &reqData[0], log, e)
-	testPost(t, 2, &reqData[1], log, e)
+	testPost(t, 1, reqData[0], log, e)
+	testPost(t, 2, reqData[1], log, e)
 
 	testGet(t, storedData, log, e)
 
@@ -102,7 +101,7 @@ func TestAll(t *testing.T) {
 	defer log.DB.Close()
 }
 
-func testPost(t *testing.T, counter int, data *io.PostRequest, log *core.Log, e *echo.Echo) {
+func testPost(t *testing.T, counter int, data *sign.LogPlain, log *log.Log, e *echo.Echo) {
 	reqJson, err := json.Marshal(data)
 	assert.NoError(t, err)
 
@@ -114,7 +113,7 @@ func testPost(t *testing.T, counter int, data *io.PostRequest, log *core.Log, e 
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	err = api.PostApi.F(log)(c)
+	err = PostApi.F(log)(c)
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -129,7 +128,7 @@ func testGet(t *testing.T, data []ent.TA, log *core.Log, e *echo.Echo) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	err := api.GetApi.F(log)(c)
+	err := GetApi.F(log)(c)
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -152,7 +151,7 @@ func testGetWithStart(t *testing.T, log *core.Log, e *echo.Echo) {
 
 	c := e.NewContext(req, rec)
 
-	err := api.GetApi.F(log)(c)
+	err := GetApi.F(log)(c)
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -179,7 +178,7 @@ func testGetWithStartAndEnd(t *testing.T, log *core.Log, e *echo.Echo) {
 
 	c := e.NewContext(req, rec)
 
-	err := api.GetApi.F(log)(c)
+	err := GetApi.F(log)(c)
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, rec.Code)

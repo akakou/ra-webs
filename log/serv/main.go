@@ -4,8 +4,8 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 
+	"github.com/akakou/ra-webs/log"
 	"github.com/akakou/ra-webs/log/api"
-	"github.com/akakou/ra-webs/log/core"
 	"github.com/labstack/echo/v4"
 )
 
@@ -19,15 +19,15 @@ func main() {
 		panic(err)
 	}
 
-	log, err := core.Default(key)
+	l, err := log.Default(key)
 	if err != nil {
 		panic(err)
 	}
 
-	api.GetApi.Set(g, log)
-	api.PostApi.Set(g, log)
+	api.GetApi.Set(g, l)
+	api.PostApi.Set(g, l)
 
-	defer log.DB.Close()
+	defer l.DB.Close()
 
 	err = e.Start(":8080")
 

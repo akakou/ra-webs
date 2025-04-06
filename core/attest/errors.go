@@ -1,4 +1,4 @@
-package core
+package attest
 
 const (
 	ERROR_INVALID_SECURITY_VERSION_IN_ATTESTATION = "invalid security version in attestation"
