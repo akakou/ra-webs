@@ -12,7 +12,7 @@ import (
 func main() {
 	e := echo.New()
 
-	g := e.Group("/")
+	g := e.Group("/api")
 
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
