@@ -1,6 +1,8 @@
 package monitor
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
 	"fmt"
 	"os"
 
@@ -9,19 +11,21 @@ import (
 )
 
 type Monitor struct {
-	Domain    string
-	DB        *DB
-	CT        CT
-	Notifier  Notifier
-	LogClient *logclient.LogClient
+	Domain      string
+	DB          *DB
+	CT          CT
+	Notifier    Notifier
+	LogClient   *logclient.LogClient
+	ATPublicKey *rsa.PublicKey
 }
 
-func New(domain string, db *DB, ct CT, notifier Notifier) (*Monitor, error) {
+func New(domain string, db *DB, ct CT, atPublicKey *rsa.PublicKey, notifier Notifier) (*Monitor, error) {
 	return &Monitor{
-		Domain:   domain,
-		DB:       db,
-		CT:       ct,
-		Notifier: notifier,
+		Domain:      domain,
+		DB:          db,
+		CT:          ct,
+		ATPublicKey: atPublicKey,
+		Notifier:    notifier,
 	}, nil
 }
 
@@ -29,6 +33,12 @@ func Default(ct CT, notifier Notifier) (*Monitor, error) {
 	domain := os.Getenv("DOMAIN")
 	if domain == "" {
 		return nil, errDomainEnvironmentVariableIsEmpty
+	}
+
+	atPublicKey := os.Getenv("AT_PUBLIC_KEY")
+	rsaATPublicKey, err := x509.ParsePKCS1PublicKey([]byte(atPublicKey))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse AT public key: %w", err)
 	}
 
 	dbType := golangutils.GetEnv("DB_TYPE", "sqlite3")
@@ -45,7 +55,7 @@ func Default(ct CT, notifier Notifier) (*Monitor, error) {
 		return nil, err
 	}
 
-	return New(domain, db, ct, notifier)
+	return New(domain, db, ct, rsaATPublicKey, notifier)
 }
 
 func (monitor *Monitor) Run() {

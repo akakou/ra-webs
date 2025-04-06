@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"bytes"
+	"crypto/rsa"
 
 	"github.com/cockroachdb/errors"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/edgelesssys/ego/attestation/tcbstatus"
 
 	"github.com/akakou/ra-webs/core/attest"
+	"github.com/akakou/ra-webs/core/sign"
 
 	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/monitor/builder"
@@ -23,6 +25,12 @@ var (
 	errPublicKeyIsNotRSA           = errors.New("public key is not RSA")
 	errBuildFailed                 = errors.New("build failed")
 )
+
+func CheckSignature(signature []byte, l *sign.LogPlain, publicKey *rsa.PublicKey) error {
+	err := sign.Verify(signature, l, publicKey)
+	return err
+
+}
 
 func CheckEvidence(evidence string) (*attestation.Report, error) {
 	report, err := attest.Verify(evidence)

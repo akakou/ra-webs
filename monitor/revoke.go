@@ -16,15 +16,6 @@ func (monitor *Monitor) Revoke(ta *ent.TA) {
 		SaveX(*monitor.DB.Ctx)
 }
 
-func (monitor *Monitor) RevokeWithEmpty() {
-	ta, err := monitor.RegisterTA([]byte(""))
-	if err != nil {
-		panic(err)
-	}
-
-	monitor.Revoke(ta)
-}
-
 func (monitor *Monitor) RevokeIncompletedCTLog(ctLogId int) {
 	ta, err := monitor.RegisterTA([]byte(""))
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/akakou/crtsh"
+	"github.com/akakou/ra-webs/core/sign"
 	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
@@ -72,6 +73,18 @@ func (monitor *Monitor) MonitorATLog(log *io.TA) {
 	if err != nil {
 		fmt.Printf("Violation: %v\n", err)
 		monitor.RevokeIncompletedATLog(log)
+		return
+	}
+
+	err = CheckSignature(log.Signature, &sign.LogPlain{
+		Repository: log.Repository,
+		Evidence:   log.Evidence,
+		CommitId:   log.CommitID,
+	}, monitor.ATPublicKey)
+	
+	if err != nil {
+		fmt.Printf("Violation: %v\n", err)
+		monitor.Revoke(ta)
 		return
 	}
 
