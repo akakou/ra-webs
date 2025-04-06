@@ -34,7 +34,7 @@ func (ap *TA) TLSConfig() (*tls.Config, error) {
 
 	fmt.Printf("Register result: %s\n", str)
 
-	resouce := IssueCertificate(ap.privateKey, ap.config.Domain, ap.config.Email)
+	resouce := IssueCertificate(ap.privateKey, ap.config.TADomain, ap.config.Email)
 
 	cert, err := parsePemCertificate(resouce.Certificate, ap.privateKey)
 

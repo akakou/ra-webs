@@ -16,52 +16,37 @@ import (
 const WAIT = 3
 const REGISTER_PATH = "/api/ta"
 
-func (ta *TA) Register() (map[string]string, error) {
-	msgs := map[string]string{}
-
-	for _, monitorBase := range ta.config.Monitors {
-		res, err := ta.registerOne(monitorBase)
-		msgs[monitorBase] = res
-
-		if err != nil {
-			return msgs, err
-		}
-
-	}
-
-	return msgs, nil
+type RegisterRequest struct {
+	Repository string `json:"repository"`
+	CommitId   string `json:"commit_id"`
+	Evidence   string `json:"evidence"`
 }
 
-func (ta *TA) registerOne(monitorBase string) (string, error) {
+func (ta *TA) Register() (string, error) {
 	publicKey := ta.privateKey.Public()
 	keyBin := x509.MarshalPKCS1PublicKey(publicKey.(*rsa.PublicKey))
 
-	quote, err := core.Attest(keyBin)
+	evidence, err := core.Attest(keyBin)
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", ERROR_ATTEST_PUBLIC_KEY, err)
 	}
 
-	reqBody := core.RegisterRequest{
-		CodeRequest: core.CodeRequest{
-			Repository: ta.config.Repository,
-		},
-		ServerRequest: core.ServerRequest{
-			PublicKey: keyBin,
-			Domain:    ta.config.Domain,
-			Quote:     quote,
-		},
+	reqBody := RegisterRequest{
+		Repository: ta.config.Repository,
+		CommitId:   ta.config.CommitID,
+		Evidence:   evidence,
 	}
 
-	return ta.post(monitorBase, REGISTER_PATH, reqBody)
+	return ta.post(REGISTER_PATH, reqBody)
 }
 
-func (ta *TA) post(monitorBase, path string, reqBody any) (string, error) {
+func (ta *TA) post(path string, reqBody any) (string, error) {
 	body, err := json.Marshal(reqBody)
 	if err != nil {
 		return "", err
 	}
 
-	u, err := url.Parse(monitorBase)
+	u, err := url.Parse(ta.config.ATLogDomain)
 	if err != nil {
 		return "", fmt.Errorf("%v: %v", ERROR_VERIFIER_BASE_PARSE, err)
 	}
