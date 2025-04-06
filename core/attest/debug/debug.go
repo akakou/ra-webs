@@ -9,7 +9,7 @@ import (
 var Debug = false
 
 func debugAttestByAzure(data []byte) (string, error) {
-	return "", nil
+	return "this is evidence", nil
 }
 
 func debugVerifyByAzure(evudence string) (*attestation.Report, error) {
@@ -23,9 +23,11 @@ func debugVerifyByAzure(evudence string) (*attestation.Report, error) {
 
 const DEBUG_TOKEN = "this-is-ra-webs-debug-token-138484039348"
 
-func EnableDebug() {
+func EnableDebug() bool {
 	Debug = true
 
 	attest.Attest = debugAttestByAzure
 	attest.Verify = debugVerifyByAzure
+
+	return true
 }
