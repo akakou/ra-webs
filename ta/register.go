@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/akakou/ra-webs/core"
+	"github.com/akakou/ra-webs/core/attest"
 )
 
 const WAIT = 3
@@ -26,7 +26,7 @@ func (ta *TA) Register() (string, error) {
 	publicKey := ta.privateKey.Public()
 	keyBin := x509.MarshalPKCS1PublicKey(publicKey.(*rsa.PublicKey))
 
-	evidence, err := core.Attest(keyBin)
+	evidence, err := attest.Attest(keyBin)
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", ERROR_ATTEST_PUBLIC_KEY, err)
 	}
