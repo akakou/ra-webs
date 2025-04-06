@@ -22,7 +22,7 @@ func DefaultConfig() (*TAConfig, error) {
 	commitId := os.Getenv("RA_WEBS_TA_COMMIT_ID")
 	domain := os.Getenv("RA_WEBS_TA_DOMAIN")
 	email := os.Getenv("RA_WEBS_SERVICE_EMAIL")
-	atLogBaseEnv := os.Getenv("RA_WEBS_AT_LOG_BASES")
+	atLogBaseEnv := os.Getenv("RA_WEBS_AT_LOG_BASE")
 
 	if token == "" {
 		return nil, fmt.Errorf("%v", ERROR_TOKEN_NOT_SET)
@@ -38,7 +38,7 @@ func DefaultConfig() (*TAConfig, error) {
 
 	if atLogBaseEnv == "" {
 		atLogBaseEnv = "http://localhost" + core.MonitorPort
-		fmt.Printf("RA_WEBS_VERIFIER_BASES is not set: so use %v\n", atLogBaseEnv)
+		fmt.Printf("RA_WEBS_AT_LOG_BASE is not set: so use %v\n", atLogBaseEnv)
 	}
 
 	if domain == "" {
