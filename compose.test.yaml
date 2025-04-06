@@ -2,7 +2,7 @@ version: '3'
 services:
   ta_example:
     tty: true
-    build: ./docker
+    build: ./
     network_mode: host
     volumes:
       - ./ta:/ta
@@ -21,13 +21,12 @@ services:
       - ta
 
   monitor:
-    build: ./docker
+    build: ./
     volumes:
       - ./monitor:/monitor
       - ./core:/core
-      - /var/run/docker.sock:/var/run/docker.sock
-    working_dir: /monitor/serv
-    command: bash -c 'go mod tidy && go run main.go'
+    working_dir: /monitor/serv/example
+    command: bash -c 'go mod tidy && go run .'
     env_file:
       - test/env/monitor.env
       - test/env/common.env
