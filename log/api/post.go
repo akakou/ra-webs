@@ -39,7 +39,6 @@ var PostApi = goutils.EchoRoute[log.Log]{
 				SetCommitID(req.CommitId).
 				SetEvidence(req.Evidence).
 				SetSignature(signature).
-				SetSignature([]byte("hello")).
 				Save(*l.DB.Ctx)
 
 			if err != nil {
