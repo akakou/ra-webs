@@ -18,7 +18,7 @@ func (monitor *Monitor) Monitor(ctLogs []crtsh.CertificateEntry) {
 	atLogs, err := monitor.LogClient.Fetch()
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
-		monitor.RevokeIncompletedATLog(&io.TA{
+		monitor.RegisterBrokenATLog(&io.TA{
 			Evidence:   "",
 			Signature:  []byte(""),
 			Repository: "",
@@ -40,13 +40,9 @@ func (monitor *Monitor) Monitor(ctLogs []crtsh.CertificateEntry) {
 func (monitor *Monitor) MonitorATLog(log *io.TA) {
 	var err error
 
-	exist, err := monitor.DB.Client.ATLog.Query().
+	exist := monitor.DB.Client.ATLog.Query().
 		Where(atlog.EvidenceEQ(log.Evidence)).
-		Exist(*monitor.DB.Ctx)
-
-	if err != nil {
-		panic(err)
-	}
+		ExistX(*monitor.DB.Ctx)
 
 	if exist {
 		return
@@ -55,7 +51,7 @@ func (monitor *Monitor) MonitorATLog(log *io.TA) {
 	report, err := CheckEvidence(log.Evidence)
 	if err != nil {
 		fmt.Printf("Violation: %v\n", err)
-		monitor.RevokeIncompletedATLog(log)
+		monitor.RegisterIncompletedATLog(log)
 		return
 	}
 
@@ -65,14 +61,13 @@ func (monitor *Monitor) MonitorATLog(log *io.TA) {
 	ta, _, err := monitor.SelectOrRegisterTA(publicKey)
 	if err != nil {
 		fmt.Printf("Violation: %v\n", err)
-		monitor.RevokeIncompletedATLog(log)
+		monitor.RegisterIncompletedATLog(log)
 		return
 	}
 
-	_, err = monitor.RegisterATLog(uniqueId, log, ta)
+	atLog, err := monitor.RegisterATLog(uniqueId, log, ta, false)
 	if err != nil {
 		fmt.Printf("Violation: %v\n", err)
-		monitor.RevokeIncompletedATLog(log)
 		return
 	}
 
@@ -81,19 +76,19 @@ func (monitor *Monitor) MonitorATLog(log *io.TA) {
 		Evidence:   log.Evidence,
 		CommitId:   log.CommitID,
 	}, monitor.ATPublicKey)
-	
+
 	if err != nil {
 		fmt.Printf("Violation: %v\n", err)
-		monitor.Revoke(ta)
 		return
 	}
 
 	err = CheckSourceHash(log, uniqueId)
 	if err != nil {
 		fmt.Printf("Violation: %v\n", err)
-		monitor.Revoke(ta)
 		return
 	}
+
+	atLog.Update().SetIsActive(true).SaveX(*monitor.DB.Ctx)
 }
 
 func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) {

@@ -30,30 +30,26 @@ func (monitor *Monitor) RevokeIncompletedCTLog(ctLogId int) {
 	monitor.Revoke(ta)
 }
 
-func (monitor *Monitor) RevokeIncompletedATLog(log *io.TA) {
+func (monitor *Monitor) RegisterIncompletedATLog(log *io.TA) {
 	ta, err := monitor.RegisterTA([]byte(""))
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = monitor.RegisterATLog([]byte{}, log, ta)
+	_, err = monitor.RegisterATLog([]byte{}, log, ta, false)
 	if err != nil {
 		panic(err)
 	}
-
-	monitor.Revoke(ta)
 }
 
-func (monitor *Monitor) RevokeATLog(log *io.TA) {
+func (monitor *Monitor) RegisterBrokenATLog(log *io.TA) {
 	ta, err := monitor.RegisterTA([]byte(""))
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = monitor.RegisterATLog([]byte{}, log, ta)
+	_, err = monitor.RegisterATLog([]byte{}, log, ta, false)
 	if err != nil {
 		panic(err)
 	}
-
-	monitor.Revoke(ta)
 }

@@ -56,7 +56,7 @@ func (monitor *Monitor) RegisterCTLog(ctLogId int, ta *ent.TA) (*ent.CTLog, erro
 	return ctLog, nil
 }
 
-func (monitor *Monitor) RegisterATLog(uniqueId []byte, log *io.TA, ta *ent.TA) (*ent.ATLog, error) {
+func (monitor *Monitor) RegisterATLog(uniqueId []byte, log *io.TA, ta *ent.TA, active bool) (*ent.ATLog, error) {
 	atLogCreate := monitor.DB.Client.ATLog.
 		Create().
 		SetEvidence(log.Evidence).
@@ -65,7 +65,7 @@ func (monitor *Monitor) RegisterATLog(uniqueId []byte, log *io.TA, ta *ent.TA) (
 		SetUniqueID(uniqueId).
 		SetSignature(log.Signature).
 		SetTa(ta).
-		SetIsActive(true)
+		SetIsActive(active)
 
 	atLog, err := atLogCreate.Save(*monitor.DB.Ctx)
 
