@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-const DB_FILE = "log.db"
+const DB_FILE = "log.db?_fk=1"
 const TOKEN_NAME = "RA_WEBS_LOG_TOKEN"
 const DOMAIN_NAME = "RA_WEBS_LOG_DOMAIN"
 
