@@ -26,17 +26,17 @@ func sign(target *LogPlain, signKey *rsa.PrivateKey) ([]byte, error) {
 	return signature, nil
 }
 
-func verify(signature []byte, target *LogPlain, publicKey *rsa.PublicKey) ([]byte, error) {
+func verify(signature []byte, target *LogPlain, publicKey *rsa.PublicKey) error {
 	targetData, err := json.Marshal(target)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	hash := sha256.Sum256(targetData)
 
 	err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, hash[:], signature)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return signature, nil
+	return nil
 }

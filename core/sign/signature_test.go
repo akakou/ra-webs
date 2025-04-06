@@ -20,6 +20,6 @@ func TestSignature(t *testing.T) {
 	signature, err := Sign(&log, privateKey)
 	assert.NoError(t, err, "Sigining failed")
 
-	_, err = Verify(signature, &log, &privateKey.PublicKey)
+	err = Verify(signature, &log, &privateKey.PublicKey)
 	assert.NoError(t, err, "Signature verification failed")
 }
