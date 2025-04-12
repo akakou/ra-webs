@@ -14,7 +14,6 @@ var postSubscribeApi = goutils.EchoRoute[monitor.Monitor]{
 	F: func(monitor *monitor.Monitor) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			var data struct {
-				Domain       string `json:"domain"`
 				Subscription struct {
 					Endpoint       string `json:"endpoint"`
 					ExpirationTime int    `json:"expirationTime"`
