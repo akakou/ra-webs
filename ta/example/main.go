@@ -4,12 +4,16 @@ import (
 	"fmt"
 	"net/http"
 
+	debug "github.com/akakou/ra-webs/core/attest/debug"
+
 	"github.com/akakou/ra-webs/ta"
 )
 
 const VERIFIER_PATH = "/app/verification-status/"
 
 func main() {
+	debug.EnableDebug()
+
 	config, err := ta.DefaultConfig()
 	if err != nil {
 		panic(err)

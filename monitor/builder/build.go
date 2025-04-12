@@ -24,14 +24,14 @@ var embedFiles embed.FS
 var Build = build
 
 const BASE_REPO_PATH = "./repo/"
-const BASE_PROGRAM_PATH = "./"
+const BASE_PROGRAM_PATH = "./ta/example"
 
 const BUILD_SCRIPT = BASE_REPO_PATH + "build.sh"
 
 const COMMIT_ID_INDEX = 0
 const UNIQUE_ID_INDEX = 1
 
-const EXECUTABLE = "m"
+const EXECUTABLE = "example"
 
 func build(repo, commitId string) ([]byte, error) {
 	sha256 := sha256.Sum256([]byte(repo))
