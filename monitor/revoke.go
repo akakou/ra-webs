@@ -8,7 +8,7 @@ import (
 )
 
 func (monitor *Monitor) Revoke(ta *ent.TA) {
-	err := NotifyViolation(monitor.Domain, monitor)
+	err := NotifyViolation(monitor.TADomain, monitor)
 	if err != nil {
 		panic(err)
 	}

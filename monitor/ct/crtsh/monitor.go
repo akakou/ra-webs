@@ -34,7 +34,7 @@ func Default(ctx context.Context) (*CrtshMonitor, error) {
 
 func (a *CrtshMonitor) Run(monitor *monitor.Monitor) {
 	for {
-		entries, err := crtsh.Fetch(monitor.Domain, "")
+		entries, err := crtsh.Fetch(monitor.TADomain, "")
 		if err == nil {
 			fmt.Printf("ct-log: %v\n", entries)
 		} else if err.Error() == direct.ERROR_FAILED_TO_NEW {

@@ -119,7 +119,7 @@ func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) {
 		panic(err)
 	}
 
-	err = NotifyUpdate(monitor.Domain, monitor)
+	err = NotifyUpdate(monitor.TADomain, monitor)
 	if err != nil {
 		panic(err)
 	}

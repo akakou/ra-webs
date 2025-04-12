@@ -13,7 +13,7 @@ import (
 )
 
 type Monitor struct {
-	Domain      string
+	TADomain    string
 	DB          *DB
 	CT          CT
 	Notifier    Notifier
@@ -21,9 +21,9 @@ type Monitor struct {
 	ATPublicKey *rsa.PublicKey
 }
 
-func New(domain string, db *DB, ct CT, atPublicKey *rsa.PublicKey, notifier Notifier, logclient *logclient.LogClient) (*Monitor, error) {
+func New(taDomain string, db *DB, ct CT, atPublicKey *rsa.PublicKey, notifier Notifier, logclient *logclient.LogClient) (*Monitor, error) {
 	return &Monitor{
-		Domain:      domain,
+		TADomain:    taDomain,
 		DB:          db,
 		CT:          ct,
 		ATPublicKey: atPublicKey,
@@ -33,9 +33,9 @@ func New(domain string, db *DB, ct CT, atPublicKey *rsa.PublicKey, notifier Noti
 }
 
 func Default(ct CT, notifier Notifier) (*Monitor, error) {
-	domain := os.Getenv("DOMAIN")
-	if domain == "" {
-		return nil, errors.Wrap(errDomainEnvironmentVariableIsEmpty, "DOMAIN not found")
+	taDomain := os.Getenv("RA_WEBS_TA_DOMAIN")
+	if taDomain == "" {
+		return nil, errors.Wrap(errDomainEnvironmentVariableIsEmpty, "RA_WEBS_TA_DOMAIN not found")
 	}
 
 	atPublicKey := os.Getenv("RA_WEBS_AT_PUBLIC_KEY")
@@ -46,7 +46,7 @@ func Default(ct CT, notifier Notifier) (*Monitor, error) {
 	}
 
 	atDomain := os.Getenv("RA_WEBS_AT_DOMAIN")
-	if domain == "" {
+	if atDomain == "" {
 		return nil, errors.Wrap(errDomainEnvironmentVariableIsEmpty, "RA_WEBS_AT_DOMAIN not found")
 	}
 
@@ -69,7 +69,7 @@ func Default(ct CT, notifier Notifier) (*Monitor, error) {
 		return nil, err
 	}
 
-	return New(domain, db, ct, rsaATPublicKey.(*rsa.PublicKey), notifier, logclient)
+	return New(taDomain, db, ct, rsaATPublicKey.(*rsa.PublicKey), notifier, logclient)
 }
 
 func (monitor *Monitor) Run() {
