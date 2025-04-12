@@ -8,4 +8,5 @@ import (
 func Route(e *echo.Group, monitor *serv.MonitorServer) {
 	GetServerFromDomainApi.Set(e, monitor)
 	PostNotifierApi.Set(e, monitor)
+	GetConfigApi.Set(e, monitor)
 }
