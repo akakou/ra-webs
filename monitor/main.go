@@ -48,7 +48,7 @@ func (monitor *Monitor) MonitorATLog(log *io.TA) {
 	}
 
 	publicKey := report.Data
-	uniqueId := report.Data
+	uniqueId := report.UniqueID
 
 	ta, err := monitor.RegisterTA(publicKey)
 	if err != nil {
