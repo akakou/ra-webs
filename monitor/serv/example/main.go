@@ -7,6 +7,7 @@ import (
 	"io"
 
 	"github.com/akakou/ra-webs/core"
+	"github.com/akakou/ra-webs/core/attest/debug"
 	"github.com/akakou/ra-webs/monitor/serv"
 	"github.com/akakou/ra-webs/monitor/serv/api"
 
@@ -39,6 +40,8 @@ func InjectSWHeader(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func main() {
+	debug.EnableDebug()
+
 	e := echo.New()
 	apiGroup := e.Group(core.API_ROOT)
 

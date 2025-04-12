@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	debug "github.com/akakou/ra-webs/core/attest/debug"
-
+	"github.com/akakou/ra-webs/core/attest/debug"
 	"github.com/akakou/ra-webs/ta"
 )
 
