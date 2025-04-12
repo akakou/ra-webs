@@ -68,6 +68,6 @@ func main() {
 		s.Monitor.Notifier.(*browsernotify.BrowserNotifier).VapidPublicKey,
 		s.Monitor.Notifier.(*browsernotify.BrowserNotifier).VapidPrivateKey)
 
-	err = s.Run(":8080", e)
+	err = s.Run(":8000", e)
 	e.Logger.Fatal(err)
 }
