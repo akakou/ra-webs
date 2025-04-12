@@ -80,7 +80,7 @@ func (monitor *Monitor) MonitorATLog(log *io.TA) {
 	}
 
 	atLog.Update().SetIsActive(true).SaveX(*monitor.DB.Ctx)
-	fmt.Printf("Inserted: %v", atLog)
+	fmt.Printf("Inserted: %v\n", atLog)
 
 }
 
@@ -109,11 +109,8 @@ func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) {
 		return
 	}
 
-	if err != nil {
-		panic(err)
-	}
-
 	if !exist {
+		fmt.Printf("TA is not found: %x\n", publicKeyBuf)
 		monitor.Revoke(ta)
 		return
 	}
@@ -128,5 +125,5 @@ func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) {
 		panic(err)
 	}
 
-	fmt.Printf("Inserted: %v", ctLog)
+	fmt.Printf("Inserted: %v\n", ctLog)
 }
