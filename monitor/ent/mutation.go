@@ -1806,7 +1806,7 @@ func (m *TAMutation) PublicKey() (r []byte, exists bool) {
 // OldPublicKey returns the old "public_key" field's value of the TA entity.
 // If the TA object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAMutation) OldPublicKey(ctx context.Context) (v []byte, err error) {
+func (m *TAMutation) OldPublicKey(ctx context.Context) (v *[]byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPublicKey is only allowed on UpdateOne operations")
 	}

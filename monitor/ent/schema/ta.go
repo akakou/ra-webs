@@ -14,7 +14,7 @@ type TA struct {
 // Fields of the TA.
 func (TA) Fields() []ent.Field {
 	return []ent.Field{
-		field.Bytes("public_key"),
+		field.Bytes("public_key").Nillable(),
 	}
 }
 
