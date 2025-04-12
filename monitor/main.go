@@ -50,18 +50,6 @@ func (monitor *Monitor) MonitorATLog(log *io.TA) {
 	publicKey := report.Data
 	uniqueId := report.UniqueID
 
-	ta, err := monitor.RegisterTA(publicKey)
-	if err != nil {
-		// fmt.Printf("Violation: %v\n", err)
-		return
-	}
-
-	atLog, err := monitor.RegisterATLog(uniqueId, log, ta, false)
-	if err != nil {
-		// fmt.Printf("Violation: %v\n", err)
-		return
-	}
-
 	err = CheckSignature(log.Signature, &sign.LogPlain{
 		Repository: log.Repository,
 		Evidence:   log.Evidence,
@@ -79,7 +67,18 @@ func (monitor *Monitor) MonitorATLog(log *io.TA) {
 		return
 	}
 
-	atLog.Update().SetIsActive(true).SaveX(*monitor.DB.Ctx)
+	ta, err := monitor.RegisterTA(publicKey)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+
+	atLog, err := monitor.RegisterATLog(uniqueId, log, ta, true)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+
 	fmt.Printf("Inserted: %v\n", atLog)
 
 }
