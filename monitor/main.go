@@ -80,6 +80,8 @@ func (monitor *Monitor) MonitorATLog(log *io.TA) {
 	}
 
 	atLog.Update().SetIsActive(true).SaveX(*monitor.DB.Ctx)
+	fmt.Printf("Inserted: %v", atLog)
+
 }
 
 func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) {
@@ -107,17 +109,24 @@ func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) {
 		return
 	}
 
-	if exist {
-		_, err = monitor.RegisterCTLog(entry.ID, ta)
-		if err != nil {
-			panic(err)
-		}
-
-		err = NotifyUpdate(monitor.Domain, monitor)
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		monitor.Revoke(ta)
+	if err != nil {
+		panic(err)
 	}
+
+	if !exist {
+		monitor.Revoke(ta)
+		return
+	}
+
+	ctLog, err := monitor.RegisterCTLog(entry.ID, ta)
+	if err != nil {
+		panic(err)
+	}
+
+	err = NotifyUpdate(monitor.Domain, monitor)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("Inserted: %v", ctLog)
 }
