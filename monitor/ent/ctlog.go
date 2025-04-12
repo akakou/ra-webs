@@ -17,8 +17,6 @@ type CTLog struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// PublicKey holds the value of the "public_key" field.
-	PublicKey []byte `json:"public_key,omitempty"`
 	// MonitorLogID holds the value of the "monitor_log_id" field.
 	MonitorLogID int `json:"monitor_log_id,omitempty"`
 	// IsActive holds the value of the "is_active" field.
@@ -55,8 +53,6 @@ func (*CTLog) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case ctlog.FieldPublicKey:
-			values[i] = new([]byte)
 		case ctlog.FieldIsActive:
 			values[i] = new(sql.NullBool)
 		case ctlog.FieldID, ctlog.FieldMonitorLogID:
@@ -84,12 +80,6 @@ func (cl *CTLog) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			cl.ID = int(value.Int64)
-		case ctlog.FieldPublicKey:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field public_key", values[i])
-			} else if value != nil {
-				cl.PublicKey = *value
-			}
 		case ctlog.FieldMonitorLogID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field monitor_log_id", values[i])
@@ -150,9 +140,6 @@ func (cl *CTLog) String() string {
 	var builder strings.Builder
 	builder.WriteString("CTLog(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", cl.ID))
-	builder.WriteString("public_key=")
-	builder.WriteString(fmt.Sprintf("%v", cl.PublicKey))
-	builder.WriteString(", ")
 	builder.WriteString("monitor_log_id=")
 	builder.WriteString(fmt.Sprintf("%v", cl.MonitorLogID))
 	builder.WriteString(", ")

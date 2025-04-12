@@ -53,11 +53,6 @@ func IDLTE(id int) predicate.CTLog {
 	return predicate.CTLog(sql.FieldLTE(FieldID, id))
 }
 
-// PublicKey applies equality check predicate on the "public_key" field. It's identical to PublicKeyEQ.
-func PublicKey(v []byte) predicate.CTLog {
-	return predicate.CTLog(sql.FieldEQ(FieldPublicKey, v))
-}
-
 // MonitorLogID applies equality check predicate on the "monitor_log_id" field. It's identical to MonitorLogIDEQ.
 func MonitorLogID(v int) predicate.CTLog {
 	return predicate.CTLog(sql.FieldEQ(FieldMonitorLogID, v))
@@ -66,46 +61,6 @@ func MonitorLogID(v int) predicate.CTLog {
 // IsActive applies equality check predicate on the "is_active" field. It's identical to IsActiveEQ.
 func IsActive(v bool) predicate.CTLog {
 	return predicate.CTLog(sql.FieldEQ(FieldIsActive, v))
-}
-
-// PublicKeyEQ applies the EQ predicate on the "public_key" field.
-func PublicKeyEQ(v []byte) predicate.CTLog {
-	return predicate.CTLog(sql.FieldEQ(FieldPublicKey, v))
-}
-
-// PublicKeyNEQ applies the NEQ predicate on the "public_key" field.
-func PublicKeyNEQ(v []byte) predicate.CTLog {
-	return predicate.CTLog(sql.FieldNEQ(FieldPublicKey, v))
-}
-
-// PublicKeyIn applies the In predicate on the "public_key" field.
-func PublicKeyIn(vs ...[]byte) predicate.CTLog {
-	return predicate.CTLog(sql.FieldIn(FieldPublicKey, vs...))
-}
-
-// PublicKeyNotIn applies the NotIn predicate on the "public_key" field.
-func PublicKeyNotIn(vs ...[]byte) predicate.CTLog {
-	return predicate.CTLog(sql.FieldNotIn(FieldPublicKey, vs...))
-}
-
-// PublicKeyGT applies the GT predicate on the "public_key" field.
-func PublicKeyGT(v []byte) predicate.CTLog {
-	return predicate.CTLog(sql.FieldGT(FieldPublicKey, v))
-}
-
-// PublicKeyGTE applies the GTE predicate on the "public_key" field.
-func PublicKeyGTE(v []byte) predicate.CTLog {
-	return predicate.CTLog(sql.FieldGTE(FieldPublicKey, v))
-}
-
-// PublicKeyLT applies the LT predicate on the "public_key" field.
-func PublicKeyLT(v []byte) predicate.CTLog {
-	return predicate.CTLog(sql.FieldLT(FieldPublicKey, v))
-}
-
-// PublicKeyLTE applies the LTE predicate on the "public_key" field.
-func PublicKeyLTE(v []byte) predicate.CTLog {
-	return predicate.CTLog(sql.FieldLTE(FieldPublicKey, v))
 }
 
 // MonitorLogIDEQ applies the EQ predicate on the "monitor_log_id" field.

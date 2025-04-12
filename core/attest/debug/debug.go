@@ -22,7 +22,7 @@ func debugVerifyByAzure(evudence string) (*attestation.Report, error) {
 		return nil, err
 	}
 
-	uniqueId, _ := hex.DecodeString("8bc46f9bf7569a0d3c21f37bdeca94c54f504806")
+	uniqueId, _ := hex.DecodeString("4759f05537868a6dbfbd2bf1109b8805c49a40ef4cd37ed4e5c446743523d4e5")
 	return &attestation.Report{
 		UniqueID:  uniqueId,
 		Data:      data,

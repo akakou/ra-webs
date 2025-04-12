@@ -299,12 +299,12 @@ func (clq *CTLogQuery) WithTa(opts ...func(*TAQuery)) *CTLogQuery {
 // Example:
 //
 //	var v []struct {
-//		PublicKey []byte `json:"public_key,omitempty"`
+//		MonitorLogID int `json:"monitor_log_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.CTLog.Query().
-//		GroupBy(ctlog.FieldPublicKey).
+//		GroupBy(ctlog.FieldMonitorLogID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (clq *CTLogQuery) GroupBy(field string, fields ...string) *CTLogGroupBy {
@@ -322,11 +322,11 @@ func (clq *CTLogQuery) GroupBy(field string, fields ...string) *CTLogGroupBy {
 // Example:
 //
 //	var v []struct {
-//		PublicKey []byte `json:"public_key,omitempty"`
+//		MonitorLogID int `json:"monitor_log_id,omitempty"`
 //	}
 //
 //	client.CTLog.Query().
-//		Select(ctlog.FieldPublicKey).
+//		Select(ctlog.FieldMonitorLogID).
 //		Scan(ctx, &v)
 func (clq *CTLogQuery) Select(fields ...string) *CTLogSelect {
 	clq.ctx.Fields = append(clq.ctx.Fields, fields...)

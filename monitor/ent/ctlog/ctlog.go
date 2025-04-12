@@ -12,8 +12,6 @@ const (
 	Label = "ct_log"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldPublicKey holds the string denoting the public_key field in the database.
-	FieldPublicKey = "public_key"
 	// FieldMonitorLogID holds the string denoting the monitor_log_id field in the database.
 	FieldMonitorLogID = "monitor_log_id"
 	// FieldIsActive holds the string denoting the is_active field in the database.
@@ -34,7 +32,6 @@ const (
 // Columns holds all SQL columns for ctlog fields.
 var Columns = []string{
 	FieldID,
-	FieldPublicKey,
 	FieldMonitorLogID,
 	FieldIsActive,
 }

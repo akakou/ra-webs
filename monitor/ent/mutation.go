@@ -704,7 +704,6 @@ type CTLogMutation struct {
 	op                Op
 	typ               string
 	id                *int
-	public_key        *[]byte
 	monitor_log_id    *int
 	addmonitor_log_id *int
 	is_active         *bool
@@ -812,42 +811,6 @@ func (m *CTLogMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetPublicKey sets the "public_key" field.
-func (m *CTLogMutation) SetPublicKey(b []byte) {
-	m.public_key = &b
-}
-
-// PublicKey returns the value of the "public_key" field in the mutation.
-func (m *CTLogMutation) PublicKey() (r []byte, exists bool) {
-	v := m.public_key
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPublicKey returns the old "public_key" field's value of the CTLog entity.
-// If the CTLog object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CTLogMutation) OldPublicKey(ctx context.Context) (v []byte, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPublicKey is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPublicKey requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPublicKey: %w", err)
-	}
-	return oldValue.PublicKey, nil
-}
-
-// ResetPublicKey resets all changes to the "public_key" field.
-func (m *CTLogMutation) ResetPublicKey() {
-	m.public_key = nil
 }
 
 // SetMonitorLogID sets the "monitor_log_id" field.
@@ -1015,10 +978,7 @@ func (m *CTLogMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CTLogMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.public_key != nil {
-		fields = append(fields, ctlog.FieldPublicKey)
-	}
+	fields := make([]string, 0, 2)
 	if m.monitor_log_id != nil {
 		fields = append(fields, ctlog.FieldMonitorLogID)
 	}
@@ -1033,8 +993,6 @@ func (m *CTLogMutation) Fields() []string {
 // schema.
 func (m *CTLogMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case ctlog.FieldPublicKey:
-		return m.PublicKey()
 	case ctlog.FieldMonitorLogID:
 		return m.MonitorLogID()
 	case ctlog.FieldIsActive:
@@ -1048,8 +1006,6 @@ func (m *CTLogMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *CTLogMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case ctlog.FieldPublicKey:
-		return m.OldPublicKey(ctx)
 	case ctlog.FieldMonitorLogID:
 		return m.OldMonitorLogID(ctx)
 	case ctlog.FieldIsActive:
@@ -1063,13 +1019,6 @@ func (m *CTLogMutation) OldField(ctx context.Context, name string) (ent.Value, e
 // type.
 func (m *CTLogMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case ctlog.FieldPublicKey:
-		v, ok := value.([]byte)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPublicKey(v)
-		return nil
 	case ctlog.FieldMonitorLogID:
 		v, ok := value.(int)
 		if !ok {
@@ -1148,9 +1097,6 @@ func (m *CTLogMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *CTLogMutation) ResetField(name string) error {
 	switch name {
-	case ctlog.FieldPublicKey:
-		m.ResetPublicKey()
-		return nil
 	case ctlog.FieldMonitorLogID:
 		m.ResetMonitorLogID()
 		return nil

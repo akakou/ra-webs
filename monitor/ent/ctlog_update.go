@@ -28,12 +28,6 @@ func (clu *CTLogUpdate) Where(ps ...predicate.CTLog) *CTLogUpdate {
 	return clu
 }
 
-// SetPublicKey sets the "public_key" field.
-func (clu *CTLogUpdate) SetPublicKey(b []byte) *CTLogUpdate {
-	clu.mutation.SetPublicKey(b)
-	return clu
-}
-
 // SetMonitorLogID sets the "monitor_log_id" field.
 func (clu *CTLogUpdate) SetMonitorLogID(i int) *CTLogUpdate {
 	clu.mutation.ResetMonitorLogID()
@@ -135,9 +129,6 @@ func (clu *CTLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := clu.mutation.PublicKey(); ok {
-		_spec.SetField(ctlog.FieldPublicKey, field.TypeBytes, value)
-	}
 	if value, ok := clu.mutation.MonitorLogID(); ok {
 		_spec.SetField(ctlog.FieldMonitorLogID, field.TypeInt, value)
 	}
@@ -194,12 +185,6 @@ type CTLogUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *CTLogMutation
-}
-
-// SetPublicKey sets the "public_key" field.
-func (cluo *CTLogUpdateOne) SetPublicKey(b []byte) *CTLogUpdateOne {
-	cluo.mutation.SetPublicKey(b)
-	return cluo
 }
 
 // SetMonitorLogID sets the "monitor_log_id" field.
@@ -332,9 +317,6 @@ func (cluo *CTLogUpdateOne) sqlSave(ctx context.Context) (_node *CTLog, err erro
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := cluo.mutation.PublicKey(); ok {
-		_spec.SetField(ctlog.FieldPublicKey, field.TypeBytes, value)
 	}
 	if value, ok := cluo.mutation.MonitorLogID(); ok {
 		_spec.SetField(ctlog.FieldMonitorLogID, field.TypeInt, value)
