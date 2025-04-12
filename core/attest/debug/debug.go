@@ -1,4 +1,4 @@
-package attest
+package debug
 
 import (
 	"github.com/akakou/ra-webs/core/attest"
