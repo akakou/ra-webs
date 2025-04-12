@@ -40,6 +40,7 @@ func Default() (*BrowserNotifier, error) {
 	return New(privateKey, publicKey, DEFAULT_SUBSCRIBER, TTL_MAX), err
 }
 
-func (notifier *BrowserNotifier) Setup(group *echo.Group) {
+func (notifier *BrowserNotifier) Setup(monitor *monitor.Monitor, group *echo.Group) {
+	notifier.Monitor = monitor
 	notifier.setUpRoute(group)
 }
