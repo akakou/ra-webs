@@ -10,6 +10,8 @@ import (
 	"github.com/akakou/ra-webs/monitor"
 )
 
+var Sleep = time.Second * 10
+
 type CrtshMonitor struct {
 	Last     int
 	Interval time.Duration
@@ -33,8 +35,8 @@ func Default(ctx context.Context) (*CrtshMonitor, error) {
 func (a *CrtshMonitor) Run(monitor *monitor.Monitor) {
 	for {
 		entries, err := crtsh.Fetch(monitor.Domain, "")
-
 		if err == nil {
+			fmt.Printf("ct-log: %v\n", entries)
 		} else if err.Error() == direct.ERROR_FAILED_TO_NEW {
 			return
 		} else {
@@ -43,5 +45,6 @@ func (a *CrtshMonitor) Run(monitor *monitor.Monitor) {
 		}
 
 		monitor.Monitor(entries)
+		time.Sleep(Sleep)
 	}
 }
