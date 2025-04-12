@@ -1,6 +1,8 @@
 package attest
 
 import (
+	"encoding/hex"
+
 	"github.com/akakou/ra-webs/core/attest"
 	"github.com/edgelesssys/ego/attestation"
 	"github.com/edgelesssys/ego/attestation/tcbstatus"
@@ -13,8 +15,9 @@ func debugAttestByAzure(data []byte) (string, error) {
 }
 
 func debugVerifyByAzure(evudence string) (*attestation.Report, error) {
+	uniqueId, _ := hex.DecodeString("8bc46f9bf7569a0d3c21f37bdeca94c54f504806")
 	return &attestation.Report{
-		UniqueID:  []byte{1, 2, 3},
+		UniqueID:  uniqueId,
 		Data:      []byte{4, 5, 6},
 		Debug:     false,
 		TCBStatus: tcbstatus.UpToDate,
