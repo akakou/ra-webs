@@ -3,41 +3,59 @@ services:
   ta_example:
     tty: true
     build: ./
-    network_mode: host
+    # network_mode: host
     volumes:
       - ./ta:/ta
       - ./core:/core
       - ./test:/test
-      - /dev:/dev
+      # - /dev:/dev
     working_dir: /ta/example
-    command: bash -c 'mount -o remount,exec /dev && ego-go build -buildvcs=false -trimpath=true && ego sign example && source /test/issue_service.sh && ego run example'
-    privileged: true
+    # command: bash -c 'mount -o remount,exec /dev && ego-go build -buildvcs=false -trimpath=true && ego sign example && source /test/issue_service.sh && ego run example'
+    command: bash -c 'ego-go build -buildvcs=false -trimpath=true && ego sign example && source /test/issue_service.sh && ego run example'
+    # privileged: true
     environment:
-      - OE_SIMULATION=0
+      - OE_SIMULATION=1
     env_file:
       - test/env/ta.env
       - test/env/common.env
-    profiles:
-      - ta
+    # profiles:
+      # - ta
+    restart: always
+    ports: 
+      - 443:443
+
+  log:
+    build: ./
+    volumes:
+      - ./core:/core
+      - ./log:/log
+    working_dir: /log/serv
+    command: bash -c 'go mod tidy && go run .'
+    env_file:
+      - test/env/log.env
+    ports: 
+      - 8080:8080 
 
   monitor:
     build: ./
     volumes:
       - ./monitor:/monitor
       - ./core:/core
+      - ./log:/log
     working_dir: /monitor/serv/example
     command: bash -c 'go mod tidy && go run .'
     env_file:
       - test/env/monitor.env
       - test/env/common.env
     privileged: true
-    tty: true
-    profiles:
-      - monitor
+    ports: 
+      - 8000:8000 
+    # profiles:
+      # - monitor
 
-  tunnel:
-    restart: unless-stopped
-    image: cloudflare/cloudflared
-    command: tunnel --url http://monitor:8080 
-    profiles:
-      - monitor
+  # tunnel:
+  #   restart: unless-stopped
+  #   image: cloudflare/cloudflared
+  #   command: tunnel --url http://monitor:8080 
+  #   profiles:
+  #     - monitor
