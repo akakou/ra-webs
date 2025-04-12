@@ -1,4 +1,4 @@
-package attest
+package debug
 
 import (
 	"encoding/base64"

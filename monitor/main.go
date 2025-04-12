@@ -18,13 +18,6 @@ func (monitor *Monitor) Monitor(ctLogs []crtsh.CertificateEntry) {
 	atLogs, err := monitor.LogClient.Fetch()
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
-		monitor.RegisterBrokenATLog(&io.TA{
-			Evidence:   "",
-			Signature:  []byte(""),
-			Repository: "",
-			CommitID:   "",
-		})
-
 		return
 	}
 
@@ -50,24 +43,22 @@ func (monitor *Monitor) MonitorATLog(log *io.TA) {
 
 	report, err := CheckEvidence(log.Evidence)
 	if err != nil {
-		fmt.Printf("Violation: %v\n", err)
-		monitor.RegisterIncompletedATLog(log)
+		fmt.Printf("Failed to Check Evidence: %v\n", err)
 		return
 	}
 
 	publicKey := report.Data
 	uniqueId := report.Data
 
-	ta, _, err := monitor.SelectOrRegisterTA(publicKey)
+	ta, err := monitor.RegisterTA(publicKey)
 	if err != nil {
-		fmt.Printf("Violation: %v\n", err)
-		monitor.RegisterIncompletedATLog(log)
+		// fmt.Printf("Violation: %v\n", err)
 		return
 	}
 
 	atLog, err := monitor.RegisterATLog(uniqueId, log, ta, false)
 	if err != nil {
-		fmt.Printf("Violation: %v\n", err)
+		// fmt.Printf("Violation: %v\n", err)
 		return
 	}
 
@@ -78,13 +69,13 @@ func (monitor *Monitor) MonitorATLog(log *io.TA) {
 	}, monitor.ATPublicKey)
 
 	if err != nil {
-		fmt.Printf("Violation: %v\n", err)
+		fmt.Printf("Failed to Check Signature: %v\n", err)
 		return
 	}
 
 	err = CheckSourceHash(log, uniqueId)
 	if err != nil {
-		fmt.Printf("Violation: %v\n", err)
+		fmt.Printf("Failed to Check Source Hash: %v\n", err)
 		return
 	}
 
@@ -92,13 +83,9 @@ func (monitor *Monitor) MonitorATLog(log *io.TA) {
 }
 
 func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) {
-	exist, err := monitor.DB.Client.CTLog.Query().
+	exist := monitor.DB.Client.CTLog.Query().
 		Where(ctlog.MonitorLogIDEQ(entry.ID)).
-		Exist(*monitor.DB.Ctx)
-
-	if err != nil {
-		panic(err)
-	}
+		ExistX(*monitor.DB.Ctx)
 
 	if exist {
 		return
@@ -106,8 +93,8 @@ func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) {
 
 	unmarshaledPublicKey, isRSA := entry.Certificate.PublicKey.(*rsa.PublicKey)
 	if !isRSA {
-		fmt.Printf("Violation: %v\n", err)
-		monitor.RevokeIncompletedCTLog(entry.ID)
+		fmt.Printf("Violation: %v\n", errPublicKeyIsNotRSA)
+		monitor.RevokeIncompletedCTLog(entry.ID, nil)
 		return
 	}
 
@@ -116,7 +103,7 @@ func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) {
 	ta, exist, err := monitor.SelectOrRegisterTA(publicKeyBuf)
 	if err != nil {
 		fmt.Printf("Violation: %v\n", err)
-		monitor.RevokeIncompletedCTLog(entry.ID)
+		monitor.RevokeIncompletedCTLog(entry.ID, ta)
 		return
 	}
 

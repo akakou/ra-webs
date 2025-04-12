@@ -22,15 +22,19 @@
             "fromHost": true
         },
         {
-            "name": "RA_WEBS_VERIFIER_BASES",
-            "fromHost": true
-        },
-        {
             "name": "RA_WEBS_TA_REPOSITORY",
             "fromHost": true
         },
         {
             "name": "RA_WEBS_SERVICE_EMAIL",
+            "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_TA_COMMIT_ID",
+            "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_AT_LOG_BASE",
             "fromHost": true
         }
     ],

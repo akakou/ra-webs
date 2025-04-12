@@ -1,6 +1,8 @@
 package monitor
 
 import (
+	"fmt"
+
 	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/monitor/ent"
 )
@@ -16,12 +18,16 @@ func (monitor *Monitor) Revoke(ta *ent.TA) {
 		SaveX(*monitor.DB.Ctx)
 }
 
-func (monitor *Monitor) RevokeIncompletedCTLog(ctLogId int) {
-	ta, err := monitor.RegisterTA([]byte(""))
-	if err != nil {
-		panic(err)
+func (monitor *Monitor) RevokeIncompletedCTLog(ctLogId int, ta *ent.TA) {
+	var err error
+	if ta == nil {
+		ta, err = monitor.RegisterTA([]byte("no public key"))
+		if err != nil {
+			panic(err)
+		}
 	}
 
+	fmt.Printf("ta: %v", ta)
 	_, err = monitor.RegisterCTLog(ctLogId, ta)
 	if err != nil {
 		panic(err)

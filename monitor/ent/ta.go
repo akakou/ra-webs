@@ -17,7 +17,7 @@ type TA struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// PublicKey holds the value of the "public_key" field.
-	PublicKey []byte `json:"public_key,omitempty"`
+	PublicKey *[]byte `json:"public_key,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TAQuery when eager-loading is set.
 	Edges        TAEdges `json:"edges"`
@@ -98,7 +98,7 @@ func (t *TA) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field public_key", values[i])
 			} else if value != nil {
-				t.PublicKey = *value
+				t.PublicKey = value
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -151,8 +151,10 @@ func (t *TA) String() string {
 	var builder strings.Builder
 	builder.WriteString("TA(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
-	builder.WriteString("public_key=")
-	builder.WriteString(fmt.Sprintf("%v", t.PublicKey))
+	if v := t.PublicKey; v != nil {
+		builder.WriteString("public_key=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

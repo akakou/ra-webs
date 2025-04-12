@@ -138,7 +138,7 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 	)
 	if value, ok := tc.mutation.PublicKey(); ok {
 		_spec.SetField(ta.FieldPublicKey, field.TypeBytes, value)
-		_node.PublicKey = value
+		_node.PublicKey = &value
 	}
 	if nodes := tc.mutation.ViolationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
