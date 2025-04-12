@@ -6,23 +6,22 @@ const App = () => {
     const [hostname, setHostname] = useState("");
 
     useEffect(async () => {
-        const referrer = new URL(document.referrer);
+        const referrer = new URL("http://localhost:8000");
         // const referrer = new URL("https://example.com")
 
         setHostname(referrer.hostname)
   
-        await setupNotification(referrer.hostname)
+        await setupNotification()
 
-        const resp = await axios.get(`/api/ta/${referrer.hostname}`)
+        const resp = await axios.get(`/api/ta`)
         console.log(resp)
     
-        const ta = resp.data.ta
-        const v = resp.data.is_valid
+        const logs = resp.data
+        const v = checkValidity(logs)
 
         var message = v ? VALID_MESSAGE : INVALID_MESSAGE
-        message += " " + resp.data.message
 
-        setLogs(ta)
+        setLogs(logs)
         setIsValid(v)
         setMessage(message)
 
