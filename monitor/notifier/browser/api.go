@@ -63,3 +63,8 @@ func getSubscriptionConfigApi(notifier *BrowserNotifier) goutils.EchoRoute[monit
 		},
 	}
 }
+
+func (notifier *BrowserNotifier) setUpRoute(e *echo.Group) {
+	postSubscribeApi.Set(e, notifier.Monitor)
+	getSubscriptionConfigApi(notifier).Set(e, notifier.Monitor)
+}

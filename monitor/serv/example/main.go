@@ -63,6 +63,7 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(InjectSWHeader)
 
+	s.Monitor.Notifier.(*browsernotify.BrowserNotifier).Setup(apiGroup)
 	e.Debug = true
 	fmt.Printf("public: %v\nprivate: %v",
 		s.Monitor.Notifier.(*browsernotify.BrowserNotifier).VapidPublicKey,

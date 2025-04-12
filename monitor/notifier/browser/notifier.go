@@ -5,6 +5,7 @@ import (
 
 	"github.com/SherClockHolmes/webpush-go"
 	"github.com/akakou/ra-webs/monitor"
+	"github.com/labstack/echo/v4"
 )
 
 const TTL_MAX = 2419200
@@ -37,4 +38,8 @@ func Default() (*BrowserNotifier, error) {
 	}
 
 	return New(privateKey, publicKey, DEFAULT_SUBSCRIBER, TTL_MAX), err
+}
+
+func (notifier *BrowserNotifier) Setup(group *echo.Group) {
+	notifier.setUpRoute(group)
 }
