@@ -41,12 +41,12 @@ func (monitor *Monitor) RegisterTA(publicKey []byte) (*ent.TA, error) {
 	return ta, nil
 }
 
-func (monitor *Monitor) RegisterCTLog(ctLogId int, ta *ent.TA) (*ent.CTLog, error) {
+func (monitor *Monitor) RegisterCTLog(ctLogId int, ta *ent.TA, isActive bool) (*ent.CTLog, error) {
 	ctLogCreate := monitor.DB.Client.CTLog.
 		Create().
 		SetMonitorLogID(ctLogId).
 		SetTa(ta).
-		SetIsActive(true)
+		SetIsActive(isActive)
 
 	ctLog, err := ctLogCreate.Save(*monitor.DB.Ctx)
 	if err != nil {

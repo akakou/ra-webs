@@ -28,7 +28,7 @@ func (monitor *Monitor) RevokeIncompletedCTLog(ctLogId int, ta *ent.TA) {
 	}
 
 	fmt.Printf("ta: %v", ta)
-	_, err = monitor.RegisterCTLog(ctLogId, ta)
+	_, err = monitor.RegisterCTLog(ctLogId, ta, false)
 	if err != nil {
 		panic(err)
 	}

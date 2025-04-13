@@ -114,7 +114,7 @@ func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) {
 		return
 	}
 
-	ctLog, err := monitor.RegisterCTLog(entry.ID, ta)
+	ctLog, err := monitor.RegisterCTLog(entry.ID, ta, true)
 	if err != nil {
 		panic(err)
 	}
