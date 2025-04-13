@@ -7,25 +7,24 @@ import (
 )
 
 func (monitor *Monitor) SelectOrRegisterTA(publicKey []byte) (*ent.TA, bool, error) {
-	ta, err := monitor.DB.Client.TA.Query().
+	exist, err := monitor.DB.Client.TA.Query().
 		Where(ta.PublicKeyEQ(publicKey)).
-		Only(*monitor.DB.Ctx)
+		Exist(*monitor.DB.Ctx)
 
 	if err != nil {
 		return nil, false, err
 	}
 
-	if ta != nil {
-		return ta, true, nil
+	var t *ent.TA
+	if exist {
+		t, err = monitor.DB.Client.TA.Query().
+			Where(ta.PublicKeyEQ(publicKey)).
+			Only(*monitor.DB.Ctx)
+	} else {
+		t, err = monitor.RegisterTA(publicKey)
 	}
 
-	ta, err = monitor.RegisterTA(publicKey)
-
-	if err != nil {
-		return nil, false, err
-	}
-
-	return ta, false, nil
+	return t, exist, err
 }
 
 func (monitor *Monitor) RegisterTA(publicKey []byte) (*ent.TA, error) {
