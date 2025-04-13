@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var GetServerFromDomainApi = goutils.EchoRoute[serv.MonitorServer]{
+var GetLogs = goutils.EchoRoute[serv.MonitorServer]{
 	Method: goutils.GET,
 	Path:   "/ta",
 	F: func(server *serv.MonitorServer) goutils.EchoRouteFunc {
