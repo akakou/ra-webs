@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -24,7 +25,6 @@ type ATLogQuery struct {
 	inters     []Interceptor
 	predicates []predicate.ATLog
 	withTa     *TAQuery
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,7 +75,7 @@ func (alq *ATLogQuery) QueryTa() *TAQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(atlog.Table, atlog.FieldID, selector),
 			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, atlog.TaTable, atlog.TaColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, atlog.TaTable, atlog.TaColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(alq.driver.Dialect(), step)
 		return fromU, nil
@@ -370,18 +370,11 @@ func (alq *ATLogQuery) prepareQuery(ctx context.Context) error {
 func (alq *ATLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*ATLog, error) {
 	var (
 		nodes       = []*ATLog{}
-		withFKs     = alq.withFKs
 		_spec       = alq.querySpec()
 		loadedTypes = [1]bool{
 			alq.withTa != nil,
 		}
 	)
-	if alq.withTa != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, atlog.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*ATLog).scanValues(nil, columns)
 	}
@@ -410,34 +403,30 @@ func (alq *ATLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*ATLog
 }
 
 func (alq *ATLogQuery) loadTa(ctx context.Context, query *TAQuery, nodes []*ATLog, init func(*ATLog), assign func(*ATLog, *TA)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*ATLog)
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*ATLog)
 	for i := range nodes {
-		if nodes[i].at_log_ta == nil {
-			continue
-		}
-		fk := *nodes[i].at_log_ta
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
 	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(ta.IDIn(ids...))
+	query.withFKs = true
+	query.Where(predicate.TA(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(atlog.TaColumn), fks...))
+	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
+		fk := n.at_log_ta
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "at_log_ta" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "at_log_ta" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "at_log_ta" returned %v for node %v`, *fk, n.ID)
 		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
+		assign(node, n)
 	}
 	return nil
 }

@@ -29,7 +29,7 @@ const (
 	// Table holds the table name of the atlog in the database.
 	Table = "at_logs"
 	// TaTable is the table that holds the ta relation/edge.
-	TaTable = "at_logs"
+	TaTable = "tas"
 	// TaInverseTable is the table name for the TA entity.
 	// It exists in this package in order to avoid circular dependency with the "ta" package.
 	TaInverseTable = "tas"
@@ -48,21 +48,10 @@ var Columns = []string{
 	FieldIsActive,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "at_logs"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"at_log_ta",
-}
-
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -112,6 +101,6 @@ func newTaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TaInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, TaTable, TaColumn),
+		sqlgraph.Edge(sqlgraph.O2O, false, TaTable, TaColumn),
 	)
 }

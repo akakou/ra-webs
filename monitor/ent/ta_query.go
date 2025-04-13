@@ -26,9 +26,10 @@ type TAQuery struct {
 	order         []ta.OrderOption
 	inters        []Interceptor
 	predicates    []predicate.TA
-	withViolation *ViolationQuery
 	withCtLog     *CTLogQuery
 	withAtLog     *ATLogQuery
+	withViolation *ViolationQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -63,28 +64,6 @@ func (tq *TAQuery) Unique(unique bool) *TAQuery {
 func (tq *TAQuery) Order(o ...ta.OrderOption) *TAQuery {
 	tq.order = append(tq.order, o...)
 	return tq
-}
-
-// QueryViolation chains the current query on the "violation" edge.
-func (tq *TAQuery) QueryViolation() *ViolationQuery {
-	query := (&ViolationClient{config: tq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := tq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ta.Table, ta.FieldID, selector),
-			sqlgraph.To(violation.Table, violation.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, ta.ViolationTable, ta.ViolationColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // QueryCtLog chains the current query on the "ct_log" edge.
@@ -123,7 +102,29 @@ func (tq *TAQuery) QueryAtLog() *ATLogQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ta.Table, ta.FieldID, selector),
 			sqlgraph.To(atlog.Table, atlog.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, ta.AtLogTable, ta.AtLogColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, ta.AtLogTable, ta.AtLogColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryViolation chains the current query on the "violation" edge.
+func (tq *TAQuery) QueryViolation() *ViolationQuery {
+	query := (&ViolationClient{config: tq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ta.Table, ta.FieldID, selector),
+			sqlgraph.To(violation.Table, violation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, ta.ViolationTable, ta.ViolationColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -323,24 +324,13 @@ func (tq *TAQuery) Clone() *TAQuery {
 		order:         append([]ta.OrderOption{}, tq.order...),
 		inters:        append([]Interceptor{}, tq.inters...),
 		predicates:    append([]predicate.TA{}, tq.predicates...),
-		withViolation: tq.withViolation.Clone(),
 		withCtLog:     tq.withCtLog.Clone(),
 		withAtLog:     tq.withAtLog.Clone(),
+		withViolation: tq.withViolation.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
 	}
-}
-
-// WithViolation tells the query-builder to eager-load the nodes that are connected to
-// the "violation" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TAQuery) WithViolation(opts ...func(*ViolationQuery)) *TAQuery {
-	query := (&ViolationClient{config: tq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	tq.withViolation = query
-	return tq
 }
 
 // WithCtLog tells the query-builder to eager-load the nodes that are connected to
@@ -362,6 +352,17 @@ func (tq *TAQuery) WithAtLog(opts ...func(*ATLogQuery)) *TAQuery {
 		opt(query)
 	}
 	tq.withAtLog = query
+	return tq
+}
+
+// WithViolation tells the query-builder to eager-load the nodes that are connected to
+// the "violation" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TAQuery) WithViolation(opts ...func(*ViolationQuery)) *TAQuery {
+	query := (&ViolationClient{config: tq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withViolation = query
 	return tq
 }
 
@@ -442,13 +443,20 @@ func (tq *TAQuery) prepareQuery(ctx context.Context) error {
 func (tq *TAQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA, error) {
 	var (
 		nodes       = []*TA{}
+		withFKs     = tq.withFKs
 		_spec       = tq.querySpec()
 		loadedTypes = [3]bool{
-			tq.withViolation != nil,
 			tq.withCtLog != nil,
 			tq.withAtLog != nil,
+			tq.withViolation != nil,
 		}
 	)
+	if tq.withAtLog != nil || tq.withViolation != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, ta.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*TA).scanValues(nil, columns)
 	}
@@ -467,13 +475,6 @@ func (tq *TAQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA, error
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := tq.withViolation; query != nil {
-		if err := tq.loadViolation(ctx, query, nodes,
-			func(n *TA) { n.Edges.Violation = []*Violation{} },
-			func(n *TA, e *Violation) { n.Edges.Violation = append(n.Edges.Violation, e) }); err != nil {
-			return nil, err
-		}
-	}
 	if query := tq.withCtLog; query != nil {
 		if err := tq.loadCtLog(ctx, query, nodes,
 			func(n *TA) { n.Edges.CtLog = []*CTLog{} },
@@ -482,46 +483,20 @@ func (tq *TAQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA, error
 		}
 	}
 	if query := tq.withAtLog; query != nil {
-		if err := tq.loadAtLog(ctx, query, nodes,
-			func(n *TA) { n.Edges.AtLog = []*ATLog{} },
-			func(n *TA, e *ATLog) { n.Edges.AtLog = append(n.Edges.AtLog, e) }); err != nil {
+		if err := tq.loadAtLog(ctx, query, nodes, nil,
+			func(n *TA, e *ATLog) { n.Edges.AtLog = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := tq.withViolation; query != nil {
+		if err := tq.loadViolation(ctx, query, nodes, nil,
+			func(n *TA, e *Violation) { n.Edges.Violation = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (tq *TAQuery) loadViolation(ctx context.Context, query *ViolationQuery, nodes []*TA, init func(*TA), assign func(*TA, *Violation)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*TA)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.withFKs = true
-	query.Where(predicate.Violation(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(ta.ViolationColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.violation_ta
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "violation_ta" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "violation_ta" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
 func (tq *TAQuery) loadCtLog(ctx context.Context, query *CTLogQuery, nodes []*TA, init func(*TA), assign func(*TA, *CTLog)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*TA)
@@ -554,33 +529,66 @@ func (tq *TAQuery) loadCtLog(ctx context.Context, query *CTLogQuery, nodes []*TA
 	return nil
 }
 func (tq *TAQuery) loadAtLog(ctx context.Context, query *ATLogQuery, nodes []*TA, init func(*TA), assign func(*TA, *ATLog)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*TA)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TA)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
+		if nodes[i].at_log_ta == nil {
+			continue
 		}
+		fk := *nodes[i].at_log_ta
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.withFKs = true
-	query.Where(predicate.ATLog(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(ta.AtLogColumn), fks...))
-	}))
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(atlog.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.at_log_ta
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "at_log_ta" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "at_log_ta" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "at_log_ta" returned %v`, n.ID)
 		}
-		assign(node, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (tq *TAQuery) loadViolation(ctx context.Context, query *ViolationQuery, nodes []*TA, init func(*TA), assign func(*TA, *Violation)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TA)
+	for i := range nodes {
+		if nodes[i].violation_ta == nil {
+			continue
+		}
+		fk := *nodes[i].violation_ta
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(violation.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "violation_ta" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }

@@ -96,7 +96,7 @@ func (vu *ViolationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if vu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   violation.TaTable,
 			Columns: []string{violation.TaColumn},
@@ -109,7 +109,7 @@ func (vu *ViolationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := vu.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   violation.TaTable,
 			Columns: []string{violation.TaColumn},
@@ -241,7 +241,7 @@ func (vuo *ViolationUpdateOne) sqlSave(ctx context.Context) (_node *Violation, e
 	}
 	if vuo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   violation.TaTable,
 			Columns: []string{violation.TaColumn},
@@ -254,7 +254,7 @@ func (vuo *ViolationUpdateOne) sqlSave(ctx context.Context) (_node *Violation, e
 	}
 	if nodes := vuo.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   violation.TaTable,
 			Columns: []string{violation.TaColumn},

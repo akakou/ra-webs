@@ -182,7 +182,7 @@ func (alu *ATLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if alu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   atlog.TaTable,
 			Columns: []string{atlog.TaColumn},
@@ -195,7 +195,7 @@ func (alu *ATLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := alu.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   atlog.TaTable,
 			Columns: []string{atlog.TaColumn},
@@ -413,7 +413,7 @@ func (aluo *ATLogUpdateOne) sqlSave(ctx context.Context) (_node *ATLog, err erro
 	}
 	if aluo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   atlog.TaTable,
 			Columns: []string{atlog.TaColumn},
@@ -426,7 +426,7 @@ func (aluo *ATLogUpdateOne) sqlSave(ctx context.Context) (_node *ATLog, err erro
 	}
 	if nodes := aluo.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   atlog.TaTable,
 			Columns: []string{atlog.TaColumn},
