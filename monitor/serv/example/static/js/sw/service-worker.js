@@ -1,4 +1,5 @@
 self.addEventListener('push', function (event) {
+    console.log(event)
     const text = event.data.text();
     const lines = text.split('\n')
     const title = lines[0]
