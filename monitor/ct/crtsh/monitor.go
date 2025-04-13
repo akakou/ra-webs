@@ -10,7 +10,7 @@ import (
 	"github.com/akakou/ra-webs/monitor"
 )
 
-var Sleep = time.Second * 10
+var Sleep = time.Second * 30
 
 type CrtshMonitor struct {
 	Last     int
