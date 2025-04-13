@@ -1,6 +1,6 @@
 # ADMIN_TOKEN=""
-# VERIFIER_BASE=""
+# MONITOR_BASE=""
 
-DOMAIN=$1
+TITLE=$1
 MESSAGE=$2
-curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $ADMIN_TOKEN" $VERIFIER_BASE/api/notify -d "{\"domain\" : \"$DOMAIN\", \"body\" : \"$MESSAGE\"}"
+curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $ADMIN_TOKEN" $MONITOR_BASE/api/notify -d "{\"message\" : \"$TITLE\n$MESSAGE\"}"
