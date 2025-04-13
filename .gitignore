@@ -42,3 +42,4 @@ monitor/serv/example/example
 monitor/client/example/example
 log/serv/serv
 monitor/serv/example/debug/tmp
+test/adversary_example/adversary_example
