@@ -40,7 +40,7 @@ func Default(ct CT, notifier Notifier) (*Monitor, error) {
 	}
 
 	dbType := golangutils.GetEnv("DB_TYPE", "sqlite3")
-	dbConfig := golangutils.GetEnv("DB_CONFIG", "file:ent?mode=memory&cache=shared&_fk=1")
+	dbConfig := golangutils.GetEnv("RA_WEBS_DB_CONFIG", "file:ent?mode=memory&cache=shared&_fk=1")
 	fmt.Printf("We use %s as database type and %s as database config\n", dbType, dbConfig)
 
 	dbc := DBConfig{
