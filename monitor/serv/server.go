@@ -47,7 +47,7 @@ func Default() (*MonitorServer, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, errFailPickupRandom.Error())
 	}
-	adminToken = golangutils.GetEnv("ADMIN_TOKEN", adminToken)
+	adminToken = golangutils.GetEnv("SERVICE_TOKEN", adminToken)
 
 	fmt.Printf("Admin token is: %s\n", adminToken)
 
