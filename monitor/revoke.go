@@ -3,8 +3,8 @@ package monitor
 import (
 	"fmt"
 
-	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/monitor/ent"
+	"github.com/akakou/ra-webs/service/api/io"
 )
 
 func (monitor *Monitor) Revoke(ta *ent.TA) {

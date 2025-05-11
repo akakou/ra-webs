@@ -7,9 +7,9 @@ import (
 	"reflect"
 
 	"github.com/akakou/crtsh"
-	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/monitor/ent"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
+	"github.com/akakou/ra-webs/service/api/io"
 )
 
 func (monitor *Monitor) Monitor(ctLogs []crtsh.CertificateEntry) {
@@ -20,7 +20,7 @@ func (monitor *Monitor) Monitor(ctLogs []crtsh.CertificateEntry) {
 
 func (monitor *Monitor) MonitorOne(ctLog crtsh.CertificateEntry) {
 	taLog := monitor.MonitorCTLog(ctLog)
-	taEntry, err := monitor.LogClient.Fetch(*taLog.PublicKey)
+	taEntry, err := monitor.ServiceClient.Fetch(*taLog.PublicKey)
 
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)

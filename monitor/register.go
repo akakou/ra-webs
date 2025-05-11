@@ -1,9 +1,9 @@
 package monitor
 
 import (
-	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/monitor/ent"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
+	"github.com/akakou/ra-webs/service/api/io"
 )
 
 func (monitor *Monitor) SelectOrRegisterTA(publicKey []byte) (*ent.TA, bool, error) {

@@ -5,25 +5,25 @@ import (
 	"os"
 
 	golangutils "github.com/akakou/golang-utils"
-	"github.com/akakou/ra-webs/monitor/logclient"
+	"github.com/akakou/ra-webs/monitor/serviceclient"
 	"github.com/cockroachdb/errors"
 )
 
 type Monitor struct {
-	TADomain  string
-	DB        *DB
-	CT        CT
-	Notifier  Notifier
-	LogClient *logclient.LogClient
+	TADomain      string
+	DB            *DB
+	CT            CT
+	Notifier      Notifier
+	ServiceClient *serviceclient.ServiceClient
 }
 
-func New(taDomain string, db *DB, ct CT, notifier Notifier, logclient *logclient.LogClient) (*Monitor, error) {
+func New(taDomain string, db *DB, ct CT, notifier Notifier, serviceClient *serviceclient.ServiceClient) (*Monitor, error) {
 	return &Monitor{
-		TADomain:  taDomain,
-		DB:        db,
-		CT:        ct,
-		Notifier:  notifier,
-		LogClient: logclient,
+		TADomain:      taDomain,
+		DB:            db,
+		CT:            ct,
+		Notifier:      notifier,
+		ServiceClient: serviceClient,
 	}, nil
 }
 
@@ -52,12 +52,12 @@ func Default(ct CT, notifier Notifier) (*Monitor, error) {
 		return nil, err
 	}
 
-	logclient, err := logclient.New(atDomain)
+	serviceClient, err := serviceclient.New(atDomain)
 	if err != nil {
 		return nil, err
 	}
 
-	return New(taDomain, db, ct, notifier, logclient)
+	return New(taDomain, db, ct, notifier, serviceClient)
 }
 
 func (monitor *Monitor) Run() {

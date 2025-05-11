@@ -24,15 +24,15 @@ services:
     ports: 
       - 443:443
 
-  log:
+  service_example:
     build: ./
     volumes:
       - ./core:/core
-      - ./log:/log
-    working_dir: /log/serv
+      - ./service:/service
+    working_dir: /service/serv
     command: bash -c 'go mod tidy && go run .'
     env_file:
-      - test/env/log.env
+      - test/env/service.env
     ports: 
       - 8080:8080 
 
@@ -41,7 +41,7 @@ services:
     volumes:
       - ./monitor:/monitor
       - ./core:/core
-      - ./log:/log
+      - ./service:/service
     working_dir: /monitor/serv/example
     command: bash -c 'go mod tidy && go run .'
     env_file:
