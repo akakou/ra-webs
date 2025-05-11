@@ -34,9 +34,9 @@ func Default(ct CT, notifier Notifier) (*Monitor, error) {
 		return nil, errors.Wrap(errDomainEnvironmentVariableIsEmpty, "RA_WEBS_TA_DOMAIN not found")
 	}
 
-	serviceDomain := os.Getenv("RA_WEBS_SERVICE_DOMAIN")
-	if serviceDomain == "" {
-		return nil, errors.Wrap(errDomainEnvironmentVariableIsEmpty, "RA_WEBS_SERVICE_DOMAIN not found")
+	serviceBase := os.Getenv("RA_WEBS_SERVICE_BASE")
+	if serviceBase == "" {
+		return nil, errors.Wrap(errDomainEnvironmentVariableIsEmpty, "RA_WEBS_SERVICE_BASE not found")
 	}
 
 	dbType := golangutils.GetEnv("DB_TYPE", "sqlite3")
@@ -53,7 +53,7 @@ func Default(ct CT, notifier Notifier) (*Monitor, error) {
 		return nil, err
 	}
 
-	serviceClient, err := devkitserviceclient.New(serviceDomain)
+	serviceClient, err := devkitserviceclient.New(serviceBase)
 	if err != nil {
 		return nil, err
 	}

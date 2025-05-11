@@ -1,15 +1,15 @@
 package serviceclient
 
 type ServiceClient struct {
-	Domain string
+	BaseURL string
 }
 
-func New(domain string) (*ServiceClient, error) {
+func New(base string) (*ServiceClient, error) {
 	return &ServiceClient{
-		Domain: domain,
+		BaseURL: base,
 	}, nil
 }
 
-func (sc *ServiceClient) SetDomain(domain string) {
-	sc.Domain = domain
+func (sc *ServiceClient) SetDomain(baseURL string) {
+	sc.BaseURL = baseURL
 }

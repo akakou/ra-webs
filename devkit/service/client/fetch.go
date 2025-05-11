@@ -11,18 +11,17 @@ import (
 	sc "github.com/akakou/ra-webs/monitor/serviceclient"
 )
 
-var schema = "http://"
+func (serviceClient *ServiceClient) Fetch(publicKey []byte) (*sc.EvidenceEntry, error) {
+	u, err := url.Parse(serviceClient.BaseURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse URL: %w", err)
 
-func (logclient *ServiceClient) Fetch(publicKey []byte) (*sc.EvidenceEntry, error) {
-	u := url.URL{
-		Scheme: schema,
-		Host:   logclient.Domain,
-		Path:   "/api/ta",
 	}
+
+	u.Path = "/api/ta"
 
 	q := u.Query()
 	encodedPublicKey := base64.URLEncoding.EncodeToString(publicKey)
-
 	q.Set("public_key", encodedPublicKey)
 	u.RawQuery = q.Encode()
 
