@@ -1,9 +1,6 @@
 package log
 
 import (
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
 	"os"
 )
 
@@ -13,11 +10,9 @@ const DOMAIN_NAME = "RA_WEBS_LOG_DOMAIN"
 const AT_PRIVATE_KEY_NAME = "RA_WEBS_AT_PRIVATE_KEY"
 
 type Log struct {
-	SignKey   *rsa.PrivateKey
-	VerifyKey *rsa.PublicKey
-	Domain    string
-	DB        *DB
-	Token     string
+	Domain string
+	DB     *DB
+	Token  string
 }
 
 func Default() (*Log, error) {
@@ -46,17 +41,9 @@ func Default() (*Log, error) {
 		return nil, ErrNoDomain
 	}
 
-	pemPrivateKey, _ := pem.Decode([]byte(privateKey))
-	rsaPrivateKey, err := x509.ParsePKCS1PrivateKey(pemPrivateKey.Bytes)
-	if err != nil {
-		return nil, err
-	}
-
 	return &Log{
-		SignKey:   rsaPrivateKey,
-		VerifyKey: &rsaPrivateKey.PublicKey,
-		DB:        db,
-		Domain:    domain,
-		Token:     token,
+		DB:     db,
+		Domain: domain,
+		Token:  token,
 	}, nil
 }
