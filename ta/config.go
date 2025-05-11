@@ -37,7 +37,7 @@ func DefaultConfig() (*TAConfig, error) {
 	}
 
 	if atLogBaseEnv == "" {
-		atLogBaseEnv = "http://localhost" + core.MonitorPort
+		atLogBaseEnv = "http://localhost" + core.LogPort
 		fmt.Printf("RA_WEBS_AT_LOG_BASE is not set: so use %v\n", atLogBaseEnv)
 	}
 

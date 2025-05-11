@@ -24,7 +24,7 @@ func init() {
 	ctlogFields := schema.CTLog{}.Fields()
 	_ = ctlogFields
 	// ctlogDescIsActive is the schema descriptor for is_active field.
-	ctlogDescIsActive := ctlogFields[2].Descriptor()
+	ctlogDescIsActive := ctlogFields[1].Descriptor()
 	// ctlog.DefaultIsActive holds the default value on creation for the is_active field.
 	ctlog.DefaultIsActive = ctlogDescIsActive.Default.(bool)
 	violationFields := schema.Violation{}.Fields()

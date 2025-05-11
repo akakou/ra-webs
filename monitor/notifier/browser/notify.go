@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (notifier *BrowserNotifier) Notify(msg []byte, domain string, monitor *monitor.Monitor) error {
+func (notifier *BrowserNotifier) Notify(msg []byte, monitor *monitor.Monitor) error {
 	subscriptions, err := monitor.DB.Client.Subscription.Query().All(*monitor.DB.Ctx)
 	if err != nil {
 		return err
@@ -31,6 +31,8 @@ func (notifier *BrowserNotifier) notifyAll(msg []byte, subscription []*ent.Subsc
 }
 
 func (notifier *BrowserNotifier) notifyOne(msg []byte, subscription *ent.Subscription) error {
+	fmt.Printf("notify: %s\n", msg)
+
 	s := webpush.Subscription{
 		Endpoint: subscription.Endpoint,
 		Keys: webpush.Keys{

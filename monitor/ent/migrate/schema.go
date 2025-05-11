@@ -17,26 +17,16 @@ var (
 		{Name: "unique_id", Type: field.TypeBytes},
 		{Name: "signature", Type: field.TypeBytes},
 		{Name: "is_active", Type: field.TypeBool, Default: false},
-		{Name: "at_log_ta", Type: field.TypeInt, Nullable: true},
 	}
 	// AtLogsTable holds the schema information for the "at_logs" table.
 	AtLogsTable = &schema.Table{
 		Name:       "at_logs",
 		Columns:    AtLogsColumns,
 		PrimaryKey: []*schema.Column{AtLogsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "at_logs_tas_ta",
-				Columns:    []*schema.Column{AtLogsColumns[7]},
-				RefColumns: []*schema.Column{TasColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 	}
 	// CtLogsColumns holds the columns for the "ct_logs" table.
 	CtLogsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "public_key", Type: field.TypeBytes},
 		{Name: "monitor_log_id", Type: field.TypeInt},
 		{Name: "is_active", Type: field.TypeBool, Default: false},
 		{Name: "ct_log_ta", Type: field.TypeInt, Nullable: true},
@@ -49,7 +39,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ct_logs_tas_ta",
-				Columns:    []*schema.Column{CtLogsColumns[4]},
+				Columns:    []*schema.Column{CtLogsColumns[3]},
 				RefColumns: []*schema.Column{TasColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -72,32 +62,39 @@ var (
 	TasColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "public_key", Type: field.TypeBytes},
+		{Name: "at_log_ta", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "violation_ta", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// TasTable holds the schema information for the "tas" table.
 	TasTable = &schema.Table{
 		Name:       "tas",
 		Columns:    TasColumns,
 		PrimaryKey: []*schema.Column{TasColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "tas_at_logs_ta",
+				Columns:    []*schema.Column{TasColumns[2]},
+				RefColumns: []*schema.Column{AtLogsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "tas_violations_ta",
+				Columns:    []*schema.Column{TasColumns[3]},
+				RefColumns: []*schema.Column{ViolationsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// ViolationsColumns holds the columns for the "violations" table.
 	ViolationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "violation_ta", Type: field.TypeInt, Nullable: true},
 	}
 	// ViolationsTable holds the schema information for the "violations" table.
 	ViolationsTable = &schema.Table{
 		Name:       "violations",
 		Columns:    ViolationsColumns,
 		PrimaryKey: []*schema.Column{ViolationsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "violations_tas_ta",
-				Columns:    []*schema.Column{ViolationsColumns[2]},
-				RefColumns: []*schema.Column{TasColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
@@ -110,7 +107,7 @@ var (
 )
 
 func init() {
-	AtLogsTable.ForeignKeys[0].RefTable = TasTable
 	CtLogsTable.ForeignKeys[0].RefTable = TasTable
-	ViolationsTable.ForeignKeys[0].RefTable = TasTable
+	TasTable.ForeignKeys[0].RefTable = AtLogsTable
+	TasTable.ForeignKeys[1].RefTable = ViolationsTable
 }

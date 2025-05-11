@@ -7,6 +7,7 @@ import (
 	"io"
 
 	"github.com/akakou/ra-webs/core"
+	"github.com/akakou/ra-webs/core/attest/debug"
 	"github.com/akakou/ra-webs/monitor/serv"
 	"github.com/akakou/ra-webs/monitor/serv/api"
 
@@ -39,6 +40,8 @@ func InjectSWHeader(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func main() {
+	debug.EnableDebug()
+
 	e := echo.New()
 	apiGroup := e.Group(core.API_ROOT)
 
@@ -60,11 +63,12 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(InjectSWHeader)
 
+	s.Monitor.Notifier.(*browsernotify.BrowserNotifier).Setup(s.Monitor, apiGroup)
 	e.Debug = true
 	fmt.Printf("public: %v\nprivate: %v",
 		s.Monitor.Notifier.(*browsernotify.BrowserNotifier).VapidPublicKey,
 		s.Monitor.Notifier.(*browsernotify.BrowserNotifier).VapidPrivateKey)
 
-	err = s.Run(":8080", e)
+	err = s.Run(":8000", e)
 	e.Logger.Fatal(err)
 }

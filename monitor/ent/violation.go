@@ -23,7 +23,6 @@ type Violation struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ViolationQuery when eager-loading is set.
 	Edges        ViolationEdges `json:"edges"`
-	violation_ta *int
 	selectValues sql.SelectValues
 }
 
@@ -56,8 +55,6 @@ func (*Violation) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case violation.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case violation.ForeignKeys[0]: // violation_ta
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -84,13 +81,6 @@ func (v *Violation) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				v.CreatedAt = value.Time
-			}
-		case violation.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field violation_ta", value)
-			} else if value.Valid {
-				v.violation_ta = new(int)
-				*v.violation_ta = int(value.Int64)
 			}
 		default:
 			v.selectValues.Set(columns[i], values[i])

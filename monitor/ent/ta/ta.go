@@ -14,21 +14,14 @@ const (
 	FieldID = "id"
 	// FieldPublicKey holds the string denoting the public_key field in the database.
 	FieldPublicKey = "public_key"
-	// EdgeViolation holds the string denoting the violation edge name in mutations.
-	EdgeViolation = "violation"
 	// EdgeCtLog holds the string denoting the ct_log edge name in mutations.
 	EdgeCtLog = "ct_log"
 	// EdgeAtLog holds the string denoting the at_log edge name in mutations.
 	EdgeAtLog = "at_log"
+	// EdgeViolation holds the string denoting the violation edge name in mutations.
+	EdgeViolation = "violation"
 	// Table holds the table name of the ta in the database.
 	Table = "tas"
-	// ViolationTable is the table that holds the violation relation/edge.
-	ViolationTable = "violations"
-	// ViolationInverseTable is the table name for the Violation entity.
-	// It exists in this package in order to avoid circular dependency with the "violation" package.
-	ViolationInverseTable = "violations"
-	// ViolationColumn is the table column denoting the violation relation/edge.
-	ViolationColumn = "violation_ta"
 	// CtLogTable is the table that holds the ct_log relation/edge.
 	CtLogTable = "ct_logs"
 	// CtLogInverseTable is the table name for the CTLog entity.
@@ -37,12 +30,19 @@ const (
 	// CtLogColumn is the table column denoting the ct_log relation/edge.
 	CtLogColumn = "ct_log_ta"
 	// AtLogTable is the table that holds the at_log relation/edge.
-	AtLogTable = "at_logs"
+	AtLogTable = "tas"
 	// AtLogInverseTable is the table name for the ATLog entity.
 	// It exists in this package in order to avoid circular dependency with the "atlog" package.
 	AtLogInverseTable = "at_logs"
 	// AtLogColumn is the table column denoting the at_log relation/edge.
 	AtLogColumn = "at_log_ta"
+	// ViolationTable is the table that holds the violation relation/edge.
+	ViolationTable = "tas"
+	// ViolationInverseTable is the table name for the Violation entity.
+	// It exists in this package in order to avoid circular dependency with the "violation" package.
+	ViolationInverseTable = "violations"
+	// ViolationColumn is the table column denoting the violation relation/edge.
+	ViolationColumn = "violation_ta"
 )
 
 // Columns holds all SQL columns for ta fields.
@@ -51,10 +51,22 @@ var Columns = []string{
 	FieldPublicKey,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "tas"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"at_log_ta",
+	"violation_ta",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -67,20 +79,6 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByViolationCount orders the results by violation count.
-func ByViolationCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newViolationStep(), opts...)
-	}
-}
-
-// ByViolation orders the results by violation terms.
-func ByViolation(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newViolationStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
 }
 
 // ByCtLogCount orders the results by ct_log count.
@@ -97,25 +95,18 @@ func ByCtLog(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByAtLogCount orders the results by at_log count.
-func ByAtLogCount(opts ...sql.OrderTermOption) OrderOption {
+// ByAtLogField orders the results by at_log field.
+func ByAtLogField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newAtLogStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newAtLogStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByAtLog orders the results by at_log terms.
-func ByAtLog(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByViolationField orders the results by violation field.
+func ByViolationField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newAtLogStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newViolationStep(), sql.OrderByField(field, opts...))
 	}
-}
-func newViolationStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ViolationInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, ViolationTable, ViolationColumn),
-	)
 }
 func newCtLogStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
@@ -128,6 +119,13 @@ func newAtLogStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AtLogInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, AtLogTable, AtLogColumn),
+		sqlgraph.Edge(sqlgraph.O2O, true, AtLogTable, AtLogColumn),
+	)
+}
+func newViolationStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ViolationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, true, ViolationTable, ViolationColumn),
 	)
 }

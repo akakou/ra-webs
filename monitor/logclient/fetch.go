@@ -12,7 +12,7 @@ import (
 var schema = "http://"
 
 func (logclient *LogClient) Fetch() ([]*logio.TA, error) {
-	resp, err := http.Get(schema + logclient.Domain + "/ta")
+	resp, err := http.Get(schema + logclient.Domain + "/api/ta")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch API: %w", err)
 	}

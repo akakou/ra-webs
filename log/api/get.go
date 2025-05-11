@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strconv"
 
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra-webs/log"
@@ -14,26 +13,29 @@ var GetApi = goutils.EchoRoute[log.Log]{
 	Path:   "/ta",
 	F: func(log *log.Log) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			start := 0
-			end := 0
+			// start := 0
+			// end := 0
 
-			startParam := c.QueryParam("start")
-			if startParam != "" {
-				start, _ = strconv.Atoi(startParam)
-				start = start - 1
-			}
+			// startParam := c.QueryParam("start")
+			// if startParam != "" {
+			// 	start, _ = strconv.Atoi(startParam)
+			// 	start = start - 1
+			// }
 
-			endParam := c.QueryParam("end")
-			if endParam != "" {
-				end, _ = strconv.Atoi(endParam)
-			}
+			// endParam := c.QueryParam("end")
+			// if endParam != "" {
+			// 	end, _ = strconv.Atoi(endParam)
+			// }
 
-			limit := end - start
-			if limit <= 0 || limit > 100 {
-				limit = 100
-			}
+			// limit := end - start
+			// if limit <= 0 || limit > 100 {
+			// 	limit = 100
+			// }
 
-			ta, err := log.DB.Client.TA.Query().Offset(start).Limit(limit).All(*log.DB.Ctx)
+			ta, err := log.DB.Client.TA.Query().
+				// Offset(start).
+				// Limit(limit).
+				All(*log.DB.Ctx)
 
 			if err != nil {
 				return c.String(http.StatusBadRequest, "invalid request")

@@ -8,7 +8,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
+	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
 // TA is the model entity for the TA schema.
@@ -17,51 +19,57 @@ type TA struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// PublicKey holds the value of the "public_key" field.
-	PublicKey []byte `json:"public_key,omitempty"`
+	PublicKey *[]byte `json:"public_key,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TAQuery when eager-loading is set.
 	Edges        TAEdges `json:"edges"`
+	at_log_ta    *int
+	violation_ta *int
 	selectValues sql.SelectValues
 }
 
 // TAEdges holds the relations/edges for other nodes in the graph.
 type TAEdges struct {
-	// Violation holds the value of the violation edge.
-	Violation []*Violation `json:"violation,omitempty"`
 	// CtLog holds the value of the ct_log edge.
 	CtLog []*CTLog `json:"ct_log,omitempty"`
 	// AtLog holds the value of the at_log edge.
-	AtLog []*ATLog `json:"at_log,omitempty"`
+	AtLog *ATLog `json:"at_log,omitempty"`
+	// Violation holds the value of the violation edge.
+	Violation *Violation `json:"violation,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
 }
 
-// ViolationOrErr returns the Violation value or an error if the edge
-// was not loaded in eager-loading.
-func (e TAEdges) ViolationOrErr() ([]*Violation, error) {
-	if e.loadedTypes[0] {
-		return e.Violation, nil
-	}
-	return nil, &NotLoadedError{edge: "violation"}
-}
-
 // CtLogOrErr returns the CtLog value or an error if the edge
 // was not loaded in eager-loading.
 func (e TAEdges) CtLogOrErr() ([]*CTLog, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.CtLog, nil
 	}
 	return nil, &NotLoadedError{edge: "ct_log"}
 }
 
 // AtLogOrErr returns the AtLog value or an error if the edge
-// was not loaded in eager-loading.
-func (e TAEdges) AtLogOrErr() ([]*ATLog, error) {
-	if e.loadedTypes[2] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TAEdges) AtLogOrErr() (*ATLog, error) {
+	if e.AtLog != nil {
 		return e.AtLog, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: atlog.Label}
 	}
 	return nil, &NotLoadedError{edge: "at_log"}
+}
+
+// ViolationOrErr returns the Violation value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TAEdges) ViolationOrErr() (*Violation, error) {
+	if e.Violation != nil {
+		return e.Violation, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: violation.Label}
+	}
+	return nil, &NotLoadedError{edge: "violation"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -72,6 +80,10 @@ func (*TA) scanValues(columns []string) ([]any, error) {
 		case ta.FieldPublicKey:
 			values[i] = new([]byte)
 		case ta.FieldID:
+			values[i] = new(sql.NullInt64)
+		case ta.ForeignKeys[0]: // at_log_ta
+			values[i] = new(sql.NullInt64)
+		case ta.ForeignKeys[1]: // violation_ta
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -98,7 +110,21 @@ func (t *TA) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field public_key", values[i])
 			} else if value != nil {
-				t.PublicKey = *value
+				t.PublicKey = value
+			}
+		case ta.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field at_log_ta", value)
+			} else if value.Valid {
+				t.at_log_ta = new(int)
+				*t.at_log_ta = int(value.Int64)
+			}
+		case ta.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field violation_ta", value)
+			} else if value.Valid {
+				t.violation_ta = new(int)
+				*t.violation_ta = int(value.Int64)
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -113,11 +139,6 @@ func (t *TA) Value(name string) (ent.Value, error) {
 	return t.selectValues.Get(name)
 }
 
-// QueryViolation queries the "violation" edge of the TA entity.
-func (t *TA) QueryViolation() *ViolationQuery {
-	return NewTAClient(t.config).QueryViolation(t)
-}
-
 // QueryCtLog queries the "ct_log" edge of the TA entity.
 func (t *TA) QueryCtLog() *CTLogQuery {
 	return NewTAClient(t.config).QueryCtLog(t)
@@ -126,6 +147,11 @@ func (t *TA) QueryCtLog() *CTLogQuery {
 // QueryAtLog queries the "at_log" edge of the TA entity.
 func (t *TA) QueryAtLog() *ATLogQuery {
 	return NewTAClient(t.config).QueryAtLog(t)
+}
+
+// QueryViolation queries the "violation" edge of the TA entity.
+func (t *TA) QueryViolation() *ViolationQuery {
+	return NewTAClient(t.config).QueryViolation(t)
 }
 
 // Update returns a builder for updating this TA.
@@ -151,8 +177,10 @@ func (t *TA) String() string {
 	var builder strings.Builder
 	builder.WriteString("TA(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
-	builder.WriteString("public_key=")
-	builder.WriteString(fmt.Sprintf("%v", t.PublicKey))
+	if v := t.PublicKey; v != nil {
+		builder.WriteString("public_key=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

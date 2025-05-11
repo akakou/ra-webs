@@ -19,7 +19,6 @@ var PostNotifierApi = goutils.EchoRoute[serv.MonitorServer]{
 			}
 
 			var data struct {
-				Domain  string `json:"domain"`
 				Message string `json:"message"`
 			}
 
@@ -28,7 +27,7 @@ var PostNotifierApi = goutils.EchoRoute[serv.MonitorServer]{
 				return err
 			}
 
-			err = server.Monitor.Notifier.Notify([]byte(data.Message), data.Domain, server.Monitor)
+			err = server.Monitor.Notifier.Notify([]byte(data.Message), server.Monitor)
 			if err != nil {
 				return err
 			}

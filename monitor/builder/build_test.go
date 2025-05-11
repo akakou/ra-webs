@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-const REPOSITORY = "https://github.com/akakou-docs/ego-statistical-analysis"
-const COMMIT_ID = "b9d0bc9519799ae2b07ce033d5dd942d7c275beb"
-const EXPECTED_UNIQUE_ID = "ea0e1b510d48a85981d5a0b3794bb08b75962a67bd44798cdeeaff58745d701a"
+const REPOSITORY = "https://github.com/akakou/ra-webs"
+const COMMIT_ID = "8bc46f9bf7569a0d3c21f37bdeca94c54f504806"
+const EXPECTED_UNIQUE_ID = "4759f05537868a6dbfbd2bf1109b8805c49a40ef4cd37ed4e5c446743523d4e5"
 
 func TestMain(t *testing.T) {
 	uniqueId, err := buildCode("1", REPOSITORY, COMMIT_ID)

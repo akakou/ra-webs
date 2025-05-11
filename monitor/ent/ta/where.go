@@ -98,29 +98,6 @@ func PublicKeyLTE(v []byte) predicate.TA {
 	return predicate.TA(sql.FieldLTE(FieldPublicKey, v))
 }
 
-// HasViolation applies the HasEdge predicate on the "violation" edge.
-func HasViolation() predicate.TA {
-	return predicate.TA(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, ViolationTable, ViolationColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasViolationWith applies the HasEdge predicate on the "violation" edge with a given conditions (other predicates).
-func HasViolationWith(preds ...predicate.Violation) predicate.TA {
-	return predicate.TA(func(s *sql.Selector) {
-		step := newViolationStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasCtLog applies the HasEdge predicate on the "ct_log" edge.
 func HasCtLog() predicate.TA {
 	return predicate.TA(func(s *sql.Selector) {
@@ -149,7 +126,7 @@ func HasAtLog() predicate.TA {
 	return predicate.TA(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, AtLogTable, AtLogColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, AtLogTable, AtLogColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -159,6 +136,29 @@ func HasAtLog() predicate.TA {
 func HasAtLogWith(preds ...predicate.ATLog) predicate.TA {
 	return predicate.TA(func(s *sql.Selector) {
 		step := newAtLogStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasViolation applies the HasEdge predicate on the "violation" edge.
+func HasViolation() predicate.TA {
+	return predicate.TA(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, ViolationTable, ViolationColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasViolationWith applies the HasEdge predicate on the "violation" edge with a given conditions (other predicates).
+func HasViolationWith(preds ...predicate.Violation) predicate.TA {
+	return predicate.TA(func(s *sql.Selector) {
+		step := newViolationStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

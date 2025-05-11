@@ -14,7 +14,6 @@ type CTLog struct {
 // Fields of the TA.
 func (CTLog) Fields() []ent.Field {
 	return []ent.Field{
-		field.Bytes("public_key"),
 		field.Int("monitor_log_id"),
 		field.Bool("is_active").Default(false),
 	}

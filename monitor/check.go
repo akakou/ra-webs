@@ -3,6 +3,7 @@ package monitor
 import (
 	"bytes"
 	"crypto/rsa"
+	"fmt"
 
 	"github.com/cockroachdb/errors"
 
@@ -67,6 +68,7 @@ func CheckSourceHash(log *io.TA, evidenceUniqueId []byte) error {
 		return errors.Wrap(errBuildFailed, err.Error())
 	}
 
+	fmt.Printf("unique id: '%x', '%x'\n", uniqueId, evidenceUniqueId)
 	if !bytes.Equal(uniqueId, evidenceUniqueId) {
 		return errUniqueIDInEvidenceMismatch
 	}

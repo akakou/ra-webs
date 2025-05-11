@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -24,7 +25,6 @@ type ViolationQuery struct {
 	inters     []Interceptor
 	predicates []predicate.Violation
 	withTa     *TAQuery
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,7 +75,7 @@ func (vq *ViolationQuery) QueryTa() *TAQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(violation.Table, violation.FieldID, selector),
 			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, violation.TaTable, violation.TaColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, violation.TaTable, violation.TaColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(vq.driver.Dialect(), step)
 		return fromU, nil
@@ -370,18 +370,11 @@ func (vq *ViolationQuery) prepareQuery(ctx context.Context) error {
 func (vq *ViolationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Violation, error) {
 	var (
 		nodes       = []*Violation{}
-		withFKs     = vq.withFKs
 		_spec       = vq.querySpec()
 		loadedTypes = [1]bool{
 			vq.withTa != nil,
 		}
 	)
-	if vq.withTa != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, violation.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Violation).scanValues(nil, columns)
 	}
@@ -410,34 +403,30 @@ func (vq *ViolationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Vi
 }
 
 func (vq *ViolationQuery) loadTa(ctx context.Context, query *TAQuery, nodes []*Violation, init func(*Violation), assign func(*Violation, *TA)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Violation)
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Violation)
 	for i := range nodes {
-		if nodes[i].violation_ta == nil {
-			continue
-		}
-		fk := *nodes[i].violation_ta
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
 	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(ta.IDIn(ids...))
+	query.withFKs = true
+	query.Where(predicate.TA(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(violation.TaColumn), fks...))
+	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
+		fk := n.violation_ta
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "violation_ta" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "violation_ta" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "violation_ta" returned %v for node %v`, *fk, n.ID)
 		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
+		assign(node, n)
 	}
 	return nil
 }

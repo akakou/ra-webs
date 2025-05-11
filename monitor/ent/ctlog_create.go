@@ -20,12 +20,6 @@ type CTLogCreate struct {
 	hooks    []Hook
 }
 
-// SetPublicKey sets the "public_key" field.
-func (clc *CTLogCreate) SetPublicKey(b []byte) *CTLogCreate {
-	clc.mutation.SetPublicKey(b)
-	return clc
-}
-
 // SetMonitorLogID sets the "monitor_log_id" field.
 func (clc *CTLogCreate) SetMonitorLogID(i int) *CTLogCreate {
 	clc.mutation.SetMonitorLogID(i)
@@ -108,9 +102,6 @@ func (clc *CTLogCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (clc *CTLogCreate) check() error {
-	if _, ok := clc.mutation.PublicKey(); !ok {
-		return &ValidationError{Name: "public_key", err: errors.New(`ent: missing required field "CTLog.public_key"`)}
-	}
 	if _, ok := clc.mutation.MonitorLogID(); !ok {
 		return &ValidationError{Name: "monitor_log_id", err: errors.New(`ent: missing required field "CTLog.monitor_log_id"`)}
 	}
@@ -143,10 +134,6 @@ func (clc *CTLogCreate) createSpec() (*CTLog, *sqlgraph.CreateSpec) {
 		_node = &CTLog{config: clc.config}
 		_spec = sqlgraph.NewCreateSpec(ctlog.Table, sqlgraph.NewFieldSpec(ctlog.FieldID, field.TypeInt))
 	)
-	if value, ok := clc.mutation.PublicKey(); ok {
-		_spec.SetField(ctlog.FieldPublicKey, field.TypeBytes, value)
-		_node.PublicKey = value
-	}
 	if value, ok := clc.mutation.MonitorLogID(); ok {
 		_spec.SetField(ctlog.FieldMonitorLogID, field.TypeInt, value)
 		_node.MonitorLogID = value

@@ -353,7 +353,7 @@ func (c *ATLogClient) QueryTa(al *ATLog) *TAQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(atlog.Table, atlog.FieldID, id),
 			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, atlog.TaTable, atlog.TaColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, atlog.TaTable, atlog.TaColumn),
 		)
 		fromV = sqlgraph.Neighbors(al.driver.Dialect(), step)
 		return fromV, nil
@@ -776,22 +776,6 @@ func (c *TAClient) GetX(ctx context.Context, id int) *TA {
 	return obj
 }
 
-// QueryViolation queries the violation edge of a TA.
-func (c *TAClient) QueryViolation(t *TA) *ViolationQuery {
-	query := (&ViolationClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ta.Table, ta.FieldID, id),
-			sqlgraph.To(violation.Table, violation.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, ta.ViolationTable, ta.ViolationColumn),
-		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryCtLog queries the ct_log edge of a TA.
 func (c *TAClient) QueryCtLog(t *TA) *CTLogQuery {
 	query := (&CTLogClient{config: c.config}).Query()
@@ -816,7 +800,23 @@ func (c *TAClient) QueryAtLog(t *TA) *ATLogQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ta.Table, ta.FieldID, id),
 			sqlgraph.To(atlog.Table, atlog.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, ta.AtLogTable, ta.AtLogColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, ta.AtLogTable, ta.AtLogColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryViolation queries the violation edge of a TA.
+func (c *TAClient) QueryViolation(t *TA) *ViolationQuery {
+	query := (&ViolationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ta.Table, ta.FieldID, id),
+			sqlgraph.To(violation.Table, violation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, ta.ViolationTable, ta.ViolationColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -965,7 +965,7 @@ func (c *ViolationClient) QueryTa(v *Violation) *TAQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(violation.Table, violation.FieldID, id),
 			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, violation.TaTable, violation.TaColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, violation.TaTable, violation.TaColumn),
 		)
 		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
 		return fromV, nil

@@ -11,5 +11,5 @@ var (
 	errCreateSchema = errors.New("failed to create schema in DB")
 	errCreateAudit  = errors.New("failed to create monitor")
 
-	errDomainEnvironmentVariableIsEmpty = errors.New("domain environment variable is empty")
+	errDomainEnvironmentVariableIsEmpty = errors.New("RA_WEBS_TA_DOMAIN environment variable is empty")
 )

@@ -1,4 +1,4 @@
-const setupNotification = async (domain) => {
+const setupNotification = async () => {
     removeAllNotifcation()
     const keyResp = await axios.get(`/api/config/subscription`)
     console.log(keyResp)
@@ -30,7 +30,6 @@ const setupNotification = async (domain) => {
     }
 
     const subscribeResp = await axios.post(`/api/subscription`, {
-        domain: domain,
         subscription: subscription.toJSON()
     })
 

@@ -11,15 +11,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var GetServerFromDomainApi = goutils.EchoRoute[serv.MonitorServer]{
+var GetLogs = goutils.EchoRoute[serv.MonitorServer]{
 	Method: goutils.GET,
 	Path:   "/ta",
 	F: func(server *serv.MonitorServer) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			servs, err := server.Monitor.DB.Client.TA.
+			servs, err := server.Monitor.DB.Client.CTLog.
 				Query().
-				WithAtLog().
+				QueryTa().
 				WithCtLog().
+				WithAtLog().
 				WithViolation().
 				Order(ent.Desc(ctlog.FieldID)).
 				All(*server.Monitor.DB.Ctx)
