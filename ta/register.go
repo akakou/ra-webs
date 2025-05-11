@@ -20,6 +20,7 @@ type RegisterRequest struct {
 	Repository string `json:"repository"`
 	CommitId   string `json:"commit_id"`
 	Evidence   string `json:"evidence"`
+	PublicKey  []byte `json:"public_key"`
 }
 
 func (ta *TA) Register() (string, error) {
@@ -35,6 +36,7 @@ func (ta *TA) Register() (string, error) {
 		Repository: ta.config.Repository,
 		CommitId:   ta.config.CommitID,
 		Evidence:   evidence,
+		PublicKey:  keyBin,
 	}
 
 	return ta.post(REGISTER_PATH, reqBody)

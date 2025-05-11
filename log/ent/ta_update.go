@@ -41,12 +41,6 @@ func (tu *TAUpdate) SetNillableEvidence(s *string) *TAUpdate {
 	return tu
 }
 
-// SetSignature sets the "signature" field.
-func (tu *TAUpdate) SetSignature(b []byte) *TAUpdate {
-	tu.mutation.SetSignature(b)
-	return tu
-}
-
 // SetRepository sets the "repository" field.
 func (tu *TAUpdate) SetRepository(s string) *TAUpdate {
 	tu.mutation.SetRepository(s)
@@ -72,6 +66,12 @@ func (tu *TAUpdate) SetNillableCommitID(s *string) *TAUpdate {
 	if s != nil {
 		tu.SetCommitID(*s)
 	}
+	return tu
+}
+
+// SetPublicKey sets the "public_key" field.
+func (tu *TAUpdate) SetPublicKey(b []byte) *TAUpdate {
+	tu.mutation.SetPublicKey(b)
 	return tu
 }
 
@@ -119,14 +119,14 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tu.mutation.Evidence(); ok {
 		_spec.SetField(ta.FieldEvidence, field.TypeString, value)
 	}
-	if value, ok := tu.mutation.Signature(); ok {
-		_spec.SetField(ta.FieldSignature, field.TypeBytes, value)
-	}
 	if value, ok := tu.mutation.Repository(); ok {
 		_spec.SetField(ta.FieldRepository, field.TypeString, value)
 	}
 	if value, ok := tu.mutation.CommitID(); ok {
 		_spec.SetField(ta.FieldCommitID, field.TypeString, value)
+	}
+	if value, ok := tu.mutation.PublicKey(); ok {
+		_spec.SetField(ta.FieldPublicKey, field.TypeBytes, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -162,12 +162,6 @@ func (tuo *TAUpdateOne) SetNillableEvidence(s *string) *TAUpdateOne {
 	return tuo
 }
 
-// SetSignature sets the "signature" field.
-func (tuo *TAUpdateOne) SetSignature(b []byte) *TAUpdateOne {
-	tuo.mutation.SetSignature(b)
-	return tuo
-}
-
 // SetRepository sets the "repository" field.
 func (tuo *TAUpdateOne) SetRepository(s string) *TAUpdateOne {
 	tuo.mutation.SetRepository(s)
@@ -193,6 +187,12 @@ func (tuo *TAUpdateOne) SetNillableCommitID(s *string) *TAUpdateOne {
 	if s != nil {
 		tuo.SetCommitID(*s)
 	}
+	return tuo
+}
+
+// SetPublicKey sets the "public_key" field.
+func (tuo *TAUpdateOne) SetPublicKey(b []byte) *TAUpdateOne {
+	tuo.mutation.SetPublicKey(b)
 	return tuo
 }
 
@@ -270,14 +270,14 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 	if value, ok := tuo.mutation.Evidence(); ok {
 		_spec.SetField(ta.FieldEvidence, field.TypeString, value)
 	}
-	if value, ok := tuo.mutation.Signature(); ok {
-		_spec.SetField(ta.FieldSignature, field.TypeBytes, value)
-	}
 	if value, ok := tuo.mutation.Repository(); ok {
 		_spec.SetField(ta.FieldRepository, field.TypeString, value)
 	}
 	if value, ok := tuo.mutation.CommitID(); ok {
 		_spec.SetField(ta.FieldCommitID, field.TypeString, value)
+	}
+	if value, ok := tuo.mutation.PublicKey(); ok {
+		_spec.SetField(ta.FieldPublicKey, field.TypeBytes, value)
 	}
 	_node = &TA{config: tuo.config}
 	_spec.Assign = _node.assignValues

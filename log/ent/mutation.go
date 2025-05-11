@@ -33,9 +33,9 @@ type TAMutation struct {
 	typ           string
 	id            *int
 	evidence      *string
-	signature     *[]byte
 	repository    *string
 	commit_id     *string
+	public_key    *[]byte
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*TA, error)
@@ -176,42 +176,6 @@ func (m *TAMutation) ResetEvidence() {
 	m.evidence = nil
 }
 
-// SetSignature sets the "signature" field.
-func (m *TAMutation) SetSignature(b []byte) {
-	m.signature = &b
-}
-
-// Signature returns the value of the "signature" field in the mutation.
-func (m *TAMutation) Signature() (r []byte, exists bool) {
-	v := m.signature
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSignature returns the old "signature" field's value of the TA entity.
-// If the TA object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TAMutation) OldSignature(ctx context.Context) (v []byte, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSignature is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSignature requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSignature: %w", err)
-	}
-	return oldValue.Signature, nil
-}
-
-// ResetSignature resets all changes to the "signature" field.
-func (m *TAMutation) ResetSignature() {
-	m.signature = nil
-}
-
 // SetRepository sets the "repository" field.
 func (m *TAMutation) SetRepository(s string) {
 	m.repository = &s
@@ -284,6 +248,42 @@ func (m *TAMutation) ResetCommitID() {
 	m.commit_id = nil
 }
 
+// SetPublicKey sets the "public_key" field.
+func (m *TAMutation) SetPublicKey(b []byte) {
+	m.public_key = &b
+}
+
+// PublicKey returns the value of the "public_key" field in the mutation.
+func (m *TAMutation) PublicKey() (r []byte, exists bool) {
+	v := m.public_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPublicKey returns the old "public_key" field's value of the TA entity.
+// If the TA object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TAMutation) OldPublicKey(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPublicKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPublicKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPublicKey: %w", err)
+	}
+	return oldValue.PublicKey, nil
+}
+
+// ResetPublicKey resets all changes to the "public_key" field.
+func (m *TAMutation) ResetPublicKey() {
+	m.public_key = nil
+}
+
 // Where appends a list predicates to the TAMutation builder.
 func (m *TAMutation) Where(ps ...predicate.TA) {
 	m.predicates = append(m.predicates, ps...)
@@ -322,14 +322,14 @@ func (m *TAMutation) Fields() []string {
 	if m.evidence != nil {
 		fields = append(fields, ta.FieldEvidence)
 	}
-	if m.signature != nil {
-		fields = append(fields, ta.FieldSignature)
-	}
 	if m.repository != nil {
 		fields = append(fields, ta.FieldRepository)
 	}
 	if m.commit_id != nil {
 		fields = append(fields, ta.FieldCommitID)
+	}
+	if m.public_key != nil {
+		fields = append(fields, ta.FieldPublicKey)
 	}
 	return fields
 }
@@ -341,12 +341,12 @@ func (m *TAMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case ta.FieldEvidence:
 		return m.Evidence()
-	case ta.FieldSignature:
-		return m.Signature()
 	case ta.FieldRepository:
 		return m.Repository()
 	case ta.FieldCommitID:
 		return m.CommitID()
+	case ta.FieldPublicKey:
+		return m.PublicKey()
 	}
 	return nil, false
 }
@@ -358,12 +358,12 @@ func (m *TAMutation) OldField(ctx context.Context, name string) (ent.Value, erro
 	switch name {
 	case ta.FieldEvidence:
 		return m.OldEvidence(ctx)
-	case ta.FieldSignature:
-		return m.OldSignature(ctx)
 	case ta.FieldRepository:
 		return m.OldRepository(ctx)
 	case ta.FieldCommitID:
 		return m.OldCommitID(ctx)
+	case ta.FieldPublicKey:
+		return m.OldPublicKey(ctx)
 	}
 	return nil, fmt.Errorf("unknown TA field %s", name)
 }
@@ -380,13 +380,6 @@ func (m *TAMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetEvidence(v)
 		return nil
-	case ta.FieldSignature:
-		v, ok := value.([]byte)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSignature(v)
-		return nil
 	case ta.FieldRepository:
 		v, ok := value.(string)
 		if !ok {
@@ -400,6 +393,13 @@ func (m *TAMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCommitID(v)
+		return nil
+	case ta.FieldPublicKey:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPublicKey(v)
 		return nil
 	}
 	return fmt.Errorf("unknown TA field %s", name)
@@ -453,14 +453,14 @@ func (m *TAMutation) ResetField(name string) error {
 	case ta.FieldEvidence:
 		m.ResetEvidence()
 		return nil
-	case ta.FieldSignature:
-		m.ResetSignature()
-		return nil
 	case ta.FieldRepository:
 		m.ResetRepository()
 		return nil
 	case ta.FieldCommitID:
 		m.ResetCommitID()
+		return nil
+	case ta.FieldPublicKey:
+		m.ResetPublicKey()
 		return nil
 	}
 	return fmt.Errorf("unknown TA field %s", name)

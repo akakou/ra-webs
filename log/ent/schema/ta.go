@@ -14,9 +14,9 @@ type TA struct {
 func (TA) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("evidence"),
-		field.Bytes("signature"),
 		field.String("repository"),
 		field.String("commit_id"),
+		field.Bytes("public_key"),
 	}
 }
 

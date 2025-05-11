@@ -57,11 +57,6 @@ func Evidence(v string) predicate.TA {
 	return predicate.TA(sql.FieldEQ(FieldEvidence, v))
 }
 
-// Signature applies equality check predicate on the "signature" field. It's identical to SignatureEQ.
-func Signature(v []byte) predicate.TA {
-	return predicate.TA(sql.FieldEQ(FieldSignature, v))
-}
-
 // Repository applies equality check predicate on the "repository" field. It's identical to RepositoryEQ.
 func Repository(v string) predicate.TA {
 	return predicate.TA(sql.FieldEQ(FieldRepository, v))
@@ -70,6 +65,11 @@ func Repository(v string) predicate.TA {
 // CommitID applies equality check predicate on the "commit_id" field. It's identical to CommitIDEQ.
 func CommitID(v string) predicate.TA {
 	return predicate.TA(sql.FieldEQ(FieldCommitID, v))
+}
+
+// PublicKey applies equality check predicate on the "public_key" field. It's identical to PublicKeyEQ.
+func PublicKey(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldEQ(FieldPublicKey, v))
 }
 
 // EvidenceEQ applies the EQ predicate on the "evidence" field.
@@ -135,46 +135,6 @@ func EvidenceEqualFold(v string) predicate.TA {
 // EvidenceContainsFold applies the ContainsFold predicate on the "evidence" field.
 func EvidenceContainsFold(v string) predicate.TA {
 	return predicate.TA(sql.FieldContainsFold(FieldEvidence, v))
-}
-
-// SignatureEQ applies the EQ predicate on the "signature" field.
-func SignatureEQ(v []byte) predicate.TA {
-	return predicate.TA(sql.FieldEQ(FieldSignature, v))
-}
-
-// SignatureNEQ applies the NEQ predicate on the "signature" field.
-func SignatureNEQ(v []byte) predicate.TA {
-	return predicate.TA(sql.FieldNEQ(FieldSignature, v))
-}
-
-// SignatureIn applies the In predicate on the "signature" field.
-func SignatureIn(vs ...[]byte) predicate.TA {
-	return predicate.TA(sql.FieldIn(FieldSignature, vs...))
-}
-
-// SignatureNotIn applies the NotIn predicate on the "signature" field.
-func SignatureNotIn(vs ...[]byte) predicate.TA {
-	return predicate.TA(sql.FieldNotIn(FieldSignature, vs...))
-}
-
-// SignatureGT applies the GT predicate on the "signature" field.
-func SignatureGT(v []byte) predicate.TA {
-	return predicate.TA(sql.FieldGT(FieldSignature, v))
-}
-
-// SignatureGTE applies the GTE predicate on the "signature" field.
-func SignatureGTE(v []byte) predicate.TA {
-	return predicate.TA(sql.FieldGTE(FieldSignature, v))
-}
-
-// SignatureLT applies the LT predicate on the "signature" field.
-func SignatureLT(v []byte) predicate.TA {
-	return predicate.TA(sql.FieldLT(FieldSignature, v))
-}
-
-// SignatureLTE applies the LTE predicate on the "signature" field.
-func SignatureLTE(v []byte) predicate.TA {
-	return predicate.TA(sql.FieldLTE(FieldSignature, v))
 }
 
 // RepositoryEQ applies the EQ predicate on the "repository" field.
@@ -305,6 +265,46 @@ func CommitIDEqualFold(v string) predicate.TA {
 // CommitIDContainsFold applies the ContainsFold predicate on the "commit_id" field.
 func CommitIDContainsFold(v string) predicate.TA {
 	return predicate.TA(sql.FieldContainsFold(FieldCommitID, v))
+}
+
+// PublicKeyEQ applies the EQ predicate on the "public_key" field.
+func PublicKeyEQ(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldEQ(FieldPublicKey, v))
+}
+
+// PublicKeyNEQ applies the NEQ predicate on the "public_key" field.
+func PublicKeyNEQ(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldNEQ(FieldPublicKey, v))
+}
+
+// PublicKeyIn applies the In predicate on the "public_key" field.
+func PublicKeyIn(vs ...[]byte) predicate.TA {
+	return predicate.TA(sql.FieldIn(FieldPublicKey, vs...))
+}
+
+// PublicKeyNotIn applies the NotIn predicate on the "public_key" field.
+func PublicKeyNotIn(vs ...[]byte) predicate.TA {
+	return predicate.TA(sql.FieldNotIn(FieldPublicKey, vs...))
+}
+
+// PublicKeyGT applies the GT predicate on the "public_key" field.
+func PublicKeyGT(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldGT(FieldPublicKey, v))
+}
+
+// PublicKeyGTE applies the GTE predicate on the "public_key" field.
+func PublicKeyGTE(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldGTE(FieldPublicKey, v))
+}
+
+// PublicKeyLT applies the LT predicate on the "public_key" field.
+func PublicKeyLT(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldLT(FieldPublicKey, v))
+}
+
+// PublicKeyLTE applies the LTE predicate on the "public_key" field.
+func PublicKeyLTE(v []byte) predicate.TA {
+	return predicate.TA(sql.FieldLTE(FieldPublicKey, v))
 }
 
 // And groups predicates with the AND operator between them.

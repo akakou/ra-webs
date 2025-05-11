@@ -25,12 +25,6 @@ func (tc *TACreate) SetEvidence(s string) *TACreate {
 	return tc
 }
 
-// SetSignature sets the "signature" field.
-func (tc *TACreate) SetSignature(b []byte) *TACreate {
-	tc.mutation.SetSignature(b)
-	return tc
-}
-
 // SetRepository sets the "repository" field.
 func (tc *TACreate) SetRepository(s string) *TACreate {
 	tc.mutation.SetRepository(s)
@@ -40,6 +34,12 @@ func (tc *TACreate) SetRepository(s string) *TACreate {
 // SetCommitID sets the "commit_id" field.
 func (tc *TACreate) SetCommitID(s string) *TACreate {
 	tc.mutation.SetCommitID(s)
+	return tc
+}
+
+// SetPublicKey sets the "public_key" field.
+func (tc *TACreate) SetPublicKey(b []byte) *TACreate {
+	tc.mutation.SetPublicKey(b)
 	return tc
 }
 
@@ -80,14 +80,14 @@ func (tc *TACreate) check() error {
 	if _, ok := tc.mutation.Evidence(); !ok {
 		return &ValidationError{Name: "evidence", err: errors.New(`ent: missing required field "TA.evidence"`)}
 	}
-	if _, ok := tc.mutation.Signature(); !ok {
-		return &ValidationError{Name: "signature", err: errors.New(`ent: missing required field "TA.signature"`)}
-	}
 	if _, ok := tc.mutation.Repository(); !ok {
 		return &ValidationError{Name: "repository", err: errors.New(`ent: missing required field "TA.repository"`)}
 	}
 	if _, ok := tc.mutation.CommitID(); !ok {
 		return &ValidationError{Name: "commit_id", err: errors.New(`ent: missing required field "TA.commit_id"`)}
+	}
+	if _, ok := tc.mutation.PublicKey(); !ok {
+		return &ValidationError{Name: "public_key", err: errors.New(`ent: missing required field "TA.public_key"`)}
 	}
 	return nil
 }
@@ -119,10 +119,6 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 		_spec.SetField(ta.FieldEvidence, field.TypeString, value)
 		_node.Evidence = value
 	}
-	if value, ok := tc.mutation.Signature(); ok {
-		_spec.SetField(ta.FieldSignature, field.TypeBytes, value)
-		_node.Signature = value
-	}
 	if value, ok := tc.mutation.Repository(); ok {
 		_spec.SetField(ta.FieldRepository, field.TypeString, value)
 		_node.Repository = value
@@ -130,6 +126,10 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.CommitID(); ok {
 		_spec.SetField(ta.FieldCommitID, field.TypeString, value)
 		_node.CommitID = value
+	}
+	if value, ok := tc.mutation.PublicKey(); ok {
+		_spec.SetField(ta.FieldPublicKey, field.TypeBytes, value)
+		_node.PublicKey = value
 	}
 	return _node, _spec
 }

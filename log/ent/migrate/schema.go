@@ -12,9 +12,9 @@ var (
 	TasColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "evidence", Type: field.TypeString},
-		{Name: "signature", Type: field.TypeBytes},
 		{Name: "repository", Type: field.TypeString},
 		{Name: "commit_id", Type: field.TypeString},
+		{Name: "public_key", Type: field.TypeBytes},
 	}
 	// TasTable holds the schema information for the "tas" table.
 	TasTable = &schema.Table{

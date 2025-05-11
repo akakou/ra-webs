@@ -13,12 +13,12 @@ const (
 	FieldID = "id"
 	// FieldEvidence holds the string denoting the evidence field in the database.
 	FieldEvidence = "evidence"
-	// FieldSignature holds the string denoting the signature field in the database.
-	FieldSignature = "signature"
 	// FieldRepository holds the string denoting the repository field in the database.
 	FieldRepository = "repository"
 	// FieldCommitID holds the string denoting the commit_id field in the database.
 	FieldCommitID = "commit_id"
+	// FieldPublicKey holds the string denoting the public_key field in the database.
+	FieldPublicKey = "public_key"
 	// Table holds the table name of the ta in the database.
 	Table = "tas"
 )
@@ -27,9 +27,9 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldEvidence,
-	FieldSignature,
 	FieldRepository,
 	FieldCommitID,
+	FieldPublicKey,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -18,12 +18,12 @@ type TA struct {
 	ID int `json:"id,omitempty"`
 	// Evidence holds the value of the "evidence" field.
 	Evidence string `json:"evidence,omitempty"`
-	// Signature holds the value of the "signature" field.
-	Signature []byte `json:"signature,omitempty"`
 	// Repository holds the value of the "repository" field.
 	Repository string `json:"repository,omitempty"`
 	// CommitID holds the value of the "commit_id" field.
-	CommitID     string `json:"commit_id,omitempty"`
+	CommitID string `json:"commit_id,omitempty"`
+	// PublicKey holds the value of the "public_key" field.
+	PublicKey    []byte `json:"public_key,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -32,7 +32,7 @@ func (*TA) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case ta.FieldSignature:
+		case ta.FieldPublicKey:
 			values[i] = new([]byte)
 		case ta.FieldID:
 			values[i] = new(sql.NullInt64)
@@ -65,12 +65,6 @@ func (t *TA) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				t.Evidence = value.String
 			}
-		case ta.FieldSignature:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field signature", values[i])
-			} else if value != nil {
-				t.Signature = *value
-			}
 		case ta.FieldRepository:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field repository", values[i])
@@ -82,6 +76,12 @@ func (t *TA) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field commit_id", values[i])
 			} else if value.Valid {
 				t.CommitID = value.String
+			}
+		case ta.FieldPublicKey:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field public_key", values[i])
+			} else if value != nil {
+				t.PublicKey = *value
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -122,14 +122,14 @@ func (t *TA) String() string {
 	builder.WriteString("evidence=")
 	builder.WriteString(t.Evidence)
 	builder.WriteString(", ")
-	builder.WriteString("signature=")
-	builder.WriteString(fmt.Sprintf("%v", t.Signature))
-	builder.WriteString(", ")
 	builder.WriteString("repository=")
 	builder.WriteString(t.Repository)
 	builder.WriteString(", ")
 	builder.WriteString("commit_id=")
 	builder.WriteString(t.CommitID)
+	builder.WriteString(", ")
+	builder.WriteString("public_key=")
+	builder.WriteString(fmt.Sprintf("%v", t.PublicKey))
 	builder.WriteByte(')')
 	return builder.String()
 }

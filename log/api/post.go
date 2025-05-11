@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
-	"github.com/akakou/ra-webs/core/sign"
 	"github.com/akakou/ra-webs/log"
 	"github.com/akakou/ra-webs/log/api/auth"
 	"github.com/akakou/ra-webs/log/api/io"
@@ -29,16 +28,11 @@ var PostApi = goutils.EchoRoute[log.Log]{
 				return c.String(http.StatusBadRequest, "invalid json body")
 			}
 
-			signature, err := sign.Sign(req, l.SignKey)
-			if err != nil {
-				return c.String(http.StatusBadRequest, "failed to sign")
-			}
-
 			ta, err := l.DB.Client.TA.Create().
 				SetRepository(req.Repository).
+				SetPublicKey(req.PublicKey).
 				SetCommitID(req.CommitId).
 				SetEvidence(req.Evidence).
-				SetSignature(signature).
 				Save(*l.DB.Ctx)
 
 			if err != nil {

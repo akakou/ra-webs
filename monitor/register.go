@@ -62,7 +62,6 @@ func (monitor *Monitor) RegisterATLog(uniqueId []byte, log *io.TA, ta *ent.TA, a
 		SetRepository(log.Repository).
 		SetCommitID(log.CommitID).
 		SetUniqueID(uniqueId).
-		SetSignature(log.Signature).
 		SetTa(ta).
 		SetIsActive(active)
 
