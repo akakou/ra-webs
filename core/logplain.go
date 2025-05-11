@@ -1,4 +1,4 @@
-package sign
+package core
 
 type LogPlain struct {
 	Repository string `json:"repository"`

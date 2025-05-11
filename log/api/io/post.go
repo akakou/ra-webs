@@ -1,5 +1,5 @@
 package io
 
-import "github.com/akakou/ra-webs/core/sign"
+import "github.com/akakou/ra-webs/core"
 
-type PostRequest *sign.LogPlain
+type PostRequest *core.LogPlain

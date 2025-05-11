@@ -9,9 +9,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/akakou/ra-webs/core/sign"
+	core "github.com/akakou/ra-webs/core"
 	"github.com/akakou/ra-webs/log"
-	core "github.com/akakou/ra-webs/log"
+	logcore "github.com/akakou/ra-webs/log"
 	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/log/ent"
 	"github.com/labstack/echo/v4"
@@ -36,13 +36,13 @@ var storedData = []ent.TA{
 }
 
 var reqData = []io.PostRequest{
-	&sign.LogPlain{
+	&core.LogPlain{
 		Repository: storedData[0].Repository,
 		CommitId:   storedData[0].CommitID,
 		Evidence:   storedData[0].Evidence,
 		PublicKey:  []byte("publickey_test_1"),
 	},
-	&sign.LogPlain{
+	&core.LogPlain{
 		Repository: storedData[1].Repository,
 		CommitId:   storedData[1].CommitID,
 		Evidence:   storedData[1].Evidence,
@@ -80,7 +80,7 @@ func TestAll(t *testing.T) {
 	defer log.DB.Close()
 }
 
-func testPost(t *testing.T, counter int, data *sign.LogPlain, log *log.Log, e *echo.Echo) {
+func testPost(t *testing.T, counter int, data *core.LogPlain, log *log.Log, e *echo.Echo) {
 	reqJson, err := json.Marshal(data)
 	assert.NoError(t, err)
 
@@ -101,7 +101,7 @@ func testPost(t *testing.T, counter int, data *sign.LogPlain, log *log.Log, e *e
 	assert.Equal(t, fmt.Sprintf("%d", counter), id)
 }
 
-func testGet(t *testing.T, data []ent.TA, log *core.Log, e *echo.Echo) {
+func testGet(t *testing.T, data []ent.TA, log *logcore.Log, e *echo.Echo) {
 	encPK := base64.URLEncoding.EncodeToString(data[0].PublicKey)
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader([]byte{}))
 	q := req.URL.Query()
