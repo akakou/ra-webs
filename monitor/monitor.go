@@ -1,9 +1,6 @@
 package monitor
 
 import (
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
 	"os"
 
@@ -13,22 +10,20 @@ import (
 )
 
 type Monitor struct {
-	TADomain    string
-	DB          *DB
-	CT          CT
-	Notifier    Notifier
-	LogClient   *logclient.LogClient
-	ATPublicKey *rsa.PublicKey
+	TADomain  string
+	DB        *DB
+	CT        CT
+	Notifier  Notifier
+	LogClient *logclient.LogClient
 }
 
-func New(taDomain string, db *DB, ct CT, atPublicKey *rsa.PublicKey, notifier Notifier, logclient *logclient.LogClient) (*Monitor, error) {
+func New(taDomain string, db *DB, ct CT, notifier Notifier, logclient *logclient.LogClient) (*Monitor, error) {
 	return &Monitor{
-		TADomain:    taDomain,
-		DB:          db,
-		CT:          ct,
-		ATPublicKey: atPublicKey,
-		Notifier:    notifier,
-		LogClient:   logclient,
+		TADomain:  taDomain,
+		DB:        db,
+		CT:        ct,
+		Notifier:  notifier,
+		LogClient: logclient,
 	}, nil
 }
 
@@ -38,16 +33,9 @@ func Default(ct CT, notifier Notifier) (*Monitor, error) {
 		return nil, errors.Wrap(errDomainEnvironmentVariableIsEmpty, "RA_WEBS_TA_DOMAIN not found")
 	}
 
-	atPublicKey := os.Getenv("RA_WEBS_AT_PUBLIC_KEY")
-	pemATPublicKey, _ := pem.Decode([]byte(atPublicKey))
-	rsaATPublicKey, err := x509.ParsePKIXPublicKey(pemATPublicKey.Bytes)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse AT public key: %w", err)
-	}
-
-	atDomain := os.Getenv("RA_WEBS_AT_DOMAIN")
+	atDomain := os.Getenv("RA_WEBS_SERVICE_DOMAIN")
 	if atDomain == "" {
-		return nil, errors.Wrap(errDomainEnvironmentVariableIsEmpty, "RA_WEBS_AT_DOMAIN not found")
+		return nil, errors.Wrap(errDomainEnvironmentVariableIsEmpty, "RA_WEBS_SERVICE_DOMAIN not found")
 	}
 
 	dbType := golangutils.GetEnv("DB_TYPE", "sqlite3")
@@ -69,7 +57,7 @@ func Default(ct CT, notifier Notifier) (*Monitor, error) {
 		return nil, err
 	}
 
-	return New(taDomain, db, ct, rsaATPublicKey.(*rsa.PublicKey), notifier, logclient)
+	return New(taDomain, db, ct, notifier, logclient)
 }
 
 func (monitor *Monitor) Run() {

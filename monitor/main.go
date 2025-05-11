@@ -6,13 +6,10 @@ import (
 	"fmt"
 
 	"github.com/akakou/crtsh"
-	"github.com/akakou/ra-webs/core/sign"
 	"github.com/akakou/ra-webs/log/api/io"
 	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 )
-
-type publicKey interface{}
 
 func (monitor *Monitor) Monitor(ctLogs []crtsh.CertificateEntry) {
 	atLogs, err := monitor.LogClient.Fetch()
@@ -49,17 +46,6 @@ func (monitor *Monitor) MonitorATLog(log *io.TA) {
 
 	publicKey := report.Data
 	uniqueId := report.UniqueID
-
-	err = CheckSignature(log.Signature, &sign.LogPlain{
-		Repository: log.Repository,
-		Evidence:   log.Evidence,
-		CommitId:   log.CommitID,
-	}, monitor.ATPublicKey)
-
-	if err != nil {
-		fmt.Printf("Failed to Check Signature: %v\n", err)
-		return
-	}
 
 	err = CheckSourceHash(log, uniqueId)
 	if err != nil {
