@@ -4,67 +4,55 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"fmt"
+	"reflect"
 
 	"github.com/akakou/crtsh"
 	"github.com/akakou/ra-webs/log/api/io"
-	"github.com/akakou/ra-webs/monitor/ent/atlog"
+	"github.com/akakou/ra-webs/monitor/ent"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 )
 
 func (monitor *Monitor) Monitor(ctLogs []crtsh.CertificateEntry) {
-	atLogs, err := monitor.LogClient.Fetch()
+	for _, entry := range ctLogs {
+		monitor.MonitorOne(entry)
+	}
+}
+
+func (monitor *Monitor) MonitorOne(ctLog crtsh.CertificateEntry) {
+	taLog := monitor.MonitorCTLog(ctLog)
+	taEntry, err := monitor.LogClient.Fetch(*taLog.PublicKey)
+
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return
 	}
 
-	for _, entry := range atLogs {
-		monitor.MonitorATLog(entry)
-	}
-
-	for _, entry := range ctLogs {
-		monitor.MonitorCTLog(entry)
-	}
+	monitor.MonitorEvidence(taEntry, taLog)
 }
 
-func (monitor *Monitor) MonitorATLog(log *io.TA) {
+func (monitor *Monitor) MonitorEvidence(taEntry *io.TA, taLog *ent.TA) {
 	var err error
 
-	exist := monitor.DB.Client.ATLog.Query().
-		Where(atlog.EvidenceEQ(log.Evidence)).
-		ExistX(*monitor.DB.Ctx)
-
-	if exist {
-		return
-	}
-
-	report, err := CheckEvidence(log.Evidence)
+	report, err := CheckEvidence(taEntry.Evidence)
 	if err != nil {
 		fmt.Printf("Failed to Check Evidence: %v\n", err)
 		return
 	}
 
-	publicKey := report.Data
+	if !reflect.DeepEqual(report.Data, taEntry.PublicKey) {
+		fmt.Printf("Failed to Check Public Key: %v\n", err)
+		return
+	}
+
 	uniqueId := report.UniqueID
 
-	err = CheckSourceHash(log, uniqueId)
+	err = CheckSourceHash(taEntry, uniqueId)
 	if err != nil {
 		fmt.Printf("Failed to Check Source Hash: %v\n", err)
 		return
 	}
 
-	ta, exist, err := monitor.SelectOrRegisterTA(publicKey)
-	if err != nil {
-		fmt.Printf("Error (1): %v\n", err)
-		return
-	}
-
-	if exist {
-		fmt.Printf("Error (2): %v\n", err)
-		return
-	}
-
-	atLog, err := monitor.RegisterATLog(uniqueId, log, ta, true)
+	atLog, err := monitor.RegisterATLog(uniqueId, taEntry, taLog, true)
 	if err != nil {
 		fmt.Printf("Error (2): %v\n", err)
 		return
@@ -73,20 +61,20 @@ func (monitor *Monitor) MonitorATLog(log *io.TA) {
 	fmt.Printf("Inserted: %v\n", atLog)
 }
 
-func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) {
+func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) *ent.TA {
 	exist := monitor.DB.Client.CTLog.Query().
 		Where(ctlog.MonitorLogIDEQ(entry.ID)).
 		ExistX(*monitor.DB.Ctx)
 
 	if exist {
-		return
+		return nil
 	}
 
 	unmarshaledPublicKey, isRSA := entry.Certificate.PublicKey.(*rsa.PublicKey)
 	if !isRSA {
 		fmt.Printf("Violation (a): %v\n", errPublicKeyIsNotRSA)
 		monitor.RevokeIncompletedCTLog(entry.ID, nil)
-		return
+		return nil
 	}
 
 	publicKeyBuf := x509.MarshalPKCS1PublicKey(unmarshaledPublicKey)
@@ -95,16 +83,16 @@ func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) {
 	if err != nil {
 		fmt.Printf("Violation (b): %v\n", err)
 		monitor.RevokeIncompletedCTLog(entry.ID, ta)
-		return
+		return nil
 	}
 
 	if !exist {
 		fmt.Printf("TA is not found: %x\n", publicKeyBuf)
 		monitor.Revoke(ta)
-		return
+		return nil
 	}
 
-	ctLog, err := monitor.RegisterCTLog(entry.ID, ta, true)
+	_, err = monitor.RegisterCTLog(entry.ID, ta, true)
 	if err != nil {
 		panic(err)
 	}
@@ -114,5 +102,5 @@ func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) {
 		panic(err)
 	}
 
-	fmt.Printf("Inserted: %v\n", ctLog)
+	return ta
 }

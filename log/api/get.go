@@ -1,10 +1,12 @@
 package api
 
 import (
+	"encoding/base64"
 	"net/http"
 
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra-webs/log"
+	"github.com/akakou/ra-webs/log/ent/ta"
 	"github.com/labstack/echo/v4"
 )
 
@@ -13,29 +15,16 @@ var GetApi = goutils.EchoRoute[log.Log]{
 	Path:   "/ta",
 	F: func(log *log.Log) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			// start := 0
-			// end := 0
+			encodedPublicKey := c.QueryParam("publicKey")
+			publicKey, err := base64.URLEncoding.DecodeString(encodedPublicKey)
 
-			// startParam := c.QueryParam("start")
-			// if startParam != "" {
-			// 	start, _ = strconv.Atoi(startParam)
-			// 	start = start - 1
-			// }
-
-			// endParam := c.QueryParam("end")
-			// if endParam != "" {
-			// 	end, _ = strconv.Atoi(endParam)
-			// }
-
-			// limit := end - start
-			// if limit <= 0 || limit > 100 {
-			// 	limit = 100
-			// }
+			if err != nil {
+				return c.String(http.StatusBadRequest, "invalid base64")
+			}
 
 			ta, err := log.DB.Client.TA.Query().
-				// Offset(start).
-				// Limit(limit).
-				All(*log.DB.Ctx)
+				Where(ta.PublicKeyEQ(publicKey)).
+				Only(*log.DB.Ctx)
 
 			if err != nil {
 				return c.String(http.StatusBadRequest, "invalid request")
