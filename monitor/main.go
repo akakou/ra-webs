@@ -9,7 +9,7 @@ import (
 	"github.com/akakou/crtsh"
 	"github.com/akakou/ra-webs/monitor/ent"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
-	"github.com/akakou/ra-webs/service/api/io"
+	"github.com/akakou/ra-webs/monitor/serviceclient"
 )
 
 func (monitor *Monitor) Monitor(ctLogs []crtsh.CertificateEntry) {
@@ -30,7 +30,7 @@ func (monitor *Monitor) MonitorOne(ctLog crtsh.CertificateEntry) {
 	monitor.MonitorEvidence(taEntry, taLog)
 }
 
-func (monitor *Monitor) MonitorEvidence(taEntry *io.TA, taLog *ent.TA) {
+func (monitor *Monitor) MonitorEvidence(taEntry *serviceclient.EvidenceEntry, taLog *ent.TA) {
 	var err error
 
 	report, err := CheckEvidence(taEntry.Evidence)

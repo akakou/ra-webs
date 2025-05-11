@@ -3,7 +3,7 @@ package monitor
 import (
 	"github.com/akakou/ra-webs/monitor/ent"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
-	"github.com/akakou/ra-webs/service/api/io"
+	"github.com/akakou/ra-webs/monitor/serviceclient"
 )
 
 func (monitor *Monitor) SelectOrRegisterTA(publicKey []byte) (*ent.TA, bool, error) {
@@ -55,12 +55,12 @@ func (monitor *Monitor) RegisterCTLog(ctLogId int, ta *ent.TA, isActive bool) (*
 	return ctLog, nil
 }
 
-func (monitor *Monitor) RegisterATLog(uniqueId []byte, log *io.TA, ta *ent.TA, active bool) (*ent.ATLog, error) {
+func (monitor *Monitor) RegisterATLog(uniqueId []byte, entry *serviceclient.EvidenceEntry, ta *ent.TA, active bool) (*ent.ATLog, error) {
 	atLogCreate := monitor.DB.Client.ATLog.
 		Create().
-		SetEvidence(log.Evidence).
-		SetRepository(log.Repository).
-		SetCommitID(log.CommitID).
+		SetEvidence(entry.Evidence).
+		SetRepository(entry.Repository).
+		SetCommitID(entry.CommitID).
 		SetUniqueID(uniqueId).
 		SetTa(ta).
 		SetIsActive(active)

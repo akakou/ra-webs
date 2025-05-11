@@ -4,9 +4,9 @@ go 1.23.6
 
 replace github.com/akakou/ra-webs/monitor => ../../
 
-replace github.com/akakou/ra-webs/core => ../../../core/
+replace github.com/akakou/ra-webs/devkit/core => ../../../core/
 
-replace github.com/akakou/ra-webs/service => ../../../service
+replace github.com/akakou/ra-webs/devkit/service => ../../../service
 
 require github.com/akakou/ra-webs/monitor v0.0.0-00010101000000-000000000000
 
@@ -21,8 +21,8 @@ require (
 	github.com/akakou/extract-embed v0.0.1 // indirect
 	github.com/akakou/go-utils v0.0.7 // indirect
 	github.com/akakou/golang-utils v0.0.1 // indirect
-	github.com/akakou/ra-webs/core v0.0.0-00010101000000-000000000000 // indirect
-	github.com/akakou/ra-webs/service v0.0.0-00010101000000-000000000000 // indirect
+	github.com/akakou/ra-webs/devkit/core v0.0.0-00010101000000-000000000000 // indirect
+	github.com/akakou/ra-webs/devkit/service v0.0.0-00010101000000-000000000000 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	golangutils "github.com/akakou/golang-utils"
+	devkitserviceclient "github.com/akakou/ra-webs/devkit/service/client"
 	"github.com/akakou/ra-webs/monitor/serviceclient"
 	"github.com/cockroachdb/errors"
 )
@@ -14,10 +15,10 @@ type Monitor struct {
 	DB            *DB
 	CT            CT
 	Notifier      Notifier
-	ServiceClient *serviceclient.ServiceClient
+	ServiceClient serviceclient.ServiceClient
 }
 
-func New(taDomain string, db *DB, ct CT, notifier Notifier, serviceClient *serviceclient.ServiceClient) (*Monitor, error) {
+func New(taDomain string, db *DB, ct CT, notifier Notifier, serviceClient serviceclient.ServiceClient) (*Monitor, error) {
 	return &Monitor{
 		TADomain:      taDomain,
 		DB:            db,
@@ -33,8 +34,8 @@ func Default(ct CT, notifier Notifier) (*Monitor, error) {
 		return nil, errors.Wrap(errDomainEnvironmentVariableIsEmpty, "RA_WEBS_TA_DOMAIN not found")
 	}
 
-	atDomain := os.Getenv("RA_WEBS_SERVICE_DOMAIN")
-	if atDomain == "" {
+	serviceDomain := os.Getenv("RA_WEBS_SERVICE_DOMAIN")
+	if serviceDomain == "" {
 		return nil, errors.Wrap(errDomainEnvironmentVariableIsEmpty, "RA_WEBS_SERVICE_DOMAIN not found")
 	}
 
@@ -52,7 +53,7 @@ func Default(ct CT, notifier Notifier) (*Monitor, error) {
 		return nil, err
 	}
 
-	serviceClient, err := serviceclient.New(atDomain)
+	serviceClient, err := devkitserviceclient.New(serviceDomain)
 	if err != nil {
 		return nil, err
 	}

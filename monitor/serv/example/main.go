@@ -6,8 +6,8 @@ import (
 	"html/template"
 	"io"
 
-	"github.com/akakou/ra-webs/core"
-	"github.com/akakou/ra-webs/core/attest/debug"
+	"github.com/akakou/ra-webs/devkit/core"
+	"github.com/akakou/ra-webs/devkit/core/attest/debug"
 	"github.com/akakou/ra-webs/monitor/serv"
 	"github.com/akakou/ra-webs/monitor/serv/api"
 

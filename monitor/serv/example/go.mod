@@ -2,14 +2,16 @@ module github.com/akakou/ra-webs/monitor/serv/example
 
 go 1.23.6
 
-replace github.com/akakou/ra-webs/core => ../../../core/
+replace github.com/akakou/ra-webs/devkit/core => ../../../devkit/core/
 
-replace github.com/akakou/ra-webs/service => ../../../service
+replace github.com/akakou/ra-webs/devkit/service => ../../../devkit/service
 
 replace github.com/akakou/ra-webs/monitor => ../../
 
+replace github.com/akakou/ra-webs/monitor/serviceclient => ../../serviceclient
+
 require (
-	github.com/akakou/ra-webs/core v0.0.0-00010101000000-000000000000
+	github.com/akakou/ra-webs/devkit/core v0.0.0-00010101000000-000000000000
 	github.com/akakou/ra-webs/monitor v0.0.0-00010101000000-000000000000
 	github.com/labstack/echo/v4 v4.13.3
 )
@@ -20,7 +22,8 @@ require (
 	github.com/akakou/crtsh v0.0.4 // indirect
 	github.com/akakou/ctstream v0.0.36 // indirect
 	github.com/akakou/extract-embed v0.0.1 // indirect
-	github.com/akakou/ra-webs/service v0.0.0-00010101000000-000000000000 // indirect
+	github.com/akakou/ra-webs/devkit/service v0.0.0-00010101000000-000000000000 // indirect
+	github.com/akakou/ra-webs/monitor/serviceclient v0.0.0-00010101000000-000000000000 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect

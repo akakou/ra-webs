@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/akakou/ra-webs/monitor/ent"
-	"github.com/akakou/ra-webs/service/api/io"
+	"github.com/akakou/ra-webs/monitor/serviceclient"
 )
 
 func (monitor *Monitor) Revoke(ta *ent.TA) {
@@ -36,25 +36,25 @@ func (monitor *Monitor) RevokeIncompletedCTLog(ctLogId int, ta *ent.TA) {
 	monitor.Revoke(ta)
 }
 
-func (monitor *Monitor) RegisterIncompletedATLog(log *io.TA) {
+func (monitor *Monitor) RegisterIncompletedATLog(entry *serviceclient.EvidenceEntry) {
 	ta, err := monitor.RegisterTA([]byte(""))
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = monitor.RegisterATLog([]byte{}, log, ta, false)
+	_, err = monitor.RegisterATLog([]byte{}, entry, ta, false)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (monitor *Monitor) RegisterBrokenATLog(log *io.TA) {
+func (monitor *Monitor) RegisterBrokenATLog(entry *serviceclient.EvidenceEntry) {
 	ta, err := monitor.RegisterTA([]byte(""))
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = monitor.RegisterATLog([]byte{}, log, ta, false)
+	_, err = monitor.RegisterATLog([]byte{}, entry, ta, false)
 	if err != nil {
 		panic(err)
 	}

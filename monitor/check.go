@@ -9,10 +9,10 @@ import (
 	"github.com/edgelesssys/ego/attestation"
 	"github.com/edgelesssys/ego/attestation/tcbstatus"
 
-	"github.com/akakou/ra-webs/core/attest"
+	"github.com/akakou/ra-webs/devkit/core/attest"
 
 	"github.com/akakou/ra-webs/monitor/builder"
-	"github.com/akakou/ra-webs/service/api/io"
+	"github.com/akakou/ra-webs/monitor/serviceclient"
 )
 
 var (
@@ -54,8 +54,8 @@ func CheckEvidence(evidence string) (*attestation.Report, error) {
 	return report, nil
 }
 
-func CheckSourceHash(log *io.TA, evidenceUniqueId []byte) error {
-	uniqueId, err := builder.Build(log.Repository, log.CommitID)
+func CheckSourceHash(entry *serviceclient.EvidenceEntry, evidenceUniqueId []byte) error {
+	uniqueId, err := builder.Build(entry.Repository, entry.CommitID)
 	if err != nil {
 		return errors.Wrap(errBuildFailed, err.Error())
 	}

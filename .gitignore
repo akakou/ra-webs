@@ -19,13 +19,13 @@
 
 # Go workspace file
 go.work
-ta/certificate.pem
-ta/private.key
-ta/example/example
+devkit/ta/certificate.pem
+devkit/ta/private.key
+devkit/ta/example/example
 monitor/ca_test.json
 
 **/repo
-service/cmd/cmd
+devkit/service/cmd/cmd
 opt/domain-owner/example/config.yaml
 opt/domain-owner/example/example
 **/*.env
@@ -34,12 +34,13 @@ opt/domain-owner/example/example
 **/*.sqlite3
 
 **/last.txt
-ta/example/private.pem
-ta/example/public.pem
+**/*.pem
 monitor/serv/last.log
 monitor/serv/first-log.txt
 monitor/serv/example/example
 monitor/client/example/example
-service/serv/serv
+devkit/service/serv/serv
 monitor/serv/example/debug/tmp
 test/adversary_example/adversary_example
+devkit/ta/example/private.pem
+devkit/ta/example/public.pem
