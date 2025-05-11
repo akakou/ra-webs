@@ -2,13 +2,11 @@ package api
 
 import (
 	"bytes"
-	"crypto/rand"
-	"crypto/rsa"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 
 	"github.com/akakou/ra-webs/core/sign"
@@ -26,14 +24,14 @@ var storedData = []ent.TA{
 		Repository: "test",
 		CommitID:   "test",
 		Evidence:   "test",
-		Signature:  []byte("hello"),
+		PublicKey:  []byte("publickey_test_1"),
 	},
 	ent.TA{
 		ID:         2,
 		Repository: "test",
 		CommitID:   "test",
 		Evidence:   "test",
-		Signature:  []byte("hello"),
+		PublicKey:  []byte("publickey_test_2"),
 	},
 }
 
@@ -42,11 +40,13 @@ var reqData = []io.PostRequest{
 		Repository: storedData[0].Repository,
 		CommitId:   storedData[0].CommitID,
 		Evidence:   storedData[0].Evidence,
+		PublicKey:  []byte("publickey_test_1"),
 	},
 	&sign.LogPlain{
 		Repository: storedData[1].Repository,
 		CommitId:   storedData[1].CommitID,
 		Evidence:   storedData[1].Evidence,
+		PublicKey:  []byte("publickey_test_2"),
 	},
 }
 
@@ -60,23 +60,14 @@ func TestAll(t *testing.T) {
 
 	assert.NoError(t, err, "DB initialization failed")
 
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	assert.NoError(t, err, "Key generation failed")
-
 	log := &log.Log{
-		DB:        db,
-		Domain:    "localhost",
-		VerifyKey: &privateKey.PublicKey,
-		SignKey:   privateKey,
-		Token:     "token",
+		DB:     db,
+		Domain: "localhost",
+		Token:  "token",
 	}
 
 	e := echo.New()
 	g := e.Group("/")
-
-	sign.Sign = func(target *sign.LogPlain, signKey *rsa.PrivateKey) ([]byte, error) {
-		return []byte("hello"), nil
-	}
 
 	GetApi.Set(g, log)
 	PostApi.Set(g, log)
@@ -85,18 +76,6 @@ func TestAll(t *testing.T) {
 	testPost(t, 2, reqData[1], log, e)
 
 	testGet(t, storedData, log, e)
-
-	for i := 0; i < max; i++ {
-		log.DB.Client.TA.Create().
-			SetRepository("test").
-			SetCommitID("test").
-			SetEvidence("test").
-			SetSignature([]byte("hello")).
-			SaveX(*log.DB.Ctx)
-	}
-
-	testGetWithStart(t, log, e)
-	testGetWithStartAndEnd(t, log, e)
 
 	defer log.DB.Close()
 }
@@ -123,7 +102,12 @@ func testPost(t *testing.T, counter int, data *sign.LogPlain, log *log.Log, e *e
 }
 
 func testGet(t *testing.T, data []ent.TA, log *core.Log, e *echo.Echo) {
+	encPK := base64.URLEncoding.EncodeToString(data[0].PublicKey)
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader([]byte{}))
+	q := req.URL.Query()
+	q.Set("publicKey", encPK)
+
+	req.URL.RawQuery = q.Encode()
 
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -133,62 +117,9 @@ func testGet(t *testing.T, data []ent.TA, log *core.Log, e *echo.Echo) {
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 
-	expected, err := json.Marshal(data)
+	expected, err := json.Marshal(data[0])
 	assert.NoError(t, err)
 
 	actual := rec.Body.String()
 	assert.Equal(t, string(expected)+"\n", actual)
-}
-
-func testGetWithStart(t *testing.T, log *core.Log, e *echo.Echo) {
-	var data io.GetResponse
-
-	rec := httptest.NewRecorder()
-
-	q := make(url.Values)
-	q.Set("start", "25")
-	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
-
-	c := e.NewContext(req, rec)
-
-	err := GetApi.F(log)(c)
-	assert.NoError(t, err)
-
-	assert.Equal(t, http.StatusOK, rec.Code)
-
-	actual := rec.Body.String()
-	json.Unmarshal([]byte(actual), &data)
-
-	fmt.Printf("data: %v\n", data)
-
-	assert.Equal(t, 25, data[0].ID)
-	assert.Equal(t, 24+100, data[len(data)-1].ID)
-	assert.Equal(t, 100, len(data))
-}
-
-func testGetWithStartAndEnd(t *testing.T, log *core.Log, e *echo.Echo) {
-	var data io.GetResponse
-
-	rec := httptest.NewRecorder()
-
-	q := make(url.Values)
-	q.Set("start", "25")
-	q.Set("end", "100")
-	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
-
-	c := e.NewContext(req, rec)
-
-	err := GetApi.F(log)(c)
-	assert.NoError(t, err)
-
-	assert.Equal(t, http.StatusOK, rec.Code)
-
-	actual := rec.Body.String()
-	json.Unmarshal([]byte(actual), &data)
-
-	fmt.Printf("data: %v\n", data)
-
-	assert.Equal(t, 25, data[0].ID)
-	assert.Equal(t, 100, data[len(data)-1].ID)
-	assert.Equal(t, 100-24, len(data))
 }
