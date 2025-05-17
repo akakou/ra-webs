@@ -1,5 +1,18 @@
 const TableCompornent = ({ logs }) => {
-    const gitRepo = s => s.edges.at_log ? `${s.edges.at_log.repository}/tree/${s.edges.at_log.commit_id}` : ""
+    const gitRepo = s => {
+        if (s.edges.at_log) {
+            let href = `${s.edges.at_log.repository}/tree/${s.edges.at_log.commit_id}`
+            return <button 
+                    onClick={
+                        e => window.location = href
+                    }
+                    >Go GitHub Repo
+                </button>
+        } else {
+            return <p>No Repo</p>
+        }
+    } 
+    
     const crtshLinks = server => server.edges.ct_log.map(
         (ctl, index) =>
             <div>
@@ -9,7 +22,7 @@ const TableCompornent = ({ logs }) => {
                 <br/>
             </div>
         )
-    const uniqueId = (server) => server.edges.at_log ? server.edges.at_log.unique_id : ""
+    const uniqueId = (server) => server.edges.at_log ? server.edges.at_log.unique_id : "-"
     const violated = (server) =>  
         (!checkValidity(server)).toString()
     
@@ -19,13 +32,8 @@ const TableCompornent = ({ logs }) => {
         <tr key={index}>
             <td>{server.id}</td>
             <td>{uniqueId(server)}</td>
-            <td>
-            {crtshLinks(server)}
-            </td>
-
-            <td>
-                <a href={gitRepo(server)}>{gitRepo(server)}</a>
-            </td>
+            <td>{crtshLinks(server)}</td>
+            <td>{gitRepo(server)}</td>
             <td>{violated(server)}</td> 
         </tr>
     );
