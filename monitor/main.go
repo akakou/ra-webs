@@ -75,13 +75,12 @@ func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) *ent.TA {
 	}
 
 	unmarshaledPublicKey, isRSA := entry.Certificate.PublicKey.(*rsa.PublicKey)
-	if !isRSA {
-		fmt.Printf("Violation (a): %v\n", errPublicKeyIsNotRSA)
-		monitor.RevokeIncompletedCTLog(entry.ID, nil)
-		return nil
-	}
 
-	publicKeyBuf := x509.MarshalPKCS1PublicKey(unmarshaledPublicKey)
+	publicKeyBuf := []byte("no public key")
+
+	if isRSA {
+		publicKeyBuf = x509.MarshalPKCS1PublicKey(unmarshaledPublicKey)
+	}
 
 	ta, err := monitor.RegisterTA(publicKeyBuf)
 	if err != nil {
@@ -93,7 +92,13 @@ func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) *ent.TA {
 		panic(err)
 	}
 
-	err = NotifyUpdate(monitor)
+	if isRSA {
+		err = NotifyUpdate(monitor)
+	} else {
+		err = NotifyViolation(monitor)
+		err = fmt.Errorf("Violation (a): %v %v\n", errPublicKeyIsNotRSA, err)
+	}
+
 	if err != nil {
 		panic(err)
 	}
