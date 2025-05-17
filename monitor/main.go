@@ -43,16 +43,12 @@ func (monitor *Monitor) MonitorEvidence(taEntry *serviceclient.EvidenceEntry, ta
 		return
 	}
 
-	fmt.Printf("left: %x\n right: \n%x\n\n", report.Data, *taLog.PublicKey)
-
 	if !reflect.DeepEqual(report.Data, *taLog.PublicKey) {
 		fmt.Printf("Failed to Check Public Key: %v\n", err)
 		return
 	}
 
 	uniqueId := report.UniqueID
-
-	fmt.Printf("commit id: %v\n", taEntry.CommitID)
 
 	err = CheckSourceHash(taEntry, uniqueId)
 	if err != nil {
