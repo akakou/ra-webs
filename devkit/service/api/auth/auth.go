@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Authenticate(l *log.Log, c echo.Context) error {
+func Authenticate(l *log.Service, c echo.Context) error {
 	authorization := c.Request().Header["Authorization"][0]
 	token := authorization[len("Bearer "):]
 

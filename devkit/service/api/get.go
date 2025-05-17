@@ -10,10 +10,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var GetApi = goutils.EchoRoute[service.Log]{
+var GetApi = goutils.EchoRoute[service.Service]{
 	Method: goutils.GET,
 	Path:   "/ta",
-	F: func(log *service.Log) goutils.EchoRouteFunc {
+	F: func(service *service.Service) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			encodedPublicKey := c.QueryParam("publicKey")
 			publicKey, err := base64.URLEncoding.DecodeString(encodedPublicKey)
@@ -22,9 +22,9 @@ var GetApi = goutils.EchoRoute[service.Log]{
 				return c.String(http.StatusBadRequest, "invalid base64")
 			}
 
-			ta, err := log.DB.Client.TA.Query().
+			ta, err := service.DB.Client.TA.Query().
 				Where(ta.PublicKeyEQ(publicKey)).
-				Only(*log.DB.Ctx)
+				Only(*service.DB.Ctx)
 
 			if err != nil {
 				return c.String(http.StatusBadRequest, "invalid request")

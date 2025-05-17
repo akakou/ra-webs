@@ -11,14 +11,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var PostApi = goutils.EchoRoute[service.Log]{
+var PostApi = goutils.EchoRoute[service.Service]{
 	Method: goutils.POST,
 	Path:   "/ta",
-	F: func(l *service.Log) goutils.EchoRouteFunc {
+	F: func(service *service.Service) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
 			var req io.PostRequest
 
-			err := auth.Authenticate(l, c)
+			err := auth.Authenticate(service, c)
 			if err != nil {
 				return c.String(http.StatusUnauthorized, "unauthorized")
 			}
@@ -28,12 +28,12 @@ var PostApi = goutils.EchoRoute[service.Log]{
 				return c.String(http.StatusBadRequest, "invalid json body")
 			}
 
-			ta, err := l.DB.Client.TA.Create().
+			ta, err := service.DB.Client.TA.Create().
 				SetRepository(req.Repository).
 				SetPublicKey(req.PublicKey).
 				SetCommitID(req.CommitId).
 				SetEvidence(req.Evidence).
-				Save(*l.DB.Ctx)
+				Save(*service.DB.Ctx)
 
 			if err != nil {
 				return c.String(http.StatusBadRequest, "failed to store the log")

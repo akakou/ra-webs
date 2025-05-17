@@ -50,8 +50,6 @@ var reqData = []io.PostRequest{
 	},
 }
 
-var max = 200
-
 func TestAll(t *testing.T) {
 	db, err := service.NewDB(&service.DBConfig{
 		Type:   "sqlite3",
@@ -60,7 +58,7 @@ func TestAll(t *testing.T) {
 
 	assert.NoError(t, err, "DB initialization failed")
 
-	log := &service.Log{
+	service := &service.Service{
 		DB:     db,
 		Domain: "localhost",
 		Token:  "token",
@@ -69,18 +67,18 @@ func TestAll(t *testing.T) {
 	e := echo.New()
 	g := e.Group("/")
 
-	GetApi.Set(g, log)
-	PostApi.Set(g, log)
+	GetApi.Set(g, service)
+	PostApi.Set(g, service)
 
-	testPost(t, 1, reqData[0], log, e)
-	testPost(t, 2, reqData[1], log, e)
+	testPost(t, 1, reqData[0], service, e)
+	testPost(t, 2, reqData[1], service, e)
 
-	testGet(t, storedData, log, e)
+	testGet(t, storedData, service, e)
 
-	defer log.DB.Close()
+	defer service.DB.Close()
 }
 
-func testPost(t *testing.T, counter int, data *core.LogPlain, log *service.Log, e *echo.Echo) {
+func testPost(t *testing.T, counter int, data *core.LogPlain, log *service.Service, e *echo.Echo) {
 	reqJson, err := json.Marshal(data)
 	assert.NoError(t, err)
 
@@ -101,7 +99,7 @@ func testPost(t *testing.T, counter int, data *core.LogPlain, log *service.Log, 
 	assert.Equal(t, fmt.Sprintf("%d", counter), id)
 }
 
-func testGet(t *testing.T, data []ent.TA, log *logcore.Log, e *echo.Echo) {
+func testGet(t *testing.T, data []ent.TA, log *logcore.Service, e *echo.Echo) {
 	encPK := base64.URLEncoding.EncodeToString(data[0].PublicKey)
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader([]byte{}))
 	q := req.URL.Query()
