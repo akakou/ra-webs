@@ -10,14 +10,12 @@ import (
 	"github.com/akakou/ra-webs/monitor"
 )
 
-var Sleep = time.Second * 30
-
 type CrtshMonitor struct {
 	Last     int
 	Interval time.Duration
 }
 
-var DefaultInterval = 10 * time.Minute
+var DefaultInterval = time.Second * 60
 
 const INITIAL_CT_DOMAIN = "example.com"
 
@@ -45,6 +43,6 @@ func (a *CrtshMonitor) Run(monitor *monitor.Monitor) {
 		}
 
 		monitor.Monitor(entries)
-		time.Sleep(Sleep)
+		time.Sleep(a.Interval)
 	}
 }
