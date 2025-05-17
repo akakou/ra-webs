@@ -33,6 +33,7 @@ services:
     working_dir: /devkit/service/serv
     command: bash -c 'go mod tidy && go run .'
     env_file:
+      - test/env/common.env
       - test/env/service.env
     ports: 
       - 8080:8080 
@@ -51,12 +52,3 @@ services:
     privileged: true
     ports: 
       - 8000:8000 
-    # profiles:
-      # - monitor
-
-  # tunnel:
-  #   restart: unless-stopped
-  #   image: cloudflare/cloudflared
-  #   command: tunnel --url http://monitor:8080 
-  #   profiles:
-  #     - monitor
