@@ -15,7 +15,7 @@ var GetApi = goutils.EchoRoute[service.Service]{
 	Path:   "/ta",
 	F: func(service *service.Service) goutils.EchoRouteFunc {
 		return func(c echo.Context) error {
-			encodedPublicKey := c.QueryParam("publicKey")
+			encodedPublicKey := c.QueryParam("public_key")
 			publicKey, err := base64.URLEncoding.DecodeString(encodedPublicKey)
 
 			if err != nil {
