@@ -24,7 +24,7 @@ var embedFiles embed.FS
 var Build = build
 
 const BASE_REPO_PATH = "./repo/"
-const BASE_PROGRAM_PATH = "./ta/example"
+const BASE_PROGRAM_PATH = "./devkit/ta/example"
 
 const BUILD_SCRIPT = BASE_REPO_PATH + "build.sh"
 
@@ -73,7 +73,7 @@ func buildCode(name, repo, commitId string) (string, error) {
 	actualCommitId := lines[COMMIT_ID_INDEX]
 	uniqueId := lines[UNIQUE_ID_INDEX]
 
-	if actualCommitId != commitId {
+	if commitId != actualCommitId {
 		return "", fmt.Errorf("expected commit id %v, but got %v", commitId, actualCommitId)
 	}
 
