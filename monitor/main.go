@@ -66,8 +66,8 @@ func (monitor *Monitor) MonitorEvidence(taEntry *serviceclient.EvidenceEntry, ta
 		return fmt.Errorf("Failed to Check Source Hash: %v\n", err)
 	}
 
-	atLog := monitor.RegisterATLog(uniqueId, taEntry, taLog)
-	fmt.Printf("Inserted: %v\n", atLog)
+	evidenceLog := monitor.RegisterATLog(uniqueId, taEntry, taLog)
+	fmt.Printf("Inserted: %v\n", evidenceLog)
 
 	return nil
 }

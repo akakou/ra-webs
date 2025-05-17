@@ -6,11 +6,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// ATLog is the predicate function for atlog builders.
-type ATLog func(*sql.Selector)
-
 // CTLog is the predicate function for ctlog builders.
 type CTLog func(*sql.Selector)
+
+// EvidenceLog is the predicate function for evidencelog builders.
+type EvidenceLog func(*sql.Selector)
 
 // Subscription is the predicate function for subscription builders.
 type Subscription func(*sql.Selector)

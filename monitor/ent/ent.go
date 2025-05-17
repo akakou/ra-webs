@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
+	"github.com/akakou/ra-webs/monitor/ent/evidencelog"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
@@ -76,8 +76,8 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			atlog.Table:        atlog.ValidColumn,
 			ctlog.Table:        ctlog.ValidColumn,
+			evidencelog.Table:  evidencelog.ValidColumn,
 			subscription.Table: subscription.ValidColumn,
 			ta.Table:           ta.ValidColumn,
 		})

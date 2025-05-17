@@ -29,11 +29,11 @@ const (
 	CtLogColumn = "ct_log_ta"
 	// AtLogTable is the table that holds the at_log relation/edge.
 	AtLogTable = "tas"
-	// AtLogInverseTable is the table name for the ATLog entity.
-	// It exists in this package in order to avoid circular dependency with the "atlog" package.
-	AtLogInverseTable = "at_logs"
+	// AtLogInverseTable is the table name for the EvidenceLog entity.
+	// It exists in this package in order to avoid circular dependency with the "evidencelog" package.
+	AtLogInverseTable = "evidence_logs"
 	// AtLogColumn is the table column denoting the at_log relation/edge.
-	AtLogColumn = "at_log_ta"
+	AtLogColumn = "evidence_log_ta"
 )
 
 // Columns holds all SQL columns for ta fields.
@@ -45,7 +45,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tas"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"at_log_ta",
+	"evidence_log_ta",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
+	"github.com/akakou/ra-webs/monitor/ent/evidencelog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
@@ -50,13 +50,13 @@ func (tu *TAUpdate) AddCtLog(c ...*CTLog) *TAUpdate {
 	return tu.AddCtLogIDs(ids...)
 }
 
-// SetAtLogID sets the "at_log" edge to the ATLog entity by ID.
+// SetAtLogID sets the "at_log" edge to the EvidenceLog entity by ID.
 func (tu *TAUpdate) SetAtLogID(id int) *TAUpdate {
 	tu.mutation.SetAtLogID(id)
 	return tu
 }
 
-// SetNillableAtLogID sets the "at_log" edge to the ATLog entity by ID if the given value is not nil.
+// SetNillableAtLogID sets the "at_log" edge to the EvidenceLog entity by ID if the given value is not nil.
 func (tu *TAUpdate) SetNillableAtLogID(id *int) *TAUpdate {
 	if id != nil {
 		tu = tu.SetAtLogID(*id)
@@ -64,9 +64,9 @@ func (tu *TAUpdate) SetNillableAtLogID(id *int) *TAUpdate {
 	return tu
 }
 
-// SetAtLog sets the "at_log" edge to the ATLog entity.
-func (tu *TAUpdate) SetAtLog(a *ATLog) *TAUpdate {
-	return tu.SetAtLogID(a.ID)
+// SetAtLog sets the "at_log" edge to the EvidenceLog entity.
+func (tu *TAUpdate) SetAtLog(e *EvidenceLog) *TAUpdate {
+	return tu.SetAtLogID(e.ID)
 }
 
 // Mutation returns the TAMutation object of the builder.
@@ -95,7 +95,7 @@ func (tu *TAUpdate) RemoveCtLog(c ...*CTLog) *TAUpdate {
 	return tu.RemoveCtLogIDs(ids...)
 }
 
-// ClearAtLog clears the "at_log" edge to the ATLog entity.
+// ClearAtLog clears the "at_log" edge to the EvidenceLog entity.
 func (tu *TAUpdate) ClearAtLog() *TAUpdate {
 	tu.mutation.ClearAtLog()
 	return tu
@@ -193,7 +193,7 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{ta.AtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(evidencelog.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -206,7 +206,7 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{ta.AtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(evidencelog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -255,13 +255,13 @@ func (tuo *TAUpdateOne) AddCtLog(c ...*CTLog) *TAUpdateOne {
 	return tuo.AddCtLogIDs(ids...)
 }
 
-// SetAtLogID sets the "at_log" edge to the ATLog entity by ID.
+// SetAtLogID sets the "at_log" edge to the EvidenceLog entity by ID.
 func (tuo *TAUpdateOne) SetAtLogID(id int) *TAUpdateOne {
 	tuo.mutation.SetAtLogID(id)
 	return tuo
 }
 
-// SetNillableAtLogID sets the "at_log" edge to the ATLog entity by ID if the given value is not nil.
+// SetNillableAtLogID sets the "at_log" edge to the EvidenceLog entity by ID if the given value is not nil.
 func (tuo *TAUpdateOne) SetNillableAtLogID(id *int) *TAUpdateOne {
 	if id != nil {
 		tuo = tuo.SetAtLogID(*id)
@@ -269,9 +269,9 @@ func (tuo *TAUpdateOne) SetNillableAtLogID(id *int) *TAUpdateOne {
 	return tuo
 }
 
-// SetAtLog sets the "at_log" edge to the ATLog entity.
-func (tuo *TAUpdateOne) SetAtLog(a *ATLog) *TAUpdateOne {
-	return tuo.SetAtLogID(a.ID)
+// SetAtLog sets the "at_log" edge to the EvidenceLog entity.
+func (tuo *TAUpdateOne) SetAtLog(e *EvidenceLog) *TAUpdateOne {
+	return tuo.SetAtLogID(e.ID)
 }
 
 // Mutation returns the TAMutation object of the builder.
@@ -300,7 +300,7 @@ func (tuo *TAUpdateOne) RemoveCtLog(c ...*CTLog) *TAUpdateOne {
 	return tuo.RemoveCtLogIDs(ids...)
 }
 
-// ClearAtLog clears the "at_log" edge to the ATLog entity.
+// ClearAtLog clears the "at_log" edge to the EvidenceLog entity.
 func (tuo *TAUpdateOne) ClearAtLog() *TAUpdateOne {
 	tuo.mutation.ClearAtLog()
 	return tuo
@@ -428,7 +428,7 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 			Columns: []string{ta.AtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(evidencelog.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -441,7 +441,7 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 			Columns: []string{ta.AtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(evidencelog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

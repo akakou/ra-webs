@@ -133,7 +133,7 @@ func HasAtLog() predicate.TA {
 }
 
 // HasAtLogWith applies the HasEdge predicate on the "at_log" edge with a given conditions (other predicates).
-func HasAtLogWith(preds ...predicate.ATLog) predicate.TA {
+func HasAtLogWith(preds ...predicate.EvidenceLog) predicate.TA {
 	return predicate.TA(func(s *sql.Selector) {
 		step := newAtLogStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

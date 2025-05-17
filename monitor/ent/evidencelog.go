@@ -8,12 +8,12 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra-webs/monitor/ent/atlog"
+	"github.com/akakou/ra-webs/monitor/ent/evidencelog"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
 
-// ATLog is the model entity for the ATLog schema.
-type ATLog struct {
+// EvidenceLog is the model entity for the EvidenceLog schema.
+type EvidenceLog struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -26,13 +26,13 @@ type ATLog struct {
 	// UniqueID holds the value of the "unique_id" field.
 	UniqueID []byte `json:"unique_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the ATLogQuery when eager-loading is set.
-	Edges        ATLogEdges `json:"edges"`
+	// The values are being populated by the EvidenceLogQuery when eager-loading is set.
+	Edges        EvidenceLogEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// ATLogEdges holds the relations/edges for other nodes in the graph.
-type ATLogEdges struct {
+// EvidenceLogEdges holds the relations/edges for other nodes in the graph.
+type EvidenceLogEdges struct {
 	// Ta holds the value of the ta edge.
 	Ta *TA `json:"ta,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -42,7 +42,7 @@ type ATLogEdges struct {
 
 // TaOrErr returns the Ta value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e ATLogEdges) TaOrErr() (*TA, error) {
+func (e EvidenceLogEdges) TaOrErr() (*TA, error) {
 	if e.Ta != nil {
 		return e.Ta, nil
 	} else if e.loadedTypes[0] {
@@ -52,15 +52,15 @@ func (e ATLogEdges) TaOrErr() (*TA, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*ATLog) scanValues(columns []string) ([]any, error) {
+func (*EvidenceLog) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case atlog.FieldUniqueID:
+		case evidencelog.FieldUniqueID:
 			values[i] = new([]byte)
-		case atlog.FieldID:
+		case evidencelog.FieldID:
 			values[i] = new(sql.NullInt64)
-		case atlog.FieldEvidence, atlog.FieldRepository, atlog.FieldCommitID:
+		case evidencelog.FieldEvidence, evidencelog.FieldRepository, evidencelog.FieldCommitID:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -70,98 +70,98 @@ func (*ATLog) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the ATLog fields.
-func (al *ATLog) assignValues(columns []string, values []any) error {
+// to the EvidenceLog fields.
+func (el *EvidenceLog) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case atlog.FieldID:
+		case evidencelog.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			al.ID = int(value.Int64)
-		case atlog.FieldEvidence:
+			el.ID = int(value.Int64)
+		case evidencelog.FieldEvidence:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field evidence", values[i])
 			} else if value.Valid {
-				al.Evidence = value.String
+				el.Evidence = value.String
 			}
-		case atlog.FieldRepository:
+		case evidencelog.FieldRepository:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field repository", values[i])
 			} else if value.Valid {
-				al.Repository = value.String
+				el.Repository = value.String
 			}
-		case atlog.FieldCommitID:
+		case evidencelog.FieldCommitID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field commit_id", values[i])
 			} else if value.Valid {
-				al.CommitID = value.String
+				el.CommitID = value.String
 			}
-		case atlog.FieldUniqueID:
+		case evidencelog.FieldUniqueID:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field unique_id", values[i])
 			} else if value != nil {
-				al.UniqueID = *value
+				el.UniqueID = *value
 			}
 		default:
-			al.selectValues.Set(columns[i], values[i])
+			el.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the ATLog.
+// Value returns the ent.Value that was dynamically selected and assigned to the EvidenceLog.
 // This includes values selected through modifiers, order, etc.
-func (al *ATLog) Value(name string) (ent.Value, error) {
-	return al.selectValues.Get(name)
+func (el *EvidenceLog) Value(name string) (ent.Value, error) {
+	return el.selectValues.Get(name)
 }
 
-// QueryTa queries the "ta" edge of the ATLog entity.
-func (al *ATLog) QueryTa() *TAQuery {
-	return NewATLogClient(al.config).QueryTa(al)
+// QueryTa queries the "ta" edge of the EvidenceLog entity.
+func (el *EvidenceLog) QueryTa() *TAQuery {
+	return NewEvidenceLogClient(el.config).QueryTa(el)
 }
 
-// Update returns a builder for updating this ATLog.
-// Note that you need to call ATLog.Unwrap() before calling this method if this ATLog
+// Update returns a builder for updating this EvidenceLog.
+// Note that you need to call EvidenceLog.Unwrap() before calling this method if this EvidenceLog
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (al *ATLog) Update() *ATLogUpdateOne {
-	return NewATLogClient(al.config).UpdateOne(al)
+func (el *EvidenceLog) Update() *EvidenceLogUpdateOne {
+	return NewEvidenceLogClient(el.config).UpdateOne(el)
 }
 
-// Unwrap unwraps the ATLog entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the EvidenceLog entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (al *ATLog) Unwrap() *ATLog {
-	_tx, ok := al.config.driver.(*txDriver)
+func (el *EvidenceLog) Unwrap() *EvidenceLog {
+	_tx, ok := el.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: ATLog is not a transactional entity")
+		panic("ent: EvidenceLog is not a transactional entity")
 	}
-	al.config.driver = _tx.drv
-	return al
+	el.config.driver = _tx.drv
+	return el
 }
 
 // String implements the fmt.Stringer.
-func (al *ATLog) String() string {
+func (el *EvidenceLog) String() string {
 	var builder strings.Builder
-	builder.WriteString("ATLog(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", al.ID))
+	builder.WriteString("EvidenceLog(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", el.ID))
 	builder.WriteString("evidence=")
-	builder.WriteString(al.Evidence)
+	builder.WriteString(el.Evidence)
 	builder.WriteString(", ")
 	builder.WriteString("repository=")
-	builder.WriteString(al.Repository)
+	builder.WriteString(el.Repository)
 	builder.WriteString(", ")
 	builder.WriteString("commit_id=")
-	builder.WriteString(al.CommitID)
+	builder.WriteString(el.CommitID)
 	builder.WriteString(", ")
 	builder.WriteString("unique_id=")
-	builder.WriteString(fmt.Sprintf("%v", al.UniqueID))
+	builder.WriteString(fmt.Sprintf("%v", el.UniqueID))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// ATLogs is a parsable slice of ATLog.
-type ATLogs []*ATLog
+// EvidenceLogs is a parsable slice of EvidenceLog.
+type EvidenceLogs []*EvidenceLog

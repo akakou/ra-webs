@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
+	"github.com/akakou/ra-webs/monitor/ent/evidencelog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
@@ -26,566 +26,11 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeATLog        = "ATLog"
 	TypeCTLog        = "CTLog"
+	TypeEvidenceLog  = "EvidenceLog"
 	TypeSubscription = "Subscription"
 	TypeTA           = "TA"
 )
-
-// ATLogMutation represents an operation that mutates the ATLog nodes in the graph.
-type ATLogMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *int
-	evidence      *string
-	repository    *string
-	commit_id     *string
-	unique_id     *[]byte
-	clearedFields map[string]struct{}
-	ta            *int
-	clearedta     bool
-	done          bool
-	oldValue      func(context.Context) (*ATLog, error)
-	predicates    []predicate.ATLog
-}
-
-var _ ent.Mutation = (*ATLogMutation)(nil)
-
-// atlogOption allows management of the mutation configuration using functional options.
-type atlogOption func(*ATLogMutation)
-
-// newATLogMutation creates new mutation for the ATLog entity.
-func newATLogMutation(c config, op Op, opts ...atlogOption) *ATLogMutation {
-	m := &ATLogMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeATLog,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withATLogID sets the ID field of the mutation.
-func withATLogID(id int) atlogOption {
-	return func(m *ATLogMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *ATLog
-		)
-		m.oldValue = func(ctx context.Context) (*ATLog, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().ATLog.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withATLog sets the old ATLog of the mutation.
-func withATLog(node *ATLog) atlogOption {
-	return func(m *ATLogMutation) {
-		m.oldValue = func(context.Context) (*ATLog, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m ATLogMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m ATLogMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *ATLogMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *ATLogMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().ATLog.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetEvidence sets the "evidence" field.
-func (m *ATLogMutation) SetEvidence(s string) {
-	m.evidence = &s
-}
-
-// Evidence returns the value of the "evidence" field in the mutation.
-func (m *ATLogMutation) Evidence() (r string, exists bool) {
-	v := m.evidence
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldEvidence returns the old "evidence" field's value of the ATLog entity.
-// If the ATLog object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ATLogMutation) OldEvidence(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEvidence is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEvidence requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEvidence: %w", err)
-	}
-	return oldValue.Evidence, nil
-}
-
-// ResetEvidence resets all changes to the "evidence" field.
-func (m *ATLogMutation) ResetEvidence() {
-	m.evidence = nil
-}
-
-// SetRepository sets the "repository" field.
-func (m *ATLogMutation) SetRepository(s string) {
-	m.repository = &s
-}
-
-// Repository returns the value of the "repository" field in the mutation.
-func (m *ATLogMutation) Repository() (r string, exists bool) {
-	v := m.repository
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldRepository returns the old "repository" field's value of the ATLog entity.
-// If the ATLog object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ATLogMutation) OldRepository(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRepository is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRepository requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRepository: %w", err)
-	}
-	return oldValue.Repository, nil
-}
-
-// ResetRepository resets all changes to the "repository" field.
-func (m *ATLogMutation) ResetRepository() {
-	m.repository = nil
-}
-
-// SetCommitID sets the "commit_id" field.
-func (m *ATLogMutation) SetCommitID(s string) {
-	m.commit_id = &s
-}
-
-// CommitID returns the value of the "commit_id" field in the mutation.
-func (m *ATLogMutation) CommitID() (r string, exists bool) {
-	v := m.commit_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCommitID returns the old "commit_id" field's value of the ATLog entity.
-// If the ATLog object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ATLogMutation) OldCommitID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCommitID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCommitID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCommitID: %w", err)
-	}
-	return oldValue.CommitID, nil
-}
-
-// ResetCommitID resets all changes to the "commit_id" field.
-func (m *ATLogMutation) ResetCommitID() {
-	m.commit_id = nil
-}
-
-// SetUniqueID sets the "unique_id" field.
-func (m *ATLogMutation) SetUniqueID(b []byte) {
-	m.unique_id = &b
-}
-
-// UniqueID returns the value of the "unique_id" field in the mutation.
-func (m *ATLogMutation) UniqueID() (r []byte, exists bool) {
-	v := m.unique_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUniqueID returns the old "unique_id" field's value of the ATLog entity.
-// If the ATLog object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ATLogMutation) OldUniqueID(ctx context.Context) (v []byte, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUniqueID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUniqueID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUniqueID: %w", err)
-	}
-	return oldValue.UniqueID, nil
-}
-
-// ResetUniqueID resets all changes to the "unique_id" field.
-func (m *ATLogMutation) ResetUniqueID() {
-	m.unique_id = nil
-}
-
-// SetTaID sets the "ta" edge to the TA entity by id.
-func (m *ATLogMutation) SetTaID(id int) {
-	m.ta = &id
-}
-
-// ClearTa clears the "ta" edge to the TA entity.
-func (m *ATLogMutation) ClearTa() {
-	m.clearedta = true
-}
-
-// TaCleared reports if the "ta" edge to the TA entity was cleared.
-func (m *ATLogMutation) TaCleared() bool {
-	return m.clearedta
-}
-
-// TaID returns the "ta" edge ID in the mutation.
-func (m *ATLogMutation) TaID() (id int, exists bool) {
-	if m.ta != nil {
-		return *m.ta, true
-	}
-	return
-}
-
-// TaIDs returns the "ta" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TaID instead. It exists only for internal usage by the builders.
-func (m *ATLogMutation) TaIDs() (ids []int) {
-	if id := m.ta; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetTa resets all changes to the "ta" edge.
-func (m *ATLogMutation) ResetTa() {
-	m.ta = nil
-	m.clearedta = false
-}
-
-// Where appends a list predicates to the ATLogMutation builder.
-func (m *ATLogMutation) Where(ps ...predicate.ATLog) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the ATLogMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *ATLogMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.ATLog, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *ATLogMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *ATLogMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (ATLog).
-func (m *ATLogMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *ATLogMutation) Fields() []string {
-	fields := make([]string, 0, 4)
-	if m.evidence != nil {
-		fields = append(fields, atlog.FieldEvidence)
-	}
-	if m.repository != nil {
-		fields = append(fields, atlog.FieldRepository)
-	}
-	if m.commit_id != nil {
-		fields = append(fields, atlog.FieldCommitID)
-	}
-	if m.unique_id != nil {
-		fields = append(fields, atlog.FieldUniqueID)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *ATLogMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case atlog.FieldEvidence:
-		return m.Evidence()
-	case atlog.FieldRepository:
-		return m.Repository()
-	case atlog.FieldCommitID:
-		return m.CommitID()
-	case atlog.FieldUniqueID:
-		return m.UniqueID()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *ATLogMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case atlog.FieldEvidence:
-		return m.OldEvidence(ctx)
-	case atlog.FieldRepository:
-		return m.OldRepository(ctx)
-	case atlog.FieldCommitID:
-		return m.OldCommitID(ctx)
-	case atlog.FieldUniqueID:
-		return m.OldUniqueID(ctx)
-	}
-	return nil, fmt.Errorf("unknown ATLog field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ATLogMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case atlog.FieldEvidence:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetEvidence(v)
-		return nil
-	case atlog.FieldRepository:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetRepository(v)
-		return nil
-	case atlog.FieldCommitID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCommitID(v)
-		return nil
-	case atlog.FieldUniqueID:
-		v, ok := value.([]byte)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUniqueID(v)
-		return nil
-	}
-	return fmt.Errorf("unknown ATLog field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *ATLogMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *ATLogMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ATLogMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown ATLog numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *ATLogMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *ATLogMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *ATLogMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown ATLog nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *ATLogMutation) ResetField(name string) error {
-	switch name {
-	case atlog.FieldEvidence:
-		m.ResetEvidence()
-		return nil
-	case atlog.FieldRepository:
-		m.ResetRepository()
-		return nil
-	case atlog.FieldCommitID:
-		m.ResetCommitID()
-		return nil
-	case atlog.FieldUniqueID:
-		m.ResetUniqueID()
-		return nil
-	}
-	return fmt.Errorf("unknown ATLog field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *ATLogMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.ta != nil {
-		edges = append(edges, atlog.EdgeTa)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *ATLogMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case atlog.EdgeTa:
-		if id := m.ta; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *ATLogMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *ATLogMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *ATLogMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedta {
-		edges = append(edges, atlog.EdgeTa)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *ATLogMutation) EdgeCleared(name string) bool {
-	switch name {
-	case atlog.EdgeTa:
-		return m.clearedta
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *ATLogMutation) ClearEdge(name string) error {
-	switch name {
-	case atlog.EdgeTa:
-		m.ClearTa()
-		return nil
-	}
-	return fmt.Errorf("unknown ATLog unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *ATLogMutation) ResetEdge(name string) error {
-	switch name {
-	case atlog.EdgeTa:
-		m.ResetTa()
-		return nil
-	}
-	return fmt.Errorf("unknown ATLog edge %s", name)
-}
 
 // CTLogMutation represents an operation that mutates the CTLog nodes in the graph.
 type CTLogMutation struct {
@@ -1014,6 +459,561 @@ func (m *CTLogMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown CTLog edge %s", name)
+}
+
+// EvidenceLogMutation represents an operation that mutates the EvidenceLog nodes in the graph.
+type EvidenceLogMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	evidence      *string
+	repository    *string
+	commit_id     *string
+	unique_id     *[]byte
+	clearedFields map[string]struct{}
+	ta            *int
+	clearedta     bool
+	done          bool
+	oldValue      func(context.Context) (*EvidenceLog, error)
+	predicates    []predicate.EvidenceLog
+}
+
+var _ ent.Mutation = (*EvidenceLogMutation)(nil)
+
+// evidencelogOption allows management of the mutation configuration using functional options.
+type evidencelogOption func(*EvidenceLogMutation)
+
+// newEvidenceLogMutation creates new mutation for the EvidenceLog entity.
+func newEvidenceLogMutation(c config, op Op, opts ...evidencelogOption) *EvidenceLogMutation {
+	m := &EvidenceLogMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeEvidenceLog,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withEvidenceLogID sets the ID field of the mutation.
+func withEvidenceLogID(id int) evidencelogOption {
+	return func(m *EvidenceLogMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *EvidenceLog
+		)
+		m.oldValue = func(ctx context.Context) (*EvidenceLog, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().EvidenceLog.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withEvidenceLog sets the old EvidenceLog of the mutation.
+func withEvidenceLog(node *EvidenceLog) evidencelogOption {
+	return func(m *EvidenceLogMutation) {
+		m.oldValue = func(context.Context) (*EvidenceLog, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m EvidenceLogMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m EvidenceLogMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *EvidenceLogMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *EvidenceLogMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().EvidenceLog.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetEvidence sets the "evidence" field.
+func (m *EvidenceLogMutation) SetEvidence(s string) {
+	m.evidence = &s
+}
+
+// Evidence returns the value of the "evidence" field in the mutation.
+func (m *EvidenceLogMutation) Evidence() (r string, exists bool) {
+	v := m.evidence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEvidence returns the old "evidence" field's value of the EvidenceLog entity.
+// If the EvidenceLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EvidenceLogMutation) OldEvidence(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEvidence is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEvidence requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEvidence: %w", err)
+	}
+	return oldValue.Evidence, nil
+}
+
+// ResetEvidence resets all changes to the "evidence" field.
+func (m *EvidenceLogMutation) ResetEvidence() {
+	m.evidence = nil
+}
+
+// SetRepository sets the "repository" field.
+func (m *EvidenceLogMutation) SetRepository(s string) {
+	m.repository = &s
+}
+
+// Repository returns the value of the "repository" field in the mutation.
+func (m *EvidenceLogMutation) Repository() (r string, exists bool) {
+	v := m.repository
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRepository returns the old "repository" field's value of the EvidenceLog entity.
+// If the EvidenceLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EvidenceLogMutation) OldRepository(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRepository is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRepository requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRepository: %w", err)
+	}
+	return oldValue.Repository, nil
+}
+
+// ResetRepository resets all changes to the "repository" field.
+func (m *EvidenceLogMutation) ResetRepository() {
+	m.repository = nil
+}
+
+// SetCommitID sets the "commit_id" field.
+func (m *EvidenceLogMutation) SetCommitID(s string) {
+	m.commit_id = &s
+}
+
+// CommitID returns the value of the "commit_id" field in the mutation.
+func (m *EvidenceLogMutation) CommitID() (r string, exists bool) {
+	v := m.commit_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCommitID returns the old "commit_id" field's value of the EvidenceLog entity.
+// If the EvidenceLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EvidenceLogMutation) OldCommitID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCommitID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCommitID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCommitID: %w", err)
+	}
+	return oldValue.CommitID, nil
+}
+
+// ResetCommitID resets all changes to the "commit_id" field.
+func (m *EvidenceLogMutation) ResetCommitID() {
+	m.commit_id = nil
+}
+
+// SetUniqueID sets the "unique_id" field.
+func (m *EvidenceLogMutation) SetUniqueID(b []byte) {
+	m.unique_id = &b
+}
+
+// UniqueID returns the value of the "unique_id" field in the mutation.
+func (m *EvidenceLogMutation) UniqueID() (r []byte, exists bool) {
+	v := m.unique_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUniqueID returns the old "unique_id" field's value of the EvidenceLog entity.
+// If the EvidenceLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EvidenceLogMutation) OldUniqueID(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUniqueID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUniqueID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUniqueID: %w", err)
+	}
+	return oldValue.UniqueID, nil
+}
+
+// ResetUniqueID resets all changes to the "unique_id" field.
+func (m *EvidenceLogMutation) ResetUniqueID() {
+	m.unique_id = nil
+}
+
+// SetTaID sets the "ta" edge to the TA entity by id.
+func (m *EvidenceLogMutation) SetTaID(id int) {
+	m.ta = &id
+}
+
+// ClearTa clears the "ta" edge to the TA entity.
+func (m *EvidenceLogMutation) ClearTa() {
+	m.clearedta = true
+}
+
+// TaCleared reports if the "ta" edge to the TA entity was cleared.
+func (m *EvidenceLogMutation) TaCleared() bool {
+	return m.clearedta
+}
+
+// TaID returns the "ta" edge ID in the mutation.
+func (m *EvidenceLogMutation) TaID() (id int, exists bool) {
+	if m.ta != nil {
+		return *m.ta, true
+	}
+	return
+}
+
+// TaIDs returns the "ta" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TaID instead. It exists only for internal usage by the builders.
+func (m *EvidenceLogMutation) TaIDs() (ids []int) {
+	if id := m.ta; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTa resets all changes to the "ta" edge.
+func (m *EvidenceLogMutation) ResetTa() {
+	m.ta = nil
+	m.clearedta = false
+}
+
+// Where appends a list predicates to the EvidenceLogMutation builder.
+func (m *EvidenceLogMutation) Where(ps ...predicate.EvidenceLog) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the EvidenceLogMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *EvidenceLogMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.EvidenceLog, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *EvidenceLogMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *EvidenceLogMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (EvidenceLog).
+func (m *EvidenceLogMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *EvidenceLogMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.evidence != nil {
+		fields = append(fields, evidencelog.FieldEvidence)
+	}
+	if m.repository != nil {
+		fields = append(fields, evidencelog.FieldRepository)
+	}
+	if m.commit_id != nil {
+		fields = append(fields, evidencelog.FieldCommitID)
+	}
+	if m.unique_id != nil {
+		fields = append(fields, evidencelog.FieldUniqueID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *EvidenceLogMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case evidencelog.FieldEvidence:
+		return m.Evidence()
+	case evidencelog.FieldRepository:
+		return m.Repository()
+	case evidencelog.FieldCommitID:
+		return m.CommitID()
+	case evidencelog.FieldUniqueID:
+		return m.UniqueID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *EvidenceLogMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case evidencelog.FieldEvidence:
+		return m.OldEvidence(ctx)
+	case evidencelog.FieldRepository:
+		return m.OldRepository(ctx)
+	case evidencelog.FieldCommitID:
+		return m.OldCommitID(ctx)
+	case evidencelog.FieldUniqueID:
+		return m.OldUniqueID(ctx)
+	}
+	return nil, fmt.Errorf("unknown EvidenceLog field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EvidenceLogMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case evidencelog.FieldEvidence:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEvidence(v)
+		return nil
+	case evidencelog.FieldRepository:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRepository(v)
+		return nil
+	case evidencelog.FieldCommitID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCommitID(v)
+		return nil
+	case evidencelog.FieldUniqueID:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUniqueID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EvidenceLog field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *EvidenceLogMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *EvidenceLogMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EvidenceLogMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown EvidenceLog numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *EvidenceLogMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *EvidenceLogMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *EvidenceLogMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown EvidenceLog nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *EvidenceLogMutation) ResetField(name string) error {
+	switch name {
+	case evidencelog.FieldEvidence:
+		m.ResetEvidence()
+		return nil
+	case evidencelog.FieldRepository:
+		m.ResetRepository()
+		return nil
+	case evidencelog.FieldCommitID:
+		m.ResetCommitID()
+		return nil
+	case evidencelog.FieldUniqueID:
+		m.ResetUniqueID()
+		return nil
+	}
+	return fmt.Errorf("unknown EvidenceLog field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *EvidenceLogMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.ta != nil {
+		edges = append(edges, evidencelog.EdgeTa)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *EvidenceLogMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case evidencelog.EdgeTa:
+		if id := m.ta; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *EvidenceLogMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *EvidenceLogMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *EvidenceLogMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedta {
+		edges = append(edges, evidencelog.EdgeTa)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *EvidenceLogMutation) EdgeCleared(name string) bool {
+	switch name {
+	case evidencelog.EdgeTa:
+		return m.clearedta
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *EvidenceLogMutation) ClearEdge(name string) error {
+	switch name {
+	case evidencelog.EdgeTa:
+		m.ClearTa()
+		return nil
+	}
+	return fmt.Errorf("unknown EvidenceLog unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *EvidenceLogMutation) ResetEdge(name string) error {
+	switch name {
+	case evidencelog.EdgeTa:
+		m.ResetTa()
+		return nil
+	}
+	return fmt.Errorf("unknown EvidenceLog edge %s", name)
 }
 
 // SubscriptionMutation represents an operation that mutates the Subscription nodes in the graph.
@@ -1656,17 +1656,17 @@ func (m *TAMutation) ResetCtLog() {
 	m.removedct_log = nil
 }
 
-// SetAtLogID sets the "at_log" edge to the ATLog entity by id.
+// SetAtLogID sets the "at_log" edge to the EvidenceLog entity by id.
 func (m *TAMutation) SetAtLogID(id int) {
 	m.at_log = &id
 }
 
-// ClearAtLog clears the "at_log" edge to the ATLog entity.
+// ClearAtLog clears the "at_log" edge to the EvidenceLog entity.
 func (m *TAMutation) ClearAtLog() {
 	m.clearedat_log = true
 }
 
-// AtLogCleared reports if the "at_log" edge to the ATLog entity was cleared.
+// AtLogCleared reports if the "at_log" edge to the EvidenceLog entity was cleared.
 func (m *TAMutation) AtLogCleared() bool {
 	return m.clearedat_log
 }

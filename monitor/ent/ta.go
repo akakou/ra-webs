@@ -8,7 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra-webs/monitor/ent/atlog"
+	"github.com/akakou/ra-webs/monitor/ent/evidencelog"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
 
@@ -21,9 +21,9 @@ type TA struct {
 	PublicKey *[]byte `json:"public_key,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TAQuery when eager-loading is set.
-	Edges        TAEdges `json:"edges"`
-	at_log_ta    *int
-	selectValues sql.SelectValues
+	Edges           TAEdges `json:"edges"`
+	evidence_log_ta *int
+	selectValues    sql.SelectValues
 }
 
 // TAEdges holds the relations/edges for other nodes in the graph.
@@ -31,7 +31,7 @@ type TAEdges struct {
 	// CtLog holds the value of the ct_log edge.
 	CtLog []*CTLog `json:"ct_log,omitempty"`
 	// AtLog holds the value of the at_log edge.
-	AtLog *ATLog `json:"at_log,omitempty"`
+	AtLog *EvidenceLog `json:"at_log,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -48,11 +48,11 @@ func (e TAEdges) CtLogOrErr() ([]*CTLog, error) {
 
 // AtLogOrErr returns the AtLog value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e TAEdges) AtLogOrErr() (*ATLog, error) {
+func (e TAEdges) AtLogOrErr() (*EvidenceLog, error) {
 	if e.AtLog != nil {
 		return e.AtLog, nil
 	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: atlog.Label}
+		return nil, &NotFoundError{label: evidencelog.Label}
 	}
 	return nil, &NotLoadedError{edge: "at_log"}
 }
@@ -66,7 +66,7 @@ func (*TA) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case ta.FieldID:
 			values[i] = new(sql.NullInt64)
-		case ta.ForeignKeys[0]: // at_log_ta
+		case ta.ForeignKeys[0]: // evidence_log_ta
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -97,10 +97,10 @@ func (t *TA) assignValues(columns []string, values []any) error {
 			}
 		case ta.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field at_log_ta", value)
+				return fmt.Errorf("unexpected type %T for edge-field evidence_log_ta", value)
 			} else if value.Valid {
-				t.at_log_ta = new(int)
-				*t.at_log_ta = int(value.Int64)
+				t.evidence_log_ta = new(int)
+				*t.evidence_log_ta = int(value.Int64)
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -121,7 +121,7 @@ func (t *TA) QueryCtLog() *CTLogQuery {
 }
 
 // QueryAtLog queries the "at_log" edge of the TA entity.
-func (t *TA) QueryAtLog() *ATLogQuery {
+func (t *TA) QueryAtLog() *EvidenceLogQuery {
 	return NewTAClient(t.config).QueryAtLog(t)
 }
 

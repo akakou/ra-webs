@@ -12,10 +12,10 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// ATLog is the client for interacting with the ATLog builders.
-	ATLog *ATLogClient
 	// CTLog is the client for interacting with the CTLog builders.
 	CTLog *CTLogClient
+	// EvidenceLog is the client for interacting with the EvidenceLog builders.
+	EvidenceLog *EvidenceLogClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
 	// TA is the client for interacting with the TA builders.
@@ -151,8 +151,8 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.ATLog = NewATLogClient(tx.config)
 	tx.CTLog = NewCTLogClient(tx.config)
+	tx.EvidenceLog = NewEvidenceLogClient(tx.config)
 	tx.Subscription = NewSubscriptionClient(tx.config)
 	tx.TA = NewTAClient(tx.config)
 }
@@ -164,7 +164,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: ATLog.QueryXXX(), the query will be executed
+// applies a query, for example: CTLog.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

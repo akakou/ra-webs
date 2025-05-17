@@ -8,20 +8,6 @@ import (
 )
 
 var (
-	// AtLogsColumns holds the columns for the "at_logs" table.
-	AtLogsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "evidence", Type: field.TypeString},
-		{Name: "repository", Type: field.TypeString},
-		{Name: "commit_id", Type: field.TypeString},
-		{Name: "unique_id", Type: field.TypeBytes},
-	}
-	// AtLogsTable holds the schema information for the "at_logs" table.
-	AtLogsTable = &schema.Table{
-		Name:       "at_logs",
-		Columns:    AtLogsColumns,
-		PrimaryKey: []*schema.Column{AtLogsColumns[0]},
-	}
 	// CtLogsColumns holds the columns for the "ct_logs" table.
 	CtLogsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -42,6 +28,20 @@ var (
 			},
 		},
 	}
+	// EvidenceLogsColumns holds the columns for the "evidence_logs" table.
+	EvidenceLogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "evidence", Type: field.TypeString},
+		{Name: "repository", Type: field.TypeString},
+		{Name: "commit_id", Type: field.TypeString},
+		{Name: "unique_id", Type: field.TypeBytes},
+	}
+	// EvidenceLogsTable holds the schema information for the "evidence_logs" table.
+	EvidenceLogsTable = &schema.Table{
+		Name:       "evidence_logs",
+		Columns:    EvidenceLogsColumns,
+		PrimaryKey: []*schema.Column{EvidenceLogsColumns[0]},
+	}
 	// SubscriptionsColumns holds the columns for the "subscriptions" table.
 	SubscriptionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -59,7 +59,7 @@ var (
 	TasColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "public_key", Type: field.TypeBytes},
-		{Name: "at_log_ta", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "evidence_log_ta", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// TasTable holds the schema information for the "tas" table.
 	TasTable = &schema.Table{
@@ -68,17 +68,17 @@ var (
 		PrimaryKey: []*schema.Column{TasColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "tas_at_logs_ta",
+				Symbol:     "tas_evidence_logs_ta",
 				Columns:    []*schema.Column{TasColumns[2]},
-				RefColumns: []*schema.Column{AtLogsColumns[0]},
+				RefColumns: []*schema.Column{EvidenceLogsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		AtLogsTable,
 		CtLogsTable,
+		EvidenceLogsTable,
 		SubscriptionsTable,
 		TasTable,
 	}
@@ -86,5 +86,5 @@ var (
 
 func init() {
 	CtLogsTable.ForeignKeys[0].RefTable = TasTable
-	TasTable.ForeignKeys[0].RefTable = AtLogsTable
+	TasTable.ForeignKeys[0].RefTable = EvidenceLogsTable
 }

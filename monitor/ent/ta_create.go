@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
+	"github.com/akakou/ra-webs/monitor/ent/evidencelog"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
 
@@ -42,13 +42,13 @@ func (tc *TACreate) AddCtLog(c ...*CTLog) *TACreate {
 	return tc.AddCtLogIDs(ids...)
 }
 
-// SetAtLogID sets the "at_log" edge to the ATLog entity by ID.
+// SetAtLogID sets the "at_log" edge to the EvidenceLog entity by ID.
 func (tc *TACreate) SetAtLogID(id int) *TACreate {
 	tc.mutation.SetAtLogID(id)
 	return tc
 }
 
-// SetNillableAtLogID sets the "at_log" edge to the ATLog entity by ID if the given value is not nil.
+// SetNillableAtLogID sets the "at_log" edge to the EvidenceLog entity by ID if the given value is not nil.
 func (tc *TACreate) SetNillableAtLogID(id *int) *TACreate {
 	if id != nil {
 		tc = tc.SetAtLogID(*id)
@@ -56,9 +56,9 @@ func (tc *TACreate) SetNillableAtLogID(id *int) *TACreate {
 	return tc
 }
 
-// SetAtLog sets the "at_log" edge to the ATLog entity.
-func (tc *TACreate) SetAtLog(a *ATLog) *TACreate {
-	return tc.SetAtLogID(a.ID)
+// SetAtLog sets the "at_log" edge to the EvidenceLog entity.
+func (tc *TACreate) SetAtLog(e *EvidenceLog) *TACreate {
+	return tc.SetAtLogID(e.ID)
 }
 
 // Mutation returns the TAMutation object of the builder.
@@ -152,13 +152,13 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 			Columns: []string{ta.AtLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(evidencelog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.at_log_ta = &nodes[0]
+		_node.evidence_log_ta = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
