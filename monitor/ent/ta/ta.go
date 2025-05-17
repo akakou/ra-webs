@@ -18,8 +18,6 @@ const (
 	EdgeCtLog = "ct_log"
 	// EdgeAtLog holds the string denoting the at_log edge name in mutations.
 	EdgeAtLog = "at_log"
-	// EdgeViolation holds the string denoting the violation edge name in mutations.
-	EdgeViolation = "violation"
 	// Table holds the table name of the ta in the database.
 	Table = "tas"
 	// CtLogTable is the table that holds the ct_log relation/edge.
@@ -36,13 +34,6 @@ const (
 	AtLogInverseTable = "at_logs"
 	// AtLogColumn is the table column denoting the at_log relation/edge.
 	AtLogColumn = "at_log_ta"
-	// ViolationTable is the table that holds the violation relation/edge.
-	ViolationTable = "tas"
-	// ViolationInverseTable is the table name for the Violation entity.
-	// It exists in this package in order to avoid circular dependency with the "violation" package.
-	ViolationInverseTable = "violations"
-	// ViolationColumn is the table column denoting the violation relation/edge.
-	ViolationColumn = "violation_ta"
 )
 
 // Columns holds all SQL columns for ta fields.
@@ -55,7 +46,6 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"at_log_ta",
-	"violation_ta",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -101,13 +91,6 @@ func ByAtLogField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newAtLogStep(), sql.OrderByField(field, opts...))
 	}
 }
-
-// ByViolationField orders the results by violation field.
-func ByViolationField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newViolationStep(), sql.OrderByField(field, opts...))
-	}
-}
 func newCtLogStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -120,12 +103,5 @@ func newAtLogStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AtLogInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, true, AtLogTable, AtLogColumn),
-	)
-}
-func newViolationStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ViolationInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, ViolationTable, ViolationColumn),
 	)
 }

@@ -16,7 +16,6 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
-	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -81,7 +80,6 @@ func checkColumn(table, column string) error {
 			ctlog.Table:        ctlog.ValidColumn,
 			subscription.Table: subscription.ValidColumn,
 			ta.Table:           ta.ValidColumn,
-			violation.Table:    violation.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

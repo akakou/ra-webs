@@ -12,7 +12,6 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
-	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
 // TACreate is the builder for creating a TA entity.
@@ -60,25 +59,6 @@ func (tc *TACreate) SetNillableAtLogID(id *int) *TACreate {
 // SetAtLog sets the "at_log" edge to the ATLog entity.
 func (tc *TACreate) SetAtLog(a *ATLog) *TACreate {
 	return tc.SetAtLogID(a.ID)
-}
-
-// SetViolationID sets the "violation" edge to the Violation entity by ID.
-func (tc *TACreate) SetViolationID(id int) *TACreate {
-	tc.mutation.SetViolationID(id)
-	return tc
-}
-
-// SetNillableViolationID sets the "violation" edge to the Violation entity by ID if the given value is not nil.
-func (tc *TACreate) SetNillableViolationID(id *int) *TACreate {
-	if id != nil {
-		tc = tc.SetViolationID(*id)
-	}
-	return tc
-}
-
-// SetViolation sets the "violation" edge to the Violation entity.
-func (tc *TACreate) SetViolation(v *Violation) *TACreate {
-	return tc.SetViolationID(v.ID)
 }
 
 // Mutation returns the TAMutation object of the builder.
@@ -179,23 +159,6 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.at_log_ta = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := tc.mutation.ViolationIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   ta.ViolationTable,
-			Columns: []string{ta.ViolationColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.violation_ta = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

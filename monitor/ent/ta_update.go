@@ -14,7 +14,6 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
-	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
 // TAUpdate is the builder for updating TA entities.
@@ -70,25 +69,6 @@ func (tu *TAUpdate) SetAtLog(a *ATLog) *TAUpdate {
 	return tu.SetAtLogID(a.ID)
 }
 
-// SetViolationID sets the "violation" edge to the Violation entity by ID.
-func (tu *TAUpdate) SetViolationID(id int) *TAUpdate {
-	tu.mutation.SetViolationID(id)
-	return tu
-}
-
-// SetNillableViolationID sets the "violation" edge to the Violation entity by ID if the given value is not nil.
-func (tu *TAUpdate) SetNillableViolationID(id *int) *TAUpdate {
-	if id != nil {
-		tu = tu.SetViolationID(*id)
-	}
-	return tu
-}
-
-// SetViolation sets the "violation" edge to the Violation entity.
-func (tu *TAUpdate) SetViolation(v *Violation) *TAUpdate {
-	return tu.SetViolationID(v.ID)
-}
-
 // Mutation returns the TAMutation object of the builder.
 func (tu *TAUpdate) Mutation() *TAMutation {
 	return tu.mutation
@@ -118,12 +98,6 @@ func (tu *TAUpdate) RemoveCtLog(c ...*CTLog) *TAUpdate {
 // ClearAtLog clears the "at_log" edge to the ATLog entity.
 func (tu *TAUpdate) ClearAtLog() *TAUpdate {
 	tu.mutation.ClearAtLog()
-	return tu
-}
-
-// ClearViolation clears the "violation" edge to the Violation entity.
-func (tu *TAUpdate) ClearViolation() *TAUpdate {
-	tu.mutation.ClearViolation()
 	return tu
 }
 
@@ -240,35 +214,6 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tu.mutation.ViolationCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   ta.ViolationTable,
-			Columns: []string{ta.ViolationColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tu.mutation.ViolationIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   ta.ViolationTable,
-			Columns: []string{ta.ViolationColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{ta.Label}
@@ -329,25 +274,6 @@ func (tuo *TAUpdateOne) SetAtLog(a *ATLog) *TAUpdateOne {
 	return tuo.SetAtLogID(a.ID)
 }
 
-// SetViolationID sets the "violation" edge to the Violation entity by ID.
-func (tuo *TAUpdateOne) SetViolationID(id int) *TAUpdateOne {
-	tuo.mutation.SetViolationID(id)
-	return tuo
-}
-
-// SetNillableViolationID sets the "violation" edge to the Violation entity by ID if the given value is not nil.
-func (tuo *TAUpdateOne) SetNillableViolationID(id *int) *TAUpdateOne {
-	if id != nil {
-		tuo = tuo.SetViolationID(*id)
-	}
-	return tuo
-}
-
-// SetViolation sets the "violation" edge to the Violation entity.
-func (tuo *TAUpdateOne) SetViolation(v *Violation) *TAUpdateOne {
-	return tuo.SetViolationID(v.ID)
-}
-
 // Mutation returns the TAMutation object of the builder.
 func (tuo *TAUpdateOne) Mutation() *TAMutation {
 	return tuo.mutation
@@ -377,12 +303,6 @@ func (tuo *TAUpdateOne) RemoveCtLog(c ...*CTLog) *TAUpdateOne {
 // ClearAtLog clears the "at_log" edge to the ATLog entity.
 func (tuo *TAUpdateOne) ClearAtLog() *TAUpdateOne {
 	tuo.mutation.ClearAtLog()
-	return tuo
-}
-
-// ClearViolation clears the "violation" edge to the Violation entity.
-func (tuo *TAUpdateOne) ClearViolation() *TAUpdateOne {
-	tuo.mutation.ClearViolation()
 	return tuo
 }
 
@@ -522,35 +442,6 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if tuo.mutation.ViolationCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   ta.ViolationTable,
-			Columns: []string{ta.ViolationColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tuo.mutation.ViolationIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   ta.ViolationTable,
-			Columns: []string{ta.ViolationColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(violation.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

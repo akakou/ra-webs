@@ -19,7 +19,6 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
-	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
 // Client is the client that holds all ent builders.
@@ -35,8 +34,6 @@ type Client struct {
 	Subscription *SubscriptionClient
 	// TA is the client for interacting with the TA builders.
 	TA *TAClient
-	// Violation is the client for interacting with the Violation builders.
-	Violation *ViolationClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -52,7 +49,6 @@ func (c *Client) init() {
 	c.CTLog = NewCTLogClient(c.config)
 	c.Subscription = NewSubscriptionClient(c.config)
 	c.TA = NewTAClient(c.config)
-	c.Violation = NewViolationClient(c.config)
 }
 
 type (
@@ -149,7 +145,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		CTLog:        NewCTLogClient(cfg),
 		Subscription: NewSubscriptionClient(cfg),
 		TA:           NewTAClient(cfg),
-		Violation:    NewViolationClient(cfg),
 	}, nil
 }
 
@@ -173,7 +168,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		CTLog:        NewCTLogClient(cfg),
 		Subscription: NewSubscriptionClient(cfg),
 		TA:           NewTAClient(cfg),
-		Violation:    NewViolationClient(cfg),
 	}, nil
 }
 
@@ -206,7 +200,6 @@ func (c *Client) Use(hooks ...Hook) {
 	c.CTLog.Use(hooks...)
 	c.Subscription.Use(hooks...)
 	c.TA.Use(hooks...)
-	c.Violation.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
@@ -216,7 +209,6 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.CTLog.Intercept(interceptors...)
 	c.Subscription.Intercept(interceptors...)
 	c.TA.Intercept(interceptors...)
-	c.Violation.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -230,8 +222,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Subscription.mutate(ctx, m)
 	case *TAMutation:
 		return c.TA.mutate(ctx, m)
-	case *ViolationMutation:
-		return c.Violation.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -808,22 +798,6 @@ func (c *TAClient) QueryAtLog(t *TA) *ATLogQuery {
 	return query
 }
 
-// QueryViolation queries the violation edge of a TA.
-func (c *TAClient) QueryViolation(t *TA) *ViolationQuery {
-	query := (&ViolationClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ta.Table, ta.FieldID, id),
-			sqlgraph.To(violation.Table, violation.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, ta.ViolationTable, ta.ViolationColumn),
-		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *TAClient) Hooks() []Hook {
 	return c.hooks.TA
@@ -849,161 +823,12 @@ func (c *TAClient) mutate(ctx context.Context, m *TAMutation) (Value, error) {
 	}
 }
 
-// ViolationClient is a client for the Violation schema.
-type ViolationClient struct {
-	config
-}
-
-// NewViolationClient returns a client for the Violation from the given config.
-func NewViolationClient(c config) *ViolationClient {
-	return &ViolationClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `violation.Hooks(f(g(h())))`.
-func (c *ViolationClient) Use(hooks ...Hook) {
-	c.hooks.Violation = append(c.hooks.Violation, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `violation.Intercept(f(g(h())))`.
-func (c *ViolationClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Violation = append(c.inters.Violation, interceptors...)
-}
-
-// Create returns a builder for creating a Violation entity.
-func (c *ViolationClient) Create() *ViolationCreate {
-	mutation := newViolationMutation(c.config, OpCreate)
-	return &ViolationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Violation entities.
-func (c *ViolationClient) CreateBulk(builders ...*ViolationCreate) *ViolationCreateBulk {
-	return &ViolationCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *ViolationClient) MapCreateBulk(slice any, setFunc func(*ViolationCreate, int)) *ViolationCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &ViolationCreateBulk{err: fmt.Errorf("calling to ViolationClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*ViolationCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &ViolationCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Violation.
-func (c *ViolationClient) Update() *ViolationUpdate {
-	mutation := newViolationMutation(c.config, OpUpdate)
-	return &ViolationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *ViolationClient) UpdateOne(v *Violation) *ViolationUpdateOne {
-	mutation := newViolationMutation(c.config, OpUpdateOne, withViolation(v))
-	return &ViolationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *ViolationClient) UpdateOneID(id int) *ViolationUpdateOne {
-	mutation := newViolationMutation(c.config, OpUpdateOne, withViolationID(id))
-	return &ViolationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Violation.
-func (c *ViolationClient) Delete() *ViolationDelete {
-	mutation := newViolationMutation(c.config, OpDelete)
-	return &ViolationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *ViolationClient) DeleteOne(v *Violation) *ViolationDeleteOne {
-	return c.DeleteOneID(v.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ViolationClient) DeleteOneID(id int) *ViolationDeleteOne {
-	builder := c.Delete().Where(violation.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &ViolationDeleteOne{builder}
-}
-
-// Query returns a query builder for Violation.
-func (c *ViolationClient) Query() *ViolationQuery {
-	return &ViolationQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeViolation},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a Violation entity by its id.
-func (c *ViolationClient) Get(ctx context.Context, id int) (*Violation, error) {
-	return c.Query().Where(violation.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *ViolationClient) GetX(ctx context.Context, id int) *Violation {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryTa queries the ta edge of a Violation.
-func (c *ViolationClient) QueryTa(v *Violation) *TAQuery {
-	query := (&TAClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := v.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(violation.Table, violation.FieldID, id),
-			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, violation.TaTable, violation.TaColumn),
-		)
-		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *ViolationClient) Hooks() []Hook {
-	return c.hooks.Violation
-}
-
-// Interceptors returns the client interceptors.
-func (c *ViolationClient) Interceptors() []Interceptor {
-	return c.inters.Violation
-}
-
-func (c *ViolationClient) mutate(ctx context.Context, m *ViolationMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&ViolationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&ViolationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&ViolationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&ViolationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown Violation mutation op: %q", m.Op())
-	}
-}
-
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		ATLog, CTLog, Subscription, TA, Violation []ent.Hook
+		ATLog, CTLog, Subscription, TA []ent.Hook
 	}
 	inters struct {
-		ATLog, CTLog, Subscription, TA, Violation []ent.Interceptor
+		ATLog, CTLog, Subscription, TA []ent.Interceptor
 	}
 )

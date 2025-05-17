@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -16,7 +15,6 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
-	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
 const (
@@ -32,7 +30,6 @@ const (
 	TypeCTLog        = "CTLog"
 	TypeSubscription = "Subscription"
 	TypeTA           = "TA"
-	TypeViolation    = "Violation"
 )
 
 // ATLogMutation represents an operation that mutates the ATLog nodes in the graph.
@@ -45,7 +42,6 @@ type ATLogMutation struct {
 	repository    *string
 	commit_id     *string
 	unique_id     *[]byte
-	is_active     *bool
 	clearedFields map[string]struct{}
 	ta            *int
 	clearedta     bool
@@ -296,42 +292,6 @@ func (m *ATLogMutation) ResetUniqueID() {
 	m.unique_id = nil
 }
 
-// SetIsActive sets the "is_active" field.
-func (m *ATLogMutation) SetIsActive(b bool) {
-	m.is_active = &b
-}
-
-// IsActive returns the value of the "is_active" field in the mutation.
-func (m *ATLogMutation) IsActive() (r bool, exists bool) {
-	v := m.is_active
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIsActive returns the old "is_active" field's value of the ATLog entity.
-// If the ATLog object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ATLogMutation) OldIsActive(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIsActive is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIsActive requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIsActive: %w", err)
-	}
-	return oldValue.IsActive, nil
-}
-
-// ResetIsActive resets all changes to the "is_active" field.
-func (m *ATLogMutation) ResetIsActive() {
-	m.is_active = nil
-}
-
 // SetTaID sets the "ta" edge to the TA entity by id.
 func (m *ATLogMutation) SetTaID(id int) {
 	m.ta = &id
@@ -405,7 +365,7 @@ func (m *ATLogMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ATLogMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 4)
 	if m.evidence != nil {
 		fields = append(fields, atlog.FieldEvidence)
 	}
@@ -417,9 +377,6 @@ func (m *ATLogMutation) Fields() []string {
 	}
 	if m.unique_id != nil {
 		fields = append(fields, atlog.FieldUniqueID)
-	}
-	if m.is_active != nil {
-		fields = append(fields, atlog.FieldIsActive)
 	}
 	return fields
 }
@@ -437,8 +394,6 @@ func (m *ATLogMutation) Field(name string) (ent.Value, bool) {
 		return m.CommitID()
 	case atlog.FieldUniqueID:
 		return m.UniqueID()
-	case atlog.FieldIsActive:
-		return m.IsActive()
 	}
 	return nil, false
 }
@@ -456,8 +411,6 @@ func (m *ATLogMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldCommitID(ctx)
 	case atlog.FieldUniqueID:
 		return m.OldUniqueID(ctx)
-	case atlog.FieldIsActive:
-		return m.OldIsActive(ctx)
 	}
 	return nil, fmt.Errorf("unknown ATLog field %s", name)
 }
@@ -494,13 +447,6 @@ func (m *ATLogMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUniqueID(v)
-		return nil
-	case atlog.FieldIsActive:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIsActive(v)
 		return nil
 	}
 	return fmt.Errorf("unknown ATLog field %s", name)
@@ -562,9 +508,6 @@ func (m *ATLogMutation) ResetField(name string) error {
 		return nil
 	case atlog.FieldUniqueID:
 		m.ResetUniqueID()
-		return nil
-	case atlog.FieldIsActive:
-		m.ResetIsActive()
 		return nil
 	}
 	return fmt.Errorf("unknown ATLog field %s", name)
@@ -1564,21 +1507,19 @@ func (m *SubscriptionMutation) ResetEdge(name string) error {
 // TAMutation represents an operation that mutates the TA nodes in the graph.
 type TAMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	public_key       *[]byte
-	clearedFields    map[string]struct{}
-	ct_log           map[int]struct{}
-	removedct_log    map[int]struct{}
-	clearedct_log    bool
-	at_log           *int
-	clearedat_log    bool
-	violation        *int
-	clearedviolation bool
-	done             bool
-	oldValue         func(context.Context) (*TA, error)
-	predicates       []predicate.TA
+	op            Op
+	typ           string
+	id            *int
+	public_key    *[]byte
+	clearedFields map[string]struct{}
+	ct_log        map[int]struct{}
+	removedct_log map[int]struct{}
+	clearedct_log bool
+	at_log        *int
+	clearedat_log bool
+	done          bool
+	oldValue      func(context.Context) (*TA, error)
+	predicates    []predicate.TA
 }
 
 var _ ent.Mutation = (*TAMutation)(nil)
@@ -1808,45 +1749,6 @@ func (m *TAMutation) ResetAtLog() {
 	m.clearedat_log = false
 }
 
-// SetViolationID sets the "violation" edge to the Violation entity by id.
-func (m *TAMutation) SetViolationID(id int) {
-	m.violation = &id
-}
-
-// ClearViolation clears the "violation" edge to the Violation entity.
-func (m *TAMutation) ClearViolation() {
-	m.clearedviolation = true
-}
-
-// ViolationCleared reports if the "violation" edge to the Violation entity was cleared.
-func (m *TAMutation) ViolationCleared() bool {
-	return m.clearedviolation
-}
-
-// ViolationID returns the "violation" edge ID in the mutation.
-func (m *TAMutation) ViolationID() (id int, exists bool) {
-	if m.violation != nil {
-		return *m.violation, true
-	}
-	return
-}
-
-// ViolationIDs returns the "violation" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ViolationID instead. It exists only for internal usage by the builders.
-func (m *TAMutation) ViolationIDs() (ids []int) {
-	if id := m.violation; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetViolation resets all changes to the "violation" edge.
-func (m *TAMutation) ResetViolation() {
-	m.violation = nil
-	m.clearedviolation = false
-}
-
 // Where appends a list predicates to the TAMutation builder.
 func (m *TAMutation) Where(ps ...predicate.TA) {
 	m.predicates = append(m.predicates, ps...)
@@ -1980,15 +1882,12 @@ func (m *TAMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TAMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.ct_log != nil {
 		edges = append(edges, ta.EdgeCtLog)
 	}
 	if m.at_log != nil {
 		edges = append(edges, ta.EdgeAtLog)
-	}
-	if m.violation != nil {
-		edges = append(edges, ta.EdgeViolation)
 	}
 	return edges
 }
@@ -2007,17 +1906,13 @@ func (m *TAMutation) AddedIDs(name string) []ent.Value {
 		if id := m.at_log; id != nil {
 			return []ent.Value{*id}
 		}
-	case ta.EdgeViolation:
-		if id := m.violation; id != nil {
-			return []ent.Value{*id}
-		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TAMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.removedct_log != nil {
 		edges = append(edges, ta.EdgeCtLog)
 	}
@@ -2040,15 +1935,12 @@ func (m *TAMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TAMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.clearedct_log {
 		edges = append(edges, ta.EdgeCtLog)
 	}
 	if m.clearedat_log {
 		edges = append(edges, ta.EdgeAtLog)
-	}
-	if m.clearedviolation {
-		edges = append(edges, ta.EdgeViolation)
 	}
 	return edges
 }
@@ -2061,8 +1953,6 @@ func (m *TAMutation) EdgeCleared(name string) bool {
 		return m.clearedct_log
 	case ta.EdgeAtLog:
 		return m.clearedat_log
-	case ta.EdgeViolation:
-		return m.clearedviolation
 	}
 	return false
 }
@@ -2073,9 +1963,6 @@ func (m *TAMutation) ClearEdge(name string) error {
 	switch name {
 	case ta.EdgeAtLog:
 		m.ClearAtLog()
-		return nil
-	case ta.EdgeViolation:
-		m.ClearViolation()
 		return nil
 	}
 	return fmt.Errorf("unknown TA unique edge %s", name)
@@ -2091,402 +1978,6 @@ func (m *TAMutation) ResetEdge(name string) error {
 	case ta.EdgeAtLog:
 		m.ResetAtLog()
 		return nil
-	case ta.EdgeViolation:
-		m.ResetViolation()
-		return nil
 	}
 	return fmt.Errorf("unknown TA edge %s", name)
-}
-
-// ViolationMutation represents an operation that mutates the Violation nodes in the graph.
-type ViolationMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *int
-	created_at    *time.Time
-	clearedFields map[string]struct{}
-	ta            *int
-	clearedta     bool
-	done          bool
-	oldValue      func(context.Context) (*Violation, error)
-	predicates    []predicate.Violation
-}
-
-var _ ent.Mutation = (*ViolationMutation)(nil)
-
-// violationOption allows management of the mutation configuration using functional options.
-type violationOption func(*ViolationMutation)
-
-// newViolationMutation creates new mutation for the Violation entity.
-func newViolationMutation(c config, op Op, opts ...violationOption) *ViolationMutation {
-	m := &ViolationMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeViolation,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withViolationID sets the ID field of the mutation.
-func withViolationID(id int) violationOption {
-	return func(m *ViolationMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Violation
-		)
-		m.oldValue = func(ctx context.Context) (*Violation, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Violation.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withViolation sets the old Violation of the mutation.
-func withViolation(node *Violation) violationOption {
-	return func(m *ViolationMutation) {
-		m.oldValue = func(context.Context) (*Violation, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m ViolationMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m ViolationMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *ViolationMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *ViolationMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Violation.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *ViolationMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *ViolationMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Violation entity.
-// If the Violation object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ViolationMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *ViolationMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetTaID sets the "ta" edge to the TA entity by id.
-func (m *ViolationMutation) SetTaID(id int) {
-	m.ta = &id
-}
-
-// ClearTa clears the "ta" edge to the TA entity.
-func (m *ViolationMutation) ClearTa() {
-	m.clearedta = true
-}
-
-// TaCleared reports if the "ta" edge to the TA entity was cleared.
-func (m *ViolationMutation) TaCleared() bool {
-	return m.clearedta
-}
-
-// TaID returns the "ta" edge ID in the mutation.
-func (m *ViolationMutation) TaID() (id int, exists bool) {
-	if m.ta != nil {
-		return *m.ta, true
-	}
-	return
-}
-
-// TaIDs returns the "ta" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TaID instead. It exists only for internal usage by the builders.
-func (m *ViolationMutation) TaIDs() (ids []int) {
-	if id := m.ta; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetTa resets all changes to the "ta" edge.
-func (m *ViolationMutation) ResetTa() {
-	m.ta = nil
-	m.clearedta = false
-}
-
-// Where appends a list predicates to the ViolationMutation builder.
-func (m *ViolationMutation) Where(ps ...predicate.Violation) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the ViolationMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *ViolationMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.Violation, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *ViolationMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *ViolationMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (Violation).
-func (m *ViolationMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *ViolationMutation) Fields() []string {
-	fields := make([]string, 0, 1)
-	if m.created_at != nil {
-		fields = append(fields, violation.FieldCreatedAt)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *ViolationMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case violation.FieldCreatedAt:
-		return m.CreatedAt()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *ViolationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case violation.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	}
-	return nil, fmt.Errorf("unknown Violation field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ViolationMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case violation.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Violation field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *ViolationMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *ViolationMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ViolationMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Violation numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *ViolationMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *ViolationMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *ViolationMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Violation nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *ViolationMutation) ResetField(name string) error {
-	switch name {
-	case violation.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown Violation field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *ViolationMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.ta != nil {
-		edges = append(edges, violation.EdgeTa)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *ViolationMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case violation.EdgeTa:
-		if id := m.ta; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *ViolationMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *ViolationMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *ViolationMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedta {
-		edges = append(edges, violation.EdgeTa)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *ViolationMutation) EdgeCleared(name string) bool {
-	switch name {
-	case violation.EdgeTa:
-		return m.clearedta
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *ViolationMutation) ClearEdge(name string) error {
-	switch name {
-	case violation.EdgeTa:
-		m.ClearTa()
-		return nil
-	}
-	return fmt.Errorf("unknown Violation unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *ViolationMutation) ResetEdge(name string) error {
-	switch name {
-	case violation.EdgeTa:
-		m.ResetTa()
-		return nil
-	}
-	return fmt.Errorf("unknown Violation edge %s", name)
 }

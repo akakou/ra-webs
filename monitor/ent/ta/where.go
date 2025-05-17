@@ -144,29 +144,6 @@ func HasAtLogWith(preds ...predicate.ATLog) predicate.TA {
 	})
 }
 
-// HasViolation applies the HasEdge predicate on the "violation" edge.
-func HasViolation() predicate.TA {
-	return predicate.TA(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, ViolationTable, ViolationColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasViolationWith applies the HasEdge predicate on the "violation" edge with a given conditions (other predicates).
-func HasViolationWith(preds ...predicate.Violation) predicate.TA {
-	return predicate.TA(func(s *sql.Selector) {
-		step := newViolationStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.TA) predicate.TA {
 	return predicate.TA(sql.AndPredicates(predicates...))

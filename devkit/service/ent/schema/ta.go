@@ -17,6 +17,7 @@ func (TA) Fields() []ent.Field {
 		field.String("repository"),
 		field.String("commit_id"),
 		field.Bytes("public_key"),
+		field.Bool("is_active").Default(true),
 	}
 }
 

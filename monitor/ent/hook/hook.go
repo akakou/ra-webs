@@ -57,18 +57,6 @@ func (f TAFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TAMutation", m)
 }
 
-// The ViolationFunc type is an adapter to allow the use of ordinary
-// function as Violation mutator.
-type ViolationFunc func(context.Context, *ent.ViolationMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f ViolationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.ViolationMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ViolationMutation", m)
-}
-
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 

@@ -44,20 +44,6 @@ func (alc *ATLogCreate) SetUniqueID(b []byte) *ATLogCreate {
 	return alc
 }
 
-// SetIsActive sets the "is_active" field.
-func (alc *ATLogCreate) SetIsActive(b bool) *ATLogCreate {
-	alc.mutation.SetIsActive(b)
-	return alc
-}
-
-// SetNillableIsActive sets the "is_active" field if the given value is not nil.
-func (alc *ATLogCreate) SetNillableIsActive(b *bool) *ATLogCreate {
-	if b != nil {
-		alc.SetIsActive(*b)
-	}
-	return alc
-}
-
 // SetTaID sets the "ta" edge to the TA entity by ID.
 func (alc *ATLogCreate) SetTaID(id int) *ATLogCreate {
 	alc.mutation.SetTaID(id)
@@ -84,7 +70,6 @@ func (alc *ATLogCreate) Mutation() *ATLogMutation {
 
 // Save creates the ATLog in the database.
 func (alc *ATLogCreate) Save(ctx context.Context) (*ATLog, error) {
-	alc.defaults()
 	return withHooks(ctx, alc.sqlSave, alc.mutation, alc.hooks)
 }
 
@@ -110,14 +95,6 @@ func (alc *ATLogCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (alc *ATLogCreate) defaults() {
-	if _, ok := alc.mutation.IsActive(); !ok {
-		v := atlog.DefaultIsActive
-		alc.mutation.SetIsActive(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (alc *ATLogCreate) check() error {
 	if _, ok := alc.mutation.Evidence(); !ok {
@@ -131,9 +108,6 @@ func (alc *ATLogCreate) check() error {
 	}
 	if _, ok := alc.mutation.UniqueID(); !ok {
 		return &ValidationError{Name: "unique_id", err: errors.New(`ent: missing required field "ATLog.unique_id"`)}
-	}
-	if _, ok := alc.mutation.IsActive(); !ok {
-		return &ValidationError{Name: "is_active", err: errors.New(`ent: missing required field "ATLog.is_active"`)}
 	}
 	return nil
 }
@@ -177,10 +151,6 @@ func (alc *ATLogCreate) createSpec() (*ATLog, *sqlgraph.CreateSpec) {
 		_spec.SetField(atlog.FieldUniqueID, field.TypeBytes, value)
 		_node.UniqueID = value
 	}
-	if value, ok := alc.mutation.IsActive(); ok {
-		_spec.SetField(atlog.FieldIsActive, field.TypeBool, value)
-		_node.IsActive = value
-	}
 	if nodes := alc.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -218,7 +188,6 @@ func (alcb *ATLogCreateBulk) Save(ctx context.Context) ([]*ATLog, error) {
 	for i := range alcb.builders {
 		func(i int, root context.Context) {
 			builder := alcb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ATLogMutation)
 				if !ok {

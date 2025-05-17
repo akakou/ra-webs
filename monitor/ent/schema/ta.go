@@ -23,6 +23,5 @@ func (TA) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("ct_log", CTLog.Type).Ref("ta"),
 		edge.From("at_log", ATLog.Type).Ref("ta").Unique(),
-		edge.From("violation", Violation.Type).Ref("ta").Unique(),
 	}
 }

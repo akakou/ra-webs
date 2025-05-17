@@ -73,11 +73,6 @@ func UniqueID(v []byte) predicate.ATLog {
 	return predicate.ATLog(sql.FieldEQ(FieldUniqueID, v))
 }
 
-// IsActive applies equality check predicate on the "is_active" field. It's identical to IsActiveEQ.
-func IsActive(v bool) predicate.ATLog {
-	return predicate.ATLog(sql.FieldEQ(FieldIsActive, v))
-}
-
 // EvidenceEQ applies the EQ predicate on the "evidence" field.
 func EvidenceEQ(v string) predicate.ATLog {
 	return predicate.ATLog(sql.FieldEQ(FieldEvidence, v))
@@ -311,16 +306,6 @@ func UniqueIDLT(v []byte) predicate.ATLog {
 // UniqueIDLTE applies the LTE predicate on the "unique_id" field.
 func UniqueIDLTE(v []byte) predicate.ATLog {
 	return predicate.ATLog(sql.FieldLTE(FieldUniqueID, v))
-}
-
-// IsActiveEQ applies the EQ predicate on the "is_active" field.
-func IsActiveEQ(v bool) predicate.ATLog {
-	return predicate.ATLog(sql.FieldEQ(FieldIsActive, v))
-}
-
-// IsActiveNEQ applies the NEQ predicate on the "is_active" field.
-func IsActiveNEQ(v bool) predicate.ATLog {
-	return predicate.ATLog(sql.FieldNEQ(FieldIsActive, v))
 }
 
 // HasTa applies the HasEdge predicate on the "ta" edge.

@@ -20,8 +20,6 @@ const (
 	FieldCommitID = "commit_id"
 	// FieldUniqueID holds the string denoting the unique_id field in the database.
 	FieldUniqueID = "unique_id"
-	// FieldIsActive holds the string denoting the is_active field in the database.
-	FieldIsActive = "is_active"
 	// EdgeTa holds the string denoting the ta edge name in mutations.
 	EdgeTa = "ta"
 	// Table holds the table name of the atlog in the database.
@@ -42,7 +40,6 @@ var Columns = []string{
 	FieldRepository,
 	FieldCommitID,
 	FieldUniqueID,
-	FieldIsActive,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -54,11 +51,6 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
-
-var (
-	// DefaultIsActive holds the default value on creation for the "is_active" field.
-	DefaultIsActive bool
-)
 
 // OrderOption defines the ordering options for the ATLog queries.
 type OrderOption func(*sql.Selector)
@@ -81,11 +73,6 @@ func ByRepository(opts ...sql.OrderTermOption) OrderOption {
 // ByCommitID orders the results by the commit_id field.
 func ByCommitID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCommitID, opts...).ToFunc()
-}
-
-// ByIsActive orders the results by the is_active field.
-func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsActive, opts...).ToFunc()
 }
 
 // ByTaField orders the results by ta field.

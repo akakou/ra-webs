@@ -3,34 +3,18 @@
 package ent
 
 import (
-	"time"
-
-	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/ent/schema"
-	"github.com/akakou/ra-webs/monitor/ent/violation"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	atlogFields := schema.ATLog{}.Fields()
-	_ = atlogFields
-	// atlogDescIsActive is the schema descriptor for is_active field.
-	atlogDescIsActive := atlogFields[4].Descriptor()
-	// atlog.DefaultIsActive holds the default value on creation for the is_active field.
-	atlog.DefaultIsActive = atlogDescIsActive.Default.(bool)
 	ctlogFields := schema.CTLog{}.Fields()
 	_ = ctlogFields
 	// ctlogDescIsActive is the schema descriptor for is_active field.
 	ctlogDescIsActive := ctlogFields[1].Descriptor()
 	// ctlog.DefaultIsActive holds the default value on creation for the is_active field.
 	ctlog.DefaultIsActive = ctlogDescIsActive.Default.(bool)
-	violationFields := schema.Violation{}.Fields()
-	_ = violationFields
-	// violationDescCreatedAt is the schema descriptor for created_at field.
-	violationDescCreatedAt := violationFields[0].Descriptor()
-	// violation.DefaultCreatedAt holds the default value on creation for the created_at field.
-	violation.DefaultCreatedAt = violationDescCreatedAt.Default.(func() time.Time)
 }

@@ -15,7 +15,6 @@ var (
 		{Name: "repository", Type: field.TypeString},
 		{Name: "commit_id", Type: field.TypeString},
 		{Name: "unique_id", Type: field.TypeBytes},
-		{Name: "is_active", Type: field.TypeBool, Default: false},
 	}
 	// AtLogsTable holds the schema information for the "at_logs" table.
 	AtLogsTable = &schema.Table{
@@ -62,7 +61,6 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "public_key", Type: field.TypeBytes},
 		{Name: "at_log_ta", Type: field.TypeInt, Unique: true, Nullable: true},
-		{Name: "violation_ta", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// TasTable holds the schema information for the "tas" table.
 	TasTable = &schema.Table{
@@ -76,24 +74,7 @@ var (
 				RefColumns: []*schema.Column{AtLogsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
-			{
-				Symbol:     "tas_violations_ta",
-				Columns:    []*schema.Column{TasColumns[3]},
-				RefColumns: []*schema.Column{ViolationsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
 		},
-	}
-	// ViolationsColumns holds the columns for the "violations" table.
-	ViolationsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-	}
-	// ViolationsTable holds the schema information for the "violations" table.
-	ViolationsTable = &schema.Table{
-		Name:       "violations",
-		Columns:    ViolationsColumns,
-		PrimaryKey: []*schema.Column{ViolationsColumns[0]},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
@@ -101,12 +82,10 @@ var (
 		CtLogsTable,
 		SubscriptionsTable,
 		TasTable,
-		ViolationsTable,
 	}
 )
 
 func init() {
 	CtLogsTable.ForeignKeys[0].RefTable = TasTable
 	TasTable.ForeignKeys[0].RefTable = AtLogsTable
-	TasTable.ForeignKeys[1].RefTable = ViolationsTable
 }

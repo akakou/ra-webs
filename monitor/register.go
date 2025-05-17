@@ -40,8 +40,7 @@ func (monitor *Monitor) RegisterATLog(uniqueId []byte, entry *serviceclient.Evid
 		SetRepository(entry.Repository).
 		SetCommitID(entry.CommitID).
 		SetUniqueID(uniqueId).
-		SetTa(ta).
-		SetIsActive(active)
+		SetTa(ta)
 
 	atLog, err := atLogCreate.Save(*monitor.DB.Ctx)
 

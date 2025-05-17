@@ -76,20 +76,6 @@ func (alu *ATLogUpdate) SetUniqueID(b []byte) *ATLogUpdate {
 	return alu
 }
 
-// SetIsActive sets the "is_active" field.
-func (alu *ATLogUpdate) SetIsActive(b bool) *ATLogUpdate {
-	alu.mutation.SetIsActive(b)
-	return alu
-}
-
-// SetNillableIsActive sets the "is_active" field if the given value is not nil.
-func (alu *ATLogUpdate) SetNillableIsActive(b *bool) *ATLogUpdate {
-	if b != nil {
-		alu.SetIsActive(*b)
-	}
-	return alu
-}
-
 // SetTaID sets the "ta" edge to the TA entity by ID.
 func (alu *ATLogUpdate) SetTaID(id int) *ATLogUpdate {
 	alu.mutation.SetTaID(id)
@@ -167,9 +153,6 @@ func (alu *ATLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := alu.mutation.UniqueID(); ok {
 		_spec.SetField(atlog.FieldUniqueID, field.TypeBytes, value)
-	}
-	if value, ok := alu.mutation.IsActive(); ok {
-		_spec.SetField(atlog.FieldIsActive, field.TypeBool, value)
 	}
 	if alu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -265,20 +248,6 @@ func (aluo *ATLogUpdateOne) SetNillableCommitID(s *string) *ATLogUpdateOne {
 // SetUniqueID sets the "unique_id" field.
 func (aluo *ATLogUpdateOne) SetUniqueID(b []byte) *ATLogUpdateOne {
 	aluo.mutation.SetUniqueID(b)
-	return aluo
-}
-
-// SetIsActive sets the "is_active" field.
-func (aluo *ATLogUpdateOne) SetIsActive(b bool) *ATLogUpdateOne {
-	aluo.mutation.SetIsActive(b)
-	return aluo
-}
-
-// SetNillableIsActive sets the "is_active" field if the given value is not nil.
-func (aluo *ATLogUpdateOne) SetNillableIsActive(b *bool) *ATLogUpdateOne {
-	if b != nil {
-		aluo.SetIsActive(*b)
-	}
 	return aluo
 }
 
@@ -389,9 +358,6 @@ func (aluo *ATLogUpdateOne) sqlSave(ctx context.Context) (_node *ATLog, err erro
 	}
 	if value, ok := aluo.mutation.UniqueID(); ok {
 		_spec.SetField(atlog.FieldUniqueID, field.TypeBytes, value)
-	}
-	if value, ok := aluo.mutation.IsActive(); ok {
-		_spec.SetField(atlog.FieldIsActive, field.TypeBool, value)
 	}
 	if aluo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
