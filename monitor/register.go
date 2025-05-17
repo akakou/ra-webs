@@ -2,30 +2,8 @@ package monitor
 
 import (
 	"github.com/akakou/ra-webs/monitor/ent"
-	"github.com/akakou/ra-webs/monitor/ent/ta"
 	"github.com/akakou/ra-webs/monitor/serviceclient"
 )
-
-func (monitor *Monitor) SelectOrRegisterTA(publicKey []byte) (*ent.TA, bool, error) {
-	exist, err := monitor.DB.Client.TA.Query().
-		Where(ta.PublicKeyEQ(publicKey)).
-		Exist(*monitor.DB.Ctx)
-
-	if err != nil {
-		return nil, false, err
-	}
-
-	var t *ent.TA
-	if exist {
-		t, err = monitor.DB.Client.TA.Query().
-			Where(ta.PublicKeyEQ(publicKey)).
-			Only(*monitor.DB.Ctx)
-	} else {
-		t, err = monitor.RegisterTA(publicKey)
-	}
-
-	return t, exist, err
-}
 
 func (monitor *Monitor) RegisterTA(publicKey []byte) (*ent.TA, error) {
 	taCreate := monitor.DB.Client.TA.
