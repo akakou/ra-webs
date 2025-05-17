@@ -1,5 +1,5 @@
 const TableCompornent = ({ logs }) => {
-    const gitRepo = s => `${s.edges.at_log.repository}/tree/${s.edges.at_log.commit_id}`
+    const gitRepo = s => s.edges.at_log ? `${s.edges.at_log.repository}/tree/${s.edges.at_log.commit_id}` : ""
     const crtshLinks = server => server.edges.ct_log.map(
         (ctl, index) =>
             <div>
@@ -9,12 +9,7 @@ const TableCompornent = ({ logs }) => {
                 <br/>
             </div>
         )
-    const uniqueId = (server) => {
-        if (!!server.edges.at_log)
-            return server.edges.at_log.unique_id
-        else 
-            return ""
-    }
+    const uniqueId = (server) => server.edges.at_log ? server.edges.at_log.unique_id : ""
     const violated = (server) =>  
         (!checkValidity(server)).toString()
     
