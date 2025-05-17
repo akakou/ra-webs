@@ -595,7 +595,6 @@ type CTLogMutation struct {
 	id                *int
 	monitor_log_id    *int
 	addmonitor_log_id *int
-	is_active         *bool
 	clearedFields     map[string]struct{}
 	ta                *int
 	clearedta         bool
@@ -758,42 +757,6 @@ func (m *CTLogMutation) ResetMonitorLogID() {
 	m.addmonitor_log_id = nil
 }
 
-// SetIsActive sets the "is_active" field.
-func (m *CTLogMutation) SetIsActive(b bool) {
-	m.is_active = &b
-}
-
-// IsActive returns the value of the "is_active" field in the mutation.
-func (m *CTLogMutation) IsActive() (r bool, exists bool) {
-	v := m.is_active
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIsActive returns the old "is_active" field's value of the CTLog entity.
-// If the CTLog object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CTLogMutation) OldIsActive(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIsActive is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIsActive requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIsActive: %w", err)
-	}
-	return oldValue.IsActive, nil
-}
-
-// ResetIsActive resets all changes to the "is_active" field.
-func (m *CTLogMutation) ResetIsActive() {
-	m.is_active = nil
-}
-
 // SetTaID sets the "ta" edge to the TA entity by id.
 func (m *CTLogMutation) SetTaID(id int) {
 	m.ta = &id
@@ -867,12 +830,9 @@ func (m *CTLogMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CTLogMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 1)
 	if m.monitor_log_id != nil {
 		fields = append(fields, ctlog.FieldMonitorLogID)
-	}
-	if m.is_active != nil {
-		fields = append(fields, ctlog.FieldIsActive)
 	}
 	return fields
 }
@@ -884,8 +844,6 @@ func (m *CTLogMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case ctlog.FieldMonitorLogID:
 		return m.MonitorLogID()
-	case ctlog.FieldIsActive:
-		return m.IsActive()
 	}
 	return nil, false
 }
@@ -897,8 +855,6 @@ func (m *CTLogMutation) OldField(ctx context.Context, name string) (ent.Value, e
 	switch name {
 	case ctlog.FieldMonitorLogID:
 		return m.OldMonitorLogID(ctx)
-	case ctlog.FieldIsActive:
-		return m.OldIsActive(ctx)
 	}
 	return nil, fmt.Errorf("unknown CTLog field %s", name)
 }
@@ -914,13 +870,6 @@ func (m *CTLogMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMonitorLogID(v)
-		return nil
-	case ctlog.FieldIsActive:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIsActive(v)
 		return nil
 	}
 	return fmt.Errorf("unknown CTLog field %s", name)
@@ -988,9 +937,6 @@ func (m *CTLogMutation) ResetField(name string) error {
 	switch name {
 	case ctlog.FieldMonitorLogID:
 		m.ResetMonitorLogID()
-		return nil
-	case ctlog.FieldIsActive:
-		m.ResetIsActive()
 		return nil
 	}
 	return fmt.Errorf("unknown CTLog field %s", name)

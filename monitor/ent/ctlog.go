@@ -19,8 +19,6 @@ type CTLog struct {
 	ID int `json:"id,omitempty"`
 	// MonitorLogID holds the value of the "monitor_log_id" field.
 	MonitorLogID int `json:"monitor_log_id,omitempty"`
-	// IsActive holds the value of the "is_active" field.
-	IsActive bool `json:"is_active,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CTLogQuery when eager-loading is set.
 	Edges        CTLogEdges `json:"edges"`
@@ -53,8 +51,6 @@ func (*CTLog) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case ctlog.FieldIsActive:
-			values[i] = new(sql.NullBool)
 		case ctlog.FieldID, ctlog.FieldMonitorLogID:
 			values[i] = new(sql.NullInt64)
 		case ctlog.ForeignKeys[0]: // ct_log_ta
@@ -85,12 +81,6 @@ func (cl *CTLog) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field monitor_log_id", values[i])
 			} else if value.Valid {
 				cl.MonitorLogID = int(value.Int64)
-			}
-		case ctlog.FieldIsActive:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field is_active", values[i])
-			} else if value.Valid {
-				cl.IsActive = value.Bool
 			}
 		case ctlog.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -142,9 +132,6 @@ func (cl *CTLog) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", cl.ID))
 	builder.WriteString("monitor_log_id=")
 	builder.WriteString(fmt.Sprintf("%v", cl.MonitorLogID))
-	builder.WriteString(", ")
-	builder.WriteString("is_active=")
-	builder.WriteString(fmt.Sprintf("%v", cl.IsActive))
 	builder.WriteByte(')')
 	return builder.String()
 }

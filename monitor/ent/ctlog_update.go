@@ -49,20 +49,6 @@ func (clu *CTLogUpdate) AddMonitorLogID(i int) *CTLogUpdate {
 	return clu
 }
 
-// SetIsActive sets the "is_active" field.
-func (clu *CTLogUpdate) SetIsActive(b bool) *CTLogUpdate {
-	clu.mutation.SetIsActive(b)
-	return clu
-}
-
-// SetNillableIsActive sets the "is_active" field if the given value is not nil.
-func (clu *CTLogUpdate) SetNillableIsActive(b *bool) *CTLogUpdate {
-	if b != nil {
-		clu.SetIsActive(*b)
-	}
-	return clu
-}
-
 // SetTaID sets the "ta" edge to the TA entity by ID.
 func (clu *CTLogUpdate) SetTaID(id int) *CTLogUpdate {
 	clu.mutation.SetTaID(id)
@@ -135,9 +121,6 @@ func (clu *CTLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := clu.mutation.AddedMonitorLogID(); ok {
 		_spec.AddField(ctlog.FieldMonitorLogID, field.TypeInt, value)
 	}
-	if value, ok := clu.mutation.IsActive(); ok {
-		_spec.SetField(ctlog.FieldIsActive, field.TypeBool, value)
-	}
 	if clu.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -205,20 +188,6 @@ func (cluo *CTLogUpdateOne) SetNillableMonitorLogID(i *int) *CTLogUpdateOne {
 // AddMonitorLogID adds i to the "monitor_log_id" field.
 func (cluo *CTLogUpdateOne) AddMonitorLogID(i int) *CTLogUpdateOne {
 	cluo.mutation.AddMonitorLogID(i)
-	return cluo
-}
-
-// SetIsActive sets the "is_active" field.
-func (cluo *CTLogUpdateOne) SetIsActive(b bool) *CTLogUpdateOne {
-	cluo.mutation.SetIsActive(b)
-	return cluo
-}
-
-// SetNillableIsActive sets the "is_active" field if the given value is not nil.
-func (cluo *CTLogUpdateOne) SetNillableIsActive(b *bool) *CTLogUpdateOne {
-	if b != nil {
-		cluo.SetIsActive(*b)
-	}
 	return cluo
 }
 
@@ -323,9 +292,6 @@ func (cluo *CTLogUpdateOne) sqlSave(ctx context.Context) (_node *CTLog, err erro
 	}
 	if value, ok := cluo.mutation.AddedMonitorLogID(); ok {
 		_spec.AddField(ctlog.FieldMonitorLogID, field.TypeInt, value)
-	}
-	if value, ok := cluo.mutation.IsActive(); ok {
-		_spec.SetField(ctlog.FieldIsActive, field.TypeBool, value)
 	}
 	if cluo.mutation.TaCleared() {
 		edge := &sqlgraph.EdgeSpec{

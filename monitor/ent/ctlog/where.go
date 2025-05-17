@@ -58,11 +58,6 @@ func MonitorLogID(v int) predicate.CTLog {
 	return predicate.CTLog(sql.FieldEQ(FieldMonitorLogID, v))
 }
 
-// IsActive applies equality check predicate on the "is_active" field. It's identical to IsActiveEQ.
-func IsActive(v bool) predicate.CTLog {
-	return predicate.CTLog(sql.FieldEQ(FieldIsActive, v))
-}
-
 // MonitorLogIDEQ applies the EQ predicate on the "monitor_log_id" field.
 func MonitorLogIDEQ(v int) predicate.CTLog {
 	return predicate.CTLog(sql.FieldEQ(FieldMonitorLogID, v))
@@ -101,16 +96,6 @@ func MonitorLogIDLT(v int) predicate.CTLog {
 // MonitorLogIDLTE applies the LTE predicate on the "monitor_log_id" field.
 func MonitorLogIDLTE(v int) predicate.CTLog {
 	return predicate.CTLog(sql.FieldLTE(FieldMonitorLogID, v))
-}
-
-// IsActiveEQ applies the EQ predicate on the "is_active" field.
-func IsActiveEQ(v bool) predicate.CTLog {
-	return predicate.CTLog(sql.FieldEQ(FieldIsActive, v))
-}
-
-// IsActiveNEQ applies the NEQ predicate on the "is_active" field.
-func IsActiveNEQ(v bool) predicate.CTLog {
-	return predicate.CTLog(sql.FieldNEQ(FieldIsActive, v))
 }
 
 // HasTa applies the HasEdge predicate on the "ta" edge.

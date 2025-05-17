@@ -19,7 +19,6 @@ func (monitor *Monitor) RegisterCTLog(ctLogId int, ta *ent.TA, isActive bool) *e
 		Create().
 		SetMonitorLogID(ctLogId).
 		SetTa(ta).
-		SetIsActive(isActive).
 		SaveX(*monitor.DB.Ctx)
 
 	return ctLog

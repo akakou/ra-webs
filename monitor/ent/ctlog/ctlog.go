@@ -14,8 +14,6 @@ const (
 	FieldID = "id"
 	// FieldMonitorLogID holds the string denoting the monitor_log_id field in the database.
 	FieldMonitorLogID = "monitor_log_id"
-	// FieldIsActive holds the string denoting the is_active field in the database.
-	FieldIsActive = "is_active"
 	// EdgeTa holds the string denoting the ta edge name in mutations.
 	EdgeTa = "ta"
 	// Table holds the table name of the ctlog in the database.
@@ -33,7 +31,6 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldMonitorLogID,
-	FieldIsActive,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "ct_logs"
@@ -57,11 +54,6 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-var (
-	// DefaultIsActive holds the default value on creation for the "is_active" field.
-	DefaultIsActive bool
-)
-
 // OrderOption defines the ordering options for the CTLog queries.
 type OrderOption func(*sql.Selector)
 
@@ -73,11 +65,6 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByMonitorLogID orders the results by the monitor_log_id field.
 func ByMonitorLogID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMonitorLogID, opts...).ToFunc()
-}
-
-// ByIsActive orders the results by the is_active field.
-func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsActive, opts...).ToFunc()
 }
 
 // ByTaField orders the results by ta field.

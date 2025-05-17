@@ -2,19 +2,8 @@
 
 package ent
 
-import (
-	"github.com/akakou/ra-webs/monitor/ent/ctlog"
-	"github.com/akakou/ra-webs/monitor/ent/schema"
-)
-
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	ctlogFields := schema.CTLog{}.Fields()
-	_ = ctlogFields
-	// ctlogDescIsActive is the schema descriptor for is_active field.
-	ctlogDescIsActive := ctlogFields[1].Descriptor()
-	// ctlog.DefaultIsActive holds the default value on creation for the is_active field.
-	ctlog.DefaultIsActive = ctlogDescIsActive.Default.(bool)
 }

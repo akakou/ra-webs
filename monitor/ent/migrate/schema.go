@@ -26,7 +26,6 @@ var (
 	CtLogsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "monitor_log_id", Type: field.TypeInt},
-		{Name: "is_active", Type: field.TypeBool, Default: false},
 		{Name: "ct_log_ta", Type: field.TypeInt, Nullable: true},
 	}
 	// CtLogsTable holds the schema information for the "ct_logs" table.
@@ -37,7 +36,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ct_logs_tas_ta",
-				Columns:    []*schema.Column{CtLogsColumns[3]},
+				Columns:    []*schema.Column{CtLogsColumns[2]},
 				RefColumns: []*schema.Column{TasColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

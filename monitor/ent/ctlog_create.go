@@ -26,20 +26,6 @@ func (clc *CTLogCreate) SetMonitorLogID(i int) *CTLogCreate {
 	return clc
 }
 
-// SetIsActive sets the "is_active" field.
-func (clc *CTLogCreate) SetIsActive(b bool) *CTLogCreate {
-	clc.mutation.SetIsActive(b)
-	return clc
-}
-
-// SetNillableIsActive sets the "is_active" field if the given value is not nil.
-func (clc *CTLogCreate) SetNillableIsActive(b *bool) *CTLogCreate {
-	if b != nil {
-		clc.SetIsActive(*b)
-	}
-	return clc
-}
-
 // SetTaID sets the "ta" edge to the TA entity by ID.
 func (clc *CTLogCreate) SetTaID(id int) *CTLogCreate {
 	clc.mutation.SetTaID(id)
@@ -66,7 +52,6 @@ func (clc *CTLogCreate) Mutation() *CTLogMutation {
 
 // Save creates the CTLog in the database.
 func (clc *CTLogCreate) Save(ctx context.Context) (*CTLog, error) {
-	clc.defaults()
 	return withHooks(ctx, clc.sqlSave, clc.mutation, clc.hooks)
 }
 
@@ -92,21 +77,10 @@ func (clc *CTLogCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (clc *CTLogCreate) defaults() {
-	if _, ok := clc.mutation.IsActive(); !ok {
-		v := ctlog.DefaultIsActive
-		clc.mutation.SetIsActive(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (clc *CTLogCreate) check() error {
 	if _, ok := clc.mutation.MonitorLogID(); !ok {
 		return &ValidationError{Name: "monitor_log_id", err: errors.New(`ent: missing required field "CTLog.monitor_log_id"`)}
-	}
-	if _, ok := clc.mutation.IsActive(); !ok {
-		return &ValidationError{Name: "is_active", err: errors.New(`ent: missing required field "CTLog.is_active"`)}
 	}
 	return nil
 }
@@ -137,10 +111,6 @@ func (clc *CTLogCreate) createSpec() (*CTLog, *sqlgraph.CreateSpec) {
 	if value, ok := clc.mutation.MonitorLogID(); ok {
 		_spec.SetField(ctlog.FieldMonitorLogID, field.TypeInt, value)
 		_node.MonitorLogID = value
-	}
-	if value, ok := clc.mutation.IsActive(); ok {
-		_spec.SetField(ctlog.FieldIsActive, field.TypeBool, value)
-		_node.IsActive = value
 	}
 	if nodes := clc.mutation.TaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -180,7 +150,6 @@ func (clcb *CTLogCreateBulk) Save(ctx context.Context) ([]*CTLog, error) {
 	for i := range clcb.builders {
 		func(i int, root context.Context) {
 			builder := clcb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CTLogMutation)
 				if !ok {

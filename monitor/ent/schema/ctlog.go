@@ -15,7 +15,6 @@ type CTLog struct {
 func (CTLog) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("monitor_log_id"),
-		field.Bool("is_active").Default(false),
 	}
 }
 
