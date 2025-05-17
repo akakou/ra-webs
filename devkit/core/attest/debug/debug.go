@@ -9,7 +9,7 @@ import (
 	"github.com/edgelesssys/ego/attestation/tcbstatus"
 )
 
-var Debug = false
+var Debug = true
 
 func debugAttestByAzure(data []byte) (string, error) {
 	evidence := base64.StdEncoding.EncodeToString(data)
@@ -22,7 +22,7 @@ func debugVerifyByAzure(evudence string) (*attestation.Report, error) {
 		return nil, err
 	}
 
-	uniqueId, _ := hex.DecodeString("4759f05537868a6dbfbd2bf1109b8805c49a40ef4cd37ed4e5c446743523d4e5")
+	uniqueId, _ := hex.DecodeString("87d64f2dbe05ebabaf1993014078baa5a3c8d0089904a2013a070d479d6d13f6")
 	return &attestation.Report{
 		UniqueID:  uniqueId,
 		Data:      data,
