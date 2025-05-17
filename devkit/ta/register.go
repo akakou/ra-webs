@@ -48,7 +48,7 @@ func (ta *TA) post(path string, reqBody any) (string, error) {
 		return "", err
 	}
 
-	u, err := url.Parse(ta.config.ATLogDomain)
+	u, err := url.Parse(ta.config.ServiceBase)
 	if err != nil {
 		return "", fmt.Errorf("%v: %v", ERROR_VERIFIER_BASE_PARSE, err)
 	}

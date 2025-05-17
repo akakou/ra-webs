@@ -12,7 +12,7 @@ type TAConfig struct {
 	Repository  string
 	CommitID    string
 	TADomain    string
-	ATLogDomain string
+	ServiceBase string
 	Email       string
 }
 
@@ -22,7 +22,7 @@ func DefaultConfig() (*TAConfig, error) {
 	commitId := os.Getenv("RA_WEBS_TA_COMMIT_ID")
 	domain := os.Getenv("RA_WEBS_TA_DOMAIN")
 	email := os.Getenv("RA_WEBS_SERVICE_EMAIL")
-	atLogBaseEnv := os.Getenv("RA_WEBS_AT_LOG_BASE")
+	serviceBase := os.Getenv("RA_WEBS_SERVICE_BASE")
 
 	if token == "" {
 		return nil, fmt.Errorf("%v", ERROR_TOKEN_NOT_SET)
@@ -36,11 +36,6 @@ func DefaultConfig() (*TAConfig, error) {
 		return nil, fmt.Errorf("%v", ERROR_EMAIL_NOT_SET)
 	}
 
-	if atLogBaseEnv == "" {
-		atLogBaseEnv = "http://localhost" + core.LogPort
-		fmt.Printf("RA_WEBS_AT_LOG_BASE is not set: so use %v\n", atLogBaseEnv)
-	}
-
 	if domain == "" {
 		domain = "http://localhost" + core.TAPort
 		fmt.Printf("RA_WEBS_TA_DOMAIN is not set: so use %v\n", domain)
@@ -51,6 +46,6 @@ func DefaultConfig() (*TAConfig, error) {
 		Repository:  repository,
 		CommitID:    commitId,
 		TADomain:    domain,
-		ATLogDomain: atLogBaseEnv,
+		ServiceBase: serviceBase,
 	}, nil
 }

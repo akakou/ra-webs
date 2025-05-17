@@ -34,7 +34,7 @@
             "fromHost": true
         },
         {
-            "name": "RA_WEBS_AT_LOG_BASE",
+            "name": "RA_WEBS_SERVICE_BASE",
             "fromHost": true
         }
     ],
