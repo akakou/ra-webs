@@ -20,6 +20,10 @@ func (monitor *Monitor) Monitor(ctLogs []crtsh.CertificateEntry) {
 
 func (monitor *Monitor) MonitorOne(ctLog crtsh.CertificateEntry) {
 	taLog := monitor.MonitorCTLog(ctLog)
+	if taLog == nil {
+		return
+	}
+
 	taEntry, err := monitor.ServiceClient.Fetch(*taLog.PublicKey)
 
 	if err != nil {
@@ -39,12 +43,16 @@ func (monitor *Monitor) MonitorEvidence(taEntry *serviceclient.EvidenceEntry, ta
 		return
 	}
 
-	if !reflect.DeepEqual(report.Data, taEntry.PublicKey) {
+	fmt.Printf("left: %x\n right: \n%x\n\n", report.Data, *taLog.PublicKey)
+
+	if !reflect.DeepEqual(report.Data, *taLog.PublicKey) {
 		fmt.Printf("Failed to Check Public Key: %v\n", err)
 		return
 	}
 
 	uniqueId := report.UniqueID
+
+	fmt.Printf("commit id: %v\n", taEntry.CommitID)
 
 	err = CheckSourceHash(taEntry, uniqueId)
 	if err != nil {
@@ -79,17 +87,9 @@ func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) *ent.TA {
 
 	publicKeyBuf := x509.MarshalPKCS1PublicKey(unmarshaledPublicKey)
 
-	ta, exist, err := monitor.SelectOrRegisterTA(publicKeyBuf)
+	ta, err := monitor.RegisterTA(publicKeyBuf)
 	if err != nil {
-		fmt.Printf("Violation (b): %v\n", err)
-		monitor.RevokeIncompletedCTLog(entry.ID, ta)
-		return nil
-	}
-
-	if !exist {
-		fmt.Printf("TA is not found: %x\n", publicKeyBuf)
-		monitor.Revoke(ta)
-		return nil
+		panic(err)
 	}
 
 	_, err = monitor.RegisterCTLog(entry.ID, ta, true)
