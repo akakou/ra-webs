@@ -52,3 +52,8 @@ services:
     privileged: true
     ports: 
       - 8000:8000 
+
+  tunnel:
+    restart: unless-stopped
+    image: cloudflare/cloudflared
+    command: tunnel --url http://monitor:8000 
