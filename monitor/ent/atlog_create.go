@@ -44,12 +44,6 @@ func (alc *ATLogCreate) SetUniqueID(b []byte) *ATLogCreate {
 	return alc
 }
 
-// SetSignature sets the "signature" field.
-func (alc *ATLogCreate) SetSignature(b []byte) *ATLogCreate {
-	alc.mutation.SetSignature(b)
-	return alc
-}
-
 // SetIsActive sets the "is_active" field.
 func (alc *ATLogCreate) SetIsActive(b bool) *ATLogCreate {
 	alc.mutation.SetIsActive(b)
@@ -138,9 +132,6 @@ func (alc *ATLogCreate) check() error {
 	if _, ok := alc.mutation.UniqueID(); !ok {
 		return &ValidationError{Name: "unique_id", err: errors.New(`ent: missing required field "ATLog.unique_id"`)}
 	}
-	if _, ok := alc.mutation.Signature(); !ok {
-		return &ValidationError{Name: "signature", err: errors.New(`ent: missing required field "ATLog.signature"`)}
-	}
 	if _, ok := alc.mutation.IsActive(); !ok {
 		return &ValidationError{Name: "is_active", err: errors.New(`ent: missing required field "ATLog.is_active"`)}
 	}
@@ -185,10 +176,6 @@ func (alc *ATLogCreate) createSpec() (*ATLog, *sqlgraph.CreateSpec) {
 	if value, ok := alc.mutation.UniqueID(); ok {
 		_spec.SetField(atlog.FieldUniqueID, field.TypeBytes, value)
 		_node.UniqueID = value
-	}
-	if value, ok := alc.mutation.Signature(); ok {
-		_spec.SetField(atlog.FieldSignature, field.TypeBytes, value)
-		_node.Signature = value
 	}
 	if value, ok := alc.mutation.IsActive(); ok {
 		_spec.SetField(atlog.FieldIsActive, field.TypeBool, value)

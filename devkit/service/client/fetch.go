@@ -45,5 +45,7 @@ func (serviceClient *ServiceClient) Fetch(publicKey []byte) (*sc.EvidenceEntry, 
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
+	fmt.Printf("%s\n", string(body))
+
 	return result, nil
 }

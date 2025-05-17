@@ -18,7 +18,7 @@ func init() {
 	atlogFields := schema.ATLog{}.Fields()
 	_ = atlogFields
 	// atlogDescIsActive is the schema descriptor for is_active field.
-	atlogDescIsActive := atlogFields[5].Descriptor()
+	atlogDescIsActive := atlogFields[4].Descriptor()
 	// atlog.DefaultIsActive holds the default value on creation for the is_active field.
 	atlog.DefaultIsActive = atlogDescIsActive.Default.(bool)
 	ctlogFields := schema.CTLog{}.Fields()

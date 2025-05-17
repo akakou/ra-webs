@@ -20,8 +20,6 @@ const (
 	FieldCommitID = "commit_id"
 	// FieldUniqueID holds the string denoting the unique_id field in the database.
 	FieldUniqueID = "unique_id"
-	// FieldSignature holds the string denoting the signature field in the database.
-	FieldSignature = "signature"
 	// FieldIsActive holds the string denoting the is_active field in the database.
 	FieldIsActive = "is_active"
 	// EdgeTa holds the string denoting the ta edge name in mutations.
@@ -44,7 +42,6 @@ var Columns = []string{
 	FieldRepository,
 	FieldCommitID,
 	FieldUniqueID,
-	FieldSignature,
 	FieldIsActive,
 }
 

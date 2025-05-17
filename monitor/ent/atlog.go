@@ -25,8 +25,6 @@ type ATLog struct {
 	CommitID string `json:"commit_id,omitempty"`
 	// UniqueID holds the value of the "unique_id" field.
 	UniqueID []byte `json:"unique_id,omitempty"`
-	// Signature holds the value of the "signature" field.
-	Signature []byte `json:"signature,omitempty"`
 	// IsActive holds the value of the "is_active" field.
 	IsActive bool `json:"is_active,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -60,7 +58,7 @@ func (*ATLog) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case atlog.FieldUniqueID, atlog.FieldSignature:
+		case atlog.FieldUniqueID:
 			values[i] = new([]byte)
 		case atlog.FieldIsActive:
 			values[i] = new(sql.NullBool)
@@ -112,12 +110,6 @@ func (al *ATLog) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field unique_id", values[i])
 			} else if value != nil {
 				al.UniqueID = *value
-			}
-		case atlog.FieldSignature:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field signature", values[i])
-			} else if value != nil {
-				al.Signature = *value
 			}
 		case atlog.FieldIsActive:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -177,9 +169,6 @@ func (al *ATLog) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("unique_id=")
 	builder.WriteString(fmt.Sprintf("%v", al.UniqueID))
-	builder.WriteString(", ")
-	builder.WriteString("signature=")
-	builder.WriteString(fmt.Sprintf("%v", al.Signature))
 	builder.WriteString(", ")
 	builder.WriteString("is_active=")
 	builder.WriteString(fmt.Sprintf("%v", al.IsActive))

@@ -15,7 +15,6 @@ var (
 		{Name: "repository", Type: field.TypeString},
 		{Name: "commit_id", Type: field.TypeString},
 		{Name: "unique_id", Type: field.TypeBytes},
-		{Name: "signature", Type: field.TypeBytes},
 		{Name: "is_active", Type: field.TypeBool, Default: false},
 	}
 	// AtLogsTable holds the schema information for the "at_logs" table.

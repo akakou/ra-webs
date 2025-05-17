@@ -76,12 +76,6 @@ func (alu *ATLogUpdate) SetUniqueID(b []byte) *ATLogUpdate {
 	return alu
 }
 
-// SetSignature sets the "signature" field.
-func (alu *ATLogUpdate) SetSignature(b []byte) *ATLogUpdate {
-	alu.mutation.SetSignature(b)
-	return alu
-}
-
 // SetIsActive sets the "is_active" field.
 func (alu *ATLogUpdate) SetIsActive(b bool) *ATLogUpdate {
 	alu.mutation.SetIsActive(b)
@@ -173,9 +167,6 @@ func (alu *ATLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := alu.mutation.UniqueID(); ok {
 		_spec.SetField(atlog.FieldUniqueID, field.TypeBytes, value)
-	}
-	if value, ok := alu.mutation.Signature(); ok {
-		_spec.SetField(atlog.FieldSignature, field.TypeBytes, value)
 	}
 	if value, ok := alu.mutation.IsActive(); ok {
 		_spec.SetField(atlog.FieldIsActive, field.TypeBool, value)
@@ -274,12 +265,6 @@ func (aluo *ATLogUpdateOne) SetNillableCommitID(s *string) *ATLogUpdateOne {
 // SetUniqueID sets the "unique_id" field.
 func (aluo *ATLogUpdateOne) SetUniqueID(b []byte) *ATLogUpdateOne {
 	aluo.mutation.SetUniqueID(b)
-	return aluo
-}
-
-// SetSignature sets the "signature" field.
-func (aluo *ATLogUpdateOne) SetSignature(b []byte) *ATLogUpdateOne {
-	aluo.mutation.SetSignature(b)
 	return aluo
 }
 
@@ -404,9 +389,6 @@ func (aluo *ATLogUpdateOne) sqlSave(ctx context.Context) (_node *ATLog, err erro
 	}
 	if value, ok := aluo.mutation.UniqueID(); ok {
 		_spec.SetField(atlog.FieldUniqueID, field.TypeBytes, value)
-	}
-	if value, ok := aluo.mutation.Signature(); ok {
-		_spec.SetField(atlog.FieldSignature, field.TypeBytes, value)
 	}
 	if value, ok := aluo.mutation.IsActive(); ok {
 		_spec.SetField(atlog.FieldIsActive, field.TypeBool, value)
