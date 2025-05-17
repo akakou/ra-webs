@@ -16,7 +16,7 @@ const TableCompornent = ({ logs }) => {
             return ""
     }
     const violated = (server) =>  
-        (checkValidity(server)).toString()
+        (!checkValidity(server)).toString()
     
 
     console.log(logs)
