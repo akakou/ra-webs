@@ -14,7 +14,7 @@ func (monitor *Monitor) RegisterTA(publicKey []byte) *ent.TA {
 	return ta
 }
 
-func (monitor *Monitor) RegisterCTLog(ctLogId int, ta *ent.TA, isActive bool) *ent.CTLog {
+func (monitor *Monitor) RegisterCTLog(ctLogId int, ta *ent.TA) *ent.CTLog {
 	ctLog := monitor.DB.Client.CTLog.
 		Create().
 		SetMonitorLogID(ctLogId).
@@ -24,7 +24,7 @@ func (monitor *Monitor) RegisterCTLog(ctLogId int, ta *ent.TA, isActive bool) *e
 	return ctLog
 }
 
-func (monitor *Monitor) RegisterATLog(uniqueId []byte, entry *serviceclient.EvidenceEntry, ta *ent.TA, active bool) *ent.ATLog {
+func (monitor *Monitor) RegisterATLog(uniqueId []byte, entry *serviceclient.EvidenceEntry, ta *ent.TA) *ent.ATLog {
 	atLog := monitor.DB.Client.ATLog.
 		Create().
 		SetEvidence(entry.Evidence).

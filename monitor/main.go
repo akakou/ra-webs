@@ -19,54 +19,68 @@ func (monitor *Monitor) Monitor(ctLogs []crtsh.CertificateEntry) {
 }
 
 func (monitor *Monitor) MonitorOne(ctLog crtsh.CertificateEntry) {
-	taLog, skip := monitor.MonitorCTLog(ctLog)
+	taLog, skip, err := monitor.MonitorCTLog(ctLog)
 	if skip {
 		return
 	}
 
-	taEntry, err := monitor.ServiceClient.Fetch(*taLog.PublicKey)
-
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
+		NotifyViolationX(monitor)
 		return
 	}
 
-	monitor.MonitorEvidence(taEntry, taLog)
+	taEntry, err := monitor.ServiceClient.Fetch(*taLog.PublicKey)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		NotifyViolationX(monitor)
+		return
+	}
+
+	err = monitor.MonitorEvidence(taEntry, taLog)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		NotifyViolationX(monitor)
+		return
+	}
+
+	NotifyUpdateX(monitor)
 }
 
-func (monitor *Monitor) MonitorEvidence(taEntry *serviceclient.EvidenceEntry, taLog *ent.TA) {
+func (monitor *Monitor) MonitorEvidence(taEntry *serviceclient.EvidenceEntry, taLog *ent.TA) error {
 	var err error
 
 	report, err := CheckEvidence(taEntry.Evidence)
 	if err != nil {
-		fmt.Printf("Failed to Check Evidence: %v\n", err)
-		return
+		return fmt.Errorf("Failed to Check Evidence: %v\n", err)
 	}
 
 	if !reflect.DeepEqual(report.Data, *taLog.PublicKey) {
-		fmt.Printf("Failed to Check Public Key: %v\n", err)
-		return
+		return fmt.Errorf("Failed to Check Public Key: %v\n", err)
 	}
 
 	uniqueId := report.UniqueID
 
 	err = CheckSourceHash(taEntry, uniqueId)
 	if err != nil {
-		fmt.Printf("Failed to Check Source Hash: %v\n", err)
-		return
+		return fmt.Errorf("Failed to Check Source Hash: %v\n", err)
 	}
 
-	atLog := monitor.RegisterATLog(uniqueId, taEntry, taLog, true)
+	atLog := monitor.RegisterATLog(uniqueId, taEntry, taLog)
 	fmt.Printf("Inserted: %v\n", atLog)
+
+	return nil
 }
 
-func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) (*ent.TA, bool) {
+func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) (*ent.TA, bool, error) {
+	var err error
+
 	skip := monitor.DB.Client.CTLog.Query().
 		Where(ctlog.MonitorLogIDEQ(entry.ID)).
 		ExistX(*monitor.DB.Ctx)
 
 	if skip {
-		return nil, skip
+		return nil, true, nil
 	}
 
 	unmarshaledPublicKey, isRSA := entry.Certificate.PublicKey.(*rsa.PublicKey)
@@ -74,18 +88,12 @@ func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) (*ent.TA, boo
 
 	if isRSA {
 		publicKeyBuf = x509.MarshalPKCS1PublicKey(unmarshaledPublicKey)
+	} else {
+		err = fmt.Errorf("Violation: %v\n", errPublicKeyIsNotRSA)
 	}
 
 	ta := monitor.RegisterTA(publicKeyBuf)
-	monitor.RegisterCTLog(entry.ID, ta, true)
+	monitor.RegisterCTLog(entry.ID, ta)
 
-	if isRSA {
-		NotifyUpdateX(monitor)
-	} else {
-		skip = true
-		fmt.Printf("Violation: %v\n", errPublicKeyIsNotRSA)
-		NotifyViolation(monitor)
-	}
-
-	return ta, skip
+	return ta, false, err
 }
