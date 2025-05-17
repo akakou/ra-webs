@@ -17,7 +17,7 @@ const App = () => {
         console.log(resp2)
     
         const logs = resp2.data
-        const v = checkValidity(logs)
+        const v = checkValidities(logs)
 
         var message = v ? VALID_MESSAGE : INVALID_MESSAGE
 

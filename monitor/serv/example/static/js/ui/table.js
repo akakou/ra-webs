@@ -1,28 +1,37 @@
 const TableCompornent = ({ logs }) => {
     const gitRepo = s => `${s.edges.at_log.repository}/tree/${s.edges.at_log.commit_id}`
-    const crtshLinks = ctLogs => ctLogs.map(
-        (ctLog, index) =>
+    const crtshLinks = server => server.edges.ct_log.map(
+        (ctl, index) =>
             <div>
-                <a href={"https://crt.sh?id="+ctLog.monitor_log_id}>
-                    {ctLog.monitor_log_id}  
+                <a href={"https://crt.sh?id="+ctl.monitor_log_id}>
+                    {ctl.monitor_log_id}  
                 </a>
                 <br/>
             </div>
         )
-     
+    const uniqueId = (server) => {
+        if (!!server.edges.at_log)
+            return server.edges.at_log.unique_id
+        else 
+            return ""
+    }
+    const violated = (server) =>  
+        (checkValidity(server)).toString()
+    
+
     console.log(logs)
     const rows = logs.map((server, index) =>
         <tr key={index}>
             <td>{server.id}</td>
-            <td>{server.edges.at_log.unique_id}</td>
+            <td>{uniqueId(server)}</td>
             <td>
-            {crtshLinks(server.edges.ct_log)}
+            {crtshLinks(server)}
             </td>
 
             <td>
                 <a href={gitRepo(server)}>{gitRepo(server)}</a>
             </td>
-            <td>{(!!server.edges.violation).toString()}</td> 
+            <td>{violated(server)}</td> 
         </tr>
     );
 
