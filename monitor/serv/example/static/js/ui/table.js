@@ -1,7 +1,7 @@
 const TableCompornent = ({ logs }) => {
     const gitRepo = s => {
-        if (s.edges.at_log) {
-            let href = `${s.edges.at_log.repository}/tree/${s.edges.at_log.commit_id}`
+        if (s.edges.evidence_log) {
+            let href = `${s.edges.evidence_log.repository}/tree/${s.edges.evidence_log.commit_id}`
             return <button 
                     onClick={
                         e => window.location = href
@@ -22,7 +22,7 @@ const TableCompornent = ({ logs }) => {
                 <br/>
             </div>
         )
-    const uniqueId = (server) => server.edges.at_log ? server.edges.at_log.unique_id : "-"
+    const uniqueId = (server) => server.edges.evidence_log ? server.edges.evidence_log.unique_id : "-"
     const violated = (server) =>  
         (!checkValidity(server)).toString()
     

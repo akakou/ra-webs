@@ -1,5 +1,5 @@
 const checkValidity = (log) => 
-    !!log.edges.at_log && !log.edges.is_active
+    !!log.edges.evidence_log && !log.edges.is_active
 
 const checkValidities = (logs) => {
     let result = true
