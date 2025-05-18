@@ -20,7 +20,7 @@ var GetLogs = goutils.EchoRoute[serv.MonitorServer]{
 				Query().
 				QueryTa().
 				WithCtLog().
-				WithAtLog().
+				WithEvidenceLog().
 				Order(ent.Desc(ctlog.FieldID)).
 				All(*server.Monitor.DB.Ctx)
 

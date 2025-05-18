@@ -26,7 +26,7 @@ type TAQuery struct {
 	inters     []Interceptor
 	predicates []predicate.TA
 	withCtLog  *CTLogQuery
-	withAtLog  *EvidenceLogQuery
+	withEvidenceLog  *EvidenceLogQuery
 	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -301,7 +301,7 @@ func (tq *TAQuery) Clone() *TAQuery {
 		inters:     append([]Interceptor{}, tq.inters...),
 		predicates: append([]predicate.TA{}, tq.predicates...),
 		withCtLog:  tq.withCtLog.Clone(),
-		withAtLog:  tq.withAtLog.Clone(),
+		withEvidenceLog:  tq.withEvidenceLog.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
@@ -319,14 +319,14 @@ func (tq *TAQuery) WithCtLog(opts ...func(*CTLogQuery)) *TAQuery {
 	return tq
 }
 
-// WithAtLog tells the query-builder to eager-load the nodes that are connected to
+// WithEvidenceLog tells the query-builder to eager-load the nodes that are connected to
 // the "at_log" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TAQuery) WithAtLog(opts ...func(*EvidenceLogQuery)) *TAQuery {
+func (tq *TAQuery) WithEvidenceLog(opts ...func(*EvidenceLogQuery)) *TAQuery {
 	query := (&EvidenceLogClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tq.withAtLog = query
+	tq.withEvidenceLog = query
 	return tq
 }
 
@@ -411,10 +411,10 @@ func (tq *TAQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA, error
 		_spec       = tq.querySpec()
 		loadedTypes = [2]bool{
 			tq.withCtLog != nil,
-			tq.withAtLog != nil,
+			tq.withEvidenceLog != nil,
 		}
 	)
-	if tq.withAtLog != nil {
+	if tq.withEvidenceLog != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -445,7 +445,7 @@ func (tq *TAQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA, error
 			return nil, err
 		}
 	}
-	if query := tq.withAtLog; query != nil {
+	if query := tq.withEvidenceLog; query != nil {
 		if err := tq.loadAtLog(ctx, query, nodes, nil,
 			func(n *TA, e *EvidenceLog) { n.Edges.AtLog = e }); err != nil {
 			return nil, err

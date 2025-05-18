@@ -24,7 +24,7 @@ func (monitor *Monitor) RegisterCTLog(ctLogId int, ta *ent.TA) *ent.CTLog {
 	return ctLog
 }
 
-func (monitor *Monitor) RegisterATLog(uniqueId []byte, entry *serviceclient.EvidenceEntry, ta *ent.TA) *ent.EvidenceLog {
+func (monitor *Monitor) RegisterEvidenceLog(uniqueId []byte, entry *serviceclient.EvidenceEntry, ta *ent.TA) *ent.EvidenceLog {
 	evidenceLog := monitor.DB.Client.EvidenceLog.
 		Create().
 		SetEvidence(entry.Evidence).
