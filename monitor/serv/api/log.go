@@ -7,6 +7,7 @@ import (
 	goutils "github.com/akakou/go-utils"
 	"github.com/akakou/ra-webs/monitor/ent"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
+	"github.com/akakou/ra-webs/monitor/ent/ta"
 	"github.com/akakou/ra-webs/monitor/serv"
 	"github.com/labstack/echo/v4"
 )
@@ -21,6 +22,10 @@ var GetLogs = goutils.EchoRoute[serv.MonitorServer]{
 				QueryTa().
 				WithCtLog().
 				WithEvidenceLog().
+				Select(
+					ta.FieldID,
+					ta.FieldIsActive,
+				).
 				Order(ent.Desc(ctlog.FieldID)).
 				All(*server.Monitor.DB.Ctx)
 
