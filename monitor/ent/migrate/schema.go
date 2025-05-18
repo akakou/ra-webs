@@ -59,6 +59,7 @@ var (
 	TasColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "public_key", Type: field.TypeBytes},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
 		{Name: "evidence_log_ta", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// TasTable holds the schema information for the "tas" table.
@@ -69,7 +70,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "tas_evidence_logs_ta",
-				Columns:    []*schema.Column{TasColumns[2]},
+				Columns:    []*schema.Column{TasColumns[3]},
 				RefColumns: []*schema.Column{EvidenceLogsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

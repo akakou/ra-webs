@@ -21,13 +21,13 @@ import (
 // TAQuery is the builder for querying TA entities.
 type TAQuery struct {
 	config
-	ctx        *QueryContext
-	order      []ta.OrderOption
-	inters     []Interceptor
-	predicates []predicate.TA
-	withCtLog  *CTLogQuery
-	withEvidenceLog  *EvidenceLogQuery
-	withFKs    bool
+	ctx             *QueryContext
+	order           []ta.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.TA
+	withCtLog       *CTLogQuery
+	withEvidenceLog *EvidenceLogQuery
+	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -86,8 +86,8 @@ func (tq *TAQuery) QueryCtLog() *CTLogQuery {
 	return query
 }
 
-// QueryAtLog chains the current query on the "at_log" edge.
-func (tq *TAQuery) QueryAtLog() *EvidenceLogQuery {
+// QueryEvidenceLog chains the current query on the "evidence_log" edge.
+func (tq *TAQuery) QueryEvidenceLog() *EvidenceLogQuery {
 	query := (&EvidenceLogClient{config: tq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
@@ -100,7 +100,7 @@ func (tq *TAQuery) QueryAtLog() *EvidenceLogQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ta.Table, ta.FieldID, selector),
 			sqlgraph.To(evidencelog.Table, evidencelog.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, ta.AtLogTable, ta.AtLogColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, ta.EvidenceLogTable, ta.EvidenceLogColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -295,13 +295,13 @@ func (tq *TAQuery) Clone() *TAQuery {
 		return nil
 	}
 	return &TAQuery{
-		config:     tq.config,
-		ctx:        tq.ctx.Clone(),
-		order:      append([]ta.OrderOption{}, tq.order...),
-		inters:     append([]Interceptor{}, tq.inters...),
-		predicates: append([]predicate.TA{}, tq.predicates...),
-		withCtLog:  tq.withCtLog.Clone(),
-		withEvidenceLog:  tq.withEvidenceLog.Clone(),
+		config:          tq.config,
+		ctx:             tq.ctx.Clone(),
+		order:           append([]ta.OrderOption{}, tq.order...),
+		inters:          append([]Interceptor{}, tq.inters...),
+		predicates:      append([]predicate.TA{}, tq.predicates...),
+		withCtLog:       tq.withCtLog.Clone(),
+		withEvidenceLog: tq.withEvidenceLog.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
@@ -320,7 +320,7 @@ func (tq *TAQuery) WithCtLog(opts ...func(*CTLogQuery)) *TAQuery {
 }
 
 // WithEvidenceLog tells the query-builder to eager-load the nodes that are connected to
-// the "at_log" edge. The optional arguments are used to configure the query builder of the edge.
+// the "evidence_log" edge. The optional arguments are used to configure the query builder of the edge.
 func (tq *TAQuery) WithEvidenceLog(opts ...func(*EvidenceLogQuery)) *TAQuery {
 	query := (&EvidenceLogClient{config: tq.config}).Query()
 	for _, opt := range opts {
@@ -446,8 +446,8 @@ func (tq *TAQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TA, error
 		}
 	}
 	if query := tq.withEvidenceLog; query != nil {
-		if err := tq.loadAtLog(ctx, query, nodes, nil,
-			func(n *TA, e *EvidenceLog) { n.Edges.AtLog = e }); err != nil {
+		if err := tq.loadEvidenceLog(ctx, query, nodes, nil,
+			func(n *TA, e *EvidenceLog) { n.Edges.EvidenceLog = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -485,7 +485,7 @@ func (tq *TAQuery) loadCtLog(ctx context.Context, query *CTLogQuery, nodes []*TA
 	}
 	return nil
 }
-func (tq *TAQuery) loadAtLog(ctx context.Context, query *EvidenceLogQuery, nodes []*TA, init func(*TA), assign func(*TA, *EvidenceLog)) error {
+func (tq *TAQuery) loadEvidenceLog(ctx context.Context, query *EvidenceLogQuery, nodes []*TA, init func(*TA), assign func(*TA, *EvidenceLog)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*TA)
 	for i := range nodes {

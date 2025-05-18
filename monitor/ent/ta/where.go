@@ -58,6 +58,11 @@ func PublicKey(v []byte) predicate.TA {
 	return predicate.TA(sql.FieldEQ(FieldPublicKey, v))
 }
 
+// IsActive applies equality check predicate on the "is_active" field. It's identical to IsActiveEQ.
+func IsActive(v bool) predicate.TA {
+	return predicate.TA(sql.FieldEQ(FieldIsActive, v))
+}
+
 // PublicKeyEQ applies the EQ predicate on the "public_key" field.
 func PublicKeyEQ(v []byte) predicate.TA {
 	return predicate.TA(sql.FieldEQ(FieldPublicKey, v))
@@ -98,6 +103,16 @@ func PublicKeyLTE(v []byte) predicate.TA {
 	return predicate.TA(sql.FieldLTE(FieldPublicKey, v))
 }
 
+// IsActiveEQ applies the EQ predicate on the "is_active" field.
+func IsActiveEQ(v bool) predicate.TA {
+	return predicate.TA(sql.FieldEQ(FieldIsActive, v))
+}
+
+// IsActiveNEQ applies the NEQ predicate on the "is_active" field.
+func IsActiveNEQ(v bool) predicate.TA {
+	return predicate.TA(sql.FieldNEQ(FieldIsActive, v))
+}
+
 // HasCtLog applies the HasEdge predicate on the "ct_log" edge.
 func HasCtLog() predicate.TA {
 	return predicate.TA(func(s *sql.Selector) {
@@ -121,21 +136,21 @@ func HasCtLogWith(preds ...predicate.CTLog) predicate.TA {
 	})
 }
 
-// HasAtLog applies the HasEdge predicate on the "at_log" edge.
-func HasAtLog() predicate.TA {
+// HasEvidenceLog applies the HasEdge predicate on the "evidence_log" edge.
+func HasEvidenceLog() predicate.TA {
 	return predicate.TA(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, AtLogTable, AtLogColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, EvidenceLogTable, EvidenceLogColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasAtLogWith applies the HasEdge predicate on the "at_log" edge with a given conditions (other predicates).
-func HasAtLogWith(preds ...predicate.EvidenceLog) predicate.TA {
+// HasEvidenceLogWith applies the HasEdge predicate on the "evidence_log" edge with a given conditions (other predicates).
+func HasEvidenceLogWith(preds ...predicate.EvidenceLog) predicate.TA {
 	return predicate.TA(func(s *sql.Selector) {
-		step := newAtLogStep()
+		step := newEvidenceLogStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

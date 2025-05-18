@@ -782,15 +782,15 @@ func (c *TAClient) QueryCtLog(t *TA) *CTLogQuery {
 	return query
 }
 
-// QueryAtLog queries the at_log edge of a TA.
-func (c *TAClient) QueryAtLog(t *TA) *EvidenceLogQuery {
+// QueryEvidenceLog queries the evidence_log edge of a TA.
+func (c *TAClient) QueryEvidenceLog(t *TA) *EvidenceLogQuery {
 	query := (&EvidenceLogClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ta.Table, ta.FieldID, id),
 			sqlgraph.To(evidencelog.Table, evidencelog.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, ta.AtLogTable, ta.AtLogColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, ta.EvidenceLogTable, ta.EvidenceLogColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil

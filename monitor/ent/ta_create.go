@@ -27,6 +27,20 @@ func (tc *TACreate) SetPublicKey(b []byte) *TACreate {
 	return tc
 }
 
+// SetIsActive sets the "is_active" field.
+func (tc *TACreate) SetIsActive(b bool) *TACreate {
+	tc.mutation.SetIsActive(b)
+	return tc
+}
+
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (tc *TACreate) SetNillableIsActive(b *bool) *TACreate {
+	if b != nil {
+		tc.SetIsActive(*b)
+	}
+	return tc
+}
+
 // AddCtLogIDs adds the "ct_log" edge to the CTLog entity by IDs.
 func (tc *TACreate) AddCtLogIDs(ids ...int) *TACreate {
 	tc.mutation.AddCtLogIDs(ids...)
@@ -42,23 +56,23 @@ func (tc *TACreate) AddCtLog(c ...*CTLog) *TACreate {
 	return tc.AddCtLogIDs(ids...)
 }
 
-// SetAtLogID sets the "at_log" edge to the EvidenceLog entity by ID.
-func (tc *TACreate) SetAtLogID(id int) *TACreate {
-	tc.mutation.SetAtLogID(id)
+// SetEvidenceLogID sets the "evidence_log" edge to the EvidenceLog entity by ID.
+func (tc *TACreate) SetEvidenceLogID(id int) *TACreate {
+	tc.mutation.SetEvidenceLogID(id)
 	return tc
 }
 
-// SetNillableAtLogID sets the "at_log" edge to the EvidenceLog entity by ID if the given value is not nil.
-func (tc *TACreate) SetNillableAtLogID(id *int) *TACreate {
+// SetNillableEvidenceLogID sets the "evidence_log" edge to the EvidenceLog entity by ID if the given value is not nil.
+func (tc *TACreate) SetNillableEvidenceLogID(id *int) *TACreate {
 	if id != nil {
-		tc = tc.SetAtLogID(*id)
+		tc = tc.SetEvidenceLogID(*id)
 	}
 	return tc
 }
 
-// SetAtLog sets the "at_log" edge to the EvidenceLog entity.
-func (tc *TACreate) SetAtLog(e *EvidenceLog) *TACreate {
-	return tc.SetAtLogID(e.ID)
+// SetEvidenceLog sets the "evidence_log" edge to the EvidenceLog entity.
+func (tc *TACreate) SetEvidenceLog(e *EvidenceLog) *TACreate {
+	return tc.SetEvidenceLogID(e.ID)
 }
 
 // Mutation returns the TAMutation object of the builder.
@@ -68,6 +82,7 @@ func (tc *TACreate) Mutation() *TAMutation {
 
 // Save creates the TA in the database.
 func (tc *TACreate) Save(ctx context.Context) (*TA, error) {
+	tc.defaults()
 	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
 }
 
@@ -93,10 +108,21 @@ func (tc *TACreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tc *TACreate) defaults() {
+	if _, ok := tc.mutation.IsActive(); !ok {
+		v := ta.DefaultIsActive
+		tc.mutation.SetIsActive(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (tc *TACreate) check() error {
 	if _, ok := tc.mutation.PublicKey(); !ok {
 		return &ValidationError{Name: "public_key", err: errors.New(`ent: missing required field "TA.public_key"`)}
+	}
+	if _, ok := tc.mutation.IsActive(); !ok {
+		return &ValidationError{Name: "is_active", err: errors.New(`ent: missing required field "TA.is_active"`)}
 	}
 	return nil
 }
@@ -128,6 +154,10 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 		_spec.SetField(ta.FieldPublicKey, field.TypeBytes, value)
 		_node.PublicKey = &value
 	}
+	if value, ok := tc.mutation.IsActive(); ok {
+		_spec.SetField(ta.FieldIsActive, field.TypeBool, value)
+		_node.IsActive = value
+	}
 	if nodes := tc.mutation.CtLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -144,12 +174,12 @@ func (tc *TACreate) createSpec() (*TA, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := tc.mutation.AtLogIDs(); len(nodes) > 0 {
+	if nodes := tc.mutation.EvidenceLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   ta.AtLogTable,
-			Columns: []string{ta.AtLogColumn},
+			Table:   ta.EvidenceLogTable,
+			Columns: []string{ta.EvidenceLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(evidencelog.FieldID, field.TypeInt),
@@ -182,6 +212,7 @@ func (tcb *TACreateBulk) Save(ctx context.Context) ([]*TA, error) {
 	for i := range tcb.builders {
 		func(i int, root context.Context) {
 			builder := tcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TAMutation)
 				if !ok {

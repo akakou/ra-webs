@@ -1453,19 +1453,20 @@ func (m *SubscriptionMutation) ResetEdge(name string) error {
 // TAMutation represents an operation that mutates the TA nodes in the graph.
 type TAMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	public_key    *[]byte
-	clearedFields map[string]struct{}
-	ct_log        map[int]struct{}
-	removedct_log map[int]struct{}
-	clearedct_log bool
-	at_log        *int
-	clearedat_log bool
-	done          bool
-	oldValue      func(context.Context) (*TA, error)
-	predicates    []predicate.TA
+	op                  Op
+	typ                 string
+	id                  *int
+	public_key          *[]byte
+	is_active           *bool
+	clearedFields       map[string]struct{}
+	ct_log              map[int]struct{}
+	removedct_log       map[int]struct{}
+	clearedct_log       bool
+	evidence_log        *int
+	clearedevidence_log bool
+	done                bool
+	oldValue            func(context.Context) (*TA, error)
+	predicates          []predicate.TA
 }
 
 var _ ent.Mutation = (*TAMutation)(nil)
@@ -1602,6 +1603,42 @@ func (m *TAMutation) ResetPublicKey() {
 	m.public_key = nil
 }
 
+// SetIsActive sets the "is_active" field.
+func (m *TAMutation) SetIsActive(b bool) {
+	m.is_active = &b
+}
+
+// IsActive returns the value of the "is_active" field in the mutation.
+func (m *TAMutation) IsActive() (r bool, exists bool) {
+	v := m.is_active
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsActive returns the old "is_active" field's value of the TA entity.
+// If the TA object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TAMutation) OldIsActive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsActive: %w", err)
+	}
+	return oldValue.IsActive, nil
+}
+
+// ResetIsActive resets all changes to the "is_active" field.
+func (m *TAMutation) ResetIsActive() {
+	m.is_active = nil
+}
+
 // AddCtLogIDs adds the "ct_log" edge to the CTLog entity by ids.
 func (m *TAMutation) AddCtLogIDs(ids ...int) {
 	if m.ct_log == nil {
@@ -1656,43 +1693,43 @@ func (m *TAMutation) ResetCtLog() {
 	m.removedct_log = nil
 }
 
-// SetAtLogID sets the "at_log" edge to the EvidenceLog entity by id.
-func (m *TAMutation) SetAtLogID(id int) {
-	m.at_log = &id
+// SetEvidenceLogID sets the "evidence_log" edge to the EvidenceLog entity by id.
+func (m *TAMutation) SetEvidenceLogID(id int) {
+	m.evidence_log = &id
 }
 
-// ClearAtLog clears the "at_log" edge to the EvidenceLog entity.
-func (m *TAMutation) ClearAtLog() {
-	m.clearedat_log = true
+// ClearEvidenceLog clears the "evidence_log" edge to the EvidenceLog entity.
+func (m *TAMutation) ClearEvidenceLog() {
+	m.clearedevidence_log = true
 }
 
-// AtLogCleared reports if the "at_log" edge to the EvidenceLog entity was cleared.
-func (m *TAMutation) AtLogCleared() bool {
-	return m.clearedat_log
+// EvidenceLogCleared reports if the "evidence_log" edge to the EvidenceLog entity was cleared.
+func (m *TAMutation) EvidenceLogCleared() bool {
+	return m.clearedevidence_log
 }
 
-// AtLogID returns the "at_log" edge ID in the mutation.
-func (m *TAMutation) AtLogID() (id int, exists bool) {
-	if m.at_log != nil {
-		return *m.at_log, true
+// EvidenceLogID returns the "evidence_log" edge ID in the mutation.
+func (m *TAMutation) EvidenceLogID() (id int, exists bool) {
+	if m.evidence_log != nil {
+		return *m.evidence_log, true
 	}
 	return
 }
 
-// AtLogIDs returns the "at_log" edge IDs in the mutation.
+// EvidenceLogIDs returns the "evidence_log" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// AtLogID instead. It exists only for internal usage by the builders.
-func (m *TAMutation) AtLogIDs() (ids []int) {
-	if id := m.at_log; id != nil {
+// EvidenceLogID instead. It exists only for internal usage by the builders.
+func (m *TAMutation) EvidenceLogIDs() (ids []int) {
+	if id := m.evidence_log; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetAtLog resets all changes to the "at_log" edge.
-func (m *TAMutation) ResetAtLog() {
-	m.at_log = nil
-	m.clearedat_log = false
+// ResetEvidenceLog resets all changes to the "evidence_log" edge.
+func (m *TAMutation) ResetEvidenceLog() {
+	m.evidence_log = nil
+	m.clearedevidence_log = false
 }
 
 // Where appends a list predicates to the TAMutation builder.
@@ -1729,9 +1766,12 @@ func (m *TAMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TAMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.public_key != nil {
 		fields = append(fields, ta.FieldPublicKey)
+	}
+	if m.is_active != nil {
+		fields = append(fields, ta.FieldIsActive)
 	}
 	return fields
 }
@@ -1743,6 +1783,8 @@ func (m *TAMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case ta.FieldPublicKey:
 		return m.PublicKey()
+	case ta.FieldIsActive:
+		return m.IsActive()
 	}
 	return nil, false
 }
@@ -1754,6 +1796,8 @@ func (m *TAMutation) OldField(ctx context.Context, name string) (ent.Value, erro
 	switch name {
 	case ta.FieldPublicKey:
 		return m.OldPublicKey(ctx)
+	case ta.FieldIsActive:
+		return m.OldIsActive(ctx)
 	}
 	return nil, fmt.Errorf("unknown TA field %s", name)
 }
@@ -1769,6 +1813,13 @@ func (m *TAMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPublicKey(v)
+		return nil
+	case ta.FieldIsActive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsActive(v)
 		return nil
 	}
 	return fmt.Errorf("unknown TA field %s", name)
@@ -1822,6 +1873,9 @@ func (m *TAMutation) ResetField(name string) error {
 	case ta.FieldPublicKey:
 		m.ResetPublicKey()
 		return nil
+	case ta.FieldIsActive:
+		m.ResetIsActive()
+		return nil
 	}
 	return fmt.Errorf("unknown TA field %s", name)
 }
@@ -1832,8 +1886,8 @@ func (m *TAMutation) AddedEdges() []string {
 	if m.ct_log != nil {
 		edges = append(edges, ta.EdgeCtLog)
 	}
-	if m.at_log != nil {
-		edges = append(edges, ta.EdgeAtLog)
+	if m.evidence_log != nil {
+		edges = append(edges, ta.EdgeEvidenceLog)
 	}
 	return edges
 }
@@ -1848,8 +1902,8 @@ func (m *TAMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case ta.EdgeAtLog:
-		if id := m.at_log; id != nil {
+	case ta.EdgeEvidenceLog:
+		if id := m.evidence_log; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -1885,8 +1939,8 @@ func (m *TAMutation) ClearedEdges() []string {
 	if m.clearedct_log {
 		edges = append(edges, ta.EdgeCtLog)
 	}
-	if m.clearedat_log {
-		edges = append(edges, ta.EdgeAtLog)
+	if m.clearedevidence_log {
+		edges = append(edges, ta.EdgeEvidenceLog)
 	}
 	return edges
 }
@@ -1897,8 +1951,8 @@ func (m *TAMutation) EdgeCleared(name string) bool {
 	switch name {
 	case ta.EdgeCtLog:
 		return m.clearedct_log
-	case ta.EdgeAtLog:
-		return m.clearedat_log
+	case ta.EdgeEvidenceLog:
+		return m.clearedevidence_log
 	}
 	return false
 }
@@ -1907,8 +1961,8 @@ func (m *TAMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *TAMutation) ClearEdge(name string) error {
 	switch name {
-	case ta.EdgeAtLog:
-		m.ClearAtLog()
+	case ta.EdgeEvidenceLog:
+		m.ClearEvidenceLog()
 		return nil
 	}
 	return fmt.Errorf("unknown TA unique edge %s", name)
@@ -1921,8 +1975,8 @@ func (m *TAMutation) ResetEdge(name string) error {
 	case ta.EdgeCtLog:
 		m.ResetCtLog()
 		return nil
-	case ta.EdgeAtLog:
-		m.ResetAtLog()
+	case ta.EdgeEvidenceLog:
+		m.ResetEvidenceLog()
 		return nil
 	}
 	return fmt.Errorf("unknown TA edge %s", name)
