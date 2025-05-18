@@ -32,13 +32,14 @@ const App = () => {
             <h1>RA-WEBs: TEE Monitoring Service</h1>
             <h2>Attestation Result</h2>
 
+            <h3>TA Domain: </h3>
+            <a href={"https://" + hostname}>{hostname}</a>
+
             <h3>Result: </h3>
             <bold>{isValid ? 'valid' : 'invalid'}</bold>
 
             <h3>Message: </h3>
             <p>{message}</p>
-
-            <br />
 
             <h2>Logs</h2>
             <TableCompornent logs={logs} />
