@@ -32,17 +32,18 @@ func Default(ctx context.Context) (*CrtshMonitor, error) {
 
 func (a *CrtshMonitor) Run(monitor *monitor.Monitor) {
 	for {
+		time.Sleep(a.Interval)
+
 		entries, err := crtsh.Fetch(monitor.TADomain, "")
 		if err == nil {
 			fmt.Printf("ct-log: %v\n", entries)
 		} else if err.Error() == direct.ERROR_FAILED_TO_NEW {
-			return
+			continue
 		} else {
 			fmt.Printf("Error: %v\n", err)
-			return
+			continue
 		}
 
 		monitor.Monitor(entries)
-		time.Sleep(a.Interval)
 	}
 }
