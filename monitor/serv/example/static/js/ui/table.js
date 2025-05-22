@@ -25,8 +25,12 @@ const TableCompornent = ({ logs }) => {
         <tr key={index}>
             <td>{server.id}</td>
             <td>{uniqueId(server)}</td>
-            <td>{publicKey(server)}</td>
-            <td>{evidence(server)}</td>
+            <td>
+                <textarea readOnly defaultValue={publicKey(server)} style={{width: "200px", height: "200px", resize: "none"}}></textarea>
+            </td>
+            <td>
+                <textarea readOnly defaultValue={evidence(server)} style={{width: "200px", height: "200px", resize: "none"}}></textarea>
+            </td>
             <td>{gitRepo(server)}</td>
             <td>{violated(server)}</td> 
         </tr>
