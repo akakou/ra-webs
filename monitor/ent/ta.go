@@ -8,7 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/akakou/ra-webs/monitor/ent/atlog"
+	"github.com/akakou/ra-webs/monitor/ent/evidencelog"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
 
@@ -19,19 +19,21 @@ type TA struct {
 	ID int `json:"id,omitempty"`
 	// PublicKey holds the value of the "public_key" field.
 	PublicKey *[]byte `json:"public_key,omitempty"`
+	// IsActive holds the value of the "is_active" field.
+	IsActive bool `json:"is_active,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TAQuery when eager-loading is set.
-	Edges        TAEdges `json:"edges"`
-	at_log_ta    *int
-	selectValues sql.SelectValues
+	Edges           TAEdges `json:"edges"`
+	evidence_log_ta *int
+	selectValues    sql.SelectValues
 }
 
 // TAEdges holds the relations/edges for other nodes in the graph.
 type TAEdges struct {
 	// CtLog holds the value of the ct_log edge.
 	CtLog []*CTLog `json:"ct_log,omitempty"`
-	// AtLog holds the value of the at_log edge.
-	AtLog *ATLog `json:"at_log,omitempty"`
+	// EvidenceLog holds the value of the evidence_log edge.
+	EvidenceLog *EvidenceLog `json:"evidence_log,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -46,15 +48,15 @@ func (e TAEdges) CtLogOrErr() ([]*CTLog, error) {
 	return nil, &NotLoadedError{edge: "ct_log"}
 }
 
-// AtLogOrErr returns the AtLog value or an error if the edge
+// EvidenceLogOrErr returns the EvidenceLog value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e TAEdges) AtLogOrErr() (*ATLog, error) {
-	if e.AtLog != nil {
-		return e.AtLog, nil
+func (e TAEdges) EvidenceLogOrErr() (*EvidenceLog, error) {
+	if e.EvidenceLog != nil {
+		return e.EvidenceLog, nil
 	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: atlog.Label}
+		return nil, &NotFoundError{label: evidencelog.Label}
 	}
-	return nil, &NotLoadedError{edge: "at_log"}
+	return nil, &NotLoadedError{edge: "evidence_log"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -64,9 +66,11 @@ func (*TA) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case ta.FieldPublicKey:
 			values[i] = new([]byte)
+		case ta.FieldIsActive:
+			values[i] = new(sql.NullBool)
 		case ta.FieldID:
 			values[i] = new(sql.NullInt64)
-		case ta.ForeignKeys[0]: // at_log_ta
+		case ta.ForeignKeys[0]: // evidence_log_ta
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -95,12 +99,18 @@ func (t *TA) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				t.PublicKey = value
 			}
+		case ta.FieldIsActive:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_active", values[i])
+			} else if value.Valid {
+				t.IsActive = value.Bool
+			}
 		case ta.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field at_log_ta", value)
+				return fmt.Errorf("unexpected type %T for edge-field evidence_log_ta", value)
 			} else if value.Valid {
-				t.at_log_ta = new(int)
-				*t.at_log_ta = int(value.Int64)
+				t.evidence_log_ta = new(int)
+				*t.evidence_log_ta = int(value.Int64)
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -120,9 +130,9 @@ func (t *TA) QueryCtLog() *CTLogQuery {
 	return NewTAClient(t.config).QueryCtLog(t)
 }
 
-// QueryAtLog queries the "at_log" edge of the TA entity.
-func (t *TA) QueryAtLog() *ATLogQuery {
-	return NewTAClient(t.config).QueryAtLog(t)
+// QueryEvidenceLog queries the "evidence_log" edge of the TA entity.
+func (t *TA) QueryEvidenceLog() *EvidenceLogQuery {
+	return NewTAClient(t.config).QueryEvidenceLog(t)
 }
 
 // Update returns a builder for updating this TA.
@@ -152,6 +162,9 @@ func (t *TA) String() string {
 		builder.WriteString("public_key=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("is_active=")
+	builder.WriteString(fmt.Sprintf("%v", t.IsActive))
 	builder.WriteByte(')')
 	return builder.String()
 }

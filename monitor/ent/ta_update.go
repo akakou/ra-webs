@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
+	"github.com/akakou/ra-webs/monitor/ent/evidencelog"
 	"github.com/akakou/ra-webs/monitor/ent/predicate"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
@@ -35,6 +35,20 @@ func (tu *TAUpdate) SetPublicKey(b []byte) *TAUpdate {
 	return tu
 }
 
+// SetIsActive sets the "is_active" field.
+func (tu *TAUpdate) SetIsActive(b bool) *TAUpdate {
+	tu.mutation.SetIsActive(b)
+	return tu
+}
+
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (tu *TAUpdate) SetNillableIsActive(b *bool) *TAUpdate {
+	if b != nil {
+		tu.SetIsActive(*b)
+	}
+	return tu
+}
+
 // AddCtLogIDs adds the "ct_log" edge to the CTLog entity by IDs.
 func (tu *TAUpdate) AddCtLogIDs(ids ...int) *TAUpdate {
 	tu.mutation.AddCtLogIDs(ids...)
@@ -50,23 +64,23 @@ func (tu *TAUpdate) AddCtLog(c ...*CTLog) *TAUpdate {
 	return tu.AddCtLogIDs(ids...)
 }
 
-// SetAtLogID sets the "at_log" edge to the ATLog entity by ID.
-func (tu *TAUpdate) SetAtLogID(id int) *TAUpdate {
-	tu.mutation.SetAtLogID(id)
+// SetEvidenceLogID sets the "evidence_log" edge to the EvidenceLog entity by ID.
+func (tu *TAUpdate) SetEvidenceLogID(id int) *TAUpdate {
+	tu.mutation.SetEvidenceLogID(id)
 	return tu
 }
 
-// SetNillableAtLogID sets the "at_log" edge to the ATLog entity by ID if the given value is not nil.
-func (tu *TAUpdate) SetNillableAtLogID(id *int) *TAUpdate {
+// SetNillableEvidenceLogID sets the "evidence_log" edge to the EvidenceLog entity by ID if the given value is not nil.
+func (tu *TAUpdate) SetNillableEvidenceLogID(id *int) *TAUpdate {
 	if id != nil {
-		tu = tu.SetAtLogID(*id)
+		tu = tu.SetEvidenceLogID(*id)
 	}
 	return tu
 }
 
-// SetAtLog sets the "at_log" edge to the ATLog entity.
-func (tu *TAUpdate) SetAtLog(a *ATLog) *TAUpdate {
-	return tu.SetAtLogID(a.ID)
+// SetEvidenceLog sets the "evidence_log" edge to the EvidenceLog entity.
+func (tu *TAUpdate) SetEvidenceLog(e *EvidenceLog) *TAUpdate {
+	return tu.SetEvidenceLogID(e.ID)
 }
 
 // Mutation returns the TAMutation object of the builder.
@@ -95,9 +109,9 @@ func (tu *TAUpdate) RemoveCtLog(c ...*CTLog) *TAUpdate {
 	return tu.RemoveCtLogIDs(ids...)
 }
 
-// ClearAtLog clears the "at_log" edge to the ATLog entity.
-func (tu *TAUpdate) ClearAtLog() *TAUpdate {
-	tu.mutation.ClearAtLog()
+// ClearEvidenceLog clears the "evidence_log" edge to the EvidenceLog entity.
+func (tu *TAUpdate) ClearEvidenceLog() *TAUpdate {
+	tu.mutation.ClearEvidenceLog()
 	return tu
 }
 
@@ -139,6 +153,9 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tu.mutation.PublicKey(); ok {
 		_spec.SetField(ta.FieldPublicKey, field.TypeBytes, value)
+	}
+	if value, ok := tu.mutation.IsActive(); ok {
+		_spec.SetField(ta.FieldIsActive, field.TypeBool, value)
 	}
 	if tu.mutation.CtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -185,28 +202,28 @@ func (tu *TAUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tu.mutation.AtLogCleared() {
+	if tu.mutation.EvidenceLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   ta.AtLogTable,
-			Columns: []string{ta.AtLogColumn},
+			Table:   ta.EvidenceLogTable,
+			Columns: []string{ta.EvidenceLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(evidencelog.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.AtLogIDs(); len(nodes) > 0 {
+	if nodes := tu.mutation.EvidenceLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   ta.AtLogTable,
-			Columns: []string{ta.AtLogColumn},
+			Table:   ta.EvidenceLogTable,
+			Columns: []string{ta.EvidenceLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(evidencelog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -240,6 +257,20 @@ func (tuo *TAUpdateOne) SetPublicKey(b []byte) *TAUpdateOne {
 	return tuo
 }
 
+// SetIsActive sets the "is_active" field.
+func (tuo *TAUpdateOne) SetIsActive(b bool) *TAUpdateOne {
+	tuo.mutation.SetIsActive(b)
+	return tuo
+}
+
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (tuo *TAUpdateOne) SetNillableIsActive(b *bool) *TAUpdateOne {
+	if b != nil {
+		tuo.SetIsActive(*b)
+	}
+	return tuo
+}
+
 // AddCtLogIDs adds the "ct_log" edge to the CTLog entity by IDs.
 func (tuo *TAUpdateOne) AddCtLogIDs(ids ...int) *TAUpdateOne {
 	tuo.mutation.AddCtLogIDs(ids...)
@@ -255,23 +286,23 @@ func (tuo *TAUpdateOne) AddCtLog(c ...*CTLog) *TAUpdateOne {
 	return tuo.AddCtLogIDs(ids...)
 }
 
-// SetAtLogID sets the "at_log" edge to the ATLog entity by ID.
-func (tuo *TAUpdateOne) SetAtLogID(id int) *TAUpdateOne {
-	tuo.mutation.SetAtLogID(id)
+// SetEvidenceLogID sets the "evidence_log" edge to the EvidenceLog entity by ID.
+func (tuo *TAUpdateOne) SetEvidenceLogID(id int) *TAUpdateOne {
+	tuo.mutation.SetEvidenceLogID(id)
 	return tuo
 }
 
-// SetNillableAtLogID sets the "at_log" edge to the ATLog entity by ID if the given value is not nil.
-func (tuo *TAUpdateOne) SetNillableAtLogID(id *int) *TAUpdateOne {
+// SetNillableEvidenceLogID sets the "evidence_log" edge to the EvidenceLog entity by ID if the given value is not nil.
+func (tuo *TAUpdateOne) SetNillableEvidenceLogID(id *int) *TAUpdateOne {
 	if id != nil {
-		tuo = tuo.SetAtLogID(*id)
+		tuo = tuo.SetEvidenceLogID(*id)
 	}
 	return tuo
 }
 
-// SetAtLog sets the "at_log" edge to the ATLog entity.
-func (tuo *TAUpdateOne) SetAtLog(a *ATLog) *TAUpdateOne {
-	return tuo.SetAtLogID(a.ID)
+// SetEvidenceLog sets the "evidence_log" edge to the EvidenceLog entity.
+func (tuo *TAUpdateOne) SetEvidenceLog(e *EvidenceLog) *TAUpdateOne {
+	return tuo.SetEvidenceLogID(e.ID)
 }
 
 // Mutation returns the TAMutation object of the builder.
@@ -300,9 +331,9 @@ func (tuo *TAUpdateOne) RemoveCtLog(c ...*CTLog) *TAUpdateOne {
 	return tuo.RemoveCtLogIDs(ids...)
 }
 
-// ClearAtLog clears the "at_log" edge to the ATLog entity.
-func (tuo *TAUpdateOne) ClearAtLog() *TAUpdateOne {
-	tuo.mutation.ClearAtLog()
+// ClearEvidenceLog clears the "evidence_log" edge to the EvidenceLog entity.
+func (tuo *TAUpdateOne) ClearEvidenceLog() *TAUpdateOne {
+	tuo.mutation.ClearEvidenceLog()
 	return tuo
 }
 
@@ -375,6 +406,9 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 	if value, ok := tuo.mutation.PublicKey(); ok {
 		_spec.SetField(ta.FieldPublicKey, field.TypeBytes, value)
 	}
+	if value, ok := tuo.mutation.IsActive(); ok {
+		_spec.SetField(ta.FieldIsActive, field.TypeBool, value)
+	}
 	if tuo.mutation.CtLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -420,28 +454,28 @@ func (tuo *TAUpdateOne) sqlSave(ctx context.Context) (_node *TA, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tuo.mutation.AtLogCleared() {
+	if tuo.mutation.EvidenceLogCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   ta.AtLogTable,
-			Columns: []string{ta.AtLogColumn},
+			Table:   ta.EvidenceLogTable,
+			Columns: []string{ta.EvidenceLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(evidencelog.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.AtLogIDs(); len(nodes) > 0 {
+	if nodes := tuo.mutation.EvidenceLogIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   ta.AtLogTable,
-			Columns: []string{ta.AtLogColumn},
+			Table:   ta.EvidenceLogTable,
+			Columns: []string{ta.EvidenceLogColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(atlog.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(evidencelog.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -7,12 +7,12 @@ import (
 )
 
 // TA holds the schema definition for the TA entity.
-type ATLog struct {
+type EvidenceLog struct {
 	ent.Schema
 }
 
 // Fields of the TA.
-func (ATLog) Fields() []ent.Field {
+func (EvidenceLog) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("evidence"),
 		field.String("repository"),
@@ -22,7 +22,7 @@ func (ATLog) Fields() []ent.Field {
 }
 
 // Edges of the TA.
-func (ATLog) Edges() []ent.Edge {
+func (EvidenceLog) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("ta", TA.Type).Unique(),
 	}

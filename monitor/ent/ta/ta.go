@@ -14,10 +14,12 @@ const (
 	FieldID = "id"
 	// FieldPublicKey holds the string denoting the public_key field in the database.
 	FieldPublicKey = "public_key"
+	// FieldIsActive holds the string denoting the is_active field in the database.
+	FieldIsActive = "is_active"
 	// EdgeCtLog holds the string denoting the ct_log edge name in mutations.
 	EdgeCtLog = "ct_log"
-	// EdgeAtLog holds the string denoting the at_log edge name in mutations.
-	EdgeAtLog = "at_log"
+	// EdgeEvidenceLog holds the string denoting the evidence_log edge name in mutations.
+	EdgeEvidenceLog = "evidence_log"
 	// Table holds the table name of the ta in the database.
 	Table = "tas"
 	// CtLogTable is the table that holds the ct_log relation/edge.
@@ -27,25 +29,26 @@ const (
 	CtLogInverseTable = "ct_logs"
 	// CtLogColumn is the table column denoting the ct_log relation/edge.
 	CtLogColumn = "ct_log_ta"
-	// AtLogTable is the table that holds the at_log relation/edge.
-	AtLogTable = "tas"
-	// AtLogInverseTable is the table name for the ATLog entity.
-	// It exists in this package in order to avoid circular dependency with the "atlog" package.
-	AtLogInverseTable = "at_logs"
-	// AtLogColumn is the table column denoting the at_log relation/edge.
-	AtLogColumn = "at_log_ta"
+	// EvidenceLogTable is the table that holds the evidence_log relation/edge.
+	EvidenceLogTable = "tas"
+	// EvidenceLogInverseTable is the table name for the EvidenceLog entity.
+	// It exists in this package in order to avoid circular dependency with the "evidencelog" package.
+	EvidenceLogInverseTable = "evidence_logs"
+	// EvidenceLogColumn is the table column denoting the evidence_log relation/edge.
+	EvidenceLogColumn = "evidence_log_ta"
 )
 
 // Columns holds all SQL columns for ta fields.
 var Columns = []string{
 	FieldID,
 	FieldPublicKey,
+	FieldIsActive,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tas"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"at_log_ta",
+	"evidence_log_ta",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -63,12 +66,22 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultIsActive holds the default value on creation for the "is_active" field.
+	DefaultIsActive bool
+)
+
 // OrderOption defines the ordering options for the TA queries.
 type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByIsActive orders the results by the is_active field.
+func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsActive, opts...).ToFunc()
 }
 
 // ByCtLogCount orders the results by ct_log count.
@@ -85,10 +98,10 @@ func ByCtLog(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByAtLogField orders the results by at_log field.
-func ByAtLogField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByEvidenceLogField orders the results by evidence_log field.
+func ByEvidenceLogField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newAtLogStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newEvidenceLogStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newCtLogStep() *sqlgraph.Step {
@@ -98,10 +111,10 @@ func newCtLogStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, true, CtLogTable, CtLogColumn),
 	)
 }
-func newAtLogStep() *sqlgraph.Step {
+func newEvidenceLogStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(AtLogInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, AtLogTable, AtLogColumn),
+		sqlgraph.To(EvidenceLogInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, true, EvidenceLogTable, EvidenceLogColumn),
 	)
 }

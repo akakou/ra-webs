@@ -9,18 +9,6 @@ import (
 	"github.com/akakou/ra-webs/monitor/ent"
 )
 
-// The ATLogFunc type is an adapter to allow the use of ordinary
-// function as ATLog mutator.
-type ATLogFunc func(context.Context, *ent.ATLogMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f ATLogFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.ATLogMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ATLogMutation", m)
-}
-
 // The CTLogFunc type is an adapter to allow the use of ordinary
 // function as CTLog mutator.
 type CTLogFunc func(context.Context, *ent.CTLogMutation) (ent.Value, error)
@@ -31,6 +19,18 @@ func (f CTLogFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CTLogMutation", m)
+}
+
+// The EvidenceLogFunc type is an adapter to allow the use of ordinary
+// function as EvidenceLog mutator.
+type EvidenceLogFunc func(context.Context, *ent.EvidenceLogMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EvidenceLogFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.EvidenceLogMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EvidenceLogMutation", m)
 }
 
 // The SubscriptionFunc type is an adapter to allow the use of ordinary

@@ -15,8 +15,8 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/akakou/ra-webs/monitor/ent/atlog"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
+	"github.com/akakou/ra-webs/monitor/ent/evidencelog"
 	"github.com/akakou/ra-webs/monitor/ent/subscription"
 	"github.com/akakou/ra-webs/monitor/ent/ta"
 )
@@ -26,10 +26,10 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// ATLog is the client for interacting with the ATLog builders.
-	ATLog *ATLogClient
 	// CTLog is the client for interacting with the CTLog builders.
 	CTLog *CTLogClient
+	// EvidenceLog is the client for interacting with the EvidenceLog builders.
+	EvidenceLog *EvidenceLogClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
 	// TA is the client for interacting with the TA builders.
@@ -45,8 +45,8 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.ATLog = NewATLogClient(c.config)
 	c.CTLog = NewCTLogClient(c.config)
+	c.EvidenceLog = NewEvidenceLogClient(c.config)
 	c.Subscription = NewSubscriptionClient(c.config)
 	c.TA = NewTAClient(c.config)
 }
@@ -141,8 +141,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:          ctx,
 		config:       cfg,
-		ATLog:        NewATLogClient(cfg),
 		CTLog:        NewCTLogClient(cfg),
+		EvidenceLog:  NewEvidenceLogClient(cfg),
 		Subscription: NewSubscriptionClient(cfg),
 		TA:           NewTAClient(cfg),
 	}, nil
@@ -164,8 +164,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:          ctx,
 		config:       cfg,
-		ATLog:        NewATLogClient(cfg),
 		CTLog:        NewCTLogClient(cfg),
+		EvidenceLog:  NewEvidenceLogClient(cfg),
 		Subscription: NewSubscriptionClient(cfg),
 		TA:           NewTAClient(cfg),
 	}, nil
@@ -174,7 +174,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		ATLog.
+//		CTLog.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -196,8 +196,8 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.ATLog.Use(hooks...)
 	c.CTLog.Use(hooks...)
+	c.EvidenceLog.Use(hooks...)
 	c.Subscription.Use(hooks...)
 	c.TA.Use(hooks...)
 }
@@ -205,8 +205,8 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.ATLog.Intercept(interceptors...)
 	c.CTLog.Intercept(interceptors...)
+	c.EvidenceLog.Intercept(interceptors...)
 	c.Subscription.Intercept(interceptors...)
 	c.TA.Intercept(interceptors...)
 }
@@ -214,165 +214,16 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
-	case *ATLogMutation:
-		return c.ATLog.mutate(ctx, m)
 	case *CTLogMutation:
 		return c.CTLog.mutate(ctx, m)
+	case *EvidenceLogMutation:
+		return c.EvidenceLog.mutate(ctx, m)
 	case *SubscriptionMutation:
 		return c.Subscription.mutate(ctx, m)
 	case *TAMutation:
 		return c.TA.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
-	}
-}
-
-// ATLogClient is a client for the ATLog schema.
-type ATLogClient struct {
-	config
-}
-
-// NewATLogClient returns a client for the ATLog from the given config.
-func NewATLogClient(c config) *ATLogClient {
-	return &ATLogClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `atlog.Hooks(f(g(h())))`.
-func (c *ATLogClient) Use(hooks ...Hook) {
-	c.hooks.ATLog = append(c.hooks.ATLog, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `atlog.Intercept(f(g(h())))`.
-func (c *ATLogClient) Intercept(interceptors ...Interceptor) {
-	c.inters.ATLog = append(c.inters.ATLog, interceptors...)
-}
-
-// Create returns a builder for creating a ATLog entity.
-func (c *ATLogClient) Create() *ATLogCreate {
-	mutation := newATLogMutation(c.config, OpCreate)
-	return &ATLogCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of ATLog entities.
-func (c *ATLogClient) CreateBulk(builders ...*ATLogCreate) *ATLogCreateBulk {
-	return &ATLogCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *ATLogClient) MapCreateBulk(slice any, setFunc func(*ATLogCreate, int)) *ATLogCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &ATLogCreateBulk{err: fmt.Errorf("calling to ATLogClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*ATLogCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &ATLogCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for ATLog.
-func (c *ATLogClient) Update() *ATLogUpdate {
-	mutation := newATLogMutation(c.config, OpUpdate)
-	return &ATLogUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *ATLogClient) UpdateOne(al *ATLog) *ATLogUpdateOne {
-	mutation := newATLogMutation(c.config, OpUpdateOne, withATLog(al))
-	return &ATLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *ATLogClient) UpdateOneID(id int) *ATLogUpdateOne {
-	mutation := newATLogMutation(c.config, OpUpdateOne, withATLogID(id))
-	return &ATLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for ATLog.
-func (c *ATLogClient) Delete() *ATLogDelete {
-	mutation := newATLogMutation(c.config, OpDelete)
-	return &ATLogDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *ATLogClient) DeleteOne(al *ATLog) *ATLogDeleteOne {
-	return c.DeleteOneID(al.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ATLogClient) DeleteOneID(id int) *ATLogDeleteOne {
-	builder := c.Delete().Where(atlog.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &ATLogDeleteOne{builder}
-}
-
-// Query returns a query builder for ATLog.
-func (c *ATLogClient) Query() *ATLogQuery {
-	return &ATLogQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeATLog},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a ATLog entity by its id.
-func (c *ATLogClient) Get(ctx context.Context, id int) (*ATLog, error) {
-	return c.Query().Where(atlog.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *ATLogClient) GetX(ctx context.Context, id int) *ATLog {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryTa queries the ta edge of a ATLog.
-func (c *ATLogClient) QueryTa(al *ATLog) *TAQuery {
-	query := (&TAClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := al.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(atlog.Table, atlog.FieldID, id),
-			sqlgraph.To(ta.Table, ta.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, atlog.TaTable, atlog.TaColumn),
-		)
-		fromV = sqlgraph.Neighbors(al.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *ATLogClient) Hooks() []Hook {
-	return c.hooks.ATLog
-}
-
-// Interceptors returns the client interceptors.
-func (c *ATLogClient) Interceptors() []Interceptor {
-	return c.inters.ATLog
-}
-
-func (c *ATLogClient) mutate(ctx context.Context, m *ATLogMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&ATLogCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&ATLogUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&ATLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&ATLogDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown ATLog mutation op: %q", m.Op())
 	}
 }
 
@@ -522,6 +373,155 @@ func (c *CTLogClient) mutate(ctx context.Context, m *CTLogMutation) (Value, erro
 		return (&CTLogDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown CTLog mutation op: %q", m.Op())
+	}
+}
+
+// EvidenceLogClient is a client for the EvidenceLog schema.
+type EvidenceLogClient struct {
+	config
+}
+
+// NewEvidenceLogClient returns a client for the EvidenceLog from the given config.
+func NewEvidenceLogClient(c config) *EvidenceLogClient {
+	return &EvidenceLogClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `evidencelog.Hooks(f(g(h())))`.
+func (c *EvidenceLogClient) Use(hooks ...Hook) {
+	c.hooks.EvidenceLog = append(c.hooks.EvidenceLog, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `evidencelog.Intercept(f(g(h())))`.
+func (c *EvidenceLogClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EvidenceLog = append(c.inters.EvidenceLog, interceptors...)
+}
+
+// Create returns a builder for creating a EvidenceLog entity.
+func (c *EvidenceLogClient) Create() *EvidenceLogCreate {
+	mutation := newEvidenceLogMutation(c.config, OpCreate)
+	return &EvidenceLogCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EvidenceLog entities.
+func (c *EvidenceLogClient) CreateBulk(builders ...*EvidenceLogCreate) *EvidenceLogCreateBulk {
+	return &EvidenceLogCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EvidenceLogClient) MapCreateBulk(slice any, setFunc func(*EvidenceLogCreate, int)) *EvidenceLogCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EvidenceLogCreateBulk{err: fmt.Errorf("calling to EvidenceLogClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EvidenceLogCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EvidenceLogCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EvidenceLog.
+func (c *EvidenceLogClient) Update() *EvidenceLogUpdate {
+	mutation := newEvidenceLogMutation(c.config, OpUpdate)
+	return &EvidenceLogUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EvidenceLogClient) UpdateOne(el *EvidenceLog) *EvidenceLogUpdateOne {
+	mutation := newEvidenceLogMutation(c.config, OpUpdateOne, withEvidenceLog(el))
+	return &EvidenceLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EvidenceLogClient) UpdateOneID(id int) *EvidenceLogUpdateOne {
+	mutation := newEvidenceLogMutation(c.config, OpUpdateOne, withEvidenceLogID(id))
+	return &EvidenceLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EvidenceLog.
+func (c *EvidenceLogClient) Delete() *EvidenceLogDelete {
+	mutation := newEvidenceLogMutation(c.config, OpDelete)
+	return &EvidenceLogDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EvidenceLogClient) DeleteOne(el *EvidenceLog) *EvidenceLogDeleteOne {
+	return c.DeleteOneID(el.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EvidenceLogClient) DeleteOneID(id int) *EvidenceLogDeleteOne {
+	builder := c.Delete().Where(evidencelog.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EvidenceLogDeleteOne{builder}
+}
+
+// Query returns a query builder for EvidenceLog.
+func (c *EvidenceLogClient) Query() *EvidenceLogQuery {
+	return &EvidenceLogQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEvidenceLog},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EvidenceLog entity by its id.
+func (c *EvidenceLogClient) Get(ctx context.Context, id int) (*EvidenceLog, error) {
+	return c.Query().Where(evidencelog.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EvidenceLogClient) GetX(ctx context.Context, id int) *EvidenceLog {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTa queries the ta edge of a EvidenceLog.
+func (c *EvidenceLogClient) QueryTa(el *EvidenceLog) *TAQuery {
+	query := (&TAClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := el.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(evidencelog.Table, evidencelog.FieldID, id),
+			sqlgraph.To(ta.Table, ta.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, evidencelog.TaTable, evidencelog.TaColumn),
+		)
+		fromV = sqlgraph.Neighbors(el.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EvidenceLogClient) Hooks() []Hook {
+	return c.hooks.EvidenceLog
+}
+
+// Interceptors returns the client interceptors.
+func (c *EvidenceLogClient) Interceptors() []Interceptor {
+	return c.inters.EvidenceLog
+}
+
+func (c *EvidenceLogClient) mutate(ctx context.Context, m *EvidenceLogMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EvidenceLogCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EvidenceLogUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EvidenceLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EvidenceLogDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown EvidenceLog mutation op: %q", m.Op())
 	}
 }
 
@@ -782,15 +782,15 @@ func (c *TAClient) QueryCtLog(t *TA) *CTLogQuery {
 	return query
 }
 
-// QueryAtLog queries the at_log edge of a TA.
-func (c *TAClient) QueryAtLog(t *TA) *ATLogQuery {
-	query := (&ATLogClient{config: c.config}).Query()
+// QueryEvidenceLog queries the evidence_log edge of a TA.
+func (c *TAClient) QueryEvidenceLog(t *TA) *EvidenceLogQuery {
+	query := (&EvidenceLogClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ta.Table, ta.FieldID, id),
-			sqlgraph.To(atlog.Table, atlog.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, ta.AtLogTable, ta.AtLogColumn),
+			sqlgraph.To(evidencelog.Table, evidencelog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, ta.EvidenceLogTable, ta.EvidenceLogColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -826,9 +826,9 @@ func (c *TAClient) mutate(ctx context.Context, m *TAMutation) (Value, error) {
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		ATLog, CTLog, Subscription, TA []ent.Hook
+		CTLog, EvidenceLog, Subscription, TA []ent.Hook
 	}
 	inters struct {
-		ATLog, CTLog, Subscription, TA []ent.Interceptor
+		CTLog, EvidenceLog, Subscription, TA []ent.Interceptor
 	}
 )

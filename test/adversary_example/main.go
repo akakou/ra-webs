@@ -15,7 +15,7 @@ var MonitorBase = "https://rare-charter-vancouver-many.trycloudflare.com"
 func main() {
 	e := echo.New()
 
-	body := "<button onclick=\"window.open('%v/app/status/');\">Monitor Page (https://rare-charter-vancouver-many.trycloudflare.com)</button><br/>"
+	body := "<button onclick=\"window.open('%v/');\">Monitor Page (https://rare-charter-vancouver-many.trycloudflare.com)</button><br/>"
 	body = fmt.Sprintf(body, MonitorBase)
 
 	e.GET("/", func(c echo.Context) error {

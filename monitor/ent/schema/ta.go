@@ -15,6 +15,7 @@ type TA struct {
 func (TA) Fields() []ent.Field {
 	return []ent.Field{
 		field.Bytes("public_key").Nillable(),
+		field.Bool("is_active").Default(true),
 	}
 }
 
@@ -22,6 +23,6 @@ func (TA) Fields() []ent.Field {
 func (TA) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("ct_log", CTLog.Type).Ref("ta"),
-		edge.From("at_log", ATLog.Type).Ref("ta").Unique(),
+		edge.From("evidence_log", EvidenceLog.Type).Ref("ta").Unique(),
 	}
 }
