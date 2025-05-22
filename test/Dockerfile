@@ -30,7 +30,5 @@ RUN apt-get install ./ego_1.5.3_amd64_ubuntu-20.04.deb
 RUN apt-get install -y ca-certificates curl
 
 
-
-
 # if you do not use azure
 # ego install libsgx-dcap-default-qpl

@@ -5,9 +5,9 @@ services:
     build: ./
     # network_mode: host
     volumes:
-      - ./devkit/ta:/devkit/ta
-      - ./devkit/core:/devkit/core
-      - ./test:/test
+      - ../devkit/ta:/devkit/ta
+      - ../devkit/core:/devkit/core
+      - ../test:/test
       # - /dev:/dev
     working_dir: /devkit/ta/example
     command: bash -c 'mount -o remount,exec /dev && ego-go build -buildvcs=false -trimpath=true && ego sign example && ego run example'
@@ -16,8 +16,8 @@ services:
     environment:
       - OE_SIMULATION=0
     env_file:
-      - test/env/ta.env
-      - test/env/common.env
+      - ./env/ta.env
+      - ./env/common.env
     # profiles:
       # - ta
     restart: always
@@ -27,9 +27,9 @@ services:
   service:
     build: ./
     volumes:
-      - ./devkit/core:/devkit/core
-      - ./devkit/service:/devkit/service
-      - ./monitor/serviceclient:/monitor/serviceclient
+      - ../devkit/core:/devkit/core
+      - ../devkit/service:/devkit/service
+      - ../monitor/serviceclient:/monitor/serviceclient
     working_dir: /devkit/service/serv
     command: bash -c 'go mod tidy && go run .'
     env_file:
