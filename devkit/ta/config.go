@@ -1,6 +1,7 @@
 package ta
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -25,20 +26,28 @@ func DefaultConfig() (*TAConfig, error) {
 	serviceBase := os.Getenv("RA_WEBS_SERVICE_BASE")
 
 	if token == "" {
-		return nil, fmt.Errorf("%v", ERROR_TOKEN_NOT_SET)
+		return nil, errors.New(ERROR_TOKEN_NOT_SET)
 	}
 
 	if repository == "" {
-		return nil, fmt.Errorf("%v", ERROR_REPOSITORY_NOT_SET)
+		return nil, errors.New(ERROR_REPOSITORY_NOT_SET)
+	}
+
+	if commitId == "" {
+		return nil, errors.New(ERROR_COMMIT_ID_NOT_SET)
 	}
 
 	if email == "" {
-		return nil, fmt.Errorf("%v", ERROR_EMAIL_NOT_SET)
+		return nil, errors.New(ERROR_EMAIL_NOT_SET)
 	}
 
 	if domain == "" {
 		domain = "http://localhost" + core.TAPort
 		fmt.Printf("RA_WEBS_TA_DOMAIN is not set: so use %v\n", domain)
+	}
+
+	if serviceBase == "" {
+		return nil, errors.New(ERROR_SERVICE_BASE_NOT_SET)
 	}
 
 	return &TAConfig{
