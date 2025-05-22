@@ -8,7 +8,7 @@ import (
 	"github.com/akakou/ra-webs/ta"
 )
 
-const VERIFIER_PATH = "/app/verification-status/"
+const VERIFIER_PATH = "/app/status/"
 
 func main() {
 	// debug.EnableDebug()
