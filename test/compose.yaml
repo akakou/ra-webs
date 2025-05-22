@@ -3,12 +3,10 @@ services:
   ta:
     tty: true
     build: ./
-    # network_mode: host
     volumes:
       - ../devkit/ta:/devkit/ta
       - ../devkit/core:/devkit/core
       - ../test:/test
-      # - /dev:/dev
     working_dir: /devkit/ta/example
     command: bash -c 'mount -o remount,exec /dev && ego-go build -buildvcs=false -trimpath=true && ego sign example && ego run example'
     #command: bash -c 'ego-go build -buildvcs=false -trimpath=true && ego sign example && ego run example'
@@ -16,10 +14,8 @@ services:
     environment:
       - OE_SIMULATION=0
     env_file:
-      - ./env/ta.env
-      - ./env/common.env
-    # profiles:
-      # - ta
+      - env/ta.env
+      - env/common.env
     restart: always
     ports: 
       - 443:443
@@ -33,22 +29,21 @@ services:
     working_dir: /devkit/service/serv
     command: bash -c 'go mod tidy && go run .'
     env_file:
-      - test/env/common.env
-      - test/env/service.env
+      - env/common.env
     ports: 
       - 8080:8080 
 
   monitor:
     build: ./
     volumes:
-      - ./monitor:/monitor
-      - ./devkit/core:/devkit/core
-      - ./devkit/service:/devkit/service
+      - ../monitor:/monitor
+      - ../devkit/core:/devkit/core
+      - ../devkit/service:/devkit/service
     working_dir: /monitor/serv/example
     command: bash -c 'go mod tidy && go run .'
     env_file:
-      - test/env/monitor.env
-      - test/env/common.env
+      - env/monitor.env
+      - env/common.env
     privileged: true
     ports: 
       - 8000:8000 
