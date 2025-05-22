@@ -6,20 +6,20 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/akakou/crtsh"
 	"github.com/akakou/ra-webs/monitor/ent"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
 	"github.com/akakou/ra-webs/monitor/serviceclient"
+	ctx509 "github.com/google/certificate-transparency-go/x509"
 )
 
-func (monitor *Monitor) Monitor(ctLogs []crtsh.CertificateEntry) {
-	for _, entry := range ctLogs {
-		monitor.MonitorOne(entry)
+func (monitor *Monitor) Monitor(cert *ctx509.Certificate, id int, params any, err error) {
+	fmt.Printf("Monitor: %v %v %v\n", cert, id, params)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
 	}
-}
 
-func (monitor *Monitor) MonitorOne(ctLog crtsh.CertificateEntry) {
-	taLog, skip, err := monitor.MonitorCTLog(ctLog)
+	taLog, skip, err := monitor.MonitorCTLog(cert, id)
 	if skip {
 		return
 	}
@@ -72,18 +72,17 @@ func (monitor *Monitor) MonitorEvidence(taEntry *serviceclient.EvidenceEntry, ta
 	return nil
 }
 
-func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) (*ent.TA, bool, error) {
+func (monitor *Monitor) MonitorCTLog(cert *ctx509.Certificate, id int) (*ent.TA, bool, error) {
 	var err error
-
 	skip := monitor.DB.Client.CTLog.Query().
-		Where(ctlog.MonitorLogIDEQ(entry.ID)).
+		Where(ctlog.MonitorLogIDEQ(id)).
 		ExistX(*monitor.DB.Ctx)
 
 	if skip {
 		return nil, true, nil
 	}
 
-	unmarshaledPublicKey, isRSA := entry.Certificate.PublicKey.(*rsa.PublicKey)
+	unmarshaledPublicKey, isRSA := cert.PublicKey.(*rsa.PublicKey)
 	publicKeyBuf := []byte("no public key")
 
 	if isRSA {
@@ -93,7 +92,7 @@ func (monitor *Monitor) MonitorCTLog(entry crtsh.CertificateEntry) (*ent.TA, boo
 	}
 
 	ta := monitor.RegisterTA(publicKeyBuf)
-	monitor.RegisterCTLog(entry.ID, ta)
+	monitor.RegisterCTLog(id, ta)
 
 	return ta, false, err
 }
