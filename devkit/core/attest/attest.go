@@ -21,6 +21,7 @@ func attestByAzure(data []byte) (string, error) {
 		return "", fmt.Errorf("%s: %w", ERROR_CREATE_ATTESTATION, err)
 	}
 
+	fmt.Printf("evidence is created! : %v\n", evidence)
 	return evidence, nil
 }
 
