@@ -7,7 +7,6 @@ import (
 	"io"
 
 	"github.com/akakou/ra-webs/devkit/core"
-	// "github.com/akakou/ra-webs/devkit/core/attest/debug"
 	"github.com/akakou/ra-webs/monitor/serv"
 	"github.com/akakou/ra-webs/monitor/serv/api"
 
@@ -16,7 +15,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-//go:embed views/*/*.html
+//go:embed views/*.html
 var viewEmbedFiles embed.FS
 
 //go:embed static/js/*.js static/js/*/*.js
@@ -55,7 +54,7 @@ func main() {
 	api.Route(apiGroup, s)
 
 	viewSubFS := echo.MustSubFS(viewEmbedFiles, "views")
-	e.StaticFS("/app", viewSubFS)
+	e.StaticFS("/", viewSubFS)
 
 	staticSubFS := echo.MustSubFS(staticEmbedFiles, "static")
 	e.StaticFS("/static", staticSubFS)
