@@ -13,17 +13,10 @@ const TableCompornent = ({ logs }) => {
         }
     } 
     
-    const crtshLinks = server => server.edges.ct_log.map(
-        (ctl, index) =>
-            <div>
-                <a href={"https://crt.sh?id="+ctl.monitor_log_id}>
-                    {ctl.monitor_log_id}  
-                </a>
-                <br/>
-            </div>
-        )
-    const uniqueId = (server) => server.edges.evidence_log ? server.edges.evidence_log.unique_id : "-"
-    const violated = (server) =>  
+    const publicKey = server => server.public_key ? server.public_key : "-"
+    const uniqueId = server => server.edges.evidence_log ? server.edges.evidence_log.unique_id : "-"
+    const evidence = server => server.edges.evidence_log ? server.edges.evidence_log.evidence : "-"
+    const violated = server =>  
         (!checkValidity(server)).toString()
     
 
@@ -32,7 +25,8 @@ const TableCompornent = ({ logs }) => {
         <tr key={index}>
             <td>{server.id}</td>
             <td>{uniqueId(server)}</td>
-            <td>{crtshLinks(server)}</td>
+            <td>{publicKey(server)}</td>
+            <td>{evidence(server)}</td>
             <td>{gitRepo(server)}</td>
             <td>{violated(server)}</td> 
         </tr>
@@ -45,7 +39,8 @@ const TableCompornent = ({ logs }) => {
                 <tr>
                     <th>Index</th>
                     <th>Unique ID</th>
-                    <th>crt.sh ID</th>
+                    <th>Public Key</th>
+                    <th>Evidence</th>
                     <th>Git Repository</th>
                     <th>Violated</th>
                 </tr>
