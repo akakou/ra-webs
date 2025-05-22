@@ -1,13 +1,12 @@
 package serv
 
 import (
-	"context"
 	"fmt"
 
+	"github.com/akakou/ctstream/monitor/sslmate"
 	goutils "github.com/akakou/go-utils"
 	golangutils "github.com/akakou/golang-utils"
 	"github.com/akakou/ra-webs/monitor"
-	"github.com/akakou/ra-webs/monitor/ct/crtsh"
 	browsernotifier "github.com/akakou/ra-webs/monitor/notifier/browser"
 	"github.com/cockroachdb/errors"
 	"github.com/labstack/echo/v4"
@@ -28,7 +27,7 @@ func New(monitor *monitor.Monitor, adminToken string) (*MonitorServer, error) {
 }
 
 func Default() (*MonitorServer, error) {
-	ct, err := crtsh.Default(context.Background())
+	ct, err := sslmate.DefaultCTClient("")
 	if err != nil {
 		return nil, err
 	}
@@ -42,13 +41,13 @@ func Default() (*MonitorServer, error) {
 	if err != nil {
 		return nil, err
 	}
+	ct.Domain = monitor.TADomain
 
 	adminToken, err := goutils.RandomHex(RANDOM_SIZE)
 	if err != nil {
 		return nil, errors.Wrap(err, errFailPickupRandom.Error())
 	}
 	adminToken = golangutils.GetEnv("RA_WEBS_SERVICE_TOKEN", adminToken)
-
 	fmt.Printf("Admin token is: %s\n", adminToken)
 
 	return New(monitor, adminToken)

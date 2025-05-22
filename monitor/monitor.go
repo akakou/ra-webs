@@ -3,22 +3,26 @@ package monitor
 import (
 	"fmt"
 	"os"
+	"time"
 
+	ctcore "github.com/akakou/ctstream/core"
 	golangutils "github.com/akakou/golang-utils"
 	devkitserviceclient "github.com/akakou/ra-webs/devkit/service/client"
 	"github.com/akakou/ra-webs/monitor/serviceclient"
 	"github.com/cockroachdb/errors"
 )
 
+var Sleep = time.Minute
+
 type Monitor struct {
 	TADomain      string
 	DB            *DB
-	CT            CT
+	CT            ctcore.CtClient
 	Notifier      Notifier
 	ServiceClient serviceclient.ServiceClient
 }
 
-func New(taDomain string, db *DB, ct CT, notifier Notifier, serviceClient serviceclient.ServiceClient) (*Monitor, error) {
+func New(taDomain string, db *DB, ct ctcore.CtClient, notifier Notifier, serviceClient serviceclient.ServiceClient) (*Monitor, error) {
 	return &Monitor{
 		TADomain:      taDomain,
 		DB:            db,
@@ -28,7 +32,7 @@ func New(taDomain string, db *DB, ct CT, notifier Notifier, serviceClient servic
 	}, nil
 }
 
-func Default(ct CT, notifier Notifier) (*Monitor, error) {
+func Default(ct ctcore.CtClient, notifier Notifier) (*Monitor, error) {
 	taDomain := os.Getenv("RA_WEBS_TA_DOMAIN")
 	if taDomain == "" {
 		return nil, errors.Wrap(errDomainEnvironmentVariableIsEmpty, "RA_WEBS_TA_DOMAIN not found")
@@ -62,7 +66,12 @@ func Default(ct CT, notifier Notifier) (*Monitor, error) {
 }
 
 func (monitor *Monitor) Run() {
-	monitor.CT.Run(monitor)
+
+	for {
+		monitor.CT.Init()
+		monitor.CT.Next(monitor.Monitor)
+		time.Sleep(Sleep)
+	}
 }
 
 func (m *Monitor) Close() {
