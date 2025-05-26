@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/akakou/ra-webs/monitor/ent"
 	"github.com/akakou/ra-webs/monitor/ent/ctlog"
@@ -16,6 +17,7 @@ func (monitor *Monitor) Monitor(cert *ctx509.Certificate, id int, params any, er
 	fmt.Printf("Monitor: %v %v %v\n", cert, id, params)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
+		time.Sleep(time.Minute * 5)
 		return
 	}
 
