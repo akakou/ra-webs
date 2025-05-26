@@ -36,6 +36,10 @@
         {
             "name": "RA_WEBS_SERVICE_BASE",
             "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_MONITOR_BASES",
+            "fromHost": true
         }
     ],
     "files": [

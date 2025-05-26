@@ -4,17 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/akakou/ra-webs/devkit/core"
 )
 
 type TAConfig struct {
-	Token       string
-	Repository  string
-	CommitID    string
-	TADomain    string
-	ServiceBase string
-	Email       string
+	Token        string
+	Repository   string
+	CommitID     string
+	TADomain     string
+	MonitorBases []string
+	ServiceBase  string
+	Email        string
 }
 
 func DefaultConfig() (*TAConfig, error) {
@@ -24,6 +26,7 @@ func DefaultConfig() (*TAConfig, error) {
 	domain := os.Getenv("RA_WEBS_TA_DOMAIN")
 	email := os.Getenv("RA_WEBS_SERVICE_EMAIL")
 	serviceBase := os.Getenv("RA_WEBS_SERVICE_BASE")
+	monitorBasesEnv := os.Getenv("RA_WEBS_MONITOR_BASES")
 
 	if token == "" {
 		return nil, errors.New(ERROR_TOKEN_NOT_SET)
@@ -50,11 +53,14 @@ func DefaultConfig() (*TAConfig, error) {
 		return nil, errors.New(ERROR_SERVICE_BASE_NOT_SET)
 	}
 
+	monitorBases := strings.Split(monitorBasesEnv, ",")
+
 	return &TAConfig{
-		Token:       token,
-		Repository:  repository,
-		CommitID:    commitId,
-		TADomain:    domain,
-		ServiceBase: serviceBase,
+		Token:        token,
+		Repository:   repository,
+		CommitID:     commitId,
+		TADomain:     domain,
+		ServiceBase:  serviceBase,
+		MonitorBases: monitorBases,
 	}, nil
 }
