@@ -11,8 +11,6 @@ const App = () => {
 
         setHostname(resp1.data.taDomain)
   
-        await setupNotification()
-
         const resp2 = await axios.get(`/api/ta`)
         console.log(resp2)
     
@@ -31,6 +29,10 @@ const App = () => {
         <div>
             <h1>RA-WEBs: TEE Monitoring Service</h1>
             <h2>Attestation Result</h2>
+
+            <button onClick={async e => {
+                await setupNotification()
+            }}>Set up Notification</button>
 
             <h3>TA Domain: </h3>
             <a href={"https://" + hostname}>{hostname}</a>
