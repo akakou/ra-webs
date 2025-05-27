@@ -1,0 +1,10 @@
+{
+    "short_name": "RA-WEBs",
+    "name": "RA-WEBs Monitoring Service",
+    "icons": [
+    ],
+    "start_url": "/",
+    "display": "standalone",
+    "theme_color": "#000000",
+    "background_color": "#ffffff"
+  }

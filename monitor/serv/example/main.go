@@ -18,7 +18,7 @@ import (
 //go:embed views/*.html
 var viewEmbedFiles embed.FS
 
-//go:embed static/js/*.js static/js/*/*.js
+//go:embed static/js/*.js static/js/*/*.js static/*.json
 var staticEmbedFiles embed.FS
 
 const TMP_FOLDER_NAME = "views"
