@@ -1,15 +1,20 @@
 package main
 
 import (
-	"context"
+	"os"
 
+	"github.com/akakou/ctstream/monitor/sslmate"
 	"github.com/akakou/ra-webs/monitor"
-	"github.com/akakou/ra-webs/monitor/ct/crtsh"
 	browsernotifier "github.com/akakou/ra-webs/monitor/notifier/browser"
 )
 
 func main() {
-	ct, err := crtsh.Default(context.Background())
+	domain := os.Getenv("RA_WEBS_TA_DOMAIN")
+	if domain == "" {
+		panic("RA_WEBS_TA_DOMAIN is empty")
+	}
+
+	ct, err := sslmate.DefaultCTClient(domain)
 
 	if err != nil {
 		panic(err)
