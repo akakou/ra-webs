@@ -21,7 +21,7 @@ cd ra-webs/test
 
 
 ```sh
-docker compose -f compose.test.yaml --profile tunnel
+docker compose up tunnel
 ```
 
 #### 3. Configure the Environment Files
@@ -38,7 +38,7 @@ cp env/monitor.env.template env/monitor.env
 #### 4. Run the servers
 
 ```sh
-docker compose -f compose.test.yaml --profile ta up
+docker compose up
 ```
 
 
