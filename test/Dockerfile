@@ -18,15 +18,14 @@ RUN wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 RUN echo "deb [arch=amd64] https://packages.microsoft.com/ubuntu/20.04/prod focal main" | tee /etc/apt/sources.list.d/msprod.list
 RUN wget -qO - https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 
-RUN wget https://go.dev/dl/go1.22.2.linux-amd64.tar.gz
-RUN rm -rf /usr/local/go && tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz
+RUN wget https://go.dev/dl/go1.25.0.linux-amd64.tar.gz
+RUN rm -rf /usr/local/go && tar -C /usr/local -xzf go1.25.0.linux-amd64.tar.gz
 
 RUN apt-get update -y
 RUN apt-get install -qq -y snapd build-essential libssl-dev clang-11 libssl-dev gdb libsgx-enclave-common libsgx-quote-ex libprotobuf17 libsgx-dcap-ql libsgx-dcap-ql-dev az-dcap-client open-enclave software-properties-common 
 
-RUN wget https://github.com/edgelesssys/ego/releases/download/v1.5.3/ego_1.5.3_amd64_ubuntu-20.04.deb
-RUN apt-get install ./ego_1.5.3_amd64_ubuntu-20.04.deb
-
+RUN wget https://github.com/edgelesssys/ego/releases/download/v1.7.2/ego_1.7.2_amd64_ubuntu-20.04.deb
+RUN apt-get install ./ego_1.7.2_amd64_ubuntu-20.04.deb
 RUN apt-get install -y ca-certificates curl
 
 
