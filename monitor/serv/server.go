@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/akakou/ctstream/monitor/sslmate"
+	golangutils "github.com/akakou/go-utils"
 	goutils "github.com/akakou/go-utils"
-	golangutils "github.com/akakou/golang-utils"
 	"github.com/akakou/ra-webs/monitor"
 	browsernotifier "github.com/akakou/ra-webs/monitor/notifier/browser"
 	"github.com/cockroachdb/errors"

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	ctcore "github.com/akakou/ctstream/core"
-	golangutils "github.com/akakou/golang-utils"
+	golangutils "github.com/akakou/go-utils"
 	devkitserviceclient "github.com/akakou/ra-webs/devkit/service/client"
 	"github.com/akakou/ra-webs/monitor/serviceclient"
 	"github.com/cockroachdb/errors"

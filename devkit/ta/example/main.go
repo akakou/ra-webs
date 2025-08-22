@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/akakou/ra-webs/devkit/ta"
 	// "github.com/akakou/ra-webs/devkit/core/attest/debug"
-	"github.com/akakou/ra-webs/ta"
 )
 
 func main() {
