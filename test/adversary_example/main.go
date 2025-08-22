@@ -10,13 +10,13 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 )
 
-var VerifierBase = "https://rare-charter-vancouver-many.trycloudflare.com"
+var MonitorBase = "https://rare-charter-vancouver-many.trycloudflare.com"
 
 func main() {
 	e := echo.New()
 
-	body := "<button onclick=\"window.open('%v/app/verification-status/');\">Verifier Page (https://rare-charter-vancouver-many.trycloudflare.com)</button><br/>"
-	body = fmt.Sprintf(body, VerifierBase)
+	body := "<button onclick=\"window.open('%v/');\">Monitor Page (https://rare-charter-vancouver-many.trycloudflare.com)</button><br/>"
+	body = fmt.Sprintf(body, MonitorBase)
 
 	e.GET("/", func(c echo.Context) error {
 		return c.HTML(http.StatusOK, body)

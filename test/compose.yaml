@@ -1,0 +1,48 @@
+version: '3'
+services:
+  ta:
+    tty: true
+    build: ./
+    volumes:
+      - ../:/ra-webs
+    working_dir: /ra-webs/devkit/ta/example
+    command: bash -c 'mount -o remount,exec /dev && ego-go build -buildvcs=false -trimpath=true && ego sign example && ego run example'
+    #command: bash -c 'ego-go build -buildvcs=false -trimpath=true && ego sign example && ego run example'
+    privileged: true
+    environment:
+      - OE_SIMULATION=0
+    env_file:
+      - env/ta.env
+      - env/common.env
+    restart: always
+    ports: 
+      - 443:443
+
+  service:
+    build: ./
+    volumes:
+      - ../:/ra-webs
+    working_dir: /ra-webs/devkit/service/serv
+    command: bash -c 'go mod tidy && go run .'
+    env_file:
+      - env/common.env
+    ports: 
+      - 8080:8080 
+
+  monitor:
+    build: ./
+    volumes:
+      - ../:/ra-webs
+    working_dir: /ra-webs/monitor/serv/example
+    command: bash -c 'go mod tidy && go run .'
+    env_file:
+      - env/monitor.env
+      - env/common.env
+    privileged: true
+    ports: 
+      - 8000:8000 
+
+  tunnel:
+    restart: unless-stopped
+    image: cloudflare/cloudflared
+    command: tunnel --url http://monitor:8000 

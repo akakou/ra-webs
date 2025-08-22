@@ -1,0 +1,51 @@
+{
+    "exe": "example",
+    "key": "private.pem",
+    "debug": false,
+    "heapSize": 2048,
+    "executableHeap": false,
+    "productID": 1,
+    "securityVersion": 1,
+    "mounts": [
+        {
+            "target": "/tmp/ra-webs.cache",
+            "type": "memfs"
+        }
+    ],
+    "env": [
+        {
+            "name": "RA_WEBS_SERVICE_TOKEN",
+            "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_TA_DOMAIN",
+            "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_TA_REPOSITORY",
+            "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_SERVICE_EMAIL",
+            "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_TA_COMMIT_ID",
+            "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_SERVICE_BASE",
+            "fromHost": true
+        },
+        {
+            "name": "RA_WEBS_MONITOR_BASES",
+            "fromHost": true
+        }
+    ],
+    "files": [
+        {
+            "source": "/etc/ssl/certs/ca-certificates.crt",
+            "target": "/etc/ssl/certs/ca-certificates.crt"
+        }
+    ]
+}

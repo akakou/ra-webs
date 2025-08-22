@@ -1,5 +1,5 @@
 cd test && go test .
 cd ..
-cd verifier/api && go test .
+cd monitorpi && go test .
 cd ../../
-cd verifier/monitor && go test .
+cd monitoronitor && go test .

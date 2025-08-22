@@ -1,0 +1,32 @@
+<link rel="manifest" href="/static/manifest.json">
+
+<link rel="stylesheet" href="https://unpkg.com/mvp.css">
+<script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+<script src="/static/js/utils.js" type="text/babel"></script>
+<script src="/static/js/react.js" type="text/babel"></script>
+<script src="/static/js/notify.js" type="text/babel"></script>
+
+
+<script src="/static/js/ui/param.js" type="text/babel"></script>
+
+<script src="/static/js/ui/table.js" type="text/babel"></script>
+<script src="/static/js/ui/check.js" type="text/babel"></script>
+<script src="/static/js/ui/app.js" type="text/babel"></script>
+
+<main>
+    <div id="root"></div>
+    <script type="text/babel">
+        const container = document.getElementById('root')
+        const root = ReactDOM.createRoot(container)
+        root.render(<App />)
+    </script>
+
+    <script>
+
+
+    </script>
+</main>
