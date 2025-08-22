@@ -59,3 +59,5 @@ require (
 	golang.org/x/tools v0.34.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/SherClockHolmes/webpush-go => github.com/akakou-fork/webpush-go v1.4.0-firefox-mobile-bug-fixed
