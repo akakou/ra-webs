@@ -1,0 +1,52 @@
+version: '3'
+services:
+  monitor:
+    build: ./
+    volumes:
+      - ../monitor:/monitor
+      - ../devkit/core:/devkit/core
+      - ../devkit/service:/devkit/service
+      - ../test:/test
+      - ../thirdparty:/thirdparty
+    working_dir: /test/bench
+    command: bash -c 'go mod tidy && sleep 30s && go test -bench .'
+    env_file:
+      - env/monitor.env
+      - env/common.env
+    ports:
+      - 8000:8000
+
+  service:
+    build: ./
+    volumes:
+      - ../devkit/core:/devkit/core
+      - ../devkit/service:/devkit/service
+      - ../monitor/serviceclient:/monitor/serviceclient
+      - ../thirdparty:/thirdparty
+    working_dir: /devkit/service/serv
+    command: bash -c 'go mod tidy && go run .'
+    env_file:
+      - env/common.env
+    ports:
+      - 8080:8080
+  ta:
+    tty: true
+    build: ./
+    volumes:
+      - ../devkit/ta:/devkit/ta
+      - ../devkit/core:/devkit/core
+      - ../test:/test
+    working_dir: /devkit/ta/example
+    command: bash -c 'mount -o remount,exec /dev && ego-go build -buildvcs=false -trimpath=true && ego sign example && ego run example'
+    #command: bash -c 'ego-go build -buildvcs=false -trimpath=true && ego sign example && ego run example'
+    privileged: true
+    environment:
+      - OE_SIMULATION=0
+    env_file:
+      - env/ta.env
+      - env/common.env
+    restart: always
+    ports:
+      - 443:443
+    profiles:
+      - ta
